@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.ogema.alliance</groupId>
+		<artifactId>alliance-models</artifactId>
+        <version>2.1.1</version>
+     </parent>
+
+	<groupId>org.ogema.model</groupId>
+    <artifactId>driver-concepts-sp</artifactId>
+    <name>Proposed driver data models and concepts (SP)</name>
+	<description>Proposed driver data models and concepts for discussion and development by partners of the OGEMA Alliance (SP)</description>
+    <packaging>bundle</packaging>
+    <version>2.1.3-SNAPSHOT</version>
+
+	<repositories>
+		<repository>
+			<releases />
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>ogema-releases</id>
+			<name>ogema-releases</name>
+			<url>https://www.ogema-source.net/artifactory/libs-release</url>
+		</repository>
+	</repositories>
+	<distributionManagement>
+		<repository>
+			<id>ogema-releases</id>
+			<name>Internal Releases</name>
+			<url>https://www.ogema-source.net/artifactory/libs-release-local</url>
+		</repository>
+	</distributionManagement>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ogema.core</groupId>
+            <artifactId>api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ogema.core</groupId>
+            <artifactId>models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ogema.model</groupId>
+            <artifactId>fhg-proposed</artifactId>
+            <version>2.1.2-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+</project>
