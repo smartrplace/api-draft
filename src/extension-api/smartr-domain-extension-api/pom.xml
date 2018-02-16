@@ -8,9 +8,9 @@
     </parent>
     
     <groupId>org.smartrplace.apps</groupId>
-    <artifactId>smartr-efficiency-api</artifactId>
-    <description>API for SmartrEfficiency Platform</description>
-	<name>SmartrEfficiency Platform API</name>
+    <artifactId>smartr-domain-extension-api</artifactId>
+    <description>API for OGEMA Domain Extensions</description>
+	<name>Domain-specific OGEMA Extension API</name>
     <packaging>bundle</packaging>
 
     <build>
