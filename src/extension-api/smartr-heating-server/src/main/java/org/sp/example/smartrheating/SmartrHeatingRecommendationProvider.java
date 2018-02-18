@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.capabilities.RecommendationProvider;
+import org.smartrplace.extensionservice.gui.DataEntryProvider;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import extensionmodel.smarteff.api.base.BuildingData;
@@ -103,6 +104,12 @@ public class SmartrHeatingRecommendationProvider implements RecommendationProvid
 	}
 	private SrtrHeatingRecommendation checkBuilding(BuildingData building) {
 		//TODO
+		return null;
+	}
+
+	@Override
+	public <S extends SmartEffExtensionResourceType> DataEntryProvider<S> resultPageDefinition() {
+		// TODO: A result page is foreseen in the mockup
 		return null;
 	}
 }

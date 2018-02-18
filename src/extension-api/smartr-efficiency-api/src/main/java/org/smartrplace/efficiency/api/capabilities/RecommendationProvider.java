@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionCapability;
+import org.smartrplace.extensionservice.gui.DataEntryProvider;
 
 import de.iwes.timeseries.eval.api.LabelledItem;
 import extensionmodel.smarteff.api.base.SmartEffGeneralData;
@@ -39,4 +40,12 @@ public interface RecommendationProvider extends ExtensionCapability {
 	public void updateRecommendations(SmartEffUserData userData, SmartEffGeneralData generalData,
 			List<SmartEffExtensionResourceType> resourcesChanged,
 			List<Recommendation> recommendations);
+	
+	/** The recommendation provider may provide a detailed view with information that is specific for the
+	 * respective recommendation/evaluation.
+	 * 
+	 * @return may be null of not result page definition is provided
+	 */
+	public <S extends SmartEffExtensionResourceType> DataEntryProvider<S> resultPageDefinition();
+
 }
