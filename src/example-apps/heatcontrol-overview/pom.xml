@@ -2,37 +2,45 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.smartrplace.apps</groupId>
-        <artifactId>generic-apps</artifactId>
-        <version>2.1.3-SNAPSHOT</version>
+       <artifactId>apps-master</artifactId>
+       <groupId>org.ogema.apps</groupId>
+       <version>2.1.2</version>
     </parent>
     
+    <artifactId>heatcontrol-overview</artifactId>
     <groupId>org.smartrplace.apps</groupId>
-    <artifactId>smartr-heating-server</artifactId>
-    <description>SmartrHeating Planning Extension for SmartrEfficiency Platform</description>
-	<name>SmartrHeating Planning</name>
+    <name>Overview Control for Smartrplace Heatcontrol</name>
+    <version>2.1.3-SNAPSHOT</version>
+    <description>Overview Control App for Smartrplace Heatcontrol</description>
+    
     <packaging>bundle</packaging>
-
+    
+    <repositories>
+    	<repository>
+		    <id>ogema-release</id>
+		    <name>ogema-release</name>
+		    <url>https://www.ogema-source.net/artifactory/libs-release</url>
+   		</repository>
+    </repositories>
+    
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
             </plugin>
-             <plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
+            </plugin>
+             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
-                    <instructions>
-                    	<!--  export only if it shall be available alos to other -->
-                        <!-- <Export-Package>com.jcraft.jsch;version=0.1.53</Export-Package> -->
-                        <Import-Package>
-                        org.json;version="[${org.json.version.min},${org.json.version.max})",
-                        *</Import-Package>
-  		                <Embed-Dependency>*;artifactId=jsch,jzlib;scope=compile|runtime</Embed-Dependency>
-                     </instructions>
-                  </configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -50,7 +58,6 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
-        
         <dependency>
             <groupId>org.ogema.core</groupId>
             <artifactId>api</artifactId>
@@ -60,34 +67,32 @@
             <artifactId>models</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ogema.tools</groupId>
-            <artifactId>resource-utils</artifactId>
-       </dependency>
-        <dependency>
+            <groupId>de.iwes.widgets</groupId>
+            <artifactId>widget-collection-util</artifactId>
+        </dependency>
+         <dependency>
             <groupId>de.iwes.widgets</groupId>
             <artifactId>ogema-js-bundle</artifactId>
         </dependency>
-		<dependency>
-            <groupId>org.ogema.model</groupId>
-            <artifactId>fhg-proposed</artifactId>
-        </dependency>
-		<dependency>
-            <groupId>de.iwes.tools</groupId>
-            <artifactId>timeseries-multieval-garo-base</artifactId>
-            <version>2.1.3-SNAPSHOT</version>
-        </dependency>  
- 		<dependency>
-            <groupId>org.smartrplace.apps</groupId>
-            <artifactId>smartr-efficiency-api</artifactId>
-            <version>2.1.3-SNAPSHOT</version>
-        </dependency>  
-        
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <groupId>de.iwes.widgets</groupId>
+            <artifactId>widget-collection</artifactId>
+            <version>2.1.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.iwes.widgets</groupId>
+            <artifactId>widget-experimental</artifactId>
+            <version>2.1.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.smartrplace.apps</groupId>
+            <artifactId>smartr-heatcontrol-extension-api</artifactId>
+            <version>2.1.3-SNAPSHOT</version>
+       </dependency>
+        <dependency>
+            <groupId>de.iwes.widgets</groupId>
+            <artifactId>widget-exam-base</artifactId>
             <scope>test</scope>
         </dependency>
-    </dependencies>
-
+   </dependencies>
 </project>
