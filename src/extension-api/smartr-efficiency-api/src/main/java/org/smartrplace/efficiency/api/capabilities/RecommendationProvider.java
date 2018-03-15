@@ -6,7 +6,7 @@ import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.gui.DataEntryProvider;
 
-import de.iwes.timeseries.eval.api.LabelledItem;
+import de.iwes.widgets.template.LabelledItem;
 import extensionmodel.smarteff.api.base.SmartEffGeneralData;
 import extensionmodel.smarteff.api.base.SmartEffUserData;
 

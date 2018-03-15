@@ -1,6 +1,6 @@
 package org.smartrplace.extensionservice;
 
-import de.iwes.timeseries.eval.api.LabelledItem;
+import de.iwes.widgets.template.LabelledItem;
 
 public interface ExtensionCapability extends LabelledItem {
 

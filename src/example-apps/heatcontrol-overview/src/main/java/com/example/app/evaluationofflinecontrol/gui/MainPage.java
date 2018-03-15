@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
+import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
 
 import com.example.app.evaluationofflinecontrol.HeatControlOverviewController;
 
@@ -24,7 +24,7 @@ import de.iwes.widgets.html.form.label.Header;
  */
 public class MainPage {
 	
-	private final DynamicTable<Room> table;
+	private final DynamicTable<HeatControlExtRoomData> table;
 	final private HeatControlExtPoint heatExtPoint;
 
 	public MainPage(final WidgetPage<?> page, final HeatControlOverviewController app) {
@@ -34,21 +34,21 @@ public class MainPage {
 		header.addDefaultStyle(WidgetData.TEXT_ALIGNMENT_LEFT);
 		page.append(header);
 		
-		table = new DynamicTable<Room>(page, "evalviewtable") {
+		table = new DynamicTable<HeatControlExtRoomData>(page, "evalviewtable") {
 
 			private static final long serialVersionUID = 1L;
 			
 			@Override
 			public void onGET(OgemaHttpRequest req) {
-				Collection<Room> providers = heatExtPoint.getRoomsControlled(); 
+				Collection<HeatControlExtRoomData> providers = heatExtPoint.getRoomsControlled(); 
 				updateRows(providers, req);
 			}
 		};
 		
-		table.setRowTemplate(new RowTemplate<Room>() {
+		table.setRowTemplate(new RowTemplate<HeatControlExtRoomData>() {
 
 			@Override
-			public Row addRow(Room eval, OgemaHttpRequest req) {
+			public Row addRow(HeatControlExtRoomData eval, OgemaHttpRequest req) {
 				Row row = new Row();
 				String lineId = getLineId(eval);
 				/*row.addCell("name", eval.id());
@@ -84,8 +84,8 @@ public class MainPage {
 			}
 
 			@Override
-			public String getLineId(Room arg0) {
-				return ResourceUtils.getValidResourceName(arg0.getLocation());
+			public String getLineId(HeatControlExtRoomData arg0) {
+				return ResourceUtils.getValidResourceName(arg0.getRoom().getLocation());
 			}
 		});
 		

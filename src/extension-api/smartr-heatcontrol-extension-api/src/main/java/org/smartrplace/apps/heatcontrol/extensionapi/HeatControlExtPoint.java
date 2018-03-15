@@ -10,6 +10,7 @@ import org.ogema.model.locations.Room;
 public interface HeatControlExtPoint {
 	boolean getEcoModeState();
 	void setEcoModeState(boolean state);
-	/**TODO: This is just an initial idea*/
-	List<Room> getRoomsControlled();
+	
+	/** Get access to rooms controlled and the relevant data*/
+	List<HeatControlExtRoomData> getRoomsControlled();
 }
