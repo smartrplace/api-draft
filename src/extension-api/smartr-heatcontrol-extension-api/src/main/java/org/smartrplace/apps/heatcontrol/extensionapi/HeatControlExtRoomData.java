@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
+import org.ogema.model.sensors.DoorWindowSensor;
 import org.ogema.model.sensors.HumiditySensor;
 import org.ogema.model.sensors.TemperatureSensor;
 
@@ -34,12 +35,15 @@ public abstract class HeatControlExtRoomData {
 	/** Only temperature sensors that are not part of thermostats*/
 	final private List<TemperatureSensor> roomTemperatureSensors;
 	final private List<HumiditySensor> roomHumiditySensors;
+	final private List<DoorWindowSensor> windowSensors;
 	public HeatControlExtRoomData(Room room, List<Thermostat> thermostats,
-			List<TemperatureSensor> roomTemperatureSensors, List<HumiditySensor> roomHumiditySensors) {
+			List<TemperatureSensor> roomTemperatureSensors, List<HumiditySensor> roomHumiditySensors,
+			List<DoorWindowSensor> windowSensors) {
 		this.room = room;
 		this.thermostats = thermostats;
 		this.roomTemperatureSensors = roomTemperatureSensors;
 		this.roomHumiditySensors = roomHumiditySensors;
+		this.windowSensors = windowSensors;
 	}
 	
 	private RoomExtensionData roomExtensionData;
@@ -66,6 +70,9 @@ public abstract class HeatControlExtRoomData {
 
 	public List<HumiditySensor> getRoomHumiditySensors() {
 		return roomHumiditySensors;
+	}
+	public List<DoorWindowSensor> getWindowSensors() {
+		return windowSensors;
 	}
 
 }

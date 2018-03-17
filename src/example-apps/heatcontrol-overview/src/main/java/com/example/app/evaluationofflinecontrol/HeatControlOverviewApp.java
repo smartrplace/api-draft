@@ -6,7 +6,9 @@ import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
+import org.smartrplace.apps.heatcontrol.extensionapi.GUIInitDataProvider;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
+import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
 
 import com.example.app.evaluationofflinecontrol.gui.MainPage;
 
@@ -53,7 +55,11 @@ public class HeatControlOverviewApp implements Application {
 		//register a web page with dynamically generated HTML
 		widgetApp = guiService.createWidgetApp(urlPath, appManager);
 		WidgetPage<?> page = widgetApp.createStartPage();
-		mainPage = new MainPage(page, controller);
+		HeatControlExtRoomData initData = null;
+		if(controller.serviceAccess.heatExtPoint instanceof GUIInitDataProvider) {
+			initData = ((GUIInitDataProvider)controller.serviceAccess.heatExtPoint).getInitObject(HeatControlExtRoomData.class);
+		}
+		mainPage = new MainPage(page, controller, initData);
 
 
 		NavigationMenu menu = new NavigationMenu("Select Page");
