@@ -1,4 +1,4 @@
-package com.example.app.evaluationofflinecontrol;
+package de.smartrplace.app.heatcontrol.overview;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;

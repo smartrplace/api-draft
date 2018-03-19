@@ -1,10 +1,10 @@
-package org.smartrplace.apps.heatcontrol.extensionapi;
+package de.smartrplace.app.heatcontrol.overview.config;
 
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.model.prototypes.Data;
 
-public interface RoomExtensionData extends Data {
+public interface HeatcontrolOverviewData extends Data {
 	TemperatureResource comfortTemperature();
 	TemperatureResource lowerTemperature();
 	/** 0: Do not control manual mode of thermostat at all

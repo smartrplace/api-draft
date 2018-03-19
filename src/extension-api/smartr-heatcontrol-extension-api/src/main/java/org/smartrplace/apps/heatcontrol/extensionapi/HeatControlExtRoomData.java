@@ -2,6 +2,7 @@ package org.smartrplace.apps.heatcontrol.extensionapi;
 
 import java.util.List;
 
+import org.ogema.core.model.Resource;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.DoorWindowSensor;
@@ -30,6 +31,16 @@ public abstract class HeatControlExtRoomData {
 	 */
 	public abstract boolean isUserPresent();
 	
+	/** The heating core application shall take care of additional configuration
+	 * resources for each room for other applications in order to make the management
+	 * of room resources more efficient
+	 * 
+	 * @param forceCreation if true the subresource will be created if not available yet
+	 * if false the method will return false if the resource is not yet available
+	 */
+	public abstract <R extends Resource> R getRoomExtensionData(boolean forceCreation,
+			Class<R> resourceType);
+
 	final private Room room;
 	final private List<Thermostat> thermostats;
 	/** Only temperature sensors that are not part of thermostats*/
@@ -46,16 +57,6 @@ public abstract class HeatControlExtRoomData {
 		this.windowSensors = windowSensors;
 	}
 	
-	private RoomExtensionData roomExtensionData;
-	
-	public RoomExtensionData getRoomExtensionData() {
-		return roomExtensionData;
-	}
-
-	public void setRoomExtensionData(RoomExtensionData roomExtensionData) {
-		this.roomExtensionData = roomExtensionData;
-	}
-
 	public Room getRoom() {
 		return room;
 	}

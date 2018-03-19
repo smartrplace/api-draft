@@ -1,4 +1,4 @@
-package com.example.app.evaluationofflinecontrol;
+package de.smartrplace.app.heatcontrol.overview;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -10,7 +10,7 @@ import org.smartrplace.apps.heatcontrol.extensionapi.GUIInitDataProvider;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
 
-import com.example.app.evaluationofflinecontrol.gui.MainPage;
+import de.smartrplace.app.heatcontrol.overview.gui.MainPage;
 
 import de.iwes.widgets.api.OgemaGuiService;
 import de.iwes.widgets.api.widgets.WidgetApp;
