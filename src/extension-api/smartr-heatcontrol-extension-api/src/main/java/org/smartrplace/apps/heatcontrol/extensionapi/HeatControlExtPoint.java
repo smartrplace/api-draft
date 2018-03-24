@@ -2,6 +2,8 @@ package org.smartrplace.apps.heatcontrol.extensionapi;
 
 import java.util.List;
 
+import org.ogema.core.model.Resource;
+
 /** Service offered by the app org.smartrplace.apps.smartrplace-heatcontrol-v2
  * 
  */
@@ -12,12 +14,22 @@ public interface HeatControlExtPoint {
 	/** Get access to rooms controlled and the relevant data*/
 	List<HeatControlExtRoomData> getRoomsControlled();
 	
+	/** The heating core application shall take care of additional global configuration
+	 * resources for applications to make the management
+	 * of room resources more efficient
+	 * 
+	 * @param forceCreation if true the subresource will be created if not available yet
+	 * if false the method will return false if the resource is not yet available
+	 */
+	public abstract <R extends Resource> R extensionData(boolean forceCreation,
+			Class<R> resourceType);
+
+	
 	public interface HeatControlExtRoomListener {
 		public enum CallbackReason {
-			/** Room is newly found, this is also used if a new room is found 
-			 * on startup*/
+			/** Room is newly found*/
 			NEW,
-			/** Room is known, but for each known room a callback is made on
+			/** For each known room a callback is made on
 			 * call of {@link HeatControlExtPoint#registerRoomListener(HeatControlExtRoomListener)}
 			 */
 			STARTUP,

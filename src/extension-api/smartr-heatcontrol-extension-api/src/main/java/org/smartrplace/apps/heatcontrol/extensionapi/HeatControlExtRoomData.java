@@ -16,12 +16,20 @@ public abstract class HeatControlExtRoomData {
 	 * no manual control is active
 	 */
 	public abstract long getRemainingDirectThermostatManualDuration();
+	/** Get the duration of manual settings made directly at the thermostat
+	 * */
+	public abstract long getAtThermostatManualSettingDuration();
+	/** Set value that is obtained from {@link #getAtThermostatManualSettingDuration()}
+	 */
+	public abstract void setAtThermostatManualSettingDuration(long duration);
+	
 	/** Get current temperature setpoint in K*/
 	public abstract float getCurrentTemperatureSetpoint();
 	/**
 	 * 
 	 * @param setpoint manuel setpoint temperature in K
-	 * @param duration duration in ms for which the setting shall be active
+	 * @param duration duration in ms for which the setting shall be active. If manual mode shall
+	 * be switched of set to negative value
 	 */
 	public abstract void setManualTemperatureSetpoint(float setpoint, long duration);
 	

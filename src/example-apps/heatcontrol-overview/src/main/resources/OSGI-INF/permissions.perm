@@ -1,0 +1,39 @@
+# OGEMA standard permissions
+(org.osgi.framework.ServicePermission "org.ogema.core.application.Application" "register")
+(org.osgi.framework.ServicePermission "de.iwes.widgets.api.OgemaGuiService" "get")
+(org.osgi.framework.PackagePermission "org.ogema.tools.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.util.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.core.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.model.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.pattern.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.widgets.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.tools.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.util.*" "import")
+(org.osgi.framework.PackagePermission "org.slf4j" "import")
+
+(org.osgi.framework.ServicePermission "org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint" "get")
+(org.osgi.framework.PackagePermission "org.smartrplace.util.*" "import")
+
+#add here manually if required:
+# - (java.util.PropertyPermission "<property_name>" "read")
+(org.ogema.accesscontrol.WebAccessPermission "name=de.iwes.widgets.ogema-js-bundle")
+
+
+#Automated Generation Below:
+# import permissions
+(org.osgi.framework.PackagePermission "org.apache.felix.scr.annotations" "import")
+(org.osgi.framework.PackagePermission "org.smartrplace.util.directobjectgui" "import")
+(org.osgi.framework.PackagePermission "org.smartrplace.apps.heatcontrol.extensionapi" "import")
+(org.osgi.framework.PackagePermission "org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint" "import")
+
+# export/custom type permissions
+(org.ogema.accesscontrol.ResourcePermission "type=de.smartrplace.app.heatcontrol.overview.config.HeatcontrolOverviewData" "read,write,addsub,create,activity,delete")
+(org.ogema.accesscontrol.ResourcePermission "type=de.smartrplace.app.heatcontrol.overview.config.GlobalHeatcontrolOverviewData" "read,write,addsub,create,activity,delete")
+(org.osgi.framework.PackagePermission "de.smartrplace.app.heatcontrol.overview.config" "exportonly")
+
+# resource permissions
+(org.ogema.accesscontrol.ResourcePermission "type=org.ogema.model.devices.buildingtechnology.Thermostat" "read")
+(org.ogema.accesscontrol.ResourcePermission "type=org.ogema.model.locations.Room" "read")
+(org.ogema.accesscontrol.ResourcePermission "type=org.ogema.model.sensors.DoorWindowSensor" "read")
+(org.ogema.accesscontrol.ResourcePermission "type=org.ogema.model.sensors.HumiditySensor" "read")
+(org.ogema.accesscontrol.ResourcePermission "type=org.ogema.model.sensors.TemperatureSensor" "read")
