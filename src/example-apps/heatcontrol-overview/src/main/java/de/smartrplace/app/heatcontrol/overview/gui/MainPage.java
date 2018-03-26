@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.model.units.TemperatureResource;
@@ -16,7 +17,6 @@ import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
-import org.smartrplace.util.format.ValueFormat;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.widgets.api.extended.WidgetData;
@@ -24,11 +24,11 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.html.form.checkbox.SimpleCheckbox;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
-import de.smartrplace.app.heatcontrol.common.util.RoomDataUtil;
 import de.smartrplace.app.heatcontrol.overview.HeatControlOverviewController;
 import de.smartrplace.app.heatcontrol.overview.config.GlobalHeatcontrolOverviewData;
 import de.smartrplace.app.heatcontrol.overview.config.HeatcontrolOverviewData;
@@ -44,12 +44,14 @@ public class MainPage extends ObjectGUITablePage<HeatControlExtRoomData, Room>{
 	
 	final private HeatControlExtPoint heatExtPoint;
 	final private GlobalHeatcontrolOverviewData myGlobalData;
+	private final HeatControlOverviewController app;
 	
 	ValueResourceTextField<TimeResource> updateInterval;
 
 	public MainPage(final WidgetPage<?> page, final HeatControlOverviewController app,
 			HeatControlExtRoomData initData) {
 		super(page, app.appMan, initData);
+		this.app = app;
 		this.heatExtPoint = app.serviceAccess.heatExtPoint;
 		this.myGlobalData = heatExtPoint.extensionData(true, GlobalHeatcontrolOverviewData.class);
 	}
@@ -98,7 +100,7 @@ public class MainPage extends ObjectGUITablePage<HeatControlExtRoomData, Room>{
 		String roomName = ResourceUtils.getHumanReadableShortName(object.getRoom());
 		if(configRes != null) id = roomName + id;
 		Label sl = vh.stringLabel("Room name", id, roomName, row);
-if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+//if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
 if(sl != null) System.out.println("Room name "+ResourceUtils.getHumanReadableShortName(object.getRoom())+" in "+sl.getId());
 else System.out.println("Room name for "+id);
 		if(object.getThermostats() != null) {
@@ -111,34 +113,36 @@ else System.out.println("Room name for "+id);
 if(sl != null) System.out.println("Therm/TH/Win "+text+" in "+sl.getId());
 else System.out.println("Therm/TH/Win for "+id);
 	
-			String columnId = ResourceUtils.getValidResourceName("T/Setp/Valve/H/Open/Motion/Manu");
+			/*String columnId = ResourceUtils.getValidResourceName("T/Setp/Valve/H/Open/Motion/Manu");
 			String widgetId = columnId + id;
 			Label dataLabel = new Label(vh.getParent(), widgetId, req) {
 				private static final long serialVersionUID = 4515005761380513466L;
 				@Override
 				public void onGET(OgemaHttpRequest req) {
+					long remaining = object.getRemainingDirectThermostatManualDuration();
+					if(remaining > 0 && remaining < 1000) remaining = remaining * 60000;
 					String text = ValueFormat.celsius(RoomDataUtil.getRoomTemperatureMeasurement(object.getRoomTemperatureSensors(), object.getThermostats()), 1)+" / "+
 							ValueFormat.celsius(object.getCurrentTemperatureSetpoint())+" / "+
 							ValueFormat.floatVal(RoomDataUtil.getTotalValveOpening(object.getThermostats()), "%.2f")+" / "+
 							ValueFormat.humidity(RoomDataUtil.getAverageRoomHumditiyMeasurement(object.getRoomHumiditySensors()))+" / "+
 							RoomDataUtil.getNumberOpenWindows(object.getWindowSensors()) +" / "+
 							(object.isUserPresent()?"1":"0") +" / "+
-							StringFormatHelper.getFormattedValue(object.getRemainingDirectThermostatManualDuration()-appMan.getFrameworkTime());
+							getFormattedDurationValue(remaining, 300);
 					setText(text, req);
 				}
 			};
 			if(myGlobalData.updateRate().getValue() > 0)
 				dataLabel.setPollingInterval(myGlobalData.updateRate().getValue(), req);
-			row.addCell(columnId, dataLabel);
+			row.addCell(columnId, dataLabel);*/
 		} else {
 			vh.registerHeaderEntry("Therm/TH/Win");
-			vh.registerHeaderEntry("T/Setp/Valve/H/Open/Motion/Manu");
+			//vh.registerHeaderEntry("T/Setp/Valve/H/Open/Motion/Manu");
 		}
 		if(configRes != null)
 			vh.floatEdit("Comfort Temp.", id, configRes.comfortTemperature(), row, alert, MIN_COMFORT_TEMP, MAX_COMFORT_TEMP, "Value not allowed");
 		else
 			vh.registerHeaderEntry("Comfort Temp.");
-		new ServiceValueEdit("At-Thermostat Duration", id, row, alert, 0, 99999, "Value not allowed", vh) {
+		/*new ServiceValueEdit("At-Thermostat Duration", id, row, alert, 0, 99999, "Value not allowed", vh) {
 
 			@Override
 			protected String getValue(OgemaHttpRequest req) {
@@ -149,13 +153,15 @@ else System.out.println("Therm/TH/Win for "+id);
 			protected void setValue(float value, OgemaHttpRequest req) {
 				object.setAtThermostatManualSettingDuration((long) (value*60000));
 			}
-		};
+		};*/
 		
 		if(object.getThermostats() != null) {
 			boolean hasManualModeControl = false;
 			boolean allManualModeControl = true;
 			boolean hasModeFeedback = false;
 			boolean allModeFeedback = true;
+			boolean hasBoostMode = false;
+			boolean allBoostMode = true;
 				for(Thermostat th: object.getThermostats()) {
 				if(getActiveManualModeControl(th) != null) {
 					hasManualModeControl = true;
@@ -166,6 +172,11 @@ else System.out.println("Therm/TH/Win for "+id);
 					hasModeFeedback = true;
 				} else {
 					allModeFeedback = false;
+				}
+				if(getBoostControl(th) != null) {
+					hasBoostMode = true;
+				} else {
+					allBoostMode = false;
 				}
 			}
 			if(hasManualModeControl) {
@@ -178,13 +189,33 @@ else System.out.println("Therm/TH/Win for "+id);
 					String adderFB = "";
 					if(!allModeFeedback) adderFB = "!!";
 					valuesToSet.put("2", "Thermostat button switch detection"+adderFB+adder);
+					//TODO: Boosting like this does not really work. This seems to interfere with
+					//mode switching and temperature setting
+					/*if(hasBoostMode) {
+						String adderBoost = "";
+						if(!allBoostMode) adderBoost = "??";
+						valuesToSet.put("3", "Thermostat button switch detection with boost"+adderBoost+adder);
+					}*/
 				}
 				vh.dropdown("Control Mode", id, configRes.controlManualMode(), row, valuesToSet );
 			} else {
 				vh.stringLabel("Control Mode", id, "Control Mode not supported", row);
 			}
+			if(hasBoostMode) {
+				Button boostButton = new Button(vh.getParent(), "boostButton"+id, "Boost->CT"+(allBoostMode?"":"*"), req) {
+					private static final long serialVersionUID = 2903972124650772289L;
+					@Override
+					public void onPOSTComplete(String data, OgemaHttpRequest req) {
+						app.startBoost(object);
+					}
+				};
+				row.addCell("Boost", boostButton);				
+			} else {
+				vh.stringLabel("Boost", id, "Boost not supported", row);
+			}
 		} else {
 			vh.registerHeaderEntry("Control Mode");
+			vh.registerHeaderEntry("Boost");
 		}
 		
 	}
@@ -197,6 +228,11 @@ else System.out.println("Therm/TH/Win for "+id);
 	public static IntegerResource getActiveModeFeedback(Thermostat th) {
 		IntegerResource setManualMode = th.getSubResource("controlMode", IntegerResource.class);
 		if((setManualMode != null)&&setManualMode.isActive()) return setManualMode;
+		else return null;
+	}
+	public static BooleanResource getBoostControl(Thermostat th) {
+		BooleanResource setBoostMode = th.getSubResource("setBoostMode",BooleanResource.class);
+		if((setBoostMode != null)&&setBoostMode.isActive()) return setBoostMode;
 		else return null;
 	}
 
@@ -220,5 +256,20 @@ else System.out.println("Therm/TH/Win for "+id);
 			return;
 		}
 		protected abstract void addWidget(R resource, String widgetName);
+	}
+	
+	public static String getFormattedDurationValue(long deltaT, int maxMinutesSecond) {
+    	if(deltaT < 0) {
+    		return "--";
+    	}
+		deltaT = deltaT / 1000;
+		if(deltaT < maxMinutesSecond) {
+			return String.format("%d sec", deltaT);
+		}
+		deltaT /= 60;
+		if(deltaT < maxMinutesSecond) {
+			return String.format("%d min", deltaT);
+		}
+		return StringFormatHelper.getFormattedValue(deltaT);
 	}
 }

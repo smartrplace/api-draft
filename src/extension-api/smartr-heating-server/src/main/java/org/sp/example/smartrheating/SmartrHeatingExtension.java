@@ -32,7 +32,8 @@ public class SmartrHeatingExtension implements SmartEffExtensionService {
 
 	@Override
 	public Collection<ExtensionCapability> getCapabilities() {
-		return Arrays.asList(new ExtensionCapability[] {new SmartrHeatingEditPage(appManMin)});
+		return Arrays.asList(new ExtensionCapability[] {new SmartrHeatingEditPage(appManMin),
+				new SmartrHeatingRecommendationProvider()});
 	}
 
 	@Override

@@ -9,7 +9,12 @@ import org.ogema.core.application.Application.AppStopReason;
  * @param <T> base ExtensionResouceType of the domain which is extended here. So this should be the same
  * for all extension modules of the domain
  */
-public interface ExtensionService<T extends ExtensionResourceType> {
+public interface ExtensionService<T extends ExtensionResourceType>  {
+	/**Id of service. If null the full class name shall be used as id*/
+	default String id() {
+		return null;
+	}
+	
 	void start(ApplicationManagerMinimal appManMin);
 	void stop(AppStopReason reason);
 	

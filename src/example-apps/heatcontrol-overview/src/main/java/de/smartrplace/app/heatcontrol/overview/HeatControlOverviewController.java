@@ -7,11 +7,13 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.application.Timer;
 import org.ogema.core.application.TimerListener;
 import org.ogema.core.logging.OgemaLogger;
+import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint.HeatControlExtRoomListener;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
@@ -21,13 +23,16 @@ import de.smartrplace.app.heatcontrol.overview.gui.MainPage;
 
 public class HeatControlOverviewController {
 	public static final long MANUAL_UPDATE_INTERVAL = 10*60000;
+	public static final long MIN_BOOST_INTERVAL = 20*60000;
+	public static final long MIN_BOOST_BLOCKER = 60000;
+	public static final float MIN_TEMPDIFF = 0.2f;
 
 	public OgemaLogger log;
     public ApplicationManager appMan;
 
 	public final HeatControlOverviewApp serviceAccess;
 	public final HeatControlExtPoint extPoint;
-	private final HeatControlExtRoomListener roomListener;
+	private final RoomListenerOverview roomListener;
 	
     public HeatControlOverviewController(ApplicationManager appMan,HeatControlOverviewApp evaluationOCApp) {
 		this.appMan = appMan;
@@ -43,13 +48,18 @@ public class HeatControlOverviewController {
 		extPoint.unregisterRoomListener(roomListener);
     }
 	
+	/**TODO: Check this: We expect that all methods in this class are triggered via
+	 * the framework smartrplace-heatcontrol thread, so we do not have to care about
+	 * synchronization etc.
+	 */
 	class RoomControlled implements TimerListener {
-		private final HeatControlExtRoomData data;
+		private HeatControlExtRoomData data;
 		HeatcontrolOverviewData myData;
 		List<TemperatureResource> timerBasedManualSetters = null;
 		List<ResourceValueListener<IntegerResource>> hmModeListeners = new ArrayList<>();
 		List<ResourceValueListener<IntegerResource>> myModeListeners = new ArrayList<>();
 		Timer timer = null;
+		long lastBoostStarted = -1;
 
 		public RoomControlled(HeatControlExtRoomData data) {
 			this.data = data;
@@ -78,13 +88,16 @@ public class HeatControlOverviewController {
 				}
 			};
 			myModeListeners.add(l);
-			myData.controlManualMode().addValueListener(l, true);
+			myData.controlManualMode().addValueListener(l, false);
 			
 			initThermostats();
 		}
 		
 		private void initThermostats() {
+			System.out.println("HeatControlOverview: initThermostats in "+
+					ResourceUtils.getHumanReadableName(data.getRoom()));
 			for(Thermostat th: data.getThermostats()) {
+				System.out.println("HeatControlOverview: initThermostat mode:"+myData.controlManualMode().getValue()+" loc: "+th.getLocation());
 				if(myData.controlManualMode().getValue() < 1) continue;
 				TemperatureResource manualControl = MainPage.getActiveManualModeControl(th);
 				if(manualControl != null) {
@@ -96,11 +109,13 @@ public class HeatControlOverviewController {
 
 						@Override
 						public void resourceChanged(IntegerResource resource) {
-							detectedManualEvent();					
+							if((modeFB.getValue() != 1)&&(modeFB.getValue() != 3)) detectedManualEvent();					
 						}
 					};
 					hmModeListeners.add(l);
 					modeFB.addValueListener(l, true);
+					System.out.println("HeatControlOverview: Listening for "+modeFB.getLocation()+" in "+
+							ResourceUtils.getHumanReadableName(data.getRoom()));
 				} else {
 					if(timerBasedManualSetters == null) timerBasedManualSetters = new ArrayList<>();
 					timerBasedManualSetters.add(manualControl);					
@@ -129,6 +144,14 @@ public class HeatControlOverviewController {
 			}
 		}
 		private void detectedManualEvent() {
+			if(appMan.getFrameworkTime() - lastBoostStarted < MIN_BOOST_BLOCKER) {
+				System.out.println("HeatControlOverview: Still blocked by boost for "+
+					((MIN_BOOST_BLOCKER- (appMan.getFrameworkTime() - lastBoostStarted))/1000)+" seconds.");
+				return;
+			};
+			final boolean lastBoostStartLongAgo = (appMan.getFrameworkTime()-lastBoostStarted > MIN_BOOST_INTERVAL);
+			System.out.println("HeatControlOverview: Detected manual event for "+
+					ResourceUtils.getHumanReadableName(data.getRoom())+" mode:"+myData.controlManualMode().getValue());
 			for(Thermostat th: data.getThermostats()) {
 				TemperatureResource manualControl = MainPage.getActiveManualModeControl(th);
 				if(manualControl == null) continue;
@@ -137,16 +160,52 @@ public class HeatControlOverviewController {
 					continue;
 				}
 				float curDiff = Math.abs(data.getCurrentTemperatureSetpoint() - myData.comfortTemperature().getValue());
-				if(curDiff < 0.2) {
+				if((myData.controlManualMode().getValue() == 3) && (curDiff >= MIN_TEMPDIFF) &&
+						lastBoostStartLongAgo) {
+					//Note: Errors occured when starting boost, but unclear if this was really the problem
+					//Suspect that homematic cannot handle to set manual mode and boost mode almost at the same time
+					
+					if(startBoost(th)) {
+						continue;
+					}
+				}
+				if(curDiff < MIN_TEMPDIFF) {
 					//switch manual off
 					manualControl.setValue(data.getCurrentTemperatureSetpoint());
 					resetManualOperation(data);
+					System.out.println("HeatControlOverview: Switched manuel OFF with setpoint "+data.getCurrentTemperatureSetpoint());
 				} else {
 					//switch on
 					manualControl.setValue(myData.comfortTemperature().getValue());
 					data.setManualTemperatureSetpoint(myData.comfortTemperature().getValue(),data.getAtThermostatManualSettingDuration());
+					System.out.println("HeatControlOverview: Set to comfort temp:"+myData.comfortTemperature().getValue()+" for "+data.getAtThermostatManualSettingDuration());
 				}
 			}
+		}
+
+		public void updateData(HeatControlExtRoomData roomData) {
+			this.data = roomData;		
+		}
+
+		public void startBoost() {
+			if(appMan.getFrameworkTime() - lastBoostStarted < MIN_BOOST_BLOCKER) {
+				System.out.println("HeatControlOverview: Still blocked by boost for "+
+					((MIN_BOOST_BLOCKER- (appMan.getFrameworkTime() - lastBoostStarted))/1000)+" seconds.");
+				return;
+			}
+			for(Thermostat th: data.getThermostats()) {
+				startBoost(th);
+			}
+		}
+		private boolean startBoost(Thermostat th) {
+			BooleanResource boostControl = MainPage.getBoostControl(th);
+			if(boostControl != null) {
+				boostControl.setValue(true);
+				lastBoostStarted = appMan.getFrameworkTime();
+				System.out.println("HeatControlOverview: Started boost");
+				return true;
+			}
+			return false;
 		}
 	}
 	private void resetManualOperation(HeatControlExtRoomData data) {
@@ -165,13 +224,16 @@ public class HeatControlOverviewController {
 		public void roomAvailable(HeatControlExtRoomData roomData, CallbackReason reason) {
 			if(reason == CallbackReason.UPDATE) {
 				RoomControlled old = getRoomData(roomData.getRoom());
-				if(old != null) {
-					old.close();
-					roomsControlled.remove(old);
-				}
+				old.updateData(roomData);
+				old.initThermostats();
+				//if(old != null) {
+				//	old.close();
+				//	roomsControlled.remove(old);
+				//}
+			} else {
+				RoomControlled r = new RoomControlled(roomData);
+				roomsControlled.add(r);
 			}
-			RoomControlled r = new RoomControlled(roomData);
-			roomsControlled.add(r);
 		}
 
 		@Override
@@ -185,5 +247,9 @@ public class HeatControlOverviewController {
 			}
 		}
 		
+	}
+	public void startBoost(HeatControlExtRoomData object) {
+		RoomControlled rc = roomListener.getRoomData(object.getRoom());
+		rc.startBoost();
 	}
 }

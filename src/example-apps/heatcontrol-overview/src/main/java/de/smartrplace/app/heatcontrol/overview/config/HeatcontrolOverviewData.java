@@ -11,6 +11,7 @@ public interface HeatcontrolOverviewData extends Data {
 	 *  1: Always set to manual mode
 	 *  2: If non-manual mode detected switch back to manual and activate
 	 *     comfort temperature for manual control duraration of thermostat control
+	 *  3: like 2, but start boost when comfort temperature is activated
 	 */
 	IntegerResource controlManualMode(); 
 }
