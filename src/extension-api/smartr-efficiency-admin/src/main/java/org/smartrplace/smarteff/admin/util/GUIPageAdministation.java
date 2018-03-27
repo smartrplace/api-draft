@@ -8,20 +8,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extensionservice.ExtensionResourceType;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.EntryType;
 import org.smartrplace.smarteff.admin.SpEffAdminApp;
+import org.smartrplace.smarteff.admin.SpEffAdminController;
+import org.smartrplace.smarteff.admin.gui.DataExplorerPage;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData.ServiceCapabilities;
 
+import de.iwes.widgets.api.widgets.WidgetPage;
+
 public class GUIPageAdministation {
 	public List<NavigationPageData> startPages = new ArrayList<>();
 	public Map<Class<? extends ExtensionResourceType>, List<NavigationPageData>> navigationPages = new HashMap<>();
+	private final SpEffAdminController app;
+	
+	public GUIPageAdministation(SpEffAdminController app) {
+		this.app = app;
+	}
 
 	public NavigationPageData selectedStartPage;
 	
@@ -30,7 +41,12 @@ public class GUIPageAdministation {
 	public void registerService(SmartEffExtensionService service) {
     	ServiceCapabilities caps = SmartrEffExtResourceTypeData.getServiceCaps(service);
     	for(NavigationGUIProvider navi: caps.naviProviders) {		
-    		NavigationPageData data = new NavigationPageData(navi, service);
+    		String url = ResourceUtils.getValidResourceName(SmartrEffUtil.buildId(navi))+".html";
+    		WidgetPage<?> page = app.widgetApp.createWidgetPage(url);
+    		ExtensionNavigationPage dataExPage = new ExtensionNavigationPage(page, url, "dataExplorer.html");
+    		navi.initPage(dataExPage, app.appConfigData.generalData());
+    		
+    		NavigationPageData data = new NavigationPageData(navi, service, url, dataExPage);
 			if(navi.getEntryType() == null) startPages.add(data);
 			else for(EntryType t: navi.getEntryType()) {
 				List<NavigationPageData> list = navigationPages.get(t.getType());
@@ -41,6 +57,7 @@ public class GUIPageAdministation {
 				list.add(data);
 			}
     	}
+    	
 	}
 	
 	public void unregisterService(SmartEffExtensionService service) {
@@ -52,15 +69,20 @@ public class GUIPageAdministation {
     	}
     	startPages.removeAll(toRemove);
     	for(NavigationGUIProvider navi: caps.naviProviders) {
-    		NavigationPageData data = new NavigationPageData(navi, service);
-			if(navi.getEntryType() == null) continue;
+    		String naviId = SmartrEffUtil.buildId(navi);
+ 			if(navi.getEntryType() == null) continue;
 			else for(EntryType t: navi.getEntryType()) {
 				List<NavigationPageData> list = navigationPages.get(t.getType());
 				if(list == null) {
 					logger.error("Navigationpages have no entry for "+t.getType().getName()+" when deregistering "+serviceId);
 					continue;
 				}
-				list.remove(data);
+				for(NavigationPageData l:list) {
+					if(SmartrEffUtil.buildId(l.provider).equals(naviId)) {
+						list.remove(l);
+						break;
+					}
+				}
 				if(list.isEmpty()) navigationPages.remove(t.getType());
 			}
     		

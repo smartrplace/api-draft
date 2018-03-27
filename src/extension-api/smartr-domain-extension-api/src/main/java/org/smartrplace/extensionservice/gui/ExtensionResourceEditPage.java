@@ -104,7 +104,7 @@ public abstract class ExtensionResourceEditPage<T extends Resource> {
 	}
 	public static void registerDependentWidgets(OgemaWidget governor, StaticTable table) {
 		for(OgemaWidget el: table.getSubWidgets()) {
-			governor.registerDependentWidget(el);
+			governor.triggerOnPOST(el);
 		}
 	}
 }

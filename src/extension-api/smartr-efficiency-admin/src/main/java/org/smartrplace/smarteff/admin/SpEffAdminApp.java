@@ -2,7 +2,9 @@ package org.smartrplace.smarteff.admin;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -13,11 +15,14 @@ import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
+import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.smarteff.admin.gui.DataExplorerPage;
+import org.smartrplace.smarteff.admin.gui.NaviOverviewPage;
 import org.smartrplace.smarteff.admin.gui.ResTypePage;
 import org.smartrplace.smarteff.admin.gui.ServiceDetailPage;
 import org.smartrplace.smarteff.admin.gui.ServicePage;
+import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 import org.smartrplace.smarteff.defaultservice.BaseDataService;
@@ -49,6 +54,7 @@ public class SpEffAdminApp implements Application {
     private OgemaLogger log;
     private ApplicationManager appMan;
     private SpEffAdminController controller;
+    private volatile boolean initDone = false;
 
 	private WidgetApp widgetApp;
 
@@ -59,6 +65,7 @@ public class SpEffAdminApp implements Application {
 	public ServiceDetailPage offlineEvalPage;
 	public ResTypePage resTypePage;
 	public DataExplorerPage dataExPage;
+	public NaviOverviewPage naviPage;
 	
 	private final Map<String,SmartEffExtensionService> evaluationProviders = Collections.synchronizedMap(new LinkedHashMap<String,SmartEffExtensionService>());
 	public Map<String, SmartEffExtensionService> getEvaluations() {
@@ -78,10 +85,10 @@ public class SpEffAdminApp implements Application {
         log = appManager.getLogger();
 
         // 
-        controller = new SpEffAdminController(appMan, this);
+		widgetApp = guiService.createWidgetApp(urlPath, appManager);
+        controller = new SpEffAdminController(appMan, this, widgetApp);
 		
 		//register a web page with dynamically generated HTML
-		widgetApp = guiService.createWidgetApp(urlPath, appManager);
 		WidgetPage<?> page = widgetApp.createStartPage();
 		mainPage = new ServicePage(page, controller);
 		WidgetPage<?> page1 = widgetApp.createWidgetPage("Details.html");
@@ -91,16 +98,31 @@ public class SpEffAdminApp implements Application {
 		resTypePage = new ResTypePage(page2, controller, rtd );
 		WidgetPage<?> page3 = widgetApp.createWidgetPage("dataExplorer.html");
 		dataExPage = new DataExplorerPage(page3, controller, controller.appConfigData.generalData());
+		WidgetPage<?> page4 = widgetApp.createWidgetPage("naviOverview.html");
+		NavigationPageData navi = new NavigationPageData(BaseDataService.BUILDING_NAVI_PROVIDER, null, "", null);
+		naviPage = new NaviOverviewPage(page4, controller, navi);
 
 		NavigationMenu menu = new NavigationMenu("Select Page");
-		menu.addEntry("Overview Page", page);
-		menu.addEntry("Details Page", page1);
+		menu.addEntry("Services Overview Page", page);
+		menu.addEntry("Services Details Page", page1);
+		menu.addEntry("Data Types", page2);
+		menu.addEntry("Data Explorer", page3);
+		menu.addEntry("Navigation Pages", page4);
 		
 		MenuConfiguration mc = page.getMenuConfiguration();
 		mc.setCustomNavigation(menu);
 		mc = page1.getMenuConfiguration();
 		mc.setCustomNavigation(menu);
-     }
+		mc = page2.getMenuConfiguration();
+		mc.setCustomNavigation(menu);
+		mc = page3.getMenuConfiguration();
+		mc.setCustomNavigation(menu);
+		mc = page4.getMenuConfiguration();
+		mc.setCustomNavigation(menu);
+
+		initDone = true;
+        controller.processOpenServices();
+ 	}
 
      /*
      * Callback called when the application is going to be stopped.
@@ -113,12 +135,30 @@ public class SpEffAdminApp implements Application {
         log.info("{} stopped", getClass().getName());
     }
     
+    List<SmartEffExtensionService> providersToProcess = new CopyOnWriteArrayList<>();
     protected void addProvider(SmartEffExtensionService provider) {
     	evaluationProviders.put(SmartrEffUtil.buildId(provider), provider);
+    	// Execute in main application thread
+    	if(initDone) {
+    		new CountDownDelayedExecutionTimer(appMan, 1) {
+				@Override
+				public void delayedExecution() {
+					controller.processNewService(provider);
+				}
+    		};
+		} else
+			providersToProcess.add(provider);
     }
     
     protected void removeProvider(SmartEffExtensionService provider) {
     	evaluationProviders.remove(SmartrEffUtil.buildId(provider));
+    	// Execute in main application thread
+    	if(controller != null) new CountDownDelayedExecutionTimer(appMan, 1) {
+			
+			@Override
+			public void delayedExecution() {
+				controller.unregisterService(provider);			}
+		};
     }
 
 }

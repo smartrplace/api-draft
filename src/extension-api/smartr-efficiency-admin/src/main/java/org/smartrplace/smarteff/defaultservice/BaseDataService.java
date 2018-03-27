@@ -3,6 +3,7 @@ package org.smartrplace.smarteff.defaultservice;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -11,8 +12,15 @@ import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extensionservice.ApplicationManagerMinimal;
 import org.smartrplace.extensionservice.ExtensionCapability;
+import org.smartrplace.extensionservice.ExtensionDoneListener;
+import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
+import de.iwes.widgets.html.form.label.Label;
 import extensionmodel.smarteff.api.base.BuildingData;
 import extensionmodel.smarteff.api.base.SmartEffPriceData;
 
@@ -42,9 +50,36 @@ public class BaseDataService implements SmartEffExtensionService {
 		}
 		
 	};
-	static {
+	public final static NavigationGUIProvider BUILDING_NAVI_PROVIDER = new NavigationGUIProvider() {
+		private ExtensionResourceType generalData;
 		
-	}
+		@Override
+		public String label(OgemaLocale locale) {
+			return "Standard Building Overview Table";
+		}
+
+		@Override
+		public void initPage(ExtensionNavigationPage page, ExtensionResourceType generalData) {
+			// TODO Auto-generated method stub
+			this.generalData = generalData;
+			Label test = new Label(page.page, "test", "Hello World!");
+			page.page.append(test);
+		}
+
+		@Override
+		public void setUserData(int entryTypeIdx, List<ExtensionResourceType> entryResources,
+				ExtensionResourceType userData, ExtensionResourceType userDataNonEdit,
+				ExtensionDoneListener<ExtensionResourceType> listener, OgemaHttpRequest req) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public List<EntryType> getEntryType() {
+			return null;
+		}
+		
+	};
 	
 	//private ApplicationManagerMinimal appManMin;
 	
@@ -60,7 +95,7 @@ public class BaseDataService implements SmartEffExtensionService {
 
 	@Override
 	public Collection<ExtensionCapability> getCapabilities() {
-		return Arrays.asList(new ExtensionCapability[] {});
+		return Arrays.asList(new ExtensionCapability[] {BUILDING_NAVI_PROVIDER});
 	}
 
 	@Override

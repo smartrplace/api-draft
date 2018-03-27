@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
@@ -47,7 +48,7 @@ public class ServicePage {
 			public Row addRow(SmartEffExtensionService eval, OgemaHttpRequest req) {
 				Row row = new Row();
 				String lineId = getLineId(eval);
-				row.addCell("name", eval.id());
+				row.addCell("name", SmartrEffUtil.buildId(eval));
 				//row.addCell("description", eval.description(OgemaLocale.ENGLISH));
 				TemplateRedirectButton<SmartEffExtensionService> detailPageButton = new TemplateRedirectButton<SmartEffExtensionService>(
 						table, "detailPageButton"+lineId, "Details", "", req) {
@@ -61,7 +62,7 @@ public class ServicePage {
 					}
 					@Override
 					protected String getConfigId(SmartEffExtensionService object) {
-						return object.id();
+						return SmartrEffUtil.buildId(object);
 					}
 				};
 												
@@ -72,7 +73,7 @@ public class ServicePage {
 
 			@Override
 			public String getLineId(SmartEffExtensionService object) {
-				return SmartrEffUtil.buildId(object);
+				return ResourceUtils.getValidResourceName(SmartrEffUtil.buildId(object));
 			}
 
 			@Override

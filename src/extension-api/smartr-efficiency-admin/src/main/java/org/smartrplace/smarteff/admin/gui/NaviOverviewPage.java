@@ -5,9 +5,11 @@ import java.util.Collection;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.EntryType;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
+import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
@@ -16,7 +18,6 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.label.Header;
-import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
 
 /**
@@ -39,7 +40,7 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 	
 	@Override
 	public void addWidgetsAboveTable() {
-		Header header = new Header(page, "header", "Data Type Overview");
+		Header header = new Header(page, "header", "Navigation Page Overview");
 		header.addDefaultStyle(WidgetData.TEXT_ALIGNMENT_LEFT);
 		page.append(header);
 	}
@@ -53,7 +54,10 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 	@Override
 	public void addWidgets(NavigationPageData object, ObjectResourceGUIHelper<NavigationPageData, Resource> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-		vh.stringLabel("Name", id, object.provider.label(req.getLocale()), row);
+		if(req != null)
+			vh.stringLabel("Name", id, object.provider.label(req.getLocale()), row);
+		else
+			vh.registerHeaderEntry("Name");
 		String text = null;
 		if(object.provider.getEntryType() == null) text = "Start Page";
 		else for(EntryType t: object.provider.getEntryType()) {
@@ -61,11 +65,20 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 			else text += "; "+t.getType().getSimpleName();
 		}
 		vh.stringLabel("Entry Types", id, text, row);
-		vh.linkingButton("Open", id, object, row, "Open", "genericNavi.html");
+		if(object.provider.getEntryType() == null)
+			vh.linkingButton("Open", id, object, row, "Open", object.url);
+		else
+			vh.stringLabel("Open", id, "--", row);
 	}
 	
 	@Override
 	public Resource getResource(NavigationPageData object, OgemaHttpRequest req) {
 		return null;
+	}
+	
+	@Override
+	public String getLineId(NavigationPageData object) {
+		String name = SmartrEffUtil.buildValidWidgetId(object.provider);
+		return name + super.getLineId(object);
 	}
 }

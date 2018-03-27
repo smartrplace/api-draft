@@ -16,27 +16,40 @@ import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.util.GUIPageAdministation;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 
+import de.iwes.util.resource.ValueResourceHelper;
+import de.iwes.widgets.api.widgets.WidgetApp;
+import extensionmodel.smarteff.api.base.SmartEffUserData;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class SpEffAdminController {
 	public final static String APPCONFIGDATA_LOCATION = SmartEffAdminData.class.getSimpleName().substring(0, 1).toLowerCase()+SmartEffAdminData.class.getSimpleName().substring(1);
 	
-	public OgemaLogger log;
-    public ApplicationManager appMan;
+	public final OgemaLogger log;
+    public final ApplicationManager appMan;
+    public final WidgetApp widgetApp;
 
 	public final SpEffAdminApp serviceAccess;
 	public SmartEffAdminData appConfigData;
 	public Set<SmartEffExtensionService> servicesKnown = new HashSet<>();
 	public Map<Class<? extends SmartEffExtensionResourceType>, SmartrEffExtResourceTypeData> resourceTypes = new HashMap<>();
-	public GUIPageAdministation guiPageAdmin = new GUIPageAdministation();
+	public final GUIPageAdministation guiPageAdmin;
 	
-    public SpEffAdminController(ApplicationManager appMan,SpEffAdminApp evaluationOCApp) {
+    public SpEffAdminController(ApplicationManager appMan,SpEffAdminApp evaluationOCApp, final WidgetApp widgetApp) {
 		this.appMan = appMan;
 		this.log = appMan.getLogger();
 		this.serviceAccess = evaluationOCApp;
+		this.widgetApp = widgetApp;
+		guiPageAdmin = new GUIPageAdministation(this);
 		
 		initConfigurationResource();
+		initTestData();
 	}
+    
+    public void processOpenServices() {
+		for(SmartEffExtensionService service: serviceAccess.getEvaluations().values()) {
+			processNewService(service);
+		}    	
+    }
 
     private void initConfigurationResource() {
 		String configResourceDefaultName = APPCONFIGDATA_LOCATION;
@@ -95,5 +108,25 @@ public class SpEffAdminController {
 	public void removeResource(SmartEffExtensionResourceType object) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public SmartEffUserDataNonEdit getUserData(String userName) {
+        for(SmartEffUserDataNonEdit userNE: appConfigData.userDataNonEdit().getAllElements()) {
+        	if(userNE.ogemaUserName().getValue().equals(userName)) {
+         		return userNE;
+        	}
+        }
+        return null;
+	}
+	
+	private void initTestData() {
+		if(getUserData("master") == null) {
+			SmartEffUserDataNonEdit data = appConfigData.userDataNonEdit().addDecorator("master", SmartEffUserDataNonEdit.class);			
+			ValueResourceHelper.setIfNew(data.ogemaUserName(), "master");
+			SmartEffUserData userData = appMan.getResourceManagement().createResource("master", SmartEffUserData.class);
+			data.editableData().setAsReference(userData);
+			userData.activate(true);
+			data.activate(true);
+		}
 	}
 }

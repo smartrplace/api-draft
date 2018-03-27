@@ -19,6 +19,7 @@ import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.ValueFormat;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.widgets.api.extended.WidgetData;
@@ -101,7 +102,6 @@ public class MainPage extends ObjectGUITablePage<HeatControlExtRoomData, Room>{
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 		HeatcontrolOverviewData configRes = object.getRoomExtensionData(true, HeatcontrolOverviewData.class);
 		String roomName = ResourceUtils.getHumanReadableShortName(object.getRoom());
-		if(configRes != null) id = roomName + id;
 		Label sl = vh.stringLabel("Room name", id, roomName, row);
 if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
 if(sl != null) System.out.println("Room name "+ResourceUtils.getHumanReadableShortName(object.getRoom())+" in "+sl.getId());
@@ -221,6 +221,12 @@ else System.out.println("Therm/TH/Win for "+id);
 			vh.registerHeaderEntry("Boost");
 		}
 		
+	}
+	
+	@Override
+	public String getLineId(HeatControlExtRoomData object) {
+		String roomName = WidgetHelper.getValidWidgetId(ResourceUtils.getHumanReadableShortName(object.getRoom()));
+		return roomName + super.getLineId(object);
 	}
 	
 	public static TemperatureResource getActiveManualModeControl(Thermostat th) {

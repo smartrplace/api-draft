@@ -21,7 +21,7 @@ public interface NavigationGUIProvider extends ExtensionCapability {
 	 * 		accessible. This information should be handed over here.
 	 * @param appManMin
 	 */
-	void initPage(final ExtensionResourceEditPage<ExtensionResourceType> page, ExtensionResourceType generalData);
+	void initPage(final ExtensionNavigationPage page, ExtensionResourceType generalData);
 	
 	/** For each new session the relevant user data is provided with this method
 	 * 

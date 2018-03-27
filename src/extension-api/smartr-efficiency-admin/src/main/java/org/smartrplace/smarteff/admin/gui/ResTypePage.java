@@ -9,13 +9,13 @@ import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.extended.WidgetData;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.label.Header;
-import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
 
 /**
@@ -65,5 +65,11 @@ public class ResTypePage extends ObjectGUITablePage<SmartrEffExtResourceTypeData
 	@Override
 	public Resource getResource(SmartrEffExtResourceTypeData object, OgemaHttpRequest req) {
 		return null;
+	}
+	
+	@Override
+	public String getLineId(SmartrEffExtResourceTypeData object) {
+		String name = WidgetHelper.getValidWidgetId(object.typeDeclaration.resourceName());
+		return name + super.getLineId(object);
 	}
 }

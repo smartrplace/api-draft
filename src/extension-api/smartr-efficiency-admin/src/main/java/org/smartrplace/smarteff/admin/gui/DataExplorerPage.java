@@ -14,9 +14,9 @@ import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil.AccessType;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.extended.WidgetData;
-import de.iwes.widgets.api.extended.plus.InitWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -71,7 +71,14 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 	
 	@Override
 	public void addWidgetsAboveTable() {
-		loggedIn = new LoginInitSingleEmpty(page, "loggedIn", app);
+		loggedIn = new LoginInitSingleEmpty(page, "loggedIn") {
+			private static final long serialVersionUID = 6446396416992821986L;
+
+			@Override
+			protected List<SmartEffUserDataNonEdit> getUsers(OgemaHttpRequest req) {
+				return app.appConfigData.userDataNonEdit().getAllElements();
+			}
+		};
 		page.append(loggedIn);
 		TemplateInitSingleEmpty<SmartrEffExtResourceTypeData> init = new TemplateInitSingleEmpty<SmartrEffExtResourceTypeData>(page, "init", false) {
 			private static final long serialVersionUID = 1L;
@@ -84,16 +91,17 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 				return null;
 			}
 			@Override
-			public void updateDependentWidgets(OgemaHttpRequest req) {
+			public void init(OgemaHttpRequest req) {
 				Collection<SmartrEffExtResourceTypeData> items = app.resourceTypes.values();
 				selectProvider.update(items , req);
 				SmartrEffExtResourceTypeData eval = getSelectedItem(req);
 				selectProvider.selectItem(eval, req);
+				System.out.println("Data Explorer: Finished init");
 			}
 		};
 		page.append(init);
 		
-		Header header = new Header(page, "header", "Data Type Overview");
+		Header header = new Header(page, "header", "Data Explorer");
 		header.addDefaultStyle(WidgetData.TEXT_ALIGNMENT_LEFT);
 		page.append(header);
 		
@@ -113,8 +121,12 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 	@Override
 	public Collection<SmartEffExtensionResourceType> getObjectsInTable(OgemaHttpRequest req) {
 		SmartrEffExtResourceTypeData item = selectProvider.getSelectedItem(req);
+		if(item == null) throw new IllegalStateException("Widget dependencies not processed correctly!");
+		System.out.println("Item:"+item.resType.getName());
+		System.out.println("loggedIn:"+loggedIn);
+		List<? extends SmartEffExtensionResourceType> list1 = getAllResourcesToAccess(item.resType, loggedIn.getSelectedItem(req));
 		@SuppressWarnings("unchecked")
-		List<SmartEffExtensionResourceType> result = (List<SmartEffExtensionResourceType>) getAllResourcesToAccess(item.resType, loggedIn.getSelectedItem(req)); 
+		List<SmartEffExtensionResourceType> result = (List<SmartEffExtensionResourceType>)list1 ; 
 		return result;
 	}
 
@@ -141,11 +153,16 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 			};
 			row.addCell("Delete", deleteButton);
 		}
-		
 	}
 	
 	@Override
 	public Resource getResource(SmartEffExtensionResourceType object, OgemaHttpRequest req) {
 		return null;
+	}
+	
+	@Override
+	public String getLineId(SmartEffExtensionResourceType object) {
+		String name = WidgetHelper.getValidWidgetId(ResourceUtils.getHumanReadableName(object));
+		return name + super.getLineId(object);
 	}
 }
