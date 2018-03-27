@@ -6,6 +6,7 @@ import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionDoneListener;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
+import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 
@@ -21,7 +22,7 @@ public interface NavigationGUIProvider extends ExtensionCapability {
 	 * 		accessible. This information should be handed over here.
 	 * @param appManMin
 	 */
-	void initPage(final ExtensionNavigationPage page, ExtensionResourceType generalData);
+	void initPage(final ExtensionNavigationPage<?> page, ExtensionResourceType generalData);
 	
 	/** For each new session the relevant user data is provided with this method
 	 * 
@@ -34,7 +35,7 @@ public interface NavigationGUIProvider extends ExtensionCapability {
 	 *		 shall be notified to the main domain app so that it can activate resources etc. 
 	 */
 	void setUserData(int entryTypeIdx, List<ExtensionResourceType> entryResources, ExtensionResourceType userData,
-			ExtensionResourceType userDataNonEdit,
+			ExtensionUserDataNonEdit userDataNonEdit,
 			ExtensionDoneListener<ExtensionResourceType> listener, OgemaHttpRequest req);	
 	
 	public static interface EntryType {

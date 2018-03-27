@@ -15,6 +15,7 @@ import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionDoneListener;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
+import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 
@@ -51,7 +52,7 @@ public class BaseDataService implements SmartEffExtensionService {
 		
 	};
 	public final static NavigationGUIProvider BUILDING_NAVI_PROVIDER = new NavigationGUIProvider() {
-		private ExtensionResourceType generalData;
+		//private ExtensionResourceType generalData;
 		
 		@Override
 		public String label(OgemaLocale locale) {
@@ -59,16 +60,16 @@ public class BaseDataService implements SmartEffExtensionService {
 		}
 
 		@Override
-		public void initPage(ExtensionNavigationPage page, ExtensionResourceType generalData) {
+		public void initPage(ExtensionNavigationPage<?> page, ExtensionResourceType generalData) {
 			// TODO Auto-generated method stub
-			this.generalData = generalData;
+			//this.generalData = generalData;
 			Label test = new Label(page.page, "test", "Hello World!");
 			page.page.append(test);
 		}
 
 		@Override
 		public void setUserData(int entryTypeIdx, List<ExtensionResourceType> entryResources,
-				ExtensionResourceType userData, ExtensionResourceType userDataNonEdit,
+				ExtensionResourceType userData, ExtensionUserDataNonEdit userDataNonEdit,
 				ExtensionDoneListener<ExtensionResourceType> listener, OgemaHttpRequest req) {
 			// TODO Auto-generated method stub
 			

@@ -41,7 +41,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 	private final SpEffAdminController app;
 	
 	ValueResourceTextField<TimeResource> updateInterval;
-	private LoginInitSingleEmpty loggedIn;
+	private LoginInitSingleEmpty<SmartEffUserDataNonEdit> loggedIn;
 	private TemplateDropdown<SmartrEffExtResourceTypeData> selectProvider;
 
 	public DataExplorerPage(final WidgetPage<?> page, final SpEffAdminController app,
@@ -71,7 +71,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 	
 	@Override
 	public void addWidgetsAboveTable() {
-		loggedIn = new LoginInitSingleEmpty(page, "loggedIn") {
+		loggedIn = new LoginInitSingleEmpty<SmartEffUserDataNonEdit>(page, "loggedIn") {
 			private static final long serialVersionUID = 6446396416992821986L;
 
 			@Override

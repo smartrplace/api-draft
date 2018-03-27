@@ -8,17 +8,17 @@ import org.ogema.accesscontrol.Constants;
 import org.ogema.accesscontrol.SessionAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartrplace.smarteff.admin.SpEffAdminApp;
+import org.smartrplace.extensionservice.ExtensionService;
+import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
-import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
-public abstract class LoginInitSingleEmpty extends ObjectInitSingleEmpty<SmartEffUserDataNonEdit> {
-	protected abstract List<SmartEffUserDataNonEdit> getUsers(OgemaHttpRequest req);
+public abstract class LoginInitSingleEmpty<T extends ExtensionUserDataNonEdit> extends ObjectInitSingleEmpty<T> {
+	protected abstract List<T> getUsers(OgemaHttpRequest req);
 	
 	private static final long serialVersionUID = 1L;
-	protected final static Logger logger = LoggerFactory.getLogger(SpEffAdminApp.class);
+	protected final static Logger logger = LoggerFactory.getLogger(ExtensionService.class);
 	
 	public LoginInitSingleEmpty(WidgetPage<?> page, String id) {
 		super(page, id);
@@ -31,7 +31,7 @@ public abstract class LoginInitSingleEmpty extends ObjectInitSingleEmpty<SmartEf
         final String user = sauth.getName();
         // FIXME
         logger.debug("Page visited by user {}",user);
-        for(SmartEffUserDataNonEdit userNE: getUsers(req)) {
+        for(T userNE: getUsers(req)) {
         	if(userNE.ogemaUserName().getValue().equals(user)) {
         		getData(req).selectItem(userNE);
         		return;

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ogema.tools.resource.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
@@ -18,12 +17,14 @@ import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.EntryType;
 import org.smartrplace.smarteff.admin.SpEffAdminApp;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
-import org.smartrplace.smarteff.admin.gui.DataExplorerPage;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData.ServiceCapabilities;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
+import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class GUIPageAdministation {
 	public List<NavigationPageData> startPages = new ArrayList<>();
@@ -40,10 +41,30 @@ public class GUIPageAdministation {
 	
 	public void registerService(SmartEffExtensionService service) {
     	ServiceCapabilities caps = SmartrEffExtResourceTypeData.getServiceCaps(service);
-    	for(NavigationGUIProvider navi: caps.naviProviders) {		
-    		String url = ResourceUtils.getValidResourceName(SmartrEffUtil.buildId(navi))+".html";
+    	for(NavigationGUIProvider navi: caps.naviProviders) {
+    		String id = WidgetHelper.getValidWidgetId(SmartrEffUtil.buildId(navi));
+    		String url = WidgetHelper.getValidWidgetId(SmartrEffUtil.buildId(navi))+".html";
     		WidgetPage<?> page = app.widgetApp.createWidgetPage(url);
-    		ExtensionNavigationPage dataExPage = new ExtensionNavigationPage(page, url, "dataExplorer.html");
+    		
+  			ExtensionNavigationPage<SmartEffUserDataNonEdit> dataExPage = new ExtensionNavigationPage<SmartEffUserDataNonEdit>(page, url, "dataExplorer.html",
+					id) {
+
+				@Override
+				protected List<SmartEffUserDataNonEdit> getUsers(OgemaHttpRequest req) {
+					return app.appConfigData.userDataNonEdit().getAllElements();
+				}
+				@Override
+				protected void init(OgemaHttpRequest req) {
+					if(navi.getEntryType() == null) {
+						SmartEffUserDataNonEdit userDataNonEdit = loggedIn.getSelectedItem(req);
+						NavigationPageCallback listener = new NavigationPageCallback();
+						navi.setUserData(-1, null, userDataNonEdit.editableData(),
+								userDataNonEdit, listener, req);						
+					} else {
+						
+					}
+				}
+			};
     		navi.initPage(dataExPage, app.appConfigData.generalData());
     		
     		NavigationPageData data = new NavigationPageData(navi, service, url, dataExPage);
