@@ -1,5 +1,6 @@
 package de.smartrplace.app.heatcontrol.overview.gui;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.ValueFormat;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.widgets.api.extended.WidgetData;
@@ -29,6 +31,7 @@ import de.iwes.widgets.html.form.checkbox.SimpleCheckbox;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
+import de.smartrplace.app.heatcontrol.common.util.RoomDataUtil;
 import de.smartrplace.app.heatcontrol.overview.HeatControlOverviewController;
 import de.smartrplace.app.heatcontrol.overview.config.GlobalHeatcontrolOverviewData;
 import de.smartrplace.app.heatcontrol.overview.config.HeatcontrolOverviewData;
@@ -88,7 +91,7 @@ public class MainPage extends ObjectGUITablePage<HeatControlExtRoomData, Room>{
 	}
 	
 	@Override
-	public List<HeatControlExtRoomData> getObjectsInTable(OgemaHttpRequest req) {
+	public Collection<HeatControlExtRoomData> getObjectsInTable(OgemaHttpRequest req) {
 		List<HeatControlExtRoomData> providers = heatExtPoint.getRoomsControlled(); 
 		return providers;
 	}
@@ -100,7 +103,7 @@ public class MainPage extends ObjectGUITablePage<HeatControlExtRoomData, Room>{
 		String roomName = ResourceUtils.getHumanReadableShortName(object.getRoom());
 		if(configRes != null) id = roomName + id;
 		Label sl = vh.stringLabel("Room name", id, roomName, row);
-//if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
 if(sl != null) System.out.println("Room name "+ResourceUtils.getHumanReadableShortName(object.getRoom())+" in "+sl.getId());
 else System.out.println("Room name for "+id);
 		if(object.getThermostats() != null) {
@@ -113,7 +116,7 @@ else System.out.println("Room name for "+id);
 if(sl != null) System.out.println("Therm/TH/Win "+text+" in "+sl.getId());
 else System.out.println("Therm/TH/Win for "+id);
 	
-			/*String columnId = ResourceUtils.getValidResourceName("T/Setp/Valve/H/Open/Motion/Manu");
+			String columnId = ResourceUtils.getValidResourceName("T/Setp/Valve/H/Open/Motion/Manu");
 			String widgetId = columnId + id;
 			Label dataLabel = new Label(vh.getParent(), widgetId, req) {
 				private static final long serialVersionUID = 4515005761380513466L;
@@ -133,16 +136,16 @@ else System.out.println("Therm/TH/Win for "+id);
 			};
 			if(myGlobalData.updateRate().getValue() > 0)
 				dataLabel.setPollingInterval(myGlobalData.updateRate().getValue(), req);
-			row.addCell(columnId, dataLabel);*/
+			row.addCell(columnId, dataLabel);
 		} else {
 			vh.registerHeaderEntry("Therm/TH/Win");
-			//vh.registerHeaderEntry("T/Setp/Valve/H/Open/Motion/Manu");
+			vh.registerHeaderEntry("T/Setp/Valve/H/Open/Motion/Manu");
 		}
 		if(configRes != null)
 			vh.floatEdit("Comfort Temp.", id, configRes.comfortTemperature(), row, alert, MIN_COMFORT_TEMP, MAX_COMFORT_TEMP, "Value not allowed");
 		else
 			vh.registerHeaderEntry("Comfort Temp.");
-		/*new ServiceValueEdit("At-Thermostat Duration", id, row, alert, 0, 99999, "Value not allowed", vh) {
+		new ServiceValueEdit("At-Thermostat Duration", id, row, alert, 0, 99999, "Value not allowed", vh) {
 
 			@Override
 			protected String getValue(OgemaHttpRequest req) {
@@ -153,7 +156,7 @@ else System.out.println("Therm/TH/Win for "+id);
 			protected void setValue(float value, OgemaHttpRequest req) {
 				object.setAtThermostatManualSettingDuration((long) (value*60000));
 			}
-		};*/
+		};
 		
 		if(object.getThermostats() != null) {
 			boolean hasManualModeControl = false;

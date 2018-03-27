@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
@@ -21,13 +20,13 @@ import de.iwes.widgets.html.form.label.Header;
 /**
  * An HTML page, generated from the Java code.
  */
-public class MainPage {
+public class ServicePage {
 	
 	private final DynamicTable<SmartEffExtensionService> table;
 
-	public MainPage(final WidgetPage<?> page, final SpEffAdminController app) {
+	public ServicePage(final WidgetPage<?> page, final SpEffAdminController app) {
 		
-		Header header = new Header(page, "header", "Extension Service Overview");
+		Header header = new Header(page, "header", "Efficiency Planning Extension Modules");
 		header.addDefaultStyle(WidgetData.TEXT_ALIGNMENT_LEFT);
 		page.append(header);
 		
@@ -48,7 +47,7 @@ public class MainPage {
 			public Row addRow(SmartEffExtensionService eval, OgemaHttpRequest req) {
 				Row row = new Row();
 				String lineId = getLineId(eval);
-				row.addCell("name", SmartrEffUtil.buildId(eval));
+				row.addCell("name", eval.id());
 				//row.addCell("description", eval.description(OgemaLocale.ENGLISH));
 				TemplateRedirectButton<SmartEffExtensionService> detailPageButton = new TemplateRedirectButton<SmartEffExtensionService>(
 						table, "detailPageButton"+lineId, "Details", "", req) {
@@ -73,13 +72,14 @@ public class MainPage {
 
 			@Override
 			public String getLineId(SmartEffExtensionService object) {
-				return ResourceUtils.getValidResourceName(SmartrEffUtil.buildId(object));
+				return SmartrEffUtil.buildId(object);
 			}
 
 			@Override
 			public Map<String, Object> getHeader() {
 				final Map<String, Object> header = new LinkedHashMap<>();
 				header.put("name", "Name/ID");
+				//header.put("description", "Description");
 				header.put("detailPageButton", "Open Detail Page");
 				return header;
 			}

@@ -27,6 +27,10 @@ public interface BuildingData extends SmartEffExtensionResourceType {
 	/** Only shown when unit type is not SFH*/
 	IntegerResource numberOfUnitsInBuilding();
 	
+	/**Number of rooms in building or unit*/
+	IntegerResource roomNum();
+
+	
 	/**Usually only country and postal code is used*/
 	LocationExtended address();
 	

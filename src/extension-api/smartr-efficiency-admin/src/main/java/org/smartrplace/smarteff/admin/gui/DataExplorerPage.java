@@ -1,0 +1,151 @@
+package org.smartrplace.smarteff.admin.gui;
+
+import java.util.Collection;
+import java.util.List;
+
+import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.TimeResource;
+import org.ogema.tools.resource.util.ResourceUtils;
+import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.smarteff.admin.SpEffAdminController;
+import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
+import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
+import org.smartrplace.smarteff.admin.util.SmartrEffUtil.AccessType;
+import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
+import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+
+import de.iwes.widgets.api.extended.WidgetData;
+import de.iwes.widgets.api.extended.plus.InitWidget;
+import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
+import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.button.Button;
+import de.iwes.widgets.html.form.button.TemplateInitSingleEmpty;
+import de.iwes.widgets.html.form.dropdown.TemplateDropdown;
+import de.iwes.widgets.html.form.label.Header;
+import de.iwes.widgets.object.widget.init.LoginInitSingleEmpty;
+import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
+import de.iwes.widgets.template.DefaultDisplayTemplate;
+import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
+
+/**
+ * An HTML page, generated from the Java code.
+ */
+public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResourceType, Resource> {
+	public static final float MIN_COMFORT_TEMP = 4;
+	public static final float MAX_COMFORT_TEMP = 30;
+	public static final float DEFAULT_COMFORT_TEMP = 21;
+	
+	private final SpEffAdminController app;
+	
+	ValueResourceTextField<TimeResource> updateInterval;
+	private LoginInitSingleEmpty loggedIn;
+	private TemplateDropdown<SmartrEffExtResourceTypeData> selectProvider;
+
+	public DataExplorerPage(final WidgetPage<?> page, final SpEffAdminController app,
+			SmartEffExtensionResourceType initData) {
+		super(page, app.appMan, initData);
+		this.app = app;
+	}
+	
+	private <T extends SmartEffExtensionResourceType> List<T> getNonEditResourcesToAccess(Class<T> type, SmartEffUserDataNonEdit userData) {
+		List<T> result = userData.getSubResources(type, true);
+		return result ;
+	}
+	private <T extends SmartEffExtensionResourceType> List<T> getEditableResourcesToAccess(Class<T> type, SmartEffUserDataNonEdit userData) {
+		List<T> result = userData.editableData().getSubResources(type, true);
+		return result ;
+	}
+	private <T extends SmartEffExtensionResourceType> List<T> getPublicResources(Class<T> type) {
+		List<T> result = app.appConfigData.generalData().getSubResources(type, true);
+		return result ;
+	}
+	private <T extends SmartEffExtensionResourceType> List<T> getAllResourcesToAccess(Class<T> type, SmartEffUserDataNonEdit userData) {
+		List<T> result = getEditableResourcesToAccess(type, userData);
+		result.addAll(getNonEditResourcesToAccess(type, userData));
+		result.addAll(getPublicResources(type));
+		return result ;
+	}
+	
+	@Override
+	public void addWidgetsAboveTable() {
+		loggedIn = new LoginInitSingleEmpty(page, "loggedIn", app);
+		page.append(loggedIn);
+		TemplateInitSingleEmpty<SmartrEffExtResourceTypeData> init = new TemplateInitSingleEmpty<SmartrEffExtResourceTypeData>(page, "init", false) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected SmartrEffExtResourceTypeData getItemById(String configId) {
+				for(SmartrEffExtResourceTypeData eval: app.resourceTypes.values()) {
+					if(ResourceUtils.getValidResourceName(eval.resType.getName()).equals(configId)) return eval;
+				}
+				return null;
+			}
+			@Override
+			public void updateDependentWidgets(OgemaHttpRequest req) {
+				Collection<SmartrEffExtResourceTypeData> items = app.resourceTypes.values();
+				selectProvider.update(items , req);
+				SmartrEffExtResourceTypeData eval = getSelectedItem(req);
+				selectProvider.selectItem(eval, req);
+			}
+		};
+		page.append(init);
+		
+		Header header = new Header(page, "header", "Data Type Overview");
+		header.addDefaultStyle(WidgetData.TEXT_ALIGNMENT_LEFT);
+		page.append(header);
+		
+		selectProvider = new  TemplateDropdown<SmartrEffExtResourceTypeData>(page, "selectProvider");
+		selectProvider.setTemplate(new DefaultDisplayTemplate<SmartrEffExtResourceTypeData>() {
+			@Override
+			public String getLabel(SmartrEffExtResourceTypeData object, OgemaLocale locale) {
+				return object.typeDeclaration.resourceName();
+			}
+			
+		});
+		page.append(selectProvider);
+		init.triggerOnPOST(selectProvider);
+		selectProvider.triggerOnPOST(mainTable);
+	}
+	
+	@Override
+	public Collection<SmartEffExtensionResourceType> getObjectsInTable(OgemaHttpRequest req) {
+		SmartrEffExtResourceTypeData item = selectProvider.getSelectedItem(req);
+		@SuppressWarnings("unchecked")
+		List<SmartEffExtensionResourceType> result = (List<SmartEffExtensionResourceType>) getAllResourcesToAccess(item.resType, loggedIn.getSelectedItem(req)); 
+		return result;
+	}
+
+	@Override
+	public void addWidgets(SmartEffExtensionResourceType object, ObjectResourceGUIHelper<SmartEffExtensionResourceType, Resource> vh,
+			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
+		//if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+		vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
+		vh.stringLabel("Elements", id, ""+object.getSubResources(false).size(), row);
+		vh.linkingButton("Export", id, object, row, "Export", "export.html");
+		vh.linkingButton("View", id, object, row, "Export", "view.html");
+		vh.linkingButton("Evaluate", id, object, row, "Export", "evaluate.html");
+		if(!(SmartrEffUtil.getAccessType(object) == AccessType.READWRITE)) {
+			vh.stringLabel("Edit", id, "--", row);
+			vh.stringLabel("Delete", id, "--", row);
+		} else {
+			vh.linkingButton("Edit", id, object, row, "", "edit.html");
+			Button deleteButton = new Button(vh.getParent(), "Delete", "Delete", req) {
+				private static final long serialVersionUID = -6168031482180238199L;
+				@Override
+				public void onPOSTComplete(String data, OgemaHttpRequest req) {
+					app.removeResource(object);
+				}
+			};
+			row.addCell("Delete", deleteButton);
+		}
+		
+	}
+	
+	@Override
+	public Resource getResource(SmartEffExtensionResourceType object, OgemaHttpRequest req) {
+		return null;
+	}
+}

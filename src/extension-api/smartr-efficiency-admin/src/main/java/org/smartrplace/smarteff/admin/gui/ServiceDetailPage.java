@@ -20,11 +20,11 @@ import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.template.DisplayTemplate;
 
-public class DetailPage {
+public class ServiceDetailPage {
 	private final SpEffAdminController controller;
 	final TemplateDropdown<SmartEffExtensionService> selectProvider;
 	
-	public DetailPage(final WidgetPage<?> page, final SpEffAdminController app) {
+	public ServiceDetailPage(final WidgetPage<?> page, final SpEffAdminController app) {
 		this.controller = app;
 		
 		TemplateInitSingleEmpty<SmartEffExtensionService> init = new TemplateInitSingleEmpty<SmartEffExtensionService>(page, "init", false) {
