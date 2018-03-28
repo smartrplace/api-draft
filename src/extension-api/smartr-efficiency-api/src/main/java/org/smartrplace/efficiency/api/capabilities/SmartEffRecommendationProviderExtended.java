@@ -1,13 +1,11 @@
 package org.smartrplace.efficiency.api.capabilities;
 
-import org.ogema.core.model.Resource;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
-
-import de.iwes.timeseries.eval.api.extended.MultiResult;
 
 /** To be provided as OSGi service
   * */
-public interface RecommendationProviderExtended extends RecommendationProvider {
+@Deprecated
+public interface SmartEffRecommendationProviderExtended extends SmartEffRecommendationProvider {
 	/* Missing options:
 	 * - Possibility to add to recommendation input definition DataProviders / JAXB data 
 	 * - There should be a way to store recommendations persistently. In resources or json files
@@ -40,5 +38,5 @@ public interface RecommendationProviderExtended extends RecommendationProvider {
 	 */
 	public SmartEffExtensionResourceType getRecommendationData2();
 	/** This is not really a MultiResult, but this could work with json persistence*/
-	public MultiResult<Resource> getRecommendationData3();
+	//public MultiResult<Resource> getRecommendationData3();
 }

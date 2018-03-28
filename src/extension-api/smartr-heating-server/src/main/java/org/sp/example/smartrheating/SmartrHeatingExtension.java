@@ -9,9 +9,9 @@ import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application.AppStopReason;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
-import org.smartrplace.extensionservice.ApplicationManagerMinimal;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
+import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 
 import extensionmodel.smarteff.api.base.BuildingData;
 

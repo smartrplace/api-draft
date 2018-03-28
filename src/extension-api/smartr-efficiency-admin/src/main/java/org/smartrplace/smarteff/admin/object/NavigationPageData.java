@@ -1,6 +1,7 @@
 package org.smartrplace.smarteff.admin.object;
 
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 
@@ -10,10 +11,10 @@ public class NavigationPageData {
 	public final NavigationGUIProvider provider;
 	public final SmartEffExtensionService parent;
 	public final String url;
-	public final ExtensionNavigationPage<SmartEffUserDataNonEdit> dataExPage;
+	public final ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> dataExPage;
 	
 	public NavigationPageData(NavigationGUIProvider provider, SmartEffExtensionService parent, String url,
-			final ExtensionNavigationPage<SmartEffUserDataNonEdit> dataExPage) {
+			final ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> dataExPage) {
 		this.provider = provider;
 		this.parent = parent;
 		this.url = url;

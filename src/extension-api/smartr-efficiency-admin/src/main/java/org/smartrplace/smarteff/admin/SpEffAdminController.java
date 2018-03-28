@@ -10,14 +10,18 @@ import org.ogema.core.logging.OgemaLogger;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
-import org.smartrplace.extensionservice.gui.DataEntryProvider;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.config.SmartEffAdminData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
+import org.smartrplace.smarteff.admin.util.ConfigIdAdministration;
 import org.smartrplace.smarteff.admin.util.GUIPageAdministation;
+import org.smartrplace.smarteff.admin.util.ResourceLockAdministration;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
+import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetApp;
+import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 import extensionmodel.smarteff.api.base.SmartEffUserData;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
@@ -33,6 +37,18 @@ public class SpEffAdminController {
 	public Set<SmartEffExtensionService> servicesKnown = new HashSet<>();
 	public Map<Class<? extends SmartEffExtensionResourceType>, SmartrEffExtResourceTypeData> resourceTypes = new HashMap<>();
 	public final GUIPageAdministation guiPageAdmin;
+
+	public ResourceLockAdministration lockAdmin = new ResourceLockAdministration();
+	public ConfigIdAdministration configIdAdmin = new ConfigIdAdministration();
+
+	public final ApplicationManagerMinimal appManMin = new ApplicationManagerMinimal() {
+		
+		@Override
+		public long getFrameworkTime() {
+			if(appMan != null) return appMan.getFrameworkTime();
+			return -1;
+		}
+	};
 	
     public SpEffAdminController(ApplicationManager appMan,SpEffAdminApp evaluationOCApp, final WidgetApp widgetApp) {
 		this.appMan = appMan;
@@ -76,6 +92,7 @@ public class SpEffAdminController {
     		} else data.addParent(service);
     	}
     	guiPageAdmin.registerService(service);
+    	service.start(appManMin );
     }
     
     public void unregisterService(SmartEffExtensionService service) {
@@ -97,10 +114,10 @@ public class SpEffAdminController {
 
 	/** Here the action is performed without checking user permissions*/
 	public <T extends SmartEffExtensionResourceType> T addResource(SmartEffExtensionResourceType parent,
-			String name, Class<T> type, SmartEffUserDataNonEdit userData, DataEntryProvider<T> entryProvider) {
+			String name, Class<T> type, SmartEffUserDataNonEdit userData, NavigationGUIProvider entryProvider) {
 		T result = parent.getSubResource(name, type);
 		result.create();
-		entryProvider.initResource(result);
+		//entryProvider.initResource(result);
 		SmartrEffExtResourceTypeData rtd = resourceTypes.get(type);
 		rtd.registerElement(result);
 		return result;
@@ -128,5 +145,9 @@ public class SpEffAdminController {
 			userData.activate(true);
 			data.activate(true);
 		}
+	}
+
+	public NavigationMenu getNavigationMenu() {
+		return serviceAccess.menu;
 	}
 }

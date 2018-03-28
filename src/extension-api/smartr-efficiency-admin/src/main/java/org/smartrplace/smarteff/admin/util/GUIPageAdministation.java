@@ -11,24 +11,30 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.EntryType;
+import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.SpEffAdminApp;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData.ServiceCapabilities;
+import org.smartrplace.smarteff.admin.util.ConfigIdAdministration.ConfigInfo;
 import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.navigation.MenuConfiguration;
+import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class GUIPageAdministation {
 	public List<NavigationPageData> startPages = new ArrayList<>();
-	public Map<Class<? extends ExtensionResourceType>, List<NavigationPageData>> navigationPages = new HashMap<>();
+	public List<NavigationPageData> navigationPages = new ArrayList<>();
+	public Map<Class<? extends ExtensionResourceType>, List<NavigationPublicPageData>> navigationPublicData = new HashMap<>();
 	private final SpEffAdminController app;
 	
 	public GUIPageAdministation(SpEffAdminController app) {
@@ -45,8 +51,11 @@ public class GUIPageAdministation {
     		String id = WidgetHelper.getValidWidgetId(SmartrEffUtil.buildId(navi));
     		String url = WidgetHelper.getValidWidgetId(SmartrEffUtil.buildId(navi))+".html";
     		WidgetPage<?> page = app.widgetApp.createWidgetPage(url);
-    		
-  			ExtensionNavigationPage<SmartEffUserDataNonEdit> dataExPage = new ExtensionNavigationPage<SmartEffUserDataNonEdit>(page, url, "dataExplorer.html",
+    		NavigationMenu menu = app.getNavigationMenu();
+    		MenuConfiguration mc = page.getMenuConfiguration();
+    		mc.setCustomNavigation(menu);
+  		
+  			ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> dataExPage = new ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>(page, url, "dataExplorer.html",
 					id) {
 
 				@Override
@@ -54,28 +63,39 @@ public class GUIPageAdministation {
 					return app.appConfigData.userDataNonEdit().getAllElements();
 				}
 				@Override
-				protected void init(OgemaHttpRequest req) {
-					if(navi.getEntryType() == null) {
-						SmartEffUserDataNonEdit userDataNonEdit = loggedIn.getSelectedItem(req);
-						NavigationPageCallback listener = new NavigationPageCallback();
-						navi.setUserData(-1, null, userDataNonEdit.editableData(),
-								userDataNonEdit, listener, req);						
+				protected ExtensionResourceAccessInitData getItemById(String configId, OgemaHttpRequest req) {
+					SmartEffUserDataNonEdit userDataNonEdit = loggedIn.getSelectedItem(req);
+					NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
+							navi.label(req.getLocale()),
+							navigationPublicData, app.lockAdmin, app.configIdAdmin);
+					if(navi.getEntryType() == null || configId == null) {
+						ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
+								userDataNonEdit.editableData(), userDataNonEdit, systemAccess);
+						return result;
 					} else {
-						
+						ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
+						ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(c.entryIdx,
+								c.entryResources,
+								userDataNonEdit.editableData(), userDataNonEdit, systemAccess);
+						return result;
 					}
 				}
 			};
-    		navi.initPage(dataExPage, app.appConfigData.generalData());
+    		navi.initPage(dataExPage, app.appConfigData.generalData(), app.appManMin);
     		
     		NavigationPageData data = new NavigationPageData(navi, service, url, dataExPage);
 			if(navi.getEntryType() == null) startPages.add(data);
-			else for(EntryType t: navi.getEntryType()) {
-				List<NavigationPageData> list = navigationPages.get(t.getType());
-				if(list == null) {
-					list = new ArrayList<>();
-					navigationPages.put(t.getType(), list);
+			else {
+				navigationPages.add(data);
+				for(EntryType t: navi.getEntryType()) {
+					List<NavigationPublicPageData> listPub = navigationPublicData.get(t.getType());
+					if(listPub == null) {
+						listPub = new ArrayList<>();
+						navigationPublicData.put(t.getType(), listPub);
+					}
+					NavigationPublicPageData dataPub = new NavigationPublicPageDataImpl(data);
+					listPub.add(dataPub);
 				}
-				list.add(data);
 			}
     	}
     	
@@ -89,22 +109,23 @@ public class GUIPageAdministation {
     		if(SmartrEffUtil.buildId(navi.parent).equals(serviceId)) toRemove.add(navi);
     	}
     	startPages.removeAll(toRemove);
+    	navigationPages.removeAll(toRemove);
     	for(NavigationGUIProvider navi: caps.naviProviders) {
     		String naviId = SmartrEffUtil.buildId(navi);
  			if(navi.getEntryType() == null) continue;
 			else for(EntryType t: navi.getEntryType()) {
-				List<NavigationPageData> list = navigationPages.get(t.getType());
-				if(list == null) {
-					logger.error("Navigationpages have no entry for "+t.getType().getName()+" when deregistering "+serviceId);
+				List<NavigationPublicPageData> listPub = navigationPublicData.get(t.getType());
+				if(listPub == null) {
+					logger.error("Navigation Public pages have no entry for "+t.getType().getName()+" when deregistering "+serviceId);
 					continue;
 				}
-				for(NavigationPageData l:list) {
-					if(SmartrEffUtil.buildId(l.provider).equals(naviId)) {
-						list.remove(l);
+				for(NavigationPublicPageData l:listPub) {
+					if(l.id().equals(naviId)) {
+						listPub.remove(l);
 						break;
 					}
 				}
-				if(list.isEmpty()) navigationPages.remove(t.getType());
+				if(listPub.isEmpty()) navigationPublicData.remove(t.getType());
 			}
     		
     	}
@@ -113,7 +134,7 @@ public class GUIPageAdministation {
 	public Collection<NavigationPageData> getAllProviders() {
 		 Set<NavigationPageData> result = new HashSet<>();
 		 result.addAll(startPages);
-		 for(List<NavigationPageData> navi: navigationPages.values()) result.addAll(navi);
+		 result.addAll(navigationPages);
 		 return result;
 	}
 }

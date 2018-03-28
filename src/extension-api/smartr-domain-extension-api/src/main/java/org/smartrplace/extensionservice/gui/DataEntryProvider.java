@@ -1,7 +1,7 @@
 package org.smartrplace.extensionservice.gui;
 
+import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
 import org.smartrplace.extensionservice.ExtensionCapability;
-import org.smartrplace.extensionservice.ExtensionDoneListener;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -13,6 +13,7 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
  * The main domain app must also provide a WidgetPage reference defining the URL. To open the
  * edit page for 
  */
+@Deprecated
 public interface DataEntryProvider<T extends ExtensionResourceType> extends ExtensionCapability {
 	
 	/** Initialize page for display and editing of a single instane of the resource type to be edited
@@ -51,7 +52,7 @@ public interface DataEntryProvider<T extends ExtensionResourceType> extends Exte
 	 *		 shall be notified to the main domain app so that it can activate resources etc. 
 	 */
 	void setUserData(ExtensionResourceType userData,
-			ExtensionDoneListener<T> listener, OgemaHttpRequest req);	
+			ExtensionPageSystemAccessForCreate listener, OgemaHttpRequest req);	
 	
 	/** When a resource is newly created or after restart of extension bundle (may be emulated by re-init every some hours)
 	 * this method is called on any destination resource before it is edited

@@ -21,6 +21,7 @@ import de.iwes.widgets.template.DisplayTemplate;
  * TODO: The Dropdown should not be mandatory part of the page. This could be replaced by other
  * visual elements in the future.
  */
+@Deprecated
 public abstract class ExtensionResourceEditPage<T extends Resource> {
 	protected abstract List<T> getOptionItems(OgemaHttpRequest req);
 	

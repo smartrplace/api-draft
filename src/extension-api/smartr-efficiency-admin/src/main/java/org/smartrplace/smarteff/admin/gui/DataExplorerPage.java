@@ -71,7 +71,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 	
 	@Override
 	public void addWidgetsAboveTable() {
-		loggedIn = new LoginInitSingleEmpty<SmartEffUserDataNonEdit>(page, "loggedIn") {
+		loggedIn = new LoginInitSingleEmpty<SmartEffUserDataNonEdit>(page, "loggedIn", true) {
 			private static final long serialVersionUID = 6446396416992821986L;
 
 			@Override
@@ -92,6 +92,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 			}
 			@Override
 			public void init(OgemaHttpRequest req) {
+				loggedIn.triggeredInit(req);
 				Collection<SmartrEffExtResourceTypeData> items = app.resourceTypes.values();
 				selectProvider.update(items , req);
 				SmartrEffExtResourceTypeData eval = getSelectedItem(req);
@@ -114,8 +115,11 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 			
 		});
 		page.append(selectProvider);
-		init.triggerOnPOST(selectProvider);
-		selectProvider.triggerOnPOST(mainTable);
+		//Note: Synchronization issues with triggerAction
+		//init.triggerOnPOST(selectProvider);
+		//selectProvider.triggerOnPOST(mainTable);
+		init.registerDependentWidget(selectProvider);
+		selectProvider.registerDependentWidget(mainTable);
 	}
 	
 	@Override

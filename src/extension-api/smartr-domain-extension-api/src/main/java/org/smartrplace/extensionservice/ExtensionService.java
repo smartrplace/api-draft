@@ -3,6 +3,7 @@ package org.smartrplace.extensionservice;
 import java.util.Collection;
 
 import org.ogema.core.application.Application.AppStopReason;
+import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 
 /** To be registered as OSGi service by the extension module. Replacement for the Application service
  * registered by normal OGEMA applications.

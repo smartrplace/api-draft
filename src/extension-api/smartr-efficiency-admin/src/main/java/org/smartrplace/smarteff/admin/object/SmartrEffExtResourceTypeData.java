@@ -8,10 +8,10 @@ import java.util.Set;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
-import org.smartrplace.efficiency.api.capabilities.RecommendationProvider;
+import org.smartrplace.efficiency.api.capabilities.SmartEffRecommendationProvider;
+import org.smartrplace.extenservice.proposal.ProposalProvider;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
-import org.smartrplace.extensionservice.gui.DataEntryProvider;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
@@ -54,16 +54,16 @@ public class SmartrEffExtResourceTypeData {
 	}
 	
 	public static class ServiceCapabilities {
-		public final Set<DataEntryProvider<?>> entryProviders = new HashSet<>();
+		public final Set<ProposalProvider> proposalProviders = new HashSet<>();
 		public final Set<NavigationGUIProvider> naviProviders = new HashSet<>();
-		public final Set<RecommendationProvider> recommendationProviders = new HashSet<>();
+		public final Set<SmartEffRecommendationProvider> recommendationProviders = new HashSet<>();
 		public final Set<ExtensionCapability> otherProviders = new HashSet<>();
 	}
 	public static ServiceCapabilities getServiceCaps(SmartEffExtensionService service) {
 		ServiceCapabilities result = new ServiceCapabilities();
     	for(ExtensionCapability c: service.getCapabilities()) {
-    		if(c instanceof DataEntryProvider<?>) result.entryProviders.add((DataEntryProvider<?>) c);
-    		else if(c instanceof RecommendationProvider) result.recommendationProviders.add((RecommendationProvider) c);
+    		if(c instanceof ProposalProvider) result.proposalProviders.add((ProposalProvider) c);
+    		else if(c instanceof SmartEffRecommendationProvider) result.recommendationProviders.add((SmartEffRecommendationProvider) c);
     		else if(c instanceof NavigationGUIProvider) result.naviProviders.add((NavigationGUIProvider) c);
     		else result.otherProviders.add(c);
     	}

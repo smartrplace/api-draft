@@ -66,6 +66,7 @@ public class SpEffAdminApp implements Application {
 	public ResTypePage resTypePage;
 	public DataExplorerPage dataExPage;
 	public NaviOverviewPage naviPage;
+	public NavigationMenu menu;
 	
 	private final Map<String,SmartEffExtensionService> evaluationProviders = Collections.synchronizedMap(new LinkedHashMap<String,SmartEffExtensionService>());
 	public Map<String, SmartEffExtensionService> getEvaluations() {
@@ -102,7 +103,7 @@ public class SpEffAdminApp implements Application {
 		NavigationPageData navi = new NavigationPageData(BaseDataService.BUILDING_NAVI_PROVIDER, null, "", null);
 		naviPage = new NaviOverviewPage(page4, controller, navi);
 
-		NavigationMenu menu = new NavigationMenu("Select Page");
+		menu = new NavigationMenu("Select Page");
 		menu.addEntry("Services Overview Page", page);
 		menu.addEntry("Services Details Page", page1);
 		menu.addEntry("Data Types", page2);
@@ -136,6 +137,7 @@ public class SpEffAdminApp implements Application {
     }
     
     List<SmartEffExtensionService> providersToProcess = new CopyOnWriteArrayList<>();
+
     protected void addProvider(SmartEffExtensionService provider) {
     	evaluationProviders.put(SmartrEffUtil.buildId(provider), provider);
     	// Execute in main application thread

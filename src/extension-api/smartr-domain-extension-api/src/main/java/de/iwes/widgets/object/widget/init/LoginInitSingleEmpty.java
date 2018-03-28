@@ -20,12 +20,18 @@ public abstract class LoginInitSingleEmpty<T extends ExtensionUserDataNonEdit> e
 	private static final long serialVersionUID = 1L;
 	protected final static Logger logger = LoggerFactory.getLogger(ExtensionService.class);
 	
-	public LoginInitSingleEmpty(WidgetPage<?> page, String id) {
+	protected final boolean initExternal;
+	
+	public LoginInitSingleEmpty(WidgetPage<?> page, String id, boolean initExternal) {
 		super(page, id);
+		this.initExternal = initExternal;
 	}
 	
 	@Override
 	public void init(OgemaHttpRequest req) {
+		if(!initExternal) triggeredInit(req);
+	}
+	public void triggeredInit(OgemaHttpRequest req) {
         HttpSession session = req.getReq().getSession();
         SessionAuth sauth = (SessionAuth) session.getAttribute(Constants.AUTH_ATTRIBUTE_NAME);
         final String user = sauth.getName();

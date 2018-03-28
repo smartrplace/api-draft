@@ -3,31 +3,25 @@ package org.smartrplace.smarteff.defaultservice;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application.AppStopReason;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
-import org.smartrplace.extensionservice.ApplicationManagerMinimal;
 import org.smartrplace.extensionservice.ExtensionCapability;
-import org.smartrplace.extensionservice.ExtensionDoneListener;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
-import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
-import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
+import org.smartrplace.smarteff.defaultservice.BuildingTablePage.Provider;
+import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 
-import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
-import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
-import de.iwes.widgets.html.form.label.Label;
 import extensionmodel.smarteff.api.base.BuildingData;
 import extensionmodel.smarteff.api.base.SmartEffPriceData;
 
 @Service(SmartEffExtensionService.class)
 @Component
 public class BaseDataService implements SmartEffExtensionService {
+	//private ApplicationManagerMinimal appManMin;
+	
 	public final static ExtensionResourceTypeDeclaration<SmartEffExtensionResourceType> BUILDING_DATA = new ExtensionResourceTypeDeclaration<SmartEffExtensionResourceType>() {
 
 		@Override
@@ -51,7 +45,9 @@ public class BaseDataService implements SmartEffExtensionService {
 		}
 		
 	};
-	public final static NavigationGUIProvider BUILDING_NAVI_PROVIDER = new NavigationGUIProvider() {
+	public final static Provider BUILDING_NAVI_PROVIDER = new BuildingTablePage().provider;
+	/*@Deprecated
+	public final static NavigationGUIProvider BUILDING_NAVI_PROVIDER2 = new NavigationGUIProvider() {
 		//private ExtensionResourceType generalData;
 		
 		@Override
@@ -60,9 +56,12 @@ public class BaseDataService implements SmartEffExtensionService {
 		}
 
 		@Override
-		public void initPage(ExtensionNavigationPage<?> page, ExtensionResourceType generalData) {
+		public void initPage(ExtensionNavigationPage<?, ?> pageIn, ExtensionResourceType generalData) {
 			// TODO Auto-generated method stub
 			//this.generalData = generalData;
+			@SuppressWarnings("unchecked")
+			ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> page =
+				(ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>) pageIn;
 			Label test = new Label(page.page, "test", "Hello World!");
 			page.page.append(test);
 		}
@@ -70,7 +69,7 @@ public class BaseDataService implements SmartEffExtensionService {
 		@Override
 		public void setUserData(int entryTypeIdx, List<ExtensionResourceType> entryResources,
 				ExtensionResourceType userData, ExtensionUserDataNonEdit userDataNonEdit,
-				ExtensionDoneListener<ExtensionResourceType> listener, OgemaHttpRequest req) {
+				ExtensionPageSystemAccessForCreate listener, OgemaHttpRequest req) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -80,9 +79,7 @@ public class BaseDataService implements SmartEffExtensionService {
 			return null;
 		}
 		
-	};
-	
-	//private ApplicationManagerMinimal appManMin;
+	};*/
 	
 	@Override
 	public void start(ApplicationManagerMinimal appManMin) {

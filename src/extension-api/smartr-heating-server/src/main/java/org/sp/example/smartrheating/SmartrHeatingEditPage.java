@@ -1,35 +1,23 @@
 package org.sp.example.smartrheating;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
-import org.ogema.core.model.simple.IntegerResource;
-import org.smartrplace.extensionservice.ApplicationManagerMinimal;
-import org.smartrplace.extensionservice.ExtensionDoneListener;
 import org.smartrplace.extensionservice.ExtensionResourceType;
-import org.smartrplace.extensionservice.gui.DataEntryProvider;
-import org.smartrplace.extensionservice.gui.ExtensionResourceEditPage;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
+import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
 
-import de.iwes.util.resource.ValueResourceHelper;
-import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
-import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
-import de.iwes.widgets.html.form.label.Label;
 import extensionmodel.smarteff.api.base.SmartEffGeneralData;
 
 
 /**
  * An HTML page, generated from the Java code.
  */
-public class SmartrHeatingEditPage implements DataEntryProvider<SmartrHeatingData> { //extends ExtensionResourceEditPage<SmartrHeatingData>
+public class SmartrHeatingEditPage implements NavigationGUIProvider { //extends ExtensionResourceEditPage<SmartrHeatingData>
 	SmartEffGeneralData generalData = null;
 	
-	@Override
-	public String id() {
-		return SmartrHeatingEditPage.class.getSimpleName();
-	}
-
 	@Override
 	public String label(OgemaLocale locale) {
 		return "Edit SmartrHeating planning data";
@@ -40,11 +28,6 @@ public class SmartrHeatingEditPage implements DataEntryProvider<SmartrHeatingDat
 		return label(locale);
 	}
 
-	@Override
-	public Class<SmartrHeatingData> getResourceTypeToEdit() {
-		return SmartrHeatingData.class;
-	}
-	
 	ResourceGUIHelper<SmartrHeatingData> mh;
 	//final ResourceList<BuildingData> buildings;
 	
@@ -63,28 +46,14 @@ public class SmartrHeatingEditPage implements DataEntryProvider<SmartrHeatingDat
 	}*/
 
 	//public SmartrHeatingEditPage(final WidgetPage<?> page, ResourceList<BuildingData> buildings,
-	@Override
-	public void initPage(final ExtensionResourceEditPage<SmartrHeatingData> page, ExtensionResourceType generalData) {
+	//@Override
+	/*public void initPage(final ExtensionResourceEditPage<SmartrHeatingData> page, ExtensionResourceType generalData) {
 		//SmartrHeatingData data;data.typeOfThermostats()
 		this.generalData = (SmartEffGeneralData) generalData;
-		/*super(page, SmartrHeatingData.class, new LabelProvider<SmartrHeatingData>() {
-			@Override
-			public String getLabel(SmartrHeatingData item) {
-				return ResourceUtils.getHumanReadableName(item.getParent());
-			}
-		});
-		this.buildings = buildings;*/
+		this.buildings = buildings;
 		//TODO: allow to use ApplicationManagerMinimal
 		mh = new ResourceGUIHelper<SmartrHeatingData>(page.page, page.init, null, false);
 		
-		/*TemplateDropdown<BuildingData> buildingDrop = new TemplateDropdown<BuildingData>(page, "buildingDrop") {
-			private static final long serialVersionUID = 1L;
-			@Override
-			public void onPrePOST(String data, OgemaHttpRequest req) {
-				//TODO
-			}
-		};
-		buildingDrop.setTemplate(new DefaultDisplayTemplate<>());*/
 		
 		StaticTable table = new StaticTable(4, 4, new int[]{1,5,5,1});
 		int c = 0;
@@ -110,30 +79,25 @@ public class SmartrHeatingEditPage implements DataEntryProvider<SmartrHeatingDat
 		page.page.append(table);
 
 		page.finalize(table);
-	}
+	}*/
 
-	@Override
-	public boolean providesSingleEditPage() {
-		return true;
-	}
-
-	@Override
-	public boolean providesOverviewTable() {
-		return false;
-	}
-
-	@Override
-	public void setUserData(ExtensionResourceType parentOrReference,
-			ExtensionDoneListener<SmartrHeatingData> listener, OgemaHttpRequest req) {
-		//we get all we need via the init widget here. This would only be required when data of the user from
-		//other models is required, e.g. for an auto-complete
-		
-	}
-
-	@Override
+	/*@Override
 	public void initResource(SmartrHeatingData resourceToUpdateInit) {
 		ValueResourceHelper.setIfNew(resourceToUpdateInit.typeOfThermostats(), 1);		
-		ValueResourceHelper.setIfNew(resourceToUpdateInit.numberOfRooms(), generalData.standardRoomNum().getValue());
+		ValueResourceHelper.setIfNew(resourceToUpdateInit.numberOfRooms(), generalData.defaultBuildingData().roomNum().getValue());
 		//TODO: add others
+	}*/
+
+	@Override
+	public List<EntryType> getEntryType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void initPage(ExtensionNavigationPage<?, ?> page, ExtensionResourceType generalData,
+			ApplicationManagerMinimal appManMin) {
+		// TODO Auto-generated method stub
+		
 	}
 }

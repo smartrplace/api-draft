@@ -12,7 +12,7 @@ import extensionmodel.smarteff.api.base.SmartEffUserData;
 
 /** To be provided as OSGi service
   * */
-public interface RecommendationProvider extends ExtensionCapability {
+public interface SmartEffRecommendationProvider extends ExtensionCapability {
 	/** TODO: Should we rather provide a Recommendation resource here? This makes the interface much more flexible,
 	if an older version of a data model is used just some fields may be missing, would be replaced by default value.
 	With this solution the main domain app will have to catch NoSuchMethods-Exceptions and fill in defaults.
