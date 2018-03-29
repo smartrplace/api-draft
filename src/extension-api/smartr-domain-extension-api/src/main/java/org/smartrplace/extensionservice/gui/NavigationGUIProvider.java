@@ -1,8 +1,7 @@
 package org.smartrplace.extensionservice.gui;
 
 import org.smartrplace.extenservice.resourcecreate.ExtensionCapabilityForCreate;
-import org.smartrplace.extensionservice.ExtensionResourceType;
-import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 
 /** A navigation page is an overview table or any other web page representation that allows to navigate
  * between views and that can initiate editing or creating of resources
@@ -16,7 +15,6 @@ public interface NavigationGUIProvider extends ExtensionCapabilityForCreate {
 	 * 		accessible. This information should be handed over here.
 	 * @param appManMin
 	 */
-	void initPage(final ExtensionNavigationPage<?, ?> page, ExtensionResourceType generalData,
-			ApplicationManagerMinimal appManMin);
+	void initPage(final ExtensionNavigationPage<?, ?> page, ApplicationManagerSPExt appManExt);
 	
 }

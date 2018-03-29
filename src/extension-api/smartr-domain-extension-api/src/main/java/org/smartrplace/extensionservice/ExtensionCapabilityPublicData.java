@@ -19,6 +19,6 @@ public interface ExtensionCapabilityPublicData extends LabelledItem {
 	 * open a page, but if the cardinality of the type allows it more than one element may be submitted.
 	 * If this is null the page is a start page.
 	 */
-	List<EntryType> getEntryType();
+	List<EntryType> getEntryTypes();
 
 }

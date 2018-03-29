@@ -45,7 +45,7 @@ public class ResTypePage extends ObjectGUITablePage<SmartrEffExtResourceTypeData
 	
 	@Override
 	public Collection<SmartrEffExtResourceTypeData> getObjectsInTable(OgemaHttpRequest req) {
-		Collection<SmartrEffExtResourceTypeData> providers = app.resourceTypes.values(); 
+		Collection<SmartrEffExtResourceTypeData> providers = app.typeAdmin.resourceTypes.values(); 
 		return providers;
 	}
 

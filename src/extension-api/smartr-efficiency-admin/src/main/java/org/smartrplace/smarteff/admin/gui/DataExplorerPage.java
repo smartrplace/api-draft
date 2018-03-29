@@ -8,6 +8,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
@@ -34,6 +35,8 @@ import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
  * An HTML page, generated from the Java code.
  */
 public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResourceType, Resource> {
+	protected static final String pid = DataExplorerPage.class.getSimpleName();
+
 	public static final float MIN_COMFORT_TEMP = 4;
 	public static final float MAX_COMFORT_TEMP = 30;
 	public static final float DEFAULT_COMFORT_TEMP = 21;
@@ -50,22 +53,22 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 		this.app = app;
 	}
 	
-	private <T extends SmartEffExtensionResourceType> List<T> getNonEditResourcesToAccess(Class<T> type, SmartEffUserDataNonEdit userData) {
+	private <T extends ExtensionResourceType> List<T> getNonEditResourcesToAccess(Class<T> type, SmartEffUserDataNonEdit userData) {
 		List<T> result = userData.getSubResources(type, true);
 		return result ;
 	}
-	private <T extends SmartEffExtensionResourceType> List<T> getEditableResourcesToAccess(Class<T> type, SmartEffUserDataNonEdit userData) {
-		List<T> result = userData.editableData().getSubResources(type, true);
+	private <T extends ExtensionResourceType> List<T> getEditableResourcesToAccess(Class<T> resType, SmartEffUserDataNonEdit userData) {
+		List<T> result = userData.editableData().getSubResources(resType, true);
 		return result ;
 	}
-	private <T extends SmartEffExtensionResourceType> List<T> getPublicResources(Class<T> type) {
+	private <T extends ExtensionResourceType> List<T> getPublicResources(Class<T> type) {
 		List<T> result = app.appConfigData.generalData().getSubResources(type, true);
 		return result ;
 	}
-	private <T extends SmartEffExtensionResourceType> List<T> getAllResourcesToAccess(Class<T> type, SmartEffUserDataNonEdit userData) {
-		List<T> result = getEditableResourcesToAccess(type, userData);
-		result.addAll(getNonEditResourcesToAccess(type, userData));
-		result.addAll(getPublicResources(type));
+	private <T extends ExtensionResourceType> List<T> getAllResourcesToAccess(Class<T> resType, SmartEffUserDataNonEdit userData) {
+		List<T> result = getEditableResourcesToAccess(resType, userData);
+		result.addAll(getNonEditResourcesToAccess(resType, userData));
+		result.addAll(getPublicResources(resType));
 		return result ;
 	}
 	
@@ -85,15 +88,16 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 
 			@Override
 			protected SmartrEffExtResourceTypeData getItemById(String configId) {
-				for(SmartrEffExtResourceTypeData eval: app.resourceTypes.values()) {
+				for(SmartrEffExtResourceTypeData eval: app.typeAdmin.resourceTypes.values()) {
 					if(ResourceUtils.getValidResourceName(eval.resType.getName()).equals(configId)) return eval;
 				}
 				return null;
 			}
 			@Override
 			public void init(OgemaHttpRequest req) {
+				super.init(req);
 				loggedIn.triggeredInit(req);
-				Collection<SmartrEffExtResourceTypeData> items = app.resourceTypes.values();
+				Collection<SmartrEffExtResourceTypeData> items = app.typeAdmin.resourceTypes.values();
 				selectProvider.update(items , req);
 				SmartrEffExtResourceTypeData eval = getSelectedItem(req);
 				selectProvider.selectItem(eval, req);
@@ -128,7 +132,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 		if(item == null) throw new IllegalStateException("Widget dependencies not processed correctly!");
 		System.out.println("Item:"+item.resType.getName());
 		System.out.println("loggedIn:"+loggedIn);
-		List<? extends SmartEffExtensionResourceType> list1 = getAllResourcesToAccess(item.resType, loggedIn.getSelectedItem(req));
+		List<? extends ExtensionResourceType> list1 = getAllResourcesToAccess(item.resType, loggedIn.getSelectedItem(req));
 		@SuppressWarnings("unchecked")
 		List<SmartEffExtensionResourceType> result = (List<SmartEffExtensionResourceType>)list1 ; 
 		return result;
@@ -138,6 +142,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 	public void addWidgets(SmartEffExtensionResourceType object, ObjectResourceGUIHelper<SmartEffExtensionResourceType, Resource> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 		//if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+		id = pid + id;
 		vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 		vh.stringLabel("Elements", id, ""+object.getSubResources(false).size(), row);
 		vh.linkingButton("Export", id, object, row, "Export", "export.html");
@@ -148,7 +153,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 			vh.stringLabel("Delete", id, "--", row);
 		} else {
 			vh.linkingButton("Edit", id, object, row, "", "edit.html");
-			Button deleteButton = new Button(vh.getParent(), "Delete", "Delete", req) {
+			Button deleteButton = new Button(vh.getParent(), "Delete"+pid, "Delete", req) {
 				private static final long serialVersionUID = -6168031482180238199L;
 				@Override
 				public void onPOSTComplete(String data, OgemaHttpRequest req) {

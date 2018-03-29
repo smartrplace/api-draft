@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
@@ -36,7 +37,7 @@ import de.iwes.timeseries.eval.api.DataProvider;
 public interface DriverProvider extends ExtensionCapability {
 	Class<? extends DataProvider<Resource>> getDataProviderType();
 	
-	void init(ExtensionResourceType generalData);
+	void init(ApplicationManagerSPExt appManExt);
 
 	/** Get data provider for the user. See {@link NavigationGUIProvider#initPage(ExtensionNavigationPage, ExtensionResourceType)}
 	 * 

@@ -9,20 +9,20 @@ import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application.AppStopReason;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
-import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 
 import extensionmodel.smarteff.api.base.BuildingData;
 
 @Service(SmartEffExtensionService.class)
 @Component
 public class SmartrHeatingExtension implements SmartEffExtensionService {
-	private ApplicationManagerMinimal appManMin;
+	private ApplicationManagerSPExt appManExt;
 	
 	@Override
-	public void start(ApplicationManagerMinimal appManMin) {
-		this.appManMin = appManMin;
+	public void start(ApplicationManagerSPExt appManExt) {
+		this.appManExt = appManExt;
 		//Do nothing more here !
 	}
 
@@ -32,7 +32,7 @@ public class SmartrHeatingExtension implements SmartEffExtensionService {
 
 	@Override
 	public Collection<ExtensionCapability> getCapabilities() {
-		return Arrays.asList(new ExtensionCapability[] {new SmartrHeatingEditPage(appManMin),
+		return Arrays.asList(new ExtensionCapability[] {new SmartrHeatingEditPage(appManExt),
 				new SmartrHeatingRecommendationProvider()});
 	}
 
@@ -43,7 +43,7 @@ public class SmartrHeatingExtension implements SmartEffExtensionService {
 		result.add(new ExtensionResourceTypeDeclaration<SmartEffExtensionResourceType>() {
 
 			@Override
-			public Class<? extends SmartEffExtensionResourceType> resourceType() {
+			public Class<? extends SmartEffExtensionResourceType> dataType() {
 				return SmartrHeatingData.class;
 			}
 

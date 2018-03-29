@@ -6,7 +6,7 @@ import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 
 public interface ExtensionResourceAccessInitData {
-	/** index within {@link #getEntryType()} used to open the page*/
+	/** index within {@link #getEntryTypes()} used to open the page*/
 	int entryTypeIdx();
 	
 	/** resources of the entry type specified by entryTypeIdx. If the cardinality of

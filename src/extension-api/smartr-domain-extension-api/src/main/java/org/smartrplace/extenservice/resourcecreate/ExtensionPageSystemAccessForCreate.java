@@ -3,6 +3,7 @@ package org.smartrplace.extenservice.resourcecreate;
 import java.util.List;
 
 import org.smartrplace.extensionservice.ExtensionResourceType;
+import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 
 public interface ExtensionPageSystemAccessForCreate {
@@ -26,6 +27,8 @@ public interface ExtensionPageSystemAccessForCreate {
 		 * TODO: We might need a specification to avoid this.
 		 */
 		RESOURCE_ALREADY_EXISTS_DIFFENT_TYPE,
+		/** For cardinality single already a sub resource of this type exists*/
+		SINGLE_RESOURCETYPE_ALREADY_EXISTS,
 		/** Can be returned when an exception in the admin application occurs*/
 		SYSTEM_ERROR
 	}
@@ -50,12 +53,14 @@ public interface ExtensionPageSystemAccessForCreate {
 	 */
 	void unlockResource(ExtensionResourceType resource, boolean activate);
 	
+	boolean isLocked(ExtensionResourceType resource);
+
 	public class NewResourceResult<T extends ExtensionResourceType> {
 		public ResourceAccessResult result;
 		public T newResource;
 	}
 	/** With getNewResource the newly created resource is automatically locked*/
-	<T extends ExtensionResourceType> NewResourceResult<T> getNewResource(ExtensionResourceType parent, String name, Class<T> type);
+	<T extends ExtensionResourceType> NewResourceResult<T> getNewResource(ExtensionResourceType parent, String name, ExtensionResourceTypeDeclaration<T> type);
 	<T extends ExtensionResourceType> NewResourceResult<T> getNewResource(T virtualResource);
 	
 	/** Activates a resource and all its childres and unlocks the resource. This should usually be called to unlock

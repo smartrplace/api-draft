@@ -58,13 +58,13 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 		else
 			vh.registerHeaderEntry("Name");
 		String text = null;
-		if(object.provider.getEntryType() == null) text = "Start Page";
-		else for(EntryType t: object.provider.getEntryType()) {
+		if(object.provider.getEntryTypes() == null) text = "Start Page";
+		else for(EntryType t: object.provider.getEntryTypes()) {
 			if(text == null) text = t.getType().getSimpleName();
 			else text += "; "+t.getType().getSimpleName();
 		}
 		vh.stringLabel("Entry Types", id, text, row);
-		if(object.provider.getEntryType() == null)
+		if(object.provider.getEntryTypes() == null)
 			vh.linkingButton("Open", id, object, row, "Open", object.url);
 		else
 			vh.stringLabel("Open", id, "--", row);

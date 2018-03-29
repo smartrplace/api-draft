@@ -1,32 +1,21 @@
 package org.smartrplace.smarteff.defaultservice;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
-import org.smartrplace.extensionservice.ExtensionResourceType;
-import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
+import org.ogema.core.model.Resource;
 
 public class CapabilityHelper {
-	@SafeVarargs
-	public static List<EntryType> getStandardEntryTypeList(Class<? extends ExtensionResourceType>... types) {
-		List<EntryType> result = new ArrayList<>();
-		for(Class<? extends ExtensionResourceType> t: types) {
-			EntryType r = new EntryType() {
-
-				@Override
-				public Class<? extends ExtensionResourceType> getType() {
-					return t;
-				}
-
-				@Override
-				public Cardinality getCardinality() {
-					return Cardinality.SINGLE_VALUE_REQUIRED;
-				}
-				
-			};
-			result.add(r);
-		}
-		return result ;
+	public static final String ERROR_START = "ERROR: ";
+	
+	public static String getnewDecoratorName(String baseName, Resource parent) {
+		return getnewDecoratorName(baseName, parent, "_");
 	}
+	public static String getnewDecoratorName(String baseName, Resource parent, String separator) {
+		int i=0;
+		String name = baseName+separator+i;
+		while(parent.getSubResource(name) != null) {
+			i++;
+			name = baseName+separator+i;
+		}
+		return name;
+	}
+
 }

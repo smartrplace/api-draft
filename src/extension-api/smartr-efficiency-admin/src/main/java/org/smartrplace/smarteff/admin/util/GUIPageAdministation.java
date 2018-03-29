@@ -22,6 +22,9 @@ import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData.ServiceCapabilities;
+import org.smartrplace.smarteff.admin.protect.ExtensionResourceAccessInitDataImpl;
+import org.smartrplace.smarteff.admin.protect.NavigationPageSystemAccess;
+import org.smartrplace.smarteff.admin.protect.NavigationPublicPageDataImpl;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration.ConfigInfo;
 import org.smartrplace.util.format.WidgetHelper;
 
@@ -67,27 +70,27 @@ public class GUIPageAdministation {
 					SmartEffUserDataNonEdit userDataNonEdit = loggedIn.getSelectedItem(req);
 					NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
 							navi.label(req.getLocale()),
-							navigationPublicData, app.lockAdmin, app.configIdAdmin);
-					if(navi.getEntryType() == null || configId == null) {
+							navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt);
+					if(navi.getEntryTypes() == null || configId == null) {
 						ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
-								userDataNonEdit.editableData(), userDataNonEdit, systemAccess);
+								userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
 						return result;
 					} else {
 						ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
 						ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(c.entryIdx,
 								c.entryResources,
-								userDataNonEdit.editableData(), userDataNonEdit, systemAccess);
+								userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
 						return result;
 					}
 				}
 			};
-    		navi.initPage(dataExPage, app.appConfigData.generalData(), app.appManMin);
+    		navi.initPage(dataExPage, app.appManExt);
     		
     		NavigationPageData data = new NavigationPageData(navi, service, url, dataExPage);
-			if(navi.getEntryType() == null) startPages.add(data);
+			if(navi.getEntryTypes() == null) startPages.add(data);
 			else {
 				navigationPages.add(data);
-				for(EntryType t: navi.getEntryType()) {
+				for(EntryType t: navi.getEntryTypes()) {
 					List<NavigationPublicPageData> listPub = navigationPublicData.get(t.getType());
 					if(listPub == null) {
 						listPub = new ArrayList<>();
@@ -112,8 +115,8 @@ public class GUIPageAdministation {
     	navigationPages.removeAll(toRemove);
     	for(NavigationGUIProvider navi: caps.naviProviders) {
     		String naviId = SmartrEffUtil.buildId(navi);
- 			if(navi.getEntryType() == null) continue;
-			else for(EntryType t: navi.getEntryType()) {
+ 			if(navi.getEntryTypes() == null) continue;
+			else for(EntryType t: navi.getEntryTypes()) {
 				List<NavigationPublicPageData> listPub = navigationPublicData.get(t.getType());
 				if(listPub == null) {
 					logger.error("Navigation Public pages have no entry for "+t.getType().getName()+" when deregistering "+serviceId);

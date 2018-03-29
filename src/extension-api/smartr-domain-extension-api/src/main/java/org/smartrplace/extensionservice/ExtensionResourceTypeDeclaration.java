@@ -2,7 +2,7 @@ package org.smartrplace.extensionservice;
 
 public interface ExtensionResourceTypeDeclaration<T extends ExtensionResourceType> {
 	/**Resource type required by app module to store its persistent data*/
-	Class<? extends T> resourceType();
+	Class<? extends T> dataType();
 	/**Name of the element or the resource list. The name needs to be unique among the sub elements of the
 	 * parent type. If null returned the name is chosen automatically (to be tested if a good idea to be
 	 * defined as default).

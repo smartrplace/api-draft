@@ -1,10 +1,11 @@
-package org.smartrplace.smarteff.admin.util;
+package org.smartrplace.smarteff.admin.protect;
 
 import java.util.List;
 
 import org.smartrplace.extenservice.resourcecreate.ExtensionCapabilityForCreate;
 import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate;
 import org.smartrplace.extensionservice.ExtensionResourceType;
+import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
@@ -16,8 +17,8 @@ public class ProviderPublicDataForCreateImpl implements ProviderPublicDataForCre
 	}
 
 	@Override
-	public List<EntryType> getEntryType() {
-		return inputProvider.getEntryType();
+	public List<EntryType> getEntryTypes() {
+		return inputProvider.getEntryTypes();
 	}
 	
 	@Override

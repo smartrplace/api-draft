@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.smartrplace.extenservice.resourcecreate.ExtensionCapabilityForCreate;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 
 /** A ProposalProvider calculates some results based on an entry point-based input resource and futher user and
@@ -16,11 +17,11 @@ import org.smartrplace.extensionservice.ExtensionResourceType;
  * new data is available etc.
  */
 public interface ProposalProvider extends ExtensionCapabilityForCreate {
-	void init(ExtensionResourceType generalData);
+	void init(ApplicationManagerSPExt appManExt);
 	
 	/** For each new session the relevant user data is provided with this method
 	 * 
-	 * @param entryTypeIdx index within {@link #getEntryType()} used to open the page
+	 * @param entryTypeIdx index within {@link #getEntryTypes()} used to open the page
 	 * @param entryResources resources of the entry type specified by entryTypeIdx. If the cardinality of
 	 * 		the EntryType does not allow multiple entries the list will only contain a single element. If
 	 * 		the cardinality allows zero the list may be empty.

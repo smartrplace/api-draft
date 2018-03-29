@@ -1,4 +1,4 @@
-package org.smartrplace.smarteff.admin.util;
+package org.smartrplace.smarteff.admin.protect;
 
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;

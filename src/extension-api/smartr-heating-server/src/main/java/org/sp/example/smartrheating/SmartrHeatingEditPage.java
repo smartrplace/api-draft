@@ -2,6 +2,7 @@ package org.sp.example.smartrheating;
 
 import java.util.List;
 
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
@@ -89,14 +90,13 @@ public class SmartrHeatingEditPage implements NavigationGUIProvider { //extends 
 	}*/
 
 	@Override
-	public List<EntryType> getEntryType() {
+	public List<EntryType> getEntryTypes() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void initPage(ExtensionNavigationPage<?, ?> page, ExtensionResourceType generalData,
-			ApplicationManagerMinimal appManMin) {
+	public void initPage(ExtensionNavigationPage<?, ?> page, ApplicationManagerSPExt appManExt) {
 		// TODO Auto-generated method stub
 		
 	}

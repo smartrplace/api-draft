@@ -1,8 +1,8 @@
 package org.smartrplace.smarteff.admin.util;
 
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extensionservice.ExtensionCapability;
+import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.util.format.WidgetHelper;
 
@@ -27,7 +27,7 @@ public class SmartrEffUtil {
 		READONLY,
 		READWRITE
 	}
-	public static AccessType getAccessType(SmartEffExtensionResourceType res) {
+	public static AccessType getAccessType(ExtensionResourceType res) {
 		if(res.getLocation().startsWith(SpEffAdminController.APPCONFIGDATA_LOCATION+"/userDataNonEdit"))
 			return AccessType.READONLY;
 		else if(res.getLocation().startsWith(SpEffAdminController.APPCONFIGDATA_LOCATION+"/generalData"))

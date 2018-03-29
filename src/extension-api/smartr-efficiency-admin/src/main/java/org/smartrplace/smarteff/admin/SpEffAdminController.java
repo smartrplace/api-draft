@@ -1,14 +1,14 @@
 package org.smartrplace.smarteff.admin;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
+import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.config.SmartEffAdminData;
@@ -16,8 +16,8 @@ import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration;
 import org.smartrplace.smarteff.admin.util.GUIPageAdministation;
 import org.smartrplace.smarteff.admin.util.ResourceLockAdministration;
-import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
-import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
+import org.smartrplace.smarteff.admin.util.TypeAdministration;
+import org.smartrplace.util.format.ValueFormat;
 
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetApp;
@@ -26,7 +26,7 @@ import extensionmodel.smarteff.api.base.SmartEffUserData;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class SpEffAdminController {
-	public final static String APPCONFIGDATA_LOCATION = SmartEffAdminData.class.getSimpleName().substring(0, 1).toLowerCase()+SmartEffAdminData.class.getSimpleName().substring(1);
+	public final static String APPCONFIGDATA_LOCATION = ValueFormat.firstLowerCase(SmartEffAdminData.class.getSimpleName());
 	
 	public final OgemaLogger log;
     public final ApplicationManager appMan;
@@ -35,18 +35,36 @@ public class SpEffAdminController {
 	public final SpEffAdminApp serviceAccess;
 	public SmartEffAdminData appConfigData;
 	public Set<SmartEffExtensionService> servicesKnown = new HashSet<>();
-	public Map<Class<? extends SmartEffExtensionResourceType>, SmartrEffExtResourceTypeData> resourceTypes = new HashMap<>();
 	public final GUIPageAdministation guiPageAdmin;
 
 	public ResourceLockAdministration lockAdmin = new ResourceLockAdministration();
 	public ConfigIdAdministration configIdAdmin = new ConfigIdAdministration();
-
-	public final ApplicationManagerMinimal appManMin = new ApplicationManagerMinimal() {
+	public TypeAdministration typeAdmin;
+	
+	public final ApplicationManagerSPExt appManExt = new ApplicationManagerSPExt() {
 		
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends ExtensionResourceType> ExtensionResourceTypeDeclaration<T> getTypeDeclaration(
+				Class<T> resourceType) {
+			return (ExtensionResourceTypeDeclaration<T>) typeAdmin.resourceTypes.get(resourceType).typeDeclaration;
+		}
+		
+		@Override
+		public ExtensionResourceType generalData() {
+			return appConfigData.generalData();
+		}
+
 		@Override
 		public long getFrameworkTime() {
 			if(appMan != null) return appMan.getFrameworkTime();
 			return -1;
+		}
+
+		@Override
+		public OgemaLogger log() {
+			if(appMan != null) return appMan.getLogger();
+			return null;
 		}
 	};
 	
@@ -55,6 +73,7 @@ public class SpEffAdminController {
 		this.log = appMan.getLogger();
 		this.serviceAccess = evaluationOCApp;
 		this.widgetApp = widgetApp;
+		this.typeAdmin = new TypeAdministration(this);
 		guiPageAdmin = new GUIPageAdministation(this);
 		
 		initConfigurationResource();
@@ -83,28 +102,14 @@ public class SpEffAdminController {
     public void processNewService(SmartEffExtensionService service) {
     	servicesKnown.add(service);
      	
-    	for(ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType> rtd: service.resourcesDefined()) {
-    		Class<? extends SmartEffExtensionResourceType> rt = rtd.resourceType();
-    		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
-    		if(data == null) {
-    			data = new SmartrEffExtResourceTypeData(rtd, service, this);
-    			resourceTypes.put(rt, data );    			
-    		} else data.addParent(service);
-    	}
+    	typeAdmin.registerService(service);
     	guiPageAdmin.registerService(service);
-    	service.start(appManMin );
+    	service.start(appManExt);
     }
     
     public void unregisterService(SmartEffExtensionService service) {
     	servicesKnown.remove(service);
-    	for(ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType> rtd: service.resourcesDefined()) {
-    		Class<? extends SmartEffExtensionResourceType> rt = rtd.resourceType();
-    		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
-    		if(data == null) {
-    			//should not occur
-    			log.error("Resource type "+rt.getName()+" not found when service "+SmartrEffUtil.buildId(service)+ "unregistered!");
-    		} else if(data.removeParent(service)) resourceTypes.remove(rt);
-    	}
+    	typeAdmin.unregisterService(service);
     	guiPageAdmin.unregisterService(service);
     }
     
@@ -118,7 +123,7 @@ public class SpEffAdminController {
 		T result = parent.getSubResource(name, type);
 		result.create();
 		//entryProvider.initResource(result);
-		SmartrEffExtResourceTypeData rtd = resourceTypes.get(type);
+		SmartrEffExtResourceTypeData rtd = typeAdmin.resourceTypes.get(type);
 		rtd.registerElement(result);
 		return result;
 	}

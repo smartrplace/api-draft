@@ -8,7 +8,8 @@ import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForC
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate.ResourceAccessResult;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 
-/** TODO: This is not thread-safe yet*/
+/** TODO: This is not thread-safe yet
+ * TODO: Locking mechanisms are not really implemented yet*/
 public class ResourceLockAdministration {
 	private class LockInfo {
 		public LockInfo(String userName, String application) {
@@ -22,7 +23,7 @@ public class ResourceLockAdministration {
 	
 	public LockResult lockResource(ExtensionResourceType resource, String userName, String application) {
 		LockResult result = new LockResult();
-		boolean alreadyExists = resourcesLocked.containsKey(resource);
+		boolean alreadyExists = isLocked(resource);
 		if(!alreadyExists) {
 			resourcesLocked.put(resource, new LockInfo(userName, application));
 			result.result = ResourceAccessResult.OK;
@@ -39,5 +40,9 @@ public class ResourceLockAdministration {
 	
 	public void unlockResource(ExtensionResourceType resource) {
 		resourcesLocked.remove(resource);
+	}
+
+	public boolean isLocked(ExtensionResourceType resource) {
+		return resourcesLocked.containsKey(resource);
 	}
 }

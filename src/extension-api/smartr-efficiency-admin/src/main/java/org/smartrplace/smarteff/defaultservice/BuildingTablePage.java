@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
-import org.ogema.model.locations.Building;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
@@ -40,7 +40,7 @@ public class BuildingTablePage  {
 		private ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
 		
 		public TablePage(ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage, ApplicationManagerMinimal appManMin) {
-			super(exPage.page, null, BuildingData.class);
+			super(exPage.page, null, appManMin, BuildingData.class);
 			this.exPage = exPage;
 			//this.appManMin = appManMin;
 		}
@@ -56,9 +56,13 @@ public class BuildingTablePage  {
 			if(appData != null) {
 				NavigationPublicPageData pageData = getBuildingEditPage(appData);
 				if(pageData != null) {
-					String configId = appData.systemAccess().accessPage(pageData, getBuildingEntryIdx(pageData),
-							Arrays.asList(new ExtensionResourceType[]{object}));
-					vh.linkingButton("Edit", id, object, row, "Edit", pageData.getUrl()+"?configId="+configId);
+					if(!appData.systemAccess().isLocked(object)) {
+						String configId = appData.systemAccess().accessPage(pageData, getBuildingEntryIdx(pageData),
+								Arrays.asList(new ExtensionResourceType[]{object}));
+						vh.linkingButton("Edit", id, object, row, "Edit", pageData.getUrl()+"?configId="+configId);
+					} else {
+						vh.stringLabel("Edit", id, "Locked", row);						
+					}
 				} else {
 					vh.stringLabel("Edit", id, "No Editor", row);
 				}
@@ -66,7 +70,10 @@ public class BuildingTablePage  {
 			} else {
 				vh.registerHeaderEntry("Edit");
 			}
-			vh.linkingButton("Evaluate All", id, object, row, "Evaluate All", "evalAll.html");
+			if(object.isActive())
+				vh.linkingButton("Evaluate All", id, object, row, "Evaluate All", "evalAll.html");
+			else
+				vh.stringLabel("Evaluate All", id, "Inactive", row);
 			vh.linkingButton("Delete", id, object, row, "Delete", "delete.html");
 		}
 
@@ -88,8 +95,10 @@ public class BuildingTablePage  {
 				public void onPrePOST(String data, OgemaHttpRequest req) {
 					ExtensionResourceAccessInitData appData = exPage.init.getSelectedItem(req);
 					NavigationPublicPageData pageData = getBuildingEditPage(appData);
-					String configId = appData.systemAccess().accessPage(pageData, getBuildingEntryIdx(pageData), null);
-					setUrl(pageData.getUrl()+"?configId="+configId, req);
+					String configId = appData.systemAccess().accessCreatePage(pageData, getBuildingEntryIdx(pageData),
+							appData.userData());
+					if(configId.startsWith(CapabilityHelper.ERROR_START)) setUrl("error/"+configId, req);
+					else setUrl(pageData.getUrl()+"?configId="+configId, req);
 				}
 			};
 			page.append(addEntry);
@@ -102,19 +111,19 @@ public class BuildingTablePage  {
 		}
 		private int getBuildingEntryIdx(NavigationPublicPageData navi) {
 			int idx = 0;
-			for(EntryType et: navi.getEntryType()) {
-				if(Building.class.isAssignableFrom(et.getType())) {
+			for(EntryType et: navi.getEntryTypes()) {
+				if(BuildingData.class.isAssignableFrom(et.getType())) {
 					return idx;
 				}
 				idx++;
 			}
-			throw new IllegalStateException("Building entry type not found in Building Edit Page!");
+			throw new IllegalStateException("BuildinData entry type not found in Building Edit Page!");
 		}
 		
 		@Override
 		public List<BuildingData> getResourcesInTable(OgemaHttpRequest req) {
 			ExtensionResourceAccessInitData appData = exPage.init.getSelectedItem(req);
-			return ((SmartEffUserData)appData.userData()).buildings().getAllElements();
+			return ((SmartEffUserData)appData.userData()).buildingData().getAllElements();
 		}
 	}
 	
@@ -127,19 +136,18 @@ public class BuildingTablePage  {
 		}
 	
 		@Override
-		public void initPage(ExtensionNavigationPage<?, ?> pageIn, ExtensionResourceType generalData,
-				ApplicationManagerMinimal appManMin) {
+		public void initPage(ExtensionNavigationPage<?, ?> pageIn, ApplicationManagerSPExt appManExt) {
 			//this.generalData = generalData;
 			@SuppressWarnings("unchecked")
 			ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> page =
 				(ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>) pageIn;
 			//Label test = new Label(page.page, "test", "Hello World!");
 			//page.page.append(test);
-			tablePage = new TablePage(page, appManMin);
+			tablePage = new TablePage(page, appManExt);
 		}
 	
 		@Override
-		public List<EntryType> getEntryType() {
+		public List<EntryType> getEntryTypes() {
 			return null;
 		}
 	}

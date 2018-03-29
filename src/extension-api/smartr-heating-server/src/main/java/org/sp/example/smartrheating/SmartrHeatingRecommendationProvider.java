@@ -5,6 +5,7 @@ import java.util.List;
 import org.smartrplace.efficiency.api.capabilities.SmartEffRecommendationProvider.Recommendation;
 import org.smartrplace.extenservice.proposal.ProposalProvider;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -105,13 +106,13 @@ public class SmartrHeatingRecommendationProvider implements ProposalProvider {
 		return null;
 	}*/
 
-	public List<EntryType> getEntryType() {
+	public List<EntryType> getEntryTypes() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void init(ExtensionResourceType generalData) {
+	public void init(ApplicationManagerSPExt appManExt) {
 		// TODO Auto-generated method stub
 		
 	}
