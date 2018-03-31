@@ -1,5 +1,3 @@
-# NOT SUPPORTED ANYMORE HERE, DO NOT USE ANYMORE
-
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -9,11 +7,11 @@
        <version>2.1.3</version>
     </parent>
     
-    <artifactId>smartr-efficiency-admin</artifactId>
+    <artifactId>smartr-efficiency-single</artifactId>
     <groupId>org.smartrplace.apps</groupId>
-    <name>Core Administration for SmartrEfficiency platform</name>
+    <name>Implementation of SmartrEfficiency for single users</name>
     <version>2.1.3-SNAPSHOT</version>
-    <description>Component manager for bundles registering SmartEffExtensionService</description>
+    <description>Implementation of SmartrEfficiency for single users (offline usage and development)</description>
     
     <packaging>bundle</packaging>
     
