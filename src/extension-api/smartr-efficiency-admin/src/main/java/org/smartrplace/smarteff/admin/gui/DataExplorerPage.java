@@ -26,7 +26,6 @@ import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.html.form.button.TemplateInitSingleEmpty;
 import de.iwes.widgets.html.form.dropdown.TemplateDropdown;
 import de.iwes.widgets.html.form.label.Header;
-import de.iwes.widgets.object.widget.init.LoginInitSingleEmpty;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
 import de.iwes.widgets.template.DefaultDisplayTemplate;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
@@ -44,7 +43,6 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 	private final SpEffAdminController app;
 	
 	ValueResourceTextField<TimeResource> updateInterval;
-	private LoginInitSingleEmpty<SmartEffUserDataNonEdit> loggedIn;
 	private TemplateDropdown<SmartrEffExtResourceTypeData> selectProvider;
 
 	public DataExplorerPage(final WidgetPage<?> page, final SpEffAdminController app,
@@ -62,7 +60,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 		return result ;
 	}
 	private <T extends ExtensionResourceType> List<T> getPublicResources(Class<T> type) {
-		List<T> result = app.appConfigData.generalData().getSubResources(type, true);
+		List<T> result = app.getUserAdmin().getAppConfigData().generalData().getSubResources(type, true);
 		return result ;
 	}
 	private <T extends ExtensionResourceType> List<T> getAllResourcesToAccess(Class<T> resType, SmartEffUserDataNonEdit userData) {
@@ -74,15 +72,6 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 	
 	@Override
 	public void addWidgetsAboveTable() {
-		loggedIn = new LoginInitSingleEmpty<SmartEffUserDataNonEdit>(page, "loggedIn", true) {
-			private static final long serialVersionUID = 6446396416992821986L;
-
-			@Override
-			protected List<SmartEffUserDataNonEdit> getUsers(OgemaHttpRequest req) {
-				return app.appConfigData.userDataNonEdit().getAllElements();
-			}
-		};
-		page.append(loggedIn);
 		TemplateInitSingleEmpty<SmartrEffExtResourceTypeData> init = new TemplateInitSingleEmpty<SmartrEffExtResourceTypeData>(page, "init", false) {
 			private static final long serialVersionUID = 1L;
 
@@ -96,7 +85,6 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 			@Override
 			public void init(OgemaHttpRequest req) {
 				super.init(req);
-				loggedIn.triggeredInit(req);
 				Collection<SmartrEffExtResourceTypeData> items = app.typeAdmin.resourceTypes.values();
 				selectProvider.update(items , req);
 				SmartrEffExtResourceTypeData eval = getSelectedItem(req);
@@ -131,8 +119,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffExtensionResour
 		SmartrEffExtResourceTypeData item = selectProvider.getSelectedItem(req);
 		if(item == null) throw new IllegalStateException("Widget dependencies not processed correctly!");
 		System.out.println("Item:"+item.resType.getName());
-		System.out.println("loggedIn:"+loggedIn);
-		List<? extends ExtensionResourceType> list1 = getAllResourcesToAccess(item.resType, loggedIn.getSelectedItem(req));
+		List<? extends ExtensionResourceType> list1 = getAllResourcesToAccess(item.resType, app.getUserAdmin().getUserData());
 		@SuppressWarnings("unchecked")
 		List<SmartEffExtensionResourceType> result = (List<SmartEffExtensionResourceType>)list1 ; 
 		return result;

@@ -35,8 +35,8 @@ public class SmartrEffExtResourceTypeData {
 	
 	public void resetResourceStatistics(SpEffAdminController app) {
 		numberTotal = app.appMan.getResourceAccess().getResources(resType).size();
-		numberPublic = app.appConfigData.generalData().getSubResources(resType, true).size();
-		numberNonEdit = app.appConfigData.userDataNonEdit().getSubResources(resType, true).size();		
+		numberPublic = app.getUserAdmin().getAppConfigData().generalData().getSubResources(resType, true).size();
+		numberNonEdit = app.getUserAdmin().getAllUserResource().getSubResources(resType, true).size();		
 	}
 
 	public void addParent(SmartEffExtensionService parent) {

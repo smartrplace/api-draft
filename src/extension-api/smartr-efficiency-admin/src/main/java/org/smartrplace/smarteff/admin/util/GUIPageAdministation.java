@@ -14,7 +14,7 @@ import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ExtensionResourceType;
-import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.SpEffAdminApp;
@@ -22,16 +22,12 @@ import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData.ServiceCapabilities;
-import org.smartrplace.smarteff.admin.protect.ExtensionResourceAccessInitDataImpl;
-import org.smartrplace.smarteff.admin.protect.NavigationPageSystemAccess;
 import org.smartrplace.smarteff.admin.protect.NavigationPublicPageDataImpl;
-import org.smartrplace.smarteff.admin.util.ConfigIdAdministration.ConfigInfo;
 import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.navigation.MenuConfiguration;
 import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
-import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class GUIPageAdministation {
@@ -58,32 +54,8 @@ public class GUIPageAdministation {
     		MenuConfiguration mc = page.getMenuConfiguration();
     		mc.setCustomNavigation(menu);
   		
-  			ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> dataExPage = new ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>(page, url, "dataExplorer.html",
-					id) {
-
-				@Override
-				protected List<SmartEffUserDataNonEdit> getUsers(OgemaHttpRequest req) {
-					return app.appConfigData.userDataNonEdit().getAllElements();
-				}
-				@Override
-				protected ExtensionResourceAccessInitData getItemById(String configId, OgemaHttpRequest req) {
-					SmartEffUserDataNonEdit userDataNonEdit = loggedIn.getSelectedItem(req);
-					NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
-							navi.label(req.getLocale()),
-							navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt);
-					if(navi.getEntryTypes() == null || configId == null) {
-						ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
-								userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
-						return result;
-					} else {
-						ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
-						ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(c.entryIdx,
-								c.entryResources,
-								userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
-						return result;
-					}
-				}
-			};
+  			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> dataExPage = app.getUserAdmin().
+  					getNaviPage(page, url, "dataExplorer.html", id, navi);
     		navi.initPage(dataExPage, app.appManExt);
     		
     		NavigationPageData data = new NavigationPageData(navi, service, url, dataExPage);

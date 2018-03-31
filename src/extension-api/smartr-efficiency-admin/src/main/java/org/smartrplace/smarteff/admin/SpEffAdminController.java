@@ -19,27 +19,25 @@ import org.smartrplace.smarteff.admin.util.ResourceLockAdministration;
 import org.smartrplace.smarteff.admin.util.TypeAdministration;
 import org.smartrplace.util.format.ValueFormat;
 
-import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
-import extensionmodel.smarteff.api.base.SmartEffUserData;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class SpEffAdminController {
 	public final static String APPCONFIGDATA_LOCATION = ValueFormat.firstLowerCase(SmartEffAdminData.class.getSimpleName());
 	
+	public final ServiceAccess serviceAccess;
 	public final OgemaLogger log;
     public final ApplicationManager appMan;
     public final WidgetApp widgetApp;
 
-	public final SpEffAdminApp serviceAccess;
-	public SmartEffAdminData appConfigData;
 	public Set<SmartEffExtensionService> servicesKnown = new HashSet<>();
 	public final GUIPageAdministation guiPageAdmin;
 
 	public ResourceLockAdministration lockAdmin = new ResourceLockAdministration();
 	public ConfigIdAdministration configIdAdmin = new ConfigIdAdministration();
 	public TypeAdministration typeAdmin;
+	private UserAdmin userAdmin;
 	
 	public final ApplicationManagerSPExt appManExt = new ApplicationManagerSPExt() {
 		
@@ -52,7 +50,7 @@ public class SpEffAdminController {
 		
 		@Override
 		public ExtensionResourceType generalData() {
-			return appConfigData.generalData();
+			return userAdmin.getAppConfigData().generalData();
 		}
 
 		@Override
@@ -68,35 +66,20 @@ public class SpEffAdminController {
 		}
 	};
 	
-    public SpEffAdminController(ApplicationManager appMan,SpEffAdminApp evaluationOCApp, final WidgetApp widgetApp) {
+    public SpEffAdminController(ApplicationManager appMan, ServiceAccess evaluationOCApp, final WidgetApp widgetApp) {
 		this.appMan = appMan;
 		this.log = appMan.getLogger();
-		this.serviceAccess = evaluationOCApp;
 		this.widgetApp = widgetApp;
+		this.serviceAccess = evaluationOCApp;
+		userAdmin = new UserAdmin(this);
 		this.typeAdmin = new TypeAdministration(this);
 		guiPageAdmin = new GUIPageAdministation(this);
-		
-		initConfigurationResource();
-		initTestData();
 	}
     
     public void processOpenServices() {
 		for(SmartEffExtensionService service: serviceAccess.getEvaluations().values()) {
 			processNewService(service);
 		}    	
-    }
-
-    private void initConfigurationResource() {
-		String configResourceDefaultName = APPCONFIGDATA_LOCATION;
-		appConfigData = appMan.getResourceAccess().getResource(configResourceDefaultName);
-		if (appConfigData != null) { // resource already exists (appears in case of non-clean start)
-			appMan.getLogger().debug("{} started with previously-existing config resource", getClass().getName());
-		}
-		else {
-			appConfigData = (SmartEffAdminData) appMan.getResourceManagement().createResource(configResourceDefaultName,SmartEffAdminData.class);
-			appConfigData.activate(true);
-			appMan.getLogger().debug("{} started with new config resource", getClass().getName());
-		}
     }
 
     public void processNewService(SmartEffExtensionService service) {
@@ -131,28 +114,12 @@ public class SpEffAdminController {
 		// TODO Auto-generated method stub
 		
 	}
-	
-	public SmartEffUserDataNonEdit getUserData(String userName) {
-        for(SmartEffUserDataNonEdit userNE: appConfigData.userDataNonEdit().getAllElements()) {
-        	if(userNE.ogemaUserName().getValue().equals(userName)) {
-         		return userNE;
-        	}
-        }
-        return null;
-	}
-	
-	private void initTestData() {
-		if(getUserData("master") == null) {
-			SmartEffUserDataNonEdit data = appConfigData.userDataNonEdit().addDecorator("master", SmartEffUserDataNonEdit.class);			
-			ValueResourceHelper.setIfNew(data.ogemaUserName(), "master");
-			SmartEffUserData userData = appMan.getResourceManagement().createResource("master", SmartEffUserData.class);
-			data.editableData().setAsReference(userData);
-			userData.activate(true);
-			data.activate(true);
-		}
-	}
 
 	public NavigationMenu getNavigationMenu() {
-		return serviceAccess.menu;
+		return serviceAccess.getMenu();
+	}
+	
+	public UserAdmin getUserAdmin() {
+		return userAdmin;
 	}
 }

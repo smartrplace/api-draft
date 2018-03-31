@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionResourceType;
-import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
@@ -96,7 +96,7 @@ public class SmartrHeatingEditPage implements NavigationGUIProvider { //extends 
 	}
 
 	@Override
-	public void initPage(ExtensionNavigationPage<?, ?> page, ApplicationManagerSPExt appManExt) {
+	public void initPage(ExtensionNavigationPageI<?, ?> page, ApplicationManagerSPExt appManExt) {
 		// TODO Auto-generated method stub
 		
 	}

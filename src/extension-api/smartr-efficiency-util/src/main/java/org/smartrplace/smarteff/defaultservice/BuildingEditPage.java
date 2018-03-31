@@ -4,11 +4,10 @@ import java.util.List;
 
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
-import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
-import org.smartrplace.smarteff.admin.util.TypeAdministration;
+import org.smartrplace.smarteff.util.CapabilityHelper;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
-import org.smartrplace.util.directresourcegui.ResourceEditPage;
 
 import de.iwes.widgets.api.extended.WidgetData;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -33,16 +32,16 @@ public class BuildingEditPage  {
 
 	public class EditPage {
 		//private final ApplicationManagerSPExt appManExt;
-		private ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
+		private ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
 		
 		private	ObjectResourceGUIHelper<BuildingData, BuildingData> mh;
 		private WidgetPage<?> page;
 
-		public EditPage(ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage, ApplicationManagerSPExt appManExt) {
+		public EditPage(ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage, ApplicationManagerSPExt appManExt) {
 			this.exPage = exPage;
 			//this.appManExt = appManExt;
 			//BuildingData bd = null; bd.heatedLivingSpace()
-			this.page = exPage.page;
+			this.page = exPage.getPage();
 			Alert alert = new Alert(page, "alert"+pid, "");
 			page.append(alert);
 			
@@ -92,19 +91,19 @@ public class BuildingEditPage  {
 				}
 				@Override
 				public void onPOSTComplete(String data, OgemaHttpRequest req) {
-					ExtensionResourceAccessInitData appData = exPage.init.getSelectedItem(req);
+					ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
 					BuildingData res = getReqData(req);
 					appData.systemAccess().activateResource(res);
 				}
 			};
 			table.setContent(c, 0, activateButton);
 			page.append(table);
-			exPage.init.registerDependentWidget(header);
-			ResourceEditPage.registerDependentWidgets(exPage.init, table);
+			exPage.registerDependentWidgetOnInit(header);
+			exPage.registerAppTableWidgetsDependentOnInit(table);
 		}
 		
 		private BuildingData getReqData(OgemaHttpRequest req) {
-			ExtensionResourceAccessInitData appData = exPage.init.getSelectedItem(req);
+			ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
 			return (BuildingData) appData.entryResources().get(0);
 		}
 
@@ -119,11 +118,11 @@ public class BuildingEditPage  {
 		}
 	
 		@Override
-		public void initPage(ExtensionNavigationPage<?, ?> pageIn, ApplicationManagerSPExt appManExt) {
+		public void initPage(ExtensionNavigationPageI<?, ?> pageIn, ApplicationManagerSPExt appManExt) {
 			//this.generalData = generalData;
 			@SuppressWarnings("unchecked")
-			ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> page =
-				(ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>) pageIn;
+			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> page =
+				(ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>) pageIn;
 			//Label test = new Label(page.page, "test", "Hello World!");
 			//page.page.append(test);
 			editPage = new EditPage(page, appManExt);
@@ -131,7 +130,7 @@ public class BuildingEditPage  {
 	
 		@Override
 		public List<EntryType> getEntryTypes() {
-			return TypeAdministration.getStandardEntryTypeList(BuildingData.class);
+			return CapabilityHelper.getStandardEntryTypeList(BuildingData.class);
 		}
 	}
 	

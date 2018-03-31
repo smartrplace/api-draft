@@ -55,25 +55,6 @@ public class TypeAdministration {
 		return result ;
 	}*/
 	
-	@SafeVarargs
-	public static List<EntryType> getStandardEntryTypeList(Class<? extends ExtensionResourceType>... types) {
-		List<EntryType> result = new ArrayList<>();
-		for(Class<? extends ExtensionResourceType> t: types) {
-			EntryType r = getEntryType(t);
-			result.add(r);
-		}
-		return result ;
-	}
-	
-	/*@SafeVarargs
-	public static List<EntryType> getStandardEntryTypeList(ApplicationManagerSPExt appManExt, Class<? extends ExtensionResourceType>... types) {
-		List<EntryType> result = new ArrayList<>();
-		for(Class<? extends ExtensionResourceType> t: types) {
-			EntryType r = getEntryType(appManExt.getTypeDeclaration(t));
-			result.add(r);
-		}
-		return result ;
-	}*/
 	public void registerElement(ExtensionResourceType res) {
 		SmartrEffExtResourceTypeData data = resourceTypes.get(res.getResourceType());
 		if(data == null) return;
@@ -85,22 +66,4 @@ public class TypeAdministration {
 		if(data == null) return;
 		data.unregisterElement(res);
 	}
-
-	private static EntryType getEntryType(Class<? extends ExtensionResourceType> type) {
-		return new EntryType() {
-
-			@Override
-			public Class<? extends ExtensionResourceType> getType() {
-				return type;
-			}
-
-			@Override
-			public Cardinality getCardinality() {
-				return Cardinality.SINGLE_VALUE_REQUIRED;
-			}
-			
-		};		
-	}
-	
-	
 }

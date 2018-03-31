@@ -15,6 +15,6 @@ public interface NavigationGUIProvider extends ExtensionCapabilityForCreate {
 	 * 		accessible. This information should be handed over here.
 	 * @param appManMin
 	 */
-	void initPage(final ExtensionNavigationPage<?, ?> page, ApplicationManagerSPExt appManExt);
+	void initPage(final ExtensionNavigationPageI<?, ?> page, ApplicationManagerSPExt appManExt);
 	
 }

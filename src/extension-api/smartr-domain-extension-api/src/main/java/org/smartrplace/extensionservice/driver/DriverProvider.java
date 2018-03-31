@@ -8,7 +8,7 @@ import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
-import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 
 import de.iwes.timeseries.eval.api.DataProvider;
@@ -39,7 +39,7 @@ public interface DriverProvider extends ExtensionCapability {
 	
 	void init(ApplicationManagerSPExt appManExt);
 
-	/** Get data provider for the user. See {@link NavigationGUIProvider#initPage(ExtensionNavigationPage, ExtensionResourceType)}
+	/** Get data provider for the user. See {@link NavigationGUIProvider#initPage(ExtensionNavigationPageI, ExtensionResourceType)}
 	 * 
 	 * @return data provider for the user. If the provider does not find the necessary configuration data for
 	 * the user it shall return null.

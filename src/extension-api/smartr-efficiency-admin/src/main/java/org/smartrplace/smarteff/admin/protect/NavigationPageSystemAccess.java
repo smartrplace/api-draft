@@ -16,7 +16,7 @@ import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration;
 import org.smartrplace.smarteff.admin.util.ResourceLockAdministration;
 import org.smartrplace.smarteff.admin.util.TypeAdministration;
-import org.smartrplace.smarteff.defaultservice.CapabilityHelper;
+import org.smartrplace.smarteff.util.CapabilityHelper;
 import org.smartrplace.util.format.ValueFormat;
 
 public class NavigationPageSystemAccess implements ExtensionPageSystemAccessForCreate {

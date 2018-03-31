@@ -6,12 +6,13 @@ import java.util.List;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
-import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
+import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ExtensionResourceType;
-import org.smartrplace.extensionservice.gui.ExtensionNavigationPage;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
+import org.smartrplace.smarteff.util.CapabilityHelper;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
 import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
@@ -37,10 +38,10 @@ public class BuildingTablePage  {
 
 	public class TablePage extends ResourceGUITablePage<BuildingData> {
 		//private final ApplicationManagerMinimal appManMin;
-		private ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
+		private ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
 		
-		public TablePage(ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage, ApplicationManagerMinimal appManMin) {
-			super(exPage.page, null, appManMin, BuildingData.class);
+		public TablePage(ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage, ApplicationManagerMinimal appManMin) {
+			super(exPage.getPage(), null, appManMin, BuildingData.class);
 			this.exPage = exPage;
 			//this.appManMin = appManMin;
 		}
@@ -49,7 +50,7 @@ public class BuildingTablePage  {
 		public void addWidgets(BuildingData object, ResourceGUIHelper<BuildingData> vh, String id,
 				OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 			ExtensionResourceAccessInitData appData = null;
-			if(exPage != null) appData = exPage.init.getSelectedItem(req);
+			if(exPage != null) appData = exPage.getAccessData(req);
 
 			vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 			vh.floatLabel("Heated Area", id, object.heatedLivingSpace(), row, "%.0f m2");
@@ -87,13 +88,13 @@ public class BuildingTablePage  {
 				private static final long serialVersionUID = -1629093147343510820L;
 				@Override
 				public void onGET(OgemaHttpRequest req) {
-					if(getBuildingEditPage(exPage.init.getSelectedItem(req)) == null)
+					if(getBuildingEditPage(exPage.getAccessData(req)) == null)
 						disable(req);
 					else enable(req);
 				}
 				@Override
 				public void onPrePOST(String data, OgemaHttpRequest req) {
-					ExtensionResourceAccessInitData appData = exPage.init.getSelectedItem(req);
+					ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
 					NavigationPublicPageData pageData = getBuildingEditPage(appData);
 					String configId = appData.systemAccess().accessCreatePage(pageData, getBuildingEntryIdx(pageData),
 							appData.userData());
@@ -122,7 +123,7 @@ public class BuildingTablePage  {
 		
 		@Override
 		public List<BuildingData> getResourcesInTable(OgemaHttpRequest req) {
-			ExtensionResourceAccessInitData appData = exPage.init.getSelectedItem(req);
+			ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
 			return ((SmartEffUserData)appData.userData()).buildingData().getAllElements();
 		}
 	}
@@ -136,11 +137,11 @@ public class BuildingTablePage  {
 		}
 	
 		@Override
-		public void initPage(ExtensionNavigationPage<?, ?> pageIn, ApplicationManagerSPExt appManExt) {
+		public void initPage(ExtensionNavigationPageI<?, ?> pageIn, ApplicationManagerSPExt appManExt) {
 			//this.generalData = generalData;
 			@SuppressWarnings("unchecked")
-			ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> page =
-				(ExtensionNavigationPage<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>) pageIn;
+			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> page =
+				(ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>) pageIn;
 			//Label test = new Label(page.page, "test", "Hello World!");
 			//page.page.append(test);
 			tablePage = new TablePage(page, appManExt);

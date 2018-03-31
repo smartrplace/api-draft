@@ -1,4 +1,4 @@
-package org.smartrplace.extensionservice.gui;
+package org.smartrplace.smarteff.admin.gui;
 
 import java.util.List;
 import java.util.Map;
@@ -6,6 +6,8 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
+import org.smartrplace.util.directresourcegui.ResourceEditPage;
 
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -14,11 +16,11 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.form.button.RedirectButton;
 import de.iwes.widgets.html.form.button.TemplateInitSingleEmpty;
 import de.iwes.widgets.html.form.button.TemplateRedirectButton;
-import de.iwes.widgets.object.widget.init.LoginInitSingleEmpty;
 /**
  * Frame for navigation pages
  */
-public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit, C extends ExtensionResourceAccessInitData> {
+public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit, C extends ExtensionResourceAccessInitData> 
+		implements ExtensionNavigationPageI<T, C>{
 	protected abstract List<T> getUsers(OgemaHttpRequest req);
 	
 	public final WidgetPage<?> page;
@@ -26,7 +28,6 @@ public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit
 	public final String overviewUrl;
 	
 	public final TemplateInitSingleEmpty<C> init;
-	protected LoginInitSingleEmpty<T> loggedIn;
 	protected void init(OgemaHttpRequest req) {};
 	protected abstract  C getItemById(String configId, OgemaHttpRequest req);
 
@@ -40,7 +41,6 @@ public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit
 			
 			@Override
 			public void init(OgemaHttpRequest req) {
-				loggedIn.triggeredInit(req);
 				Map<String,String[]> params = getPage().getPageParameters(req);
 				C res = null;
 				if (params == null || params.isEmpty())
@@ -69,16 +69,6 @@ public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit
 			}
 		};
 		page.append(init);
-		
-		loggedIn = new LoginInitSingleEmpty<T>(page, "loggedIn"+providerId, true) {
-			private static final long serialVersionUID = 6446396416992821986L;
-
-			@Override
-			protected List<T> getUsers(OgemaHttpRequest req) {
-				return ExtensionNavigationPage.this.getUsers(req);
-			}
-		};
-		page.append(loggedIn);
 	}
 	
 	public void finalize(StaticTable table) {
@@ -89,9 +79,24 @@ public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit
 			page.append(mainPageBut);
 		}
 	}
-	public static void registerDependentWidgets(OgemaWidget governor, StaticTable table) {
-		for(OgemaWidget el: table.getSubWidgets()) {
-			governor.triggerOnPOST(el);
-		}
+	
+	@Override
+	public WidgetPage<?> getPage() {
+		return page;
+	}
+	
+	@Override
+	public void registerDependentWidgetOnInit(OgemaWidget widget) {
+		init.registerDependentWidget(widget);
+	}
+	
+	@Override
+	public void registerAppTableWidgetsDependentOnInit(StaticTable table) {
+		ResourceEditPage.registerDependentWidgets(init, table);
+	}
+	
+	@Override
+	public ExtensionResourceAccessInitData getAccessData(OgemaHttpRequest req) {
+		return init.getSelectedItem(req);
 	}
 }

@@ -7,11 +7,11 @@
        <version>2.1.3</version>
     </parent>
     
-    <artifactId>smartr-efficiency-single</artifactId>
+    <artifactId>smartr-efficiency-util</artifactId>
     <groupId>org.smartrplace.apps</groupId>
-    <name>Implementation of SmartrEfficiency for single users</name>
+    <name>Util classes for SmartrEfficiency</name>
     <version>2.1.3-SNAPSHOT</version>
-    <description>Implementation of SmartrEfficiency for single users (offline usage and development)</description>
+    <description>Util classes for SmartrEfficiency Collection</description>
     
     <packaging>bundle</packaging>
     

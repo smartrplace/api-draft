@@ -48,7 +48,7 @@ import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 })
 @Component(specVersion = "1.2", immediate = true)
 @Service(Application.class)
-public class SpEffAdminApp implements Application {
+public class SpEffAdminApp implements Application, ServiceAccess {
 	public static final String urlPath = "/org/sp/smarteff/admin";
 
     private OgemaLogger log;
@@ -98,7 +98,7 @@ public class SpEffAdminApp implements Application {
 		SmartrEffExtResourceTypeData rtd = new SmartrEffExtResourceTypeData(BaseDataService.BUILDING_DATA, null, null);
 		resTypePage = new ResTypePage(page2, controller, rtd );
 		WidgetPage<?> page3 = widgetApp.createWidgetPage("dataExplorer.html");
-		dataExPage = new DataExplorerPage(page3, controller, controller.appConfigData.generalData());
+		dataExPage = new DataExplorerPage(page3, controller, controller.getUserAdmin().getAppConfigData().generalData());
 		WidgetPage<?> page4 = widgetApp.createWidgetPage("naviOverview.html");
 		NavigationPageData navi = new NavigationPageData(BaseDataService.BUILDING_NAVI_PROVIDER, null, "", null);
 		naviPage = new NaviOverviewPage(page4, controller, navi);
@@ -162,5 +162,8 @@ public class SpEffAdminApp implements Application {
 				controller.unregisterService(provider);			}
 		};
     }
-
+    
+    public NavigationMenu getMenu() {
+    	return menu;
+    }
 }

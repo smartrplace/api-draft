@@ -18,6 +18,7 @@
     <modules>
 		<module>smartr-domain-extension-api</module>
 		<module>smartr-efficiency-api</module>
+		<module>smartr-efficiency-util</module>
 		<module>smartr-efficiency-admin</module>
 		<module>smartr-heating-server</module>
 		<module>smartr-heatcontrol-extension-api</module>
