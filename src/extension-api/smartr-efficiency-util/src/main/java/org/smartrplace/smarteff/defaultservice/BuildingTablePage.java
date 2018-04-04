@@ -1,18 +1,15 @@
 package org.smartrplace.smarteff.defaultservice;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
-import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
-import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
-import org.smartrplace.smarteff.util.CapabilityHelper;
+import org.smartrplace.smarteff.util.AddEntryButton;
+import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
 import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
@@ -41,26 +38,28 @@ public class BuildingTablePage  {
 		private ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
 		
 		public TablePage(ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage, ApplicationManagerMinimal appManMin) {
-			super(exPage.getPage(), null, appManMin, BuildingData.class);
+			super(exPage.getPage(), null, appManMin, BuildingData.class, false);
 			this.exPage = exPage;
 			//this.appManMin = appManMin;
+			triggerPageBuild();
 		}
 
 		@Override
 		public void addWidgets(BuildingData object, ResourceGUIHelper<BuildingData> vh, String id,
 				OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 			ExtensionResourceAccessInitData appData = null;
-			if(exPage != null) appData = exPage.getAccessData(req);
+			if(req != null) appData = exPage.getAccessData(req);
 
 			vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 			vh.floatLabel("Heated Area", id, object.heatedLivingSpace(), row, "%.0f m2");
-			if(appData != null) {
+			SPPageUtil.addResOpenButton("Edit", object, BuildingData.class, vh, id, row, appData);
+			/*if(appData != null) {
 				NavigationPublicPageData pageData = getBuildingEditPage(appData);
 				if(pageData != null) {
 					if(!appData.systemAccess().isLocked(object)) {
 						String configId = appData.systemAccess().accessPage(pageData, getBuildingEntryIdx(pageData),
 								Arrays.asList(new ExtensionResourceType[]{object}));
-						vh.linkingButton("Edit", id, object, row, "Edit", pageData.getUrl()+"?configId="+configId);
+						vh.linkingButton("Edit", id, null, row, "Edit", pageData.getUrl()+"?configId="+configId);
 					} else {
 						vh.stringLabel("Edit", id, "Locked", row);						
 					}
@@ -70,7 +69,7 @@ public class BuildingTablePage  {
 				
 			} else {
 				vh.registerHeaderEntry("Edit");
-			}
+			}*/
 			if(object.isActive())
 				vh.linkingButton("Evaluate All", id, object, row, "Evaluate All", "evalAll.html");
 			else
@@ -84,7 +83,8 @@ public class BuildingTablePage  {
 			header.addDefaultStyle(WidgetData.TEXT_ALIGNMENT_LEFT);
 			page.append(header);
 			
-			RedirectButton addEntry = new RedirectButton(page, "addEntry"+pid, "Add Building") {
+			RedirectButton addEntry = new AddEntryButton(page, "addEntry", pid, "Add Building", BuildingData.class, exPage);
+			/*RedirectButton addEntry = new RedirectButton(page, "addEntry"+pid, "Add Building") {
 				private static final long serialVersionUID = -1629093147343510820L;
 				@Override
 				public void onGET(OgemaHttpRequest req) {
@@ -101,11 +101,11 @@ public class BuildingTablePage  {
 					if(configId.startsWith(CapabilityHelper.ERROR_START)) setUrl("error/"+configId, req);
 					else setUrl(pageData.getUrl()+"?configId="+configId, req);
 				}
-			};
+			};*/
 			page.append(addEntry);
 		}
 		
-		private NavigationPublicPageData getBuildingEditPage(ExtensionResourceAccessInitData appData) {
+		/*private NavigationPublicPageData getBuildingEditPage(ExtensionResourceAccessInitData appData) {
 			List<NavigationPublicPageData> pages = appData.systemAccess().getPages(BuildingData.class);
 			if(pages.isEmpty()) return null;
 			else return pages.get(0);
@@ -119,7 +119,7 @@ public class BuildingTablePage  {
 				idx++;
 			}
 			throw new IllegalStateException("BuildinData entry type not found in Building Edit Page!");
-		}
+		}*/
 		
 		@Override
 		public List<BuildingData> getResourcesInTable(OgemaHttpRequest req) {

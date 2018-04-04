@@ -5,12 +5,14 @@ import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.config.SmartEffAdminData;
 import org.smartrplace.smarteff.admin.gui.ExtensionNavigationPage;
 import org.smartrplace.smarteff.admin.protect.ExtensionResourceAccessInitDataImpl;
 import org.smartrplace.smarteff.admin.protect.NavigationPageSystemAccess;
+import org.smartrplace.smarteff.admin.protect.NavigationPageSystemAccessForPageOpening;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration.ConfigInfo;
 
 import de.iwes.util.resource.ValueResourceHelper;
@@ -25,6 +27,7 @@ public class UserAdmin {
 	
 	public UserAdmin(SpEffAdminController app) {
 		this.app = app;
+		if(app == null) return;
 		userDataNE = app.appMan.getResourceAccess().getResource("master");
 		if(!userDataNE.isActive()) {
 			initTestData();
@@ -96,4 +99,39 @@ public class UserAdmin {
 	public SmartEffAdminData getAppConfigData() {
 		return appConfigData;
 	}
+	
+	public ExtensionResourceAccessInitData getAccessData(String configId, OgemaHttpRequest req,
+			NavigationGUIProvider navi) {
+		return getAccessData(configId, req, navi, getUserData(), app);
+	}	
+	protected ExtensionResourceAccessInitData getAccessData(String configId, OgemaHttpRequest req,
+			NavigationGUIProvider navi, SmartEffUserDataNonEdit userDataNonEdit,
+			SpEffAdminController app) {
+		if(navi.getEntryTypes() == null || configId == null) {
+			ExtensionResourceType editableData = null;
+			NavigationPageSystemAccessForPageOpening systemAccess;
+			if(userDataNonEdit != null) {
+				editableData = userDataNonEdit.editableData().getLocationResource();
+				systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
+						navi.label(req.getLocale()),
+						app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt);
+			} else {
+				systemAccess = new NavigationPageSystemAccessForPageOpening(
+					app.guiPageAdmin.navigationPublicData, app.configIdAdmin);
+			}
+			ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
+					editableData , userDataNonEdit, systemAccess);
+			return result;
+		} else {
+			NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
+					navi.label(req.getLocale()),
+					app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt);
+			ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
+			ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(c.entryIdx,
+					c.entryResources,
+					userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
+			return result;
+		}
+	}
+
 }

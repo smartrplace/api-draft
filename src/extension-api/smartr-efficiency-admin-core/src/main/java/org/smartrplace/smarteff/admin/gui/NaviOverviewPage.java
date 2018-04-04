@@ -64,8 +64,10 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 			else text += "; "+t.getType().getSimpleName();
 		}
 		vh.stringLabel("Entry Types", id, text, row);
+		//ExtensionResourceAccessInitData systemAccess = app.getUserAdmin().getAccessData(null, req, object.provider);
+		//SPPageUtil.addOpenButton("Open", null, null, vh, id, row, object, systemAccess.systemAccess(), "Open", "--");
 		if(object.provider.getEntryTypes() == null)
-			vh.linkingButton("Open", id, object, row, "Open", object.url);
+			vh.linkingButton("Open", id, null, row, "Open", object.url);
 		else
 			vh.stringLabel("Open", id, "--", row);
 	}

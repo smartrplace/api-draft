@@ -17,7 +17,6 @@ import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
-import org.smartrplace.smarteff.admin.SpEffAdminApp;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
@@ -42,7 +41,7 @@ public class GUIPageAdministation {
 
 	public NavigationPageData selectedStartPage;
 	
-	protected final static Logger logger = LoggerFactory.getLogger(SpEffAdminApp.class);
+	protected final static Logger logger = LoggerFactory.getLogger(SpEffAdminController.class);
 	
 	public void registerService(SmartEffExtensionService service) {
     	ServiceCapabilities caps = SmartrEffExtResourceTypeData.getServiceCaps(service);

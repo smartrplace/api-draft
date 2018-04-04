@@ -19,12 +19,11 @@ import org.smartrplace.smarteff.admin.util.TypeAdministration;
 import org.smartrplace.smarteff.util.CapabilityHelper;
 import org.smartrplace.util.format.ValueFormat;
 
-public class NavigationPageSystemAccess implements ExtensionPageSystemAccessForCreate {
+public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPageOpening
+		implements ExtensionPageSystemAccessForCreate {
 	private final String userName;
 	private final String applicationName;
-	private final Map<Class<? extends ExtensionResourceType>, List<NavigationPublicPageData>> pageInfo;
 	private final ResourceLockAdministration lockAdmin;
-	private final ConfigIdAdministration configIdAdmin;
 	private final ApplicationManagerSPExt appExt;
 	private final TypeAdministration typeAdmin;
 	
@@ -33,11 +32,10 @@ public class NavigationPageSystemAccess implements ExtensionPageSystemAccessForC
 			ResourceLockAdministration lockAdmin, ConfigIdAdministration configIdAdmin,
 			TypeAdministration typeAdmin,
 			ApplicationManagerSPExt appExt) {
+		super(pageInfo, configIdAdmin);
 		this.userName = userName;
 		this.applicationName = applicationName;
-		this.pageInfo = pageInfo;
 		this.lockAdmin = lockAdmin;
-		this.configIdAdmin = configIdAdmin;
 		this.typeAdmin = typeAdmin;
 		this.appExt = appExt;
 	}

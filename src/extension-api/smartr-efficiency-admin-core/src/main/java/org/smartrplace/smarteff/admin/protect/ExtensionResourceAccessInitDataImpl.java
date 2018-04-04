@@ -3,6 +3,7 @@ package org.smartrplace.smarteff.admin.protect;
 import java.util.List;
 
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
+import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForPageOpening;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
@@ -12,11 +13,11 @@ public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAcc
 	private final List<ExtensionResourceType> entryResources;
 	private final ExtensionResourceType userData;
 	private final ExtensionUserDataNonEdit userDataNonEdit;
-	private final ExtensionPageSystemAccessForCreate systemAccess;
+	private final ExtensionPageSystemAccessForPageOpening systemAccess;
 	
 	public ExtensionResourceAccessInitDataImpl(int entryTypeIdx, List<ExtensionResourceType> entryResources,
 			ExtensionResourceType userData, ExtensionUserDataNonEdit userDataNonEdit,
-			ExtensionPageSystemAccessForCreate systemAccess) {
+			ExtensionPageSystemAccessForPageOpening systemAccess) {
 		this.entryTypeIdx = entryTypeIdx;
 		this.entryResources = entryResources;
 		this.userData = userData;
@@ -46,6 +47,12 @@ public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAcc
 
 	@Override
 	public ExtensionPageSystemAccessForCreate systemAccess() {
+		if(!(systemAccess instanceof ExtensionPageSystemAccessForCreate))
+			throw new IllegalStateException("Page without valid configID only supports systeAccessForPageOpening!");
+		return (ExtensionPageSystemAccessForCreate) systemAccess;
+	}
+	@Override
+	public ExtensionPageSystemAccessForPageOpening systemAccessForPageOpening() {
 		return systemAccess;
 	}
 }

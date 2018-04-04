@@ -24,4 +24,8 @@ public interface ExtensionResourceAccessInitData {
 	
 	/** Access for module for resource creation process*/
 	ExtensionPageSystemAccessForCreate systemAccess();
+
+	/** Access for module for simple page opening, supported also for page openings without
+	 * valid configId*/
+	ExtensionPageSystemAccessForPageOpening systemAccessForPageOpening();
 }

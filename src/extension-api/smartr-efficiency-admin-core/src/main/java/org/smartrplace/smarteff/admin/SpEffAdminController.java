@@ -32,7 +32,7 @@ public class SpEffAdminController {
     public final WidgetApp widgetApp;
 
 	public Set<SmartEffExtensionService> servicesKnown = new HashSet<>();
-	public final GUIPageAdministation guiPageAdmin;
+	public GUIPageAdministation guiPageAdmin;
 
 	public ResourceLockAdministration lockAdmin = new ResourceLockAdministration();
 	public ConfigIdAdministration configIdAdmin = new ConfigIdAdministration();
@@ -71,10 +71,14 @@ public class SpEffAdminController {
 		this.log = appMan.getLogger();
 		this.widgetApp = widgetApp;
 		this.serviceAccess = evaluationOCApp;
+		init();
+	}
+    
+    protected void init() {
 		userAdmin = new UserAdmin(this);
 		this.typeAdmin = new TypeAdministration(this);
-		guiPageAdmin = new GUIPageAdministation(this);
-	}
+		this.guiPageAdmin = new GUIPageAdministation(this);    	
+    }
     
     public void processOpenServices() {
 		for(SmartEffExtensionService service: serviceAccess.getEvaluations().values()) {
