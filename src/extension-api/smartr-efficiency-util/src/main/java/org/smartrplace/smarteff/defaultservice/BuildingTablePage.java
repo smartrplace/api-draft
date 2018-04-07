@@ -3,10 +3,12 @@ package org.smartrplace.smarteff.defaultservice;
 import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.Resource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.smarteff.util.AddEntryButton;
 import org.smartrplace.smarteff.util.NaviPageBase;
 import org.smartrplace.smarteff.util.SPPageUtil;
@@ -49,6 +51,7 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 			vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 			vh.floatLabel("Heated Area", id, object.heatedLivingSpace(), row, "%.0f m2");
 			SPPageUtil.addResOpenButton("Edit", object, BuildingData.class, vh, id, row, appData);
+			SPPageUtil.addResResourceOpenButton("Open", object, BuildingData.class, vh, id, row, appData);
 			if(object.isActive())
 				vh.linkingButton("Evaluate All", id, object, row, "Evaluate All", "evalAll.html");
 			else
@@ -58,7 +61,13 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 
 		@Override
 		public void addWidgetsAboveTable() {
-			RedirectButton addEntry = new AddEntryButton(page, "addEntry", pid(), "Add Building", BuildingData.class, exPage);
+			RedirectButton addEntry = new AddEntryButton(page, "addEntry", pid(), "Add Building", BuildingData.class, exPage) {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected Resource getResource(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {
+					return appData.userData();
+				}
+			};
 			page.append(addEntry);
 			exPage.registerDependentWidgetOnInit(mainTable);
 		}
@@ -98,5 +107,10 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 	@Override
 	protected String getHeader(OgemaHttpRequest req) {
 		return provider.label(null);
+	}
+
+	@Override
+	protected PageType getPageType() {
+		return PageType.TABLE_PAGE;
 	}
 }

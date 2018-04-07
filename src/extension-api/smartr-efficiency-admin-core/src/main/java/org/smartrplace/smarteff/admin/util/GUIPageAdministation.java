@@ -22,6 +22,7 @@ import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData.ServiceCapabilities;
 import org.smartrplace.smarteff.admin.protect.NavigationPublicPageDataImpl;
+import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -46,8 +47,8 @@ public class GUIPageAdministation {
 	public void registerService(SmartEffExtensionService service) {
     	ServiceCapabilities caps = SmartrEffExtResourceTypeData.getServiceCaps(service);
     	for(NavigationGUIProvider navi: caps.naviProviders) {
-    		String id = WidgetHelper.getValidWidgetId(SmartrEffUtil.buildId(navi));
-    		String url = WidgetHelper.getValidWidgetId(SmartrEffUtil.buildId(navi))+".html";
+    		String id = WidgetHelper.getValidWidgetId(SPPageUtil.buildId(navi));
+    		String url = SPPageUtil.getProviderURL(navi);
     		WidgetPage<?> page = app.widgetApp.createWidgetPage(url);
     		NavigationMenu menu = app.getNavigationMenu();
     		MenuConfiguration mc = page.getMenuConfiguration();
@@ -78,14 +79,14 @@ public class GUIPageAdministation {
 	public void unregisterService(SmartEffExtensionService service) {
     	ServiceCapabilities caps = SmartrEffExtResourceTypeData.getServiceCaps(service);
     	List<NavigationPageData> toRemove = new ArrayList<>();
-    	String serviceId = SmartrEffUtil.buildId(service);
+    	String serviceId = SPPageUtil.buildId(service);
     	for(NavigationPageData navi: startPages) {
-    		if(SmartrEffUtil.buildId(navi.parent).equals(serviceId)) toRemove.add(navi);
+    		if(SPPageUtil.buildId(navi.parent).equals(serviceId)) toRemove.add(navi);
     	}
     	startPages.removeAll(toRemove);
     	navigationPages.removeAll(toRemove);
     	for(NavigationGUIProvider navi: caps.naviProviders) {
-    		String naviId = SmartrEffUtil.buildId(navi);
+    		String naviId = SPPageUtil.buildId(navi);
  			if(navi.getEntryTypes() == null) continue;
 			else for(EntryType t: navi.getEntryTypes()) {
 				List<NavigationPublicPageData> listPub = navigationPublicData.get(t.getType());

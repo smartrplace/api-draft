@@ -1,6 +1,9 @@
 package org.smartrplace.smarteff.admin;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
@@ -48,6 +51,16 @@ public class SpEffAdminController {
 			return (ExtensionResourceTypeDeclaration<T>) typeAdmin.resourceTypes.get(resourceType).typeDeclaration;
 		}
 		
+		public List<Class<? extends Resource>> getSubTypes(Class<? extends Resource> parentType) {
+			List<Class<? extends Resource>> result = new ArrayList<>();
+			for(Entry<Class<? extends SmartEffResource>, SmartrEffExtResourceTypeData> e: typeAdmin.resourceTypes.entrySet()) {
+				if((e.getValue().typeDeclaration.parentType() != null) && e.getValue().typeDeclaration.parentType().isAssignableFrom(parentType)) {
+					result.add(e.getKey());
+				}
+			}
+			return result;
+		}
+
 		@Override
 		public Resource generalData() {
 			return userAdmin.getAppConfigData().generalData();

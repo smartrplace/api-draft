@@ -8,6 +8,8 @@ import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PagePriority;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 
 import de.iwes.widgets.api.extended.WidgetData;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -21,12 +23,16 @@ public abstract class NaviPageBase<T extends Resource>  {
 	protected abstract String label(OgemaLocale locale);
 	protected abstract void addWidgets();
 	protected abstract List<EntryType> getEntryTypes();
+	protected abstract PageType getPageType();
 	//Overwrite if necessary
 	protected String getHeader(OgemaHttpRequest req) {
 		return getReqData(req).getLocation();
 	}
 	protected String pid() {
 		return typeClass().getSimpleName();
+	}
+	protected PagePriority getPriority() {
+		return PagePriority.STANDARD;
 	}
 
 	protected EditPage editPage;
@@ -92,6 +98,16 @@ public abstract class NaviPageBase<T extends Resource>  {
 		@Override
 		public List<EntryType> getEntryTypes() {
 			return NaviPageBase.this.getEntryTypes();
+		}
+
+		@Override
+		public PageType getPageType() {
+			return NaviPageBase.this.getPageType();
+		}
+		
+		@Override
+		public PagePriority getPriority() {
+			return NaviPageBase.this.getPriority();
 		}
 	}
 	

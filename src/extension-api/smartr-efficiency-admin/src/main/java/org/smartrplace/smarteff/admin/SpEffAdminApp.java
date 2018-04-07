@@ -24,8 +24,8 @@ import org.smartrplace.smarteff.admin.gui.ServiceDetailPage;
 import org.smartrplace.smarteff.admin.gui.ServicePage;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
-import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 import org.smartrplace.smarteff.defaultservice.BaseDataService;
+import org.smartrplace.smarteff.util.SPPageUtil;
 
 import de.iwes.timeseries.eval.base.provider.BasicEvaluationProvider;
 import de.iwes.widgets.api.OgemaGuiService;
@@ -139,7 +139,7 @@ public class SpEffAdminApp implements Application, ServiceAccess {
     List<SmartEffExtensionService> providersToProcess = new CopyOnWriteArrayList<>();
 
     protected void addProvider(SmartEffExtensionService provider) {
-    	evaluationProviders.put(SmartrEffUtil.buildId(provider), provider);
+    	evaluationProviders.put(SPPageUtil.buildId(provider), provider);
     	// Execute in main application thread
     	if(initDone) {
     		new CountDownDelayedExecutionTimer(appMan, 1) {
@@ -153,7 +153,7 @@ public class SpEffAdminApp implements Application, ServiceAccess {
     }
     
     protected void removeProvider(SmartEffExtensionService provider) {
-    	evaluationProviders.remove(SmartrEffUtil.buildId(provider));
+    	evaluationProviders.remove(SPPageUtil.buildId(provider));
     	// Execute in main application thread
     	if(controller != null) new CountDownDelayedExecutionTimer(appMan, 1) {
 			

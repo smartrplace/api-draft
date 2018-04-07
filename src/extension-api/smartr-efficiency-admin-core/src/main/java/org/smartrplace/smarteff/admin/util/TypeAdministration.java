@@ -9,6 +9,7 @@ import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
+import org.smartrplace.smarteff.util.SPPageUtil;
 
 public class TypeAdministration {
 	public Map<Class<? extends SmartEffResource>, SmartrEffExtResourceTypeData> resourceTypes = new HashMap<>();
@@ -36,7 +37,7 @@ public class TypeAdministration {
     		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
     		if(data == null) {
     			//should not occur
-    			app.log.error("Resource type "+rt.getName()+" not found when service "+SmartrEffUtil.buildId(service)+ "unregistered!");
+    			app.log.error("Resource type "+rt.getName()+" not found when service "+SPPageUtil.buildId(service)+ "unregistered!");
     		} else if(data.removeParent(service)) resourceTypes.remove(rt);
     	}
 	}

@@ -7,11 +7,13 @@ import java.util.Collection;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application.AppStopReason;
+import org.ogema.core.model.Resource;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
+import org.smartrplace.smarteff.util.NaviPageBase;
 
 import extensionmodel.smarteff.api.base.BuildingData;
 import extensionmodel.smarteff.api.base.SmartEffPriceData;
@@ -46,6 +48,8 @@ public class BaseDataService implements SmartEffExtensionService {
 	};
 	public final static org.smartrplace.smarteff.defaultservice.BuildingTablePage.Provider BUILDING_NAVI_PROVIDER = new BuildingTablePage().provider;
 	public final static org.smartrplace.smarteff.defaultservice.BuildingEditPage.Provider BUILDING_EDIT_PROVIDER = new BuildingEditPage().provider;
+	public final static NaviPageBase<Resource>.Provider RESOURCE_NAVI_PROVIDER = new ResourceTablePage().provider;
+	public final static NaviPageBase<Resource>.Provider RESOURCEALL_NAVI_PROVIDER = new ResourceAllTablePage().provider;
 	
 	@Override
 	public void start(ApplicationManagerSPExt appManExt) {
@@ -59,7 +63,7 @@ public class BaseDataService implements SmartEffExtensionService {
 
 	@Override
 	public Collection<ExtensionCapability> getCapabilities() {
-		return Arrays.asList(new ExtensionCapability[] {BUILDING_NAVI_PROVIDER, BUILDING_EDIT_PROVIDER});
+		return Arrays.asList(new ExtensionCapability[] {BUILDING_NAVI_PROVIDER, BUILDING_EDIT_PROVIDER, RESOURCE_NAVI_PROVIDER, RESOURCEALL_NAVI_PROVIDER});
 	}
 
 	@Override

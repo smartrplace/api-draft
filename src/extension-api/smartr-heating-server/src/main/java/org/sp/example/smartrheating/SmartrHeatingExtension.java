@@ -12,17 +12,18 @@ import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
+import org.smartrplace.smarteff.util.NaviPageBase;
 
 import extensionmodel.smarteff.api.base.BuildingData;
 
 @Service(SmartEffExtensionService.class)
 @Component
 public class SmartrHeatingExtension implements SmartEffExtensionService {
-	private ApplicationManagerSPExt appManExt;
+	//private ApplicationManagerSPExt appManExt;
 	
 	@Override
 	public void start(ApplicationManagerSPExt appManExt) {
-		this.appManExt = appManExt;
+		//this.appManExt = appManExt;
 		//Do nothing more here !
 	}
 
@@ -30,9 +31,10 @@ public class SmartrHeatingExtension implements SmartEffExtensionService {
 	public void stop(AppStopReason reason) {
 	}
 
+	public final static NaviPageBase<SmartrHeatingData>.Provider EDIT_PROVIDER = new SmartrHeatingEditPage().provider;
 	@Override
 	public Collection<ExtensionCapability> getCapabilities() {
-		return Arrays.asList(new ExtensionCapability[] {new SmartrHeatingEditPage(appManExt),
+		return Arrays.asList(new ExtensionCapability[] {EDIT_PROVIDER,
 				new SmartrHeatingRecommendationProvider()});
 	}
 

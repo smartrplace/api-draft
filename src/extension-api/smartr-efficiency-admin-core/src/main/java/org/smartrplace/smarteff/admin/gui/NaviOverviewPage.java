@@ -8,7 +8,7 @@ import org.ogema.core.model.simple.TimeResource;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
-import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
+import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
@@ -79,7 +79,7 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 	
 	@Override
 	public String getLineId(NavigationPageData object) {
-		String name = SmartrEffUtil.buildValidWidgetId(object.provider);
+		String name = SPPageUtil.buildValidWidgetId(object.provider);
 		return name + super.getLineId(object);
 	}
 }

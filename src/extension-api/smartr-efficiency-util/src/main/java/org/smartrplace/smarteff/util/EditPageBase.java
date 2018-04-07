@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
+import org.ogema.model.prototypes.Data;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.widgets.api.widgets.OgemaWidget;
@@ -13,11 +16,17 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.html.form.button.TemplateInitSingleEmpty;
+import extensionmodel.smarteff.api.base.BuildingData;
 
 public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 	protected abstract void getEditTableLines(EditTableBuilder etb);
 	public abstract boolean checkResource(T data);
 	
+	@Override
+	protected List<EntryType> getEntryTypes() {
+		return CapabilityHelper.getStandardEntryTypeList(typeClass());
+	}
+
 	protected ObjectResourceGUIHelper<T, T> mh;
 	protected Alert alert;
 	
@@ -112,10 +121,34 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 				appData.systemAccess().activateResource(res);
 			}
 		};
-		table.setContent(c, 0, activateButton);
+		TableOpenButton tableButton = new TableOpenButton(page, "addEntry", pid(), "Data Explorer", typeClass(), exPage);
+		table.setContent(c, 0, activateButton).setContent(c, 1, tableButton);
 
 		page.append(table);
 		exPage.registerAppTableWidgetsDependentOnInit(table);
 	}
 	
+	@Override
+	protected PageType getPageType() {
+		return PageType.EDIT_PAGE;
+	}
+	
+	protected <R extends Resource> boolean checkResourceBase(R resource, boolean nameRelevant) {
+		Data data;
+		String name = null;
+		if(nameRelevant) {
+			data = (Data)resource;
+			name = data.name().getValue();
+			if(name.isEmpty()) return false;
+		}
+		@SuppressWarnings("unchecked")
+		Class<R> type = (Class<R>) resource.getResourceType();
+		List<R> otherOfType = resource.getParent().getSubResources(type, false);
+		for(R ot: otherOfType) {
+			if(ot.equalsLocation(resource)) continue;
+			if(nameRelevant &&(((Data)ot).name().getValue().equals(name))) return false;
+		}
+		return true;
+	}
+
 }

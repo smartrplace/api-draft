@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
-import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
+import org.smartrplace.smarteff.util.SPPageUtil;
 
 import de.iwes.widgets.api.extended.WidgetData;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -33,7 +33,7 @@ public class ServiceDetailPage {
 			@Override
 			protected SmartEffExtensionService getItemById(String configId) {
 				for(SmartEffExtensionService eval: controller.serviceAccess.getEvaluations().values()) {
-					if(SmartrEffUtil.buildId(eval).equals(configId)) return eval;
+					if(SPPageUtil.buildId(eval).equals(configId)) return eval;
 				}
 				return null;
 			}
@@ -56,7 +56,7 @@ public class ServiceDetailPage {
 		selectProvider.setTemplate(new DisplayTemplate<SmartEffExtensionService>() {
 			@Override
 			public String getId(SmartEffExtensionService object) {
-				return SmartrEffUtil.buildId(object);
+				return SPPageUtil.buildId(object);
 			}
 
 			@Override

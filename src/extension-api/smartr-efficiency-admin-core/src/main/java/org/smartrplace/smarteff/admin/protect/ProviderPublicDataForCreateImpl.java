@@ -5,7 +5,7 @@ import java.util.List;
 import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionCapabilityForCreate;
 import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate;
-import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
+import org.smartrplace.smarteff.util.SPPageUtil;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
@@ -28,7 +28,7 @@ public class ProviderPublicDataForCreateImpl implements ProviderPublicDataForCre
 
 	@Override
 	public String id() {
-		return SmartrEffUtil.buildId(inputProvider);
+		return SPPageUtil.buildId(inputProvider);
 	}
 
 	@Override

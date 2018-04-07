@@ -1,7 +1,6 @@
 package org.smartrplace.smarteff.admin.protect;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -11,12 +10,12 @@ import org.ogema.core.resourcemanager.ResourceException;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
-import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration;
 import org.smartrplace.smarteff.admin.util.ResourceLockAdministration;
 import org.smartrplace.smarteff.admin.util.TypeAdministration;
 import org.smartrplace.smarteff.util.CapabilityHelper;
+import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.format.ValueFormat;
 
 public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPageOpening
@@ -38,19 +37,6 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 		this.lockAdmin = lockAdmin;
 		this.typeAdmin = typeAdmin;
 		this.appExt = appExt;
-	}
-
-	@Override
-	public List<NavigationPublicPageData> getPages(Class<? extends Resource> type) {
-		List<NavigationPublicPageData> result = pageInfo.get(type);
-		if(result == null) return Collections.emptyList();
-		return result;
-	}
-	
-	@Override
-	public String accessPage(NavigationPublicPageData pageData, int entryIdx,
-			List<Resource> entryResources) {
-		return configIdAdmin.getConfigId(entryIdx, entryResources);
 	}
 
 	@Override
@@ -92,7 +78,7 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 	@Override
 	public <T extends Resource> NewResourceResult<T> getNewResource(Resource parentIn,
 			String name, ExtensionResourceTypeDeclaration<T> type) {
-		if(isMulti(type.cardinality())) {
+		if(SPPageUtil.isMulti(type.cardinality())) {
 			ResourceList<T> parent = null;
 			if(parentIn instanceof ResourceList) {
 				parent = (ResourceList<T>) parentIn;
@@ -144,11 +130,6 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 		}
 	}
 	
-	private boolean isMulti(Cardinality card) {
-		if(card == Cardinality.MULTIPLE_OPTIONAL || card == Cardinality.MULTIPLE_REQUIRED) return true;
-		return false;
-	}
-
 	@Override
 	public <T extends Resource> NewResourceResult<T> getNewResource(T virtualResource) {
 		NewResourceResult<T> result = new NewResourceResult<>();
