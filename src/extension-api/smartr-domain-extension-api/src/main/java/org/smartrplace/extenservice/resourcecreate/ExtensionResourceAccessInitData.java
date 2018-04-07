@@ -2,7 +2,7 @@ package org.smartrplace.extenservice.resourcecreate;
 
 import java.util.List;
 
-import org.smartrplace.extensionservice.ExtensionResourceType;
+import org.ogema.core.model.Resource;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 
 public interface ExtensionResourceAccessInitData {
@@ -13,11 +13,11 @@ public interface ExtensionResourceAccessInitData {
 	 * 		the EntryType does not allow multiple entries the list will only contain a single element. If
 	 * 		the cardinality allows zero the list may be empty.
 	 */
-	List<ExtensionResourceType> entryResources();
+	List<Resource> entryResources();
 
 	/**Domain-specific reference to user data.
 	 */
-	ExtensionResourceType userData();
+	Resource userData();
 	
 	/** User data than cannot be edited by the user*/
 	ExtensionUserDataNonEdit userDataNonEdit();

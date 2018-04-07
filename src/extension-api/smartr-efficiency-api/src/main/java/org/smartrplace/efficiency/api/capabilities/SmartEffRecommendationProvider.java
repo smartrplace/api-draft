@@ -2,9 +2,9 @@ package org.smartrplace.efficiency.api.capabilities;
 
 import java.util.List;
 
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ExtensionCapability;
-import org.smartrplace.extensionservice.gui.DataEntryProvider;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 
 import de.iwes.widgets.template.LabelledItem;
 import extensionmodel.smarteff.api.base.SmartEffGeneralData;
@@ -28,7 +28,7 @@ public interface SmartEffRecommendationProvider extends ExtensionCapability {
 	 * called. Note that not listeners on all elements may be registered, but the application may
 	 * only trigger this if it changed a value itself or let an extension make changes
 	 */
-	public List<Class<? extends SmartEffExtensionResourceType>> inputResourceTypes();
+	public List<Class<? extends SmartEffResource>> inputResourceTypes();
 	
 	/** Trigger initial calculation of recommendations or update for a certain user
 	 * 
@@ -38,7 +38,7 @@ public interface SmartEffRecommendationProvider extends ExtensionCapability {
 	 * @param recommendations may be an emtpy list on initial calculation
 	 */
 	public void updateRecommendations(SmartEffUserData userData, SmartEffGeneralData generalData,
-			List<SmartEffExtensionResourceType> resourcesChanged,
+			List<SmartEffResource> resourcesChanged,
 			List<Recommendation> recommendations);
 	
 	/** The recommendation provider may provide a detailed view with information that is specific for the
@@ -46,6 +46,6 @@ public interface SmartEffRecommendationProvider extends ExtensionCapability {
 	 * 
 	 * @return may be null of not result page definition is provided
 	 */
-	public <S extends SmartEffExtensionResourceType> DataEntryProvider<S> resultPageDefinition();
+	public NavigationGUIProvider resultPageDefinition();
 
 }

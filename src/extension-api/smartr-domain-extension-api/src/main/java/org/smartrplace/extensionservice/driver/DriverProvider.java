@@ -3,10 +3,8 @@ package org.smartrplace.extensionservice.driver;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
-import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
@@ -39,11 +37,11 @@ public interface DriverProvider extends ExtensionCapability {
 	
 	void init(ApplicationManagerSPExt appManExt);
 
-	/** Get data provider for the user. See {@link NavigationGUIProvider#initPage(ExtensionNavigationPageI, ExtensionResourceType)}
+	/** Get data provider for the user. See {@link NavigationGUIProvider#initPage(ExtensionNavigationPageI, Resource)}
 	 * 
 	 * @return data provider for the user. If the provider does not find the necessary configuration data for
 	 * the user it shall return null.
 	 */
-	DataProvider<Resource> getDataProvider(int entryTypeIdx, List<ExtensionResourceType> entryResources, ExtensionResourceType userData,
+	DataProvider<Resource> getDataProvider(int entryTypeIdx, List<Resource> entryResources, Resource userData,
 			ExtensionUserDataNonEdit userDataNonEdit);
 }

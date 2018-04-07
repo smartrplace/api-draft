@@ -2,10 +2,10 @@ package org.smartrplace.extenservice.proposal;
 
 import java.util.List;
 
+import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionCapabilityForCreate;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 
 /** A ProposalProvider calculates some results based on an entry point-based input resource and futher user and
  * general data it finds itself based on the entry point-based resource(s). So a ProposalProvider acts very
@@ -31,5 +31,5 @@ public interface ProposalProvider extends ExtensionCapabilityForCreate {
 	 * @return resources created and modified. The first element should contain the most important result and the
 	 * 		further order of the list should reflect the relevance of the changes (if possible) 
 	 */
-	List<ExtensionResourceType> calculate(ExtensionResourceAccessInitData data);	
+	List<Resource> calculate(ExtensionResourceAccessInitData data);	
 }

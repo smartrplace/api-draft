@@ -1,6 +1,8 @@
 package org.smartrplace.extensionservice;
 
-public interface ExtensionResourceTypeDeclaration<T extends ExtensionResourceType> {
+import org.ogema.core.model.Resource;
+
+public interface ExtensionResourceTypeDeclaration<T extends Resource> {
 	/**Resource type required by app module to store its persistent data*/
 	Class<? extends T> dataType();
 	/**Name of the element or the resource list. The name needs to be unique among the sub elements of the

@@ -3,9 +3,9 @@ package extensionmodel.smarteff.api.base;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 
-public interface BuildingData extends SmartEffExtensionResourceType {
+public interface BuildingData extends SmartEffResource {
 	/** 1: single family home (SFH)<br>
 	 *  2: multi family home< (MFH)br>
 	 *  3: apartment<br>

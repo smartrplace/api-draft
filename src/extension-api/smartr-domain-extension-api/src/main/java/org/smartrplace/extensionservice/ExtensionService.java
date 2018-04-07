@@ -3,13 +3,14 @@ package org.smartrplace.extensionservice;
 import java.util.Collection;
 
 import org.ogema.core.application.Application.AppStopReason;
+import org.ogema.core.model.Resource;
 
 /** To be registered as OSGi service by the extension module. Replacement for the Application service
  * registered by normal OGEMA applications.
  * @param <T> base ExtensionResouceType of the domain which is extended here. So this should be the same
  * for all extension modules of the domain
  */
-public interface ExtensionService<T extends ExtensionResourceType>  {
+public interface ExtensionService<T extends Resource>  {
 	/**Id of service. If null the full class name shall be used as id*/
 	default String id() {
 		return null;

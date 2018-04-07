@@ -1,5 +1,7 @@
 package org.smartrplace.extensionservice;
 
-public interface ExtensionUserData extends ExtensionResourceType {
+import org.ogema.model.prototypes.Data;
+
+public interface ExtensionUserData extends Data {
 
 }

@@ -7,8 +7,8 @@ import java.util.Collection;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application.AppStopReason;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
@@ -37,13 +37,13 @@ public class SmartrHeatingExtension implements SmartEffExtensionService {
 	}
 
 	@Override
-	public Collection<ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType>> resourcesDefined() {
-		Collection<ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType>> result = 
+	public Collection<ExtensionResourceTypeDeclaration<? extends SmartEffResource>> resourcesDefined() {
+		Collection<ExtensionResourceTypeDeclaration<? extends SmartEffResource>> result = 
 				new ArrayList<>();
-		result.add(new ExtensionResourceTypeDeclaration<SmartEffExtensionResourceType>() {
+		result.add(new ExtensionResourceTypeDeclaration<SmartEffResource>() {
 
 			@Override
-			public Class<? extends SmartEffExtensionResourceType> dataType() {
+			public Class<? extends SmartEffResource> dataType() {
 				return SmartrHeatingData.class;
 			}
 
@@ -53,7 +53,7 @@ public class SmartrHeatingExtension implements SmartEffExtensionService {
 			}
 
 			@Override
-			public Class<? extends SmartEffExtensionResourceType> parentType() {
+			public Class<? extends SmartEffResource> parentType() {
 				return BuildingData.class;
 			}
 

@@ -1,21 +1,17 @@
 package org.smartrplace.smarteff.admin.util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.ogema.core.model.Resource;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
-import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
-import org.smartrplace.extensionservice.ExtensionResourceType;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
-import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 
 public class TypeAdministration {
-	public Map<Class<? extends SmartEffExtensionResourceType>, SmartrEffExtResourceTypeData> resourceTypes = new HashMap<>();
+	public Map<Class<? extends SmartEffResource>, SmartrEffExtResourceTypeData> resourceTypes = new HashMap<>();
 	private final SpEffAdminController app;
 	
 	public TypeAdministration(SpEffAdminController app) {
@@ -23,8 +19,8 @@ public class TypeAdministration {
 	}
 
 	public void registerService(SmartEffExtensionService service) {
-    	for(ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType> rtd: service.resourcesDefined()) {
-    		Class<? extends SmartEffExtensionResourceType> rt = rtd.dataType();
+    	for(ExtensionResourceTypeDeclaration<? extends SmartEffResource> rtd: service.resourcesDefined()) {
+    		Class<? extends SmartEffResource> rt = rtd.dataType();
     		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
     		if(data == null) {
     			data = new SmartrEffExtResourceTypeData(rtd, service, app);
@@ -35,8 +31,8 @@ public class TypeAdministration {
 	}
 	
 	public void unregisterService(SmartEffExtensionService service) {
-     	for(ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType> rtd: service.resourcesDefined()) {
-    		Class<? extends SmartEffExtensionResourceType> rt = rtd.dataType();
+     	for(ExtensionResourceTypeDeclaration<? extends SmartEffResource> rtd: service.resourcesDefined()) {
+    		Class<? extends SmartEffResource> rt = rtd.dataType();
     		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
     		if(data == null) {
     			//should not occur
@@ -46,22 +42,22 @@ public class TypeAdministration {
 	}
 
 	/*@SuppressWarnings("unchecked")
-	public List<EntryType> getStandardEntryTypeList(Class<? extends ExtensionResourceType>... types) {
+	public List<EntryType> getStandardEntryTypeList(Class<? extends Resource>... types) {
 		List<EntryType> result = new ArrayList<>();
-		for(Class<? extends ExtensionResourceType> t: types) {
+		for(Class<? extends Resource> t: types) {
 			EntryType r = getEntryType(resourceTypes.get(t).typeDeclaration);
 			result.add(r);
 		}
 		return result ;
 	}*/
 	
-	public void registerElement(ExtensionResourceType res) {
+	public void registerElement(Resource res) {
 		SmartrEffExtResourceTypeData data = resourceTypes.get(res.getResourceType());
 		if(data == null) return;
 		data.registerElement(res);
 	}
 	
-	public void unregisterElement(SmartEffExtensionResourceType res) {
+	public void unregisterElement(SmartEffResource res) {
 		SmartrEffExtResourceTypeData data = resourceTypes.get(res.getResourceType());
 		if(data == null) return;
 		data.unregisterElement(res);

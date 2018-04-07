@@ -2,21 +2,21 @@ package org.smartrplace.smarteff.admin.protect;
 
 import java.util.List;
 
+import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForPageOpening;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 
 public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAccessInitData {
 	private final int entryTypeIdx;
-	private final List<ExtensionResourceType> entryResources;
-	private final ExtensionResourceType userData;
+	private final List<Resource> entryResources;
+	private final Resource userData;
 	private final ExtensionUserDataNonEdit userDataNonEdit;
 	private final ExtensionPageSystemAccessForPageOpening systemAccess;
 	
-	public ExtensionResourceAccessInitDataImpl(int entryTypeIdx, List<ExtensionResourceType> entryResources,
-			ExtensionResourceType userData, ExtensionUserDataNonEdit userDataNonEdit,
+	public ExtensionResourceAccessInitDataImpl(int entryTypeIdx, List<Resource> entryResources,
+			Resource userData, ExtensionUserDataNonEdit userDataNonEdit,
 			ExtensionPageSystemAccessForPageOpening systemAccess) {
 		this.entryTypeIdx = entryTypeIdx;
 		this.entryResources = entryResources;
@@ -31,12 +31,12 @@ public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAcc
 	}
 
 	@Override
-	public List<ExtensionResourceType> entryResources() {
+	public List<Resource> entryResources() {
 		return entryResources;
 	}
 
 	@Override
-	public ExtensionResourceType userData() {
+	public Resource userData() {
 		return userData;
 	}
 

@@ -2,11 +2,11 @@ package org.sp.example.smartrheating;
 
 import java.util.List;
 
+import org.ogema.core.model.Resource;
 import org.smartrplace.efficiency.api.capabilities.SmartEffRecommendationProvider.Recommendation;
 import org.smartrplace.extenservice.proposal.ProposalProvider;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import extensionmodel.smarteff.api.base.BuildingData;
@@ -29,8 +29,8 @@ public class SmartrHeatingRecommendationProvider implements ProposalProvider {
 	}
 
 	/*@Override
-	public List<Class<? extends SmartEffExtensionResourceType>> inputResourceTypes() {
-		List<Class<? extends SmartEffExtensionResourceType>> result = new ArrayList<>();
+	public List<Class<? extends SmartEffResource>> inputResourceTypes() {
+		List<Class<? extends SmartEffResource>> result = new ArrayList<>();
 		result .add(BuildingData.class);
 		result.add(SmartrHeatingData.class);
 		return result;
@@ -38,7 +38,7 @@ public class SmartrHeatingRecommendationProvider implements ProposalProvider {
 
 	/*@Override
 	public void updateRecommendations(SmartEffUserData userData, SmartEffGeneralData generalData,
-			List<SmartEffExtensionResourceType> resourcesChanged, List<Recommendation> recommendations) {
+			List<SmartEffResource> resourcesChanged, List<Recommendation> recommendations) {
 		final List<BuildingData> buildings;
 		if(resourcesChanged == null) {
 			buildings = userData.buildings().getAllElements();
@@ -97,7 +97,7 @@ public class SmartrHeatingRecommendationProvider implements ProposalProvider {
 		
 	}
 	
-	/*private List<BuildingData> getBuildingsChanged(List<SmartEffExtensionResourceType> resourcesChanged) {
+	/*private List<BuildingData> getBuildingsChanged(List<SmartEffResource> resourcesChanged) {
 		//TODO
 		return null;
 	}
@@ -118,7 +118,7 @@ public class SmartrHeatingRecommendationProvider implements ProposalProvider {
 	}
 
 	@Override
-	public List<ExtensionResourceType> calculate(ExtensionResourceAccessInitData data) {
+	public List<Resource> calculate(ExtensionResourceAccessInitData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}

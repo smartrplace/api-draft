@@ -2,9 +2,9 @@ package org.smartrplace.smarteff.admin.protect;
 
 import java.util.List;
 
+import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionCapabilityForCreate;
 import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -22,7 +22,7 @@ public class ProviderPublicDataForCreateImpl implements ProviderPublicDataForCre
 	}
 	
 	@Override
-	public List<Class<? extends ExtensionResourceType>> createTypes() {
+	public List<Class<? extends Resource>> createTypes() {
 		return inputProvider.createTypes();
 	}
 

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.config.SmartEffAdminData;
@@ -108,7 +107,7 @@ public class UserAdmin {
 			NavigationGUIProvider navi, SmartEffUserDataNonEdit userDataNonEdit,
 			SpEffAdminController app) {
 		if(navi.getEntryTypes() == null || configId == null) {
-			ExtensionResourceType editableData = null;
+			Resource editableData = null;
 			NavigationPageSystemAccessForPageOpening systemAccess;
 			if(userDataNonEdit != null) {
 				editableData = userDataNonEdit.editableData().getLocationResource();

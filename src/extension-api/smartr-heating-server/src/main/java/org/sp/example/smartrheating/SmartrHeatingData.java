@@ -3,9 +3,9 @@ package org.sp.example.smartrheating;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.IntegerResource;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 
-public interface SmartrHeatingData extends SmartEffExtensionResourceType {
+public interface SmartrHeatingData extends SmartEffResource {
 	/** 1: Standard on radiators<br>
 	 *  2: Control knob connected via pressure cable<br>
 	 *  3: room control device<br>

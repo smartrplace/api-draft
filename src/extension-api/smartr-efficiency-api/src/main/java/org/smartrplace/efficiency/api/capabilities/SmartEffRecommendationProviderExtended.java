@@ -1,6 +1,6 @@
 package org.smartrplace.efficiency.api.capabilities;
 
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 
 /** To be provided as OSGi service
   * */
@@ -36,7 +36,7 @@ public interface SmartEffRecommendationProviderExtended extends SmartEffRecommen
 	 * @param scenario
 	 * @return
 	 */
-	public SmartEffExtensionResourceType getRecommendationData2();
+	public SmartEffResource getRecommendationData2();
 	/** This is not really a MultiResult, but this could work with json persistence*/
 	//public MultiResult<Resource> getRecommendationData3();
 }

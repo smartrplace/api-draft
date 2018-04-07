@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.resourcemanager.ResourceException;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
@@ -28,7 +28,7 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 	private final TypeAdministration typeAdmin;
 	
 	public NavigationPageSystemAccess(String userName, String applicationName,
-			Map<Class<? extends ExtensionResourceType>, List<NavigationPublicPageData>> pageInfo,
+			Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo,
 			ResourceLockAdministration lockAdmin, ConfigIdAdministration configIdAdmin,
 			TypeAdministration typeAdmin,
 			ApplicationManagerSPExt appExt) {
@@ -41,7 +41,7 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 	}
 
 	@Override
-	public List<NavigationPublicPageData> getPages(Class<? extends ExtensionResourceType> type) {
+	public List<NavigationPublicPageData> getPages(Class<? extends Resource> type) {
 		List<NavigationPublicPageData> result = pageInfo.get(type);
 		if(result == null) return Collections.emptyList();
 		return result;
@@ -49,33 +49,33 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 	
 	@Override
 	public String accessPage(NavigationPublicPageData pageData, int entryIdx,
-			List<ExtensionResourceType> entryResources) {
+			List<Resource> entryResources) {
 		return configIdAdmin.getConfigId(entryIdx, entryResources);
 	}
 
 	@Override
 	public String accessCreatePage(NavigationPublicPageData pageData, int entryIdx,
-			ExtensionResourceType parent) {
-		Class<? extends ExtensionResourceType> type = pageData.getEntryTypes().get(entryIdx).getType();
-		ExtensionResourceTypeDeclaration<? extends ExtensionResourceType> typeDecl = appExt.getTypeDeclaration(type);
+			Resource parent) {
+		Class<? extends Resource> type = pageData.getEntryTypes().get(entryIdx).getType();
+		ExtensionResourceTypeDeclaration<? extends Resource> typeDecl = appExt.getTypeDeclaration(type);
 		String name = CapabilityHelper.getnewDecoratorName(ValueFormat.firstLowerCase(type.getSimpleName()), parent);
-		NewResourceResult<? extends ExtensionResourceType> newResource = getNewResource(parent, name, typeDecl);
+		NewResourceResult<? extends Resource> newResource = getNewResource(parent, name, typeDecl);
 		if(newResource.result != ResourceAccessResult.OK) {
 			System.out.println("Error while trying to create "+parent.getLocation()+"/"+name+": "+newResource.result);
 			return CapabilityHelper.ERROR_START+newResource.result;			
 		}
-		List<ExtensionResourceType> entryResources = Arrays.asList(new ExtensionResourceType[] {newResource.newResource});
+		List<Resource> entryResources = Arrays.asList(new Resource[] {newResource.newResource});
 		return accessPage(pageData, entryIdx, entryResources );
 	}
 	
 	@Override
-	public LockResult lockResource(ExtensionResourceType resource) {
+	public LockResult lockResource(Resource resource) {
 		if(!checkAllowed(resource)) return null;
 		return lockAdmin.lockResource(resource, userName, applicationName);
 	}
 
 	@Override
-	public void unlockResource(ExtensionResourceType resource, boolean activate) {
+	public void unlockResource(Resource resource, boolean activate) {
 		if(!checkAllowed(resource)) return;
 		if(activate) {
 			resource.activate(true);
@@ -84,13 +84,13 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 	}
 
 	@Override
-	public boolean isLocked(ExtensionResourceType resource) {
+	public boolean isLocked(Resource resource) {
 		return lockAdmin.isLocked(resource);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends ExtensionResourceType> NewResourceResult<T> getNewResource(ExtensionResourceType parentIn,
+	public <T extends Resource> NewResourceResult<T> getNewResource(Resource parentIn,
 			String name, ExtensionResourceTypeDeclaration<T> type) {
 		if(isMulti(type.cardinality())) {
 			ResourceList<T> parent = null;
@@ -127,7 +127,7 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 			T res = parent.getSubResource(elName, type.dataType());
 			return getNewResource(res);
 		}
-		ExtensionResourceType parent = parentIn;
+		Resource parent = parentIn;
 		List<? extends T> existing = parent.getSubResources(type.dataType(), false);
 		if(!existing.isEmpty()) {
 			NewResourceResult<T> result = new NewResourceResult<>();
@@ -150,7 +150,7 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 	}
 
 	@Override
-	public <T extends ExtensionResourceType> NewResourceResult<T> getNewResource(T virtualResource) {
+	public <T extends Resource> NewResourceResult<T> getNewResource(T virtualResource) {
 		NewResourceResult<T> result = new NewResourceResult<>();
 		if(!checkAllowed(virtualResource)) {
 			result.result = ResourceAccessResult.NOT_ALLOWED;
@@ -168,11 +168,11 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 	}
 
 	@Override
-	public void activateResource(ExtensionResourceType resource) {
+	public void activateResource(Resource resource) {
 		unlockResource(resource, true);
 	}
 	
-	private boolean checkAllowed(ExtensionResourceType resource) {
+	private boolean checkAllowed(Resource resource) {
 		String[] els = resource.getLocation().split("/", 2);
 		if(els.length == 0) throw new IllegalStateException("Resource location should not be empty!");
 		if(els[0].equals(userName)) return true;

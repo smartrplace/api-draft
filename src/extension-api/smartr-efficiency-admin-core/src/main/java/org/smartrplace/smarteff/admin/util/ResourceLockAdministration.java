@@ -6,7 +6,6 @@ import java.util.Map;
 import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate.LockResult;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate.ResourceAccessResult;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 
 /** TODO: This is not thread-safe yet
  * TODO: Locking mechanisms are not really implemented yet*/
@@ -21,7 +20,7 @@ public class ResourceLockAdministration {
 	}
 	Map<Resource, LockInfo> resourcesLocked = new HashMap<>();
 	
-	public LockResult lockResource(ExtensionResourceType resource, String userName, String application) {
+	public LockResult lockResource(Resource resource, String userName, String application) {
 		LockResult result = new LockResult();
 		boolean alreadyExists = isLocked(resource);
 		if(!alreadyExists) {
@@ -38,11 +37,11 @@ public class ResourceLockAdministration {
 		return result;
 	}
 	
-	public void unlockResource(ExtensionResourceType resource) {
+	public void unlockResource(Resource resource) {
 		resourcesLocked.remove(resource);
 	}
 
-	public boolean isLocked(ExtensionResourceType resource) {
+	public boolean isLocked(Resource resource) {
 		return resourcesLocked.containsKey(resource);
 	}
 }

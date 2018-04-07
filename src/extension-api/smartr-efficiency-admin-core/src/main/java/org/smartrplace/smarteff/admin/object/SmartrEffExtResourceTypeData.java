@@ -5,27 +5,27 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.ogema.core.model.Resource;
 import org.ogema.tools.resource.util.ResourceUtils;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.efficiency.api.capabilities.SmartEffRecommendationProvider;
 import org.smartrplace.extenservice.proposal.ProposalProvider;
 import org.smartrplace.extensionservice.ExtensionCapability;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 
 public class SmartrEffExtResourceTypeData {
-	public final Class<? extends ExtensionResourceType> resType;
-	public final ExtensionResourceTypeDeclaration<? extends ExtensionResourceType> typeDeclaration;
+	public final Class<? extends Resource> resType;
+	public final ExtensionResourceTypeDeclaration<? extends Resource> typeDeclaration;
 	public final List<SmartEffExtensionService> requiredBy = new ArrayList<>();
 	public int numberTotal;
 	public int numberPublic;
 	public int numberNonEdit;
 	
-	public SmartrEffExtResourceTypeData(ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType> typeDeclaration,
+	public SmartrEffExtResourceTypeData(ExtensionResourceTypeDeclaration<? extends SmartEffResource> typeDeclaration,
 			SmartEffExtensionService parent, SpEffAdminController app) {
 		this.resType = typeDeclaration.dataType();
 		this.typeDeclaration = typeDeclaration;
@@ -72,7 +72,7 @@ public class SmartrEffExtResourceTypeData {
 	}
 
 	@SuppressWarnings("incomplete-switch")
-	public void registerElement(ExtensionResourceType res) {
+	public void registerElement(Resource res) {
 		numberTotal++;
 		switch(SmartrEffUtil.getAccessType(res)) {
 		case PUBLIC:
@@ -84,7 +84,7 @@ public class SmartrEffExtResourceTypeData {
 		}		
 	}
 	@SuppressWarnings("incomplete-switch")
-	public void unregisterElement(SmartEffExtensionResourceType res) {
+	public void unregisterElement(SmartEffResource res) {
 		numberTotal--;
 		switch(SmartrEffUtil.getAccessType(res)) {
 		case PUBLIC:

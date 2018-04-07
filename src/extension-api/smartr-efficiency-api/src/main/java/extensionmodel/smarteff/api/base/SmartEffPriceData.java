@@ -2,10 +2,10 @@ package extensionmodel.smarteff.api.base;
 
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 
 /** Data that is accessible for all users.*/
-public interface SmartEffPriceData extends SmartEffExtensionResourceType {
+public interface SmartEffPriceData extends SmartEffResource {
 	FloatResource gasPricePerkWh();
 	FloatResource gasPriceBase();
 	FloatResource oilPricePerkWh();

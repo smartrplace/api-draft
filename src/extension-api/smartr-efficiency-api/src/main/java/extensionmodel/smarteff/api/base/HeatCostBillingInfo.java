@@ -3,9 +3,9 @@ package extensionmodel.smarteff.api.base;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.TimeResource;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 
-public interface HeatCostBillingInfo extends SmartEffExtensionResourceType {
+public interface HeatCostBillingInfo extends SmartEffResource {
 	/** 1: gas in m3
 	 *  2: oil in l
 	 *  3: solid fuel in kg

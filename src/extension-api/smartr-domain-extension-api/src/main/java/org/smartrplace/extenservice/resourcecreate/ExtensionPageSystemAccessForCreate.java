@@ -1,12 +1,12 @@
 package org.smartrplace.extenservice.resourcecreate;
 
-import org.smartrplace.extensionservice.ExtensionResourceType;
+import org.ogema.core.model.Resource;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 
 public interface ExtensionPageSystemAccessForCreate extends ExtensionPageSystemAccessForPageOpening{
 	public String accessCreatePage(NavigationPublicPageData pageData, int entryIdx,
-			ExtensionResourceType parent);
+			Resource parent);
 	
 	public enum ResourceAccessResult {
 		OK,
@@ -40,25 +40,25 @@ public interface ExtensionPageSystemAccessForCreate extends ExtensionPageSystemA
 	 * @param resource
 	 * @return null if access is not allowed
 	 */
-	LockResult lockResource(ExtensionResourceType resource);
+	LockResult lockResource(Resource resource);
 	/** Unlock resource
 	 * 
 	 * @param resource
-	 * @param activate if true the method behaves like {@link #activateResource(ExtensionResourceType)}
+	 * @param activate if true the method behaves like {@link #activateResource(Resource)}
 	 */
-	void unlockResource(ExtensionResourceType resource, boolean activate);
+	void unlockResource(Resource resource, boolean activate);
 	
-	boolean isLocked(ExtensionResourceType resource);
+	boolean isLocked(Resource resource);
 
-	public class NewResourceResult<T extends ExtensionResourceType> {
+	public class NewResourceResult<T extends Resource> {
 		public ResourceAccessResult result;
 		public T newResource;
 	}
 	/** With getNewResource the newly created resource is automatically locked*/
-	<T extends ExtensionResourceType> NewResourceResult<T> getNewResource(ExtensionResourceType parent, String name, ExtensionResourceTypeDeclaration<T> type);
-	<T extends ExtensionResourceType> NewResourceResult<T> getNewResource(T virtualResource);
+	<T extends Resource> NewResourceResult<T> getNewResource(Resource parent, String name, ExtensionResourceTypeDeclaration<T> type);
+	<T extends Resource> NewResourceResult<T> getNewResource(T virtualResource);
 	
 	/** Activates a resource and all its childres and unlocks the resource. This should usually be called to unlock
 	 * after extensive editing as new subresources may have been created*/
-	void activateResource(ExtensionResourceType resource);
+	void activateResource(Resource resource);
 }

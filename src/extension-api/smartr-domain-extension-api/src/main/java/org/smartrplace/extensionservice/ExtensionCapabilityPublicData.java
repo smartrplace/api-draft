@@ -2,13 +2,14 @@ package org.smartrplace.extensionservice;
 
 import java.util.List;
 
+import org.ogema.core.model.Resource;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
 
 import de.iwes.widgets.template.LabelledItem;
 
 public interface ExtensionCapabilityPublicData extends LabelledItem {
 	public static interface EntryType {
-		Class<? extends ExtensionResourceType> getType();
+		Class<? extends Resource> getType();
 		/** The standard cardinality is SINGLE_VALUE_REQUIRED. If _OPTIONAL is specified the
 		 * navigator must be able to search by itself for suitable data in the userData or generalData.
 		 */

@@ -5,10 +5,10 @@ import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.ogema.core.model.Resource;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.config.SmartEffAdminData;
@@ -43,13 +43,13 @@ public class SpEffAdminController {
 		
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T extends ExtensionResourceType> ExtensionResourceTypeDeclaration<T> getTypeDeclaration(
+		public <T extends Resource> ExtensionResourceTypeDeclaration<T> getTypeDeclaration(
 				Class<T> resourceType) {
 			return (ExtensionResourceTypeDeclaration<T>) typeAdmin.resourceTypes.get(resourceType).typeDeclaration;
 		}
 		
 		@Override
-		public ExtensionResourceType generalData() {
+		public Resource generalData() {
 			return userAdmin.getAppConfigData().generalData();
 		}
 
@@ -105,7 +105,7 @@ public class SpEffAdminController {
     }
 
 	/** Here the action is performed without checking user permissions*/
-	public <T extends SmartEffExtensionResourceType> T addResource(SmartEffExtensionResourceType parent,
+	public <T extends SmartEffResource> T addResource(SmartEffResource parent,
 			String name, Class<T> type, SmartEffUserDataNonEdit userData, NavigationGUIProvider entryProvider) {
 		T result = parent.getSubResource(name, type);
 		result.create();
@@ -114,7 +114,7 @@ public class SpEffAdminController {
 		rtd.registerElement(result);
 		return result;
 	}
-	public void removeResource(SmartEffExtensionResourceType object) {
+	public void removeResource(SmartEffResource object) {
 		// TODO Auto-generated method stub
 		
 	}

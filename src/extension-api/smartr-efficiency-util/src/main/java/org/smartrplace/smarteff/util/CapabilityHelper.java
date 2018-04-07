@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
 
@@ -25,9 +24,9 @@ public class CapabilityHelper {
 	}
 
 	@SafeVarargs
-	public static List<EntryType> getStandardEntryTypeList(Class<? extends ExtensionResourceType>... types) {
+	public static List<EntryType> getStandardEntryTypeList(Class<? extends Resource>... types) {
 		List<EntryType> result = new ArrayList<>();
-		for(Class<? extends ExtensionResourceType> t: types) {
+		for(Class<? extends Resource> t: types) {
 			EntryType r = getEntryType(t);
 			result.add(r);
 		}
@@ -35,20 +34,20 @@ public class CapabilityHelper {
 	}
 	
 	/*@SafeVarargs
-	public static List<EntryType> getStandardEntryTypeList(ApplicationManagerSPExt appManExt, Class<? extends ExtensionResourceType>... types) {
+	public static List<EntryType> getStandardEntryTypeList(ApplicationManagerSPExt appManExt, Class<? extends Resource>... types) {
 		List<EntryType> result = new ArrayList<>();
-		for(Class<? extends ExtensionResourceType> t: types) {
+		for(Class<? extends Resource> t: types) {
 			EntryType r = getEntryType(appManExt.getTypeDeclaration(t));
 			result.add(r);
 		}
 		return result ;
 	}*/
 
-	private static EntryType getEntryType(Class<? extends ExtensionResourceType> type) {
+	private static EntryType getEntryType(Class<? extends Resource> type) {
 		return new EntryType() {
 
 			@Override
-			public Class<? extends ExtensionResourceType> getType() {
+			public Class<? extends Resource> getType() {
 				return type;
 			}
 

@@ -1,7 +1,7 @@
 package org.smartrplace.smarteff.util;
 
+import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 
@@ -12,11 +12,11 @@ import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class AddEntryButton extends RedirectButton {
 	private static final long serialVersionUID = -4145439981103486352L;
-	private final Class<? extends ExtensionResourceType> type;
+	private final Class<? extends Resource> type;
 	private final ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
 	
 	public AddEntryButton(WidgetPage<?> page, String id, String pid, String text,
-			Class<? extends ExtensionResourceType> type,
+			Class<? extends Resource> type,
 			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage) {
 		super(page, id, text);
 		this.type = type;

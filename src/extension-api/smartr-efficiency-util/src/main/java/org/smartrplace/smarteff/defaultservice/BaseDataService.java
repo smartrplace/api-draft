@@ -7,7 +7,7 @@ import java.util.Collection;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application.AppStopReason;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
@@ -21,10 +21,10 @@ import extensionmodel.smarteff.api.base.SmartEffPriceData;
 public class BaseDataService implements SmartEffExtensionService {
 	//private ApplicationManagerSPExt appManExt;
 	
-	public final static ExtensionResourceTypeDeclaration<SmartEffExtensionResourceType> BUILDING_DATA = new ExtensionResourceTypeDeclaration<SmartEffExtensionResourceType>() {
+	public final static ExtensionResourceTypeDeclaration<SmartEffResource> BUILDING_DATA = new ExtensionResourceTypeDeclaration<SmartEffResource>() {
 
 		@Override
-		public Class<? extends SmartEffExtensionResourceType> dataType() {
+		public Class<? extends SmartEffResource> dataType() {
 			return BuildingData.class;
 		}
 
@@ -34,7 +34,7 @@ public class BaseDataService implements SmartEffExtensionService {
 		}
 
 		@Override
-		public Class<? extends SmartEffExtensionResourceType> parentType() {
+		public Class<? extends SmartEffResource> parentType() {
 			return null;
 		}
 
@@ -63,14 +63,14 @@ public class BaseDataService implements SmartEffExtensionService {
 	}
 
 	@Override
-	public Collection<ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType>> resourcesDefined() {
-		Collection<ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType>> result = 
+	public Collection<ExtensionResourceTypeDeclaration<? extends SmartEffResource>> resourcesDefined() {
+		Collection<ExtensionResourceTypeDeclaration<? extends SmartEffResource>> result = 
 				new ArrayList<>();
 		result.add(BUILDING_DATA);
-		result.add(new ExtensionResourceTypeDeclaration<SmartEffExtensionResourceType>() {
+		result.add(new ExtensionResourceTypeDeclaration<SmartEffResource>() {
 
 			@Override
-			public Class<? extends SmartEffExtensionResourceType> dataType() {
+			public Class<? extends SmartEffResource> dataType() {
 				return SmartEffPriceData.class;
 			}
 
@@ -80,7 +80,7 @@ public class BaseDataService implements SmartEffExtensionService {
 			}
 
 			@Override
-			public Class<? extends SmartEffExtensionResourceType> parentType() {
+			public Class<? extends SmartEffResource> parentType() {
 				return null;
 			}
 

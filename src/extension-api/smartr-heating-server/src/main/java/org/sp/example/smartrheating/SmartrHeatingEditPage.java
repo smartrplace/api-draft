@@ -3,7 +3,6 @@ package org.sp.example.smartrheating;
 import java.util.List;
 
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
@@ -48,7 +47,7 @@ public class SmartrHeatingEditPage implements NavigationGUIProvider { //extends 
 
 	//public SmartrHeatingEditPage(final WidgetPage<?> page, ResourceList<BuildingData> buildings,
 	//@Override
-	/*public void initPage(final ExtensionResourceEditPage<SmartrHeatingData> page, ExtensionResourceType generalData) {
+	/*public void initPage(final ExtensionResourceEditPage<SmartrHeatingData> page, Resource generalData) {
 		//SmartrHeatingData data;data.typeOfThermostats()
 		this.generalData = (SmartEffGeneralData) generalData;
 		this.buildings = buildings;

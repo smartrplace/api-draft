@@ -4,24 +4,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForPageOpening;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration;
 
 public class NavigationPageSystemAccessForPageOpening implements ExtensionPageSystemAccessForPageOpening {
-	protected final Map<Class<? extends ExtensionResourceType>, List<NavigationPublicPageData>> pageInfo;
+	protected final Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo;
 	protected final ConfigIdAdministration configIdAdmin;
 	
 	public NavigationPageSystemAccessForPageOpening(
-			Map<Class<? extends ExtensionResourceType>, List<NavigationPublicPageData>> pageInfo,
+			Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo,
 			ConfigIdAdministration configIdAdmin) {
 		this.pageInfo = pageInfo;
 		this.configIdAdmin = configIdAdmin;
 	}
 
 	@Override
-	public List<NavigationPublicPageData> getPages(Class<? extends ExtensionResourceType> type) {
+	public List<NavigationPublicPageData> getPages(Class<? extends Resource> type) {
 		List<NavigationPublicPageData> result = pageInfo.get(type);
 		if(result == null) return Collections.emptyList();
 		return result;
@@ -29,7 +29,7 @@ public class NavigationPageSystemAccessForPageOpening implements ExtensionPageSy
 	
 	@Override
 	public String accessPage(NavigationPublicPageData pageData, int entryIdx,
-			List<ExtensionResourceType> entryResources) {
+			List<Resource> entryResources) {
 		return configIdAdmin.getConfigId(entryIdx, entryResources);
 	}
 }

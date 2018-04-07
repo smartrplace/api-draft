@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ogema.core.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
-import org.smartrplace.extensionservice.ExtensionResourceType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
@@ -32,7 +32,7 @@ import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 public class GUIPageAdministation {
 	public List<NavigationPageData> startPages = new ArrayList<>();
 	public List<NavigationPageData> navigationPages = new ArrayList<>();
-	public Map<Class<? extends ExtensionResourceType>, List<NavigationPublicPageData>> navigationPublicData = new HashMap<>();
+	public Map<Class<? extends Resource>, List<NavigationPublicPageData>> navigationPublicData = new HashMap<>();
 	private final SpEffAdminController app;
 	
 	public GUIPageAdministation(SpEffAdminController app) {
