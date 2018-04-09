@@ -14,6 +14,7 @@ import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.smarteff.util.NaviPageBase;
 
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import extensionmodel.smarteff.api.base.BuildingData;
 
 @Service(SmartEffExtensionService.class)
@@ -50,7 +51,7 @@ public class SmartrHeatingExtension implements SmartEffExtensionService {
 			}
 
 			@Override
-			public String resourceName() {
+			public String label(OgemaLocale locale) {
 				return "smartrHeatingData";
 			}
 

@@ -12,6 +12,8 @@ import org.ogema.core.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
+import org.smartrplace.extenservice.proposal.ProposalProvider;
+import org.smartrplace.extenservice.proposal.ProposalPublicData;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
@@ -19,9 +21,11 @@ import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
+import org.smartrplace.smarteff.admin.object.ProposalProviderData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData.ServiceCapabilities;
 import org.smartrplace.smarteff.admin.protect.NavigationPublicPageDataImpl;
+import org.smartrplace.smarteff.admin.protect.ProposalPublicDataImpl;
 import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.format.WidgetHelper;
 
@@ -33,7 +37,9 @@ import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 public class GUIPageAdministation {
 	public List<NavigationPageData> startPages = new ArrayList<>();
 	public List<NavigationPageData> navigationPages = new ArrayList<>();
+	public List<ProposalProviderData> proposalProviders = new ArrayList<>();
 	public Map<Class<? extends Resource>, List<NavigationPublicPageData>> navigationPublicData = new HashMap<>();
+	public Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo = new HashMap<>();
 	private final SpEffAdminController app;
 	
 	public GUIPageAdministation(SpEffAdminController app) {
@@ -74,6 +80,19 @@ public class GUIPageAdministation {
 			}
     	}
     	
+    	for(ProposalProvider navi: caps.proposalProviders) {
+    		ProposalProviderData data = new ProposalProviderData(navi, service);
+			proposalProviders.add(data);
+			for(EntryType t: navi.getEntryTypes()) {
+				List<ProposalPublicData> listPub = proposalInfo.get(t.getType());
+				if(listPub == null) {
+					listPub = new ArrayList<>();
+					proposalInfo.put(t.getType(), listPub);
+				}
+				ProposalPublicDataImpl dataPub = new ProposalPublicDataImpl(data);
+				listPub.add(dataPub);
+			}
+    	}
 	}
 	
 	public void unregisterService(SmartEffExtensionService service) {
@@ -102,8 +121,28 @@ public class GUIPageAdministation {
 				}
 				if(listPub.isEmpty()) navigationPublicData.remove(t.getType());
 			}
+    	}
+    	
+     	for(ProposalProvider navi: caps.proposalProviders) {
+    		String naviId = SPPageUtil.buildId(navi);
+ 			if(navi.getEntryTypes() == null) continue;
+			else for(EntryType t: navi.getEntryTypes()) {
+				List<ProposalPublicData> listPub = proposalInfo.get(t.getType());
+				if(listPub == null) {
+					logger.error("Proposal providers have no entry for "+t.getType().getName()+" when deregistering "+serviceId);
+					continue;
+				}
+				for(ProposalPublicData l:listPub) {
+					if(l.id().equals(naviId)) {
+						listPub.remove(l);
+						break;
+					}
+				}
+				if(listPub.isEmpty()) proposalInfo.remove(t.getType());
+			}
     		
     	}
+
 	}
 	
 	public Collection<NavigationPageData> getAllProviders() {

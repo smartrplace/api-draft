@@ -15,6 +15,7 @@ import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.smarteff.util.NaviPageBase;
 
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import extensionmodel.smarteff.api.base.BuildingData;
 import extensionmodel.smarteff.api.base.SmartEffPriceData;
 
@@ -31,7 +32,7 @@ public class BaseDataService implements SmartEffExtensionService {
 		}
 
 		@Override
-		public String resourceName() {
+		public String label(OgemaLocale locale) {
 			return "Building Data";
 		}
 
@@ -44,12 +45,12 @@ public class BaseDataService implements SmartEffExtensionService {
 		public Cardinality cardinality() {
 			return Cardinality.MULTIPLE_OPTIONAL;
 		}
-		
 	};
 	public final static org.smartrplace.smarteff.defaultservice.BuildingTablePage.Provider BUILDING_NAVI_PROVIDER = new BuildingTablePage().provider;
 	public final static org.smartrplace.smarteff.defaultservice.BuildingEditPage.Provider BUILDING_EDIT_PROVIDER = new BuildingEditPage().provider;
 	public final static NaviPageBase<Resource>.Provider RESOURCE_NAVI_PROVIDER = new ResourceTablePage().provider;
 	public final static NaviPageBase<Resource>.Provider RESOURCEALL_NAVI_PROVIDER = new ResourceAllTablePage().provider;
+	public final static NaviPageBase<Resource>.Provider PROPOSALTABLE_PROVIDER = new ProposalProvTablePage().provider;
 	
 	@Override
 	public void start(ApplicationManagerSPExt appManExt) {
@@ -63,7 +64,8 @@ public class BaseDataService implements SmartEffExtensionService {
 
 	@Override
 	public Collection<ExtensionCapability> getCapabilities() {
-		return Arrays.asList(new ExtensionCapability[] {BUILDING_NAVI_PROVIDER, BUILDING_EDIT_PROVIDER, RESOURCE_NAVI_PROVIDER, RESOURCEALL_NAVI_PROVIDER});
+		return Arrays.asList(new ExtensionCapability[] {BUILDING_NAVI_PROVIDER, BUILDING_EDIT_PROVIDER, RESOURCE_NAVI_PROVIDER, RESOURCEALL_NAVI_PROVIDER,
+				PROPOSALTABLE_PROVIDER});
 	}
 
 	@Override
@@ -79,7 +81,7 @@ public class BaseDataService implements SmartEffExtensionService {
 			}
 
 			@Override
-			public String resourceName() {
+			public String label(OgemaLocale locale) {
 				return "Basic Price Data";
 			}
 

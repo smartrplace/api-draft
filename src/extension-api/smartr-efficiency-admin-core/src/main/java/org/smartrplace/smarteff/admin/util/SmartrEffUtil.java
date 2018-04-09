@@ -1,11 +1,8 @@
 package org.smartrplace.smarteff.admin.util;
 
 import org.ogema.core.model.Resource;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
-import org.smartrplace.extensionservice.ExtensionCapability;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PagePriority;
+import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
-import org.smartrplace.util.format.WidgetHelper;
 
 public class SmartrEffUtil {
 	public static enum AccessType {

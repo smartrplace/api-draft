@@ -1,6 +1,5 @@
 package org.smartrplace.smarteff.admin.protect;
 
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PagePriority;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;

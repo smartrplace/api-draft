@@ -6,6 +6,7 @@ import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionCapabilityForCreate;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
+import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 
 /** A ProposalProvider calculates some results based on an entry point-based input resource and futher user and
  * general data it finds itself based on the entry point-based resource(s). So a ProposalProvider acts very
@@ -31,5 +32,34 @@ public interface ProposalProvider extends ExtensionCapabilityForCreate {
 	 * @return resources created and modified. The first element should contain the most important result and the
 	 * 		further order of the list should reflect the relevance of the changes (if possible) 
 	 */
-	List<Resource> calculate(ExtensionResourceAccessInitData data);	
+	List<Resource> calculate(ExtensionResourceAccessInitData data);
+	
+	public class CalculationResultType {
+		private final Class<? extends CalculatedData> resourceType;
+		private final int entryTypeParentIdx;
+		public CalculationResultType(Class<? extends CalculatedData> resourceType) {
+			this.resourceType = resourceType;
+			this.entryTypeParentIdx = 0;
+		}
+		public CalculationResultType(Class<? extends CalculatedData> resourceType, int entryTypeParentIdx) {
+			this.resourceType = resourceType;
+			this.entryTypeParentIdx = entryTypeParentIdx;
+		}
+		public Class<? extends CalculatedData> resourceType() {
+			return resourceType;
+		}
+		public int entryTypeParentIdx() {
+			return entryTypeParentIdx;
+		}
+	}
+	/**Usually this list contains only a single type, but in some cases the result may be distributed
+	 * over more than one result type. The {@link CalculationResultType#entryTypeParentIdx} specifies
+	 * where the respective result is placed. Usually the {@link ExtensionResourceTypeDeclaration} for
+	 * the result type shall specifiy the type of respective EntryType given from {@link #getEntryTypes()}
+	 * as parent and the results is attached to the parent.<br>
+	 * If the parent type does not match the type must match any resource type given in the direct
+	 * parent - child - hierarchy of the type specified by the EntryType. The result is then attached to
+	 * the fitting type element if it exists. Otherwise the result cannot be provided.
+	 */
+	List<CalculationResultType> resultTypes();
 }

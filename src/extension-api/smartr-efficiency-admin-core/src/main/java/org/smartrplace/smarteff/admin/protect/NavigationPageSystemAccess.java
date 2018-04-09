@@ -7,6 +7,7 @@ import java.util.Map;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.resourcemanager.ResourceException;
+import org.smartrplace.extenservice.proposal.ProposalPublicData;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
@@ -30,8 +31,9 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 			Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo,
 			ResourceLockAdministration lockAdmin, ConfigIdAdministration configIdAdmin,
 			TypeAdministration typeAdmin,
-			ApplicationManagerSPExt appExt) {
-		super(pageInfo, configIdAdmin);
+			ApplicationManagerSPExt appExt,
+			Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo) {
+		super(pageInfo, configIdAdmin, proposalInfo);
 		this.userName = userName;
 		this.applicationName = applicationName;
 		this.lockAdmin = lockAdmin;

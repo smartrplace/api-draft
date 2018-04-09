@@ -122,4 +122,10 @@ public class SmartrHeatingRecommendationProvider implements ProposalProvider {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<CalculationResultType> resultTypes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

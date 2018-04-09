@@ -58,7 +58,8 @@ public class UserAdmin {
 				SmartEffUserDataNonEdit userDataNonEdit = userDataNE;
 				NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
 						navi.label(req.getLocale()),
-						app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt);
+						app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
+						app.guiPageAdmin.proposalInfo);
 				if(navi.getEntryTypes() == null || configId == null) {
 					ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
 							userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
@@ -113,10 +114,12 @@ public class UserAdmin {
 				editableData = userDataNonEdit.editableData().getLocationResource();
 				systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
 						navi.label(req.getLocale()),
-						app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt);
+						app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
+						app.guiPageAdmin.proposalInfo);
 			} else {
 				systemAccess = new NavigationPageSystemAccessForPageOpening(
-					app.guiPageAdmin.navigationPublicData, app.configIdAdmin);
+					app.guiPageAdmin.navigationPublicData, app.configIdAdmin,
+					app.guiPageAdmin.proposalInfo);
 			}
 			ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
 					editableData , userDataNonEdit, systemAccess);
@@ -124,7 +127,8 @@ public class UserAdmin {
 		} else {
 			NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
 					navi.label(req.getLocale()),
-					app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt);
+					app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
+					app.guiPageAdmin.proposalInfo);
 			ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
 			ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(c.entryIdx,
 					c.entryResources,

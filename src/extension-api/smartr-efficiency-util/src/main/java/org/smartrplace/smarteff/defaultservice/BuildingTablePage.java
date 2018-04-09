@@ -50,8 +50,8 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 
 			vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 			vh.floatLabel("Heated Area", id, object.heatedLivingSpace(), row, "%.0f m2");
-			SPPageUtil.addResOpenButton("Edit", object, BuildingData.class, vh, id, row, appData);
-			SPPageUtil.addResResourceOpenButton("Open", object, BuildingData.class, vh, id, row, appData);
+			SPPageUtil.addResEditOpenButton("Edit", object, BuildingData.class, vh, id, row, appData);
+			SPPageUtil.addResTableOpenButton("Open", object, BuildingData.class, vh, id, row, appData);
 			if(object.isActive())
 				vh.linkingButton("Evaluate All", id, object, row, "Evaluate All", "evalAll.html");
 			else

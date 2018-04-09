@@ -15,4 +15,14 @@ public interface ProviderPublicDataForCreate extends ExtensionCapabilityPublicDa
 	default List<Class<? extends Resource>> createTypes() {
 		return Collections.emptyList();
 	};
+	
+	public enum PagePriority {
+		STANDARD,
+		SECONDARY,
+		/** Hidden pages can only be accessed via URL directly*/
+		HIDDEN
+	}
+	default PagePriority getPriority() {
+		return PagePriority.STANDARD;
+	}
 }

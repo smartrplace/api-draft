@@ -33,8 +33,7 @@ public class ProviderPublicDataForCreateImpl implements ProviderPublicDataForCre
 
 	@Override
 	public String label(OgemaLocale locale) {
-		// TODO Auto-generated method stub
-		return null;
+		return inputProvider.label(locale);
 	}
 
 }

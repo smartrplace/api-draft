@@ -52,7 +52,7 @@ public class ResTypePage extends ObjectGUITablePage<SmartrEffExtResourceTypeData
 	@Override
 	public void addWidgets(SmartrEffExtResourceTypeData object, ObjectResourceGUIHelper<SmartrEffExtResourceTypeData, Resource> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-		vh.stringLabel("Name", id, object.typeDeclaration.resourceName(), row);
+		vh.stringLabel("Name", id, object.typeDeclaration.label(req.getLocale()), row);
 		vh.stringLabel("Resource Type", id, object.resType.getName(), row);
 		vh.stringLabel("Public", id, ""+object.numberPublic, row);
 		vh.stringLabel("ReadOnly", id, ""+object.numberNonEdit, row);
@@ -69,7 +69,7 @@ public class ResTypePage extends ObjectGUITablePage<SmartrEffExtResourceTypeData
 	
 	@Override
 	public String getLineId(SmartrEffExtResourceTypeData object) {
-		String name = WidgetHelper.getValidWidgetId(object.typeDeclaration.resourceName());
+		String name = WidgetHelper.getValidWidgetId(object.typeDeclaration.label(null));
 		return name + super.getLineId(object);
 	}
 }

@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
+import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PagePriority;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.smarteff.util.CapabilityHelper;
 

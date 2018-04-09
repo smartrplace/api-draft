@@ -7,12 +7,12 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.StringResource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
-import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
+import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
+import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
-import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PagePriority;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
+import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.util.AddEditButton;
 import org.smartrplace.smarteff.util.AddEntryButton;
 import org.smartrplace.smarteff.util.CapabilityHelper;
@@ -56,8 +56,8 @@ public class ResourceTablePage extends NaviPageBase<Resource> {
 			vh.stringLabel("Type", id, object.getResourceType().getSimpleName(), row);
 			if(object.exists()) {
 				vh.stringLabel("Name", id, getSimpleName(object), row);
-				SPPageUtil.addResOpenButton("Edit", object, object.getResourceType(), vh, id, row, appData);
-				SPPageUtil.addResResourceOpenButton("Open", object, object.getResourceType(), vh, id, row, appData);
+				SPPageUtil.addResEditOpenButton("Edit", object, object.getResourceType(), vh, id, row, appData);
+				SPPageUtil.addResTableOpenButton("Open", object, object.getResourceType(), vh, id, row, appData);
 				if(object.isActive())
 					vh.linkingButton("Evaluate All", id, object, row, "Evaluate All", "evalAll.html");
 				else
@@ -93,7 +93,7 @@ public class ResourceTablePage extends NaviPageBase<Resource> {
 					return getResource(appData, req).getResourceType();
 				}
 			};
-			StaticTable topTable = new StaticTable(1, 2);
+			StaticTable topTable = new StaticTable(1, 3);
 			TableOpenButton allResourceButton2 = new TableOpenButton(page, "allResourceButton", pid(), "All Resources", resourceType, exPage) {
 				private static final long serialVersionUID = 1L;
 				@Override
@@ -102,10 +102,15 @@ public class ResourceTablePage extends NaviPageBase<Resource> {
 					return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESOURCEALL_NAVI_PROVIDER));//super.getPageData(appData, type, typeRequested);
 				}
 			};
-			//RedirectButton allResourceButton = new RedirectButton(page, "allResourceButton"+pid(),
-			//		"All Resources", SPPageUtil.getProviderURL(BaseDataService.RESOURCEALL_NAVI_PROVIDER));
-			allResourceButton2.setDefaultOpenInNewTab(false);
-			topTable.setContent(0, 0, editResource).setContent(0, 1, allResourceButton2);
+			TableOpenButton proposalTableOpenButton = new TableOpenButton(page, "proposalTableOpenButton", pid(), "Proposal providers", resourceType, exPage) {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
+						Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
+					return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.PROPOSALTABLE_PROVIDER));//super.getPageData(appData, type, typeRequested);
+				}
+			};
+			topTable.setContent(0, 0, editResource).setContent(0, 1, allResourceButton2).setContent(0, 2, proposalTableOpenButton);
 			page.append(topTable);
 		}
 		

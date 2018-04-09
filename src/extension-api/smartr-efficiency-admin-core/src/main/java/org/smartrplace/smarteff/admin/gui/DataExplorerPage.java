@@ -101,7 +101,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resou
 		selectProvider.setTemplate(new DefaultDisplayTemplate<SmartrEffExtResourceTypeData>() {
 			@Override
 			public String getLabel(SmartrEffExtResourceTypeData object, OgemaLocale locale) {
-				return object.typeDeclaration.resourceName();
+				return object.typeDeclaration.label(locale);
 			}
 			
 		});

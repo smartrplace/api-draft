@@ -9,7 +9,6 @@ import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitDa
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -39,7 +38,7 @@ public class SPPageUtil {
 			return vh.stringLabel(columnName, id, alternativeText+"*", row);
 		}
 	}
-	public static OgemaWidget addResOpenButton(String columnName, Resource object,
+	public static OgemaWidget addResEditOpenButton(String columnName, Resource object,
 			Class<? extends Resource> type,
 			ObjectResourceGUIHelper<?,?> vh, String id, Row row,
 			ExtensionResourceAccessInitData appData) {
@@ -52,7 +51,7 @@ public class SPPageUtil {
 			return null;
 		}
 	}
-	public static OgemaWidget addResResourceOpenButton(String columnName, Resource object,
+	public static OgemaWidget addResTableOpenButton(String columnName, Resource object,
 			Class<? extends Resource> type,
 			ObjectResourceGUIHelper<?,?> vh, String id, Row row,
 			ExtensionResourceAccessInitData appData) {
@@ -104,7 +103,7 @@ public class SPPageUtil {
 		return id;
 	}
 
-	public static String getProviderURL(NavigationGUIProvider navi) {
+	public static String getProviderURL(ExtensionCapability navi) {
 		return WidgetHelper.getValidWidgetId(buildId(navi))+".html";	
 	}
 

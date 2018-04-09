@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.model.Resource;
+import org.smartrplace.extenservice.proposal.ProposalPublicData;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForPageOpening;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PagePriority;
+import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration;
@@ -15,13 +16,16 @@ import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 
 public class NavigationPageSystemAccessForPageOpening implements ExtensionPageSystemAccessForPageOpening {
 	protected final Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo;
+	protected final Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo;
 	protected final ConfigIdAdministration configIdAdmin;
 	
 	public NavigationPageSystemAccessForPageOpening(
 			Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo,
-			ConfigIdAdministration configIdAdmin) {
+			ConfigIdAdministration configIdAdmin,
+			Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo) {
 		this.pageInfo = pageInfo;
 		this.configIdAdmin = configIdAdmin;
+		this.proposalInfo = proposalInfo;
 	}
 
 	@Override
@@ -66,5 +70,18 @@ public class NavigationPageSystemAccessForPageOpening implements ExtensionPageSy
 	public String accessPage(NavigationPublicPageData pageData, int entryIdx,
 			List<Resource> entryResources) {
 		return configIdAdmin.getConfigId(entryIdx, entryResources);
+	}
+
+	@Override
+	public List<ProposalPublicData> getProposalProviders(Class<? extends Resource> type) {
+		List<ProposalPublicData> resultAll = proposalInfo.get(type);
+		List<ProposalPublicData> resultRes = proposalInfo.get(Resource.class);
+		if(resultRes != null) resultAll.addAll(resultRes);
+		if(resultAll == null) return Collections.emptyList();
+		List<ProposalPublicData> result = new ArrayList<>();
+		for(ProposalPublicData r: resultAll) {
+			if(r.getPriority() != PagePriority.HIDDEN) result.add(r);
+		}
+		return result;
 	}
 }

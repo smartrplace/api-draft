@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PagePriority;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 
 import de.iwes.widgets.api.extended.WidgetData;

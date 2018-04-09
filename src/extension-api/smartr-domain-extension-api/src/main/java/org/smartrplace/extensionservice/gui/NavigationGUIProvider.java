@@ -22,14 +22,4 @@ public interface NavigationGUIProvider extends ExtensionCapabilityForCreate {
 		TABLE_PAGE
 	}
 	PageType getPageType();
-	
-	public enum PagePriority {
-		STANDARD,
-		SECONDARY,
-		/** Hidden pages can only be accessed via URL directly*/
-		HIDDEN
-	}
-	default PagePriority getPriority() {
-		return PagePriority.STANDARD;
-	}
 }
