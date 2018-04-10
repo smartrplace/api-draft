@@ -6,17 +6,18 @@ import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForPageOpening;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.ExtensionUserData;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 
 public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAccessInitData {
 	private final int entryTypeIdx;
 	private final List<Resource> entryResources;
-	private final Resource userData;
+	private final ExtensionUserData userData;
 	private final ExtensionUserDataNonEdit userDataNonEdit;
 	private final ExtensionPageSystemAccessForPageOpening systemAccess;
 	
 	public ExtensionResourceAccessInitDataImpl(int entryTypeIdx, List<Resource> entryResources,
-			Resource userData, ExtensionUserDataNonEdit userDataNonEdit,
+			ExtensionUserData userData, ExtensionUserDataNonEdit userDataNonEdit,
 			ExtensionPageSystemAccessForPageOpening systemAccess) {
 		this.entryTypeIdx = entryTypeIdx;
 		this.entryResources = entryResources;
@@ -36,7 +37,7 @@ public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAcc
 	}
 
 	@Override
-	public Resource userData() {
+	public ExtensionUserData userData() {
 		return userData;
 	}
 

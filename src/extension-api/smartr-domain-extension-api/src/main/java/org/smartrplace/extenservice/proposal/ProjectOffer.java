@@ -21,4 +21,9 @@ public interface ProjectOffer extends CalculatedData {
 	 * contribution still is required.
 	 */
 	StringResource turnKeyDescription();
+	
+	/** If the projected contract partner is different from {@link ProjectProposal#plannerUserName()}
+	 * provide here the projected contract partner. Usually this should also be a valid user name, 
+	 * but here also any company name by be given.*/
+	StringResource offeredBy();
 }

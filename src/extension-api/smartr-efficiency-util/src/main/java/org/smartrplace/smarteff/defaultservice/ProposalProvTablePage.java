@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
-import org.ogema.core.model.simple.StringResource;
 import org.smartrplace.extenservice.proposal.ProposalPublicData;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
@@ -92,7 +91,7 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 
 	@Override
 	protected String label(OgemaLocale locale) {
-		return "Generic Resource Overview Table";
+		return "Proposal providers for Resource";
 	}
 
 	@Override
@@ -102,7 +101,7 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 
 	@Override
 	protected String getHeader(OgemaHttpRequest req) {
-		return "Resources by Type in "+super.getHeader(req);
+		return "Proposal providers for "+super.getHeader(req);
 	}
 	
 	@Override
@@ -119,15 +118,4 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 	protected PagePriority getPriority() {
 		return PagePriority.HIDDEN;
 	}
-	
-	public static String getSimpleName(Resource resource) {
-		Resource name = resource.getSubResource("name");
-		if ((name != null) && (name instanceof StringResource)) {
-			String val = ((StringResource) (name)).getValue();
-			if (name.isActive() && (!val.trim().isEmpty()))
-				return val;
-		}
-		return resource.getName();
-	}
-
 }

@@ -98,7 +98,7 @@ public class SpEffAdminApp implements Application, ServiceAccess {
 		SmartrEffExtResourceTypeData rtd = new SmartrEffExtResourceTypeData(BaseDataService.BUILDING_DATA, null, null);
 		resTypePage = new ResTypePage(page2, controller, rtd );
 		WidgetPage<?> page3 = widgetApp.createWidgetPage("dataExplorer.html");
-		dataExPage = new DataExplorerPage(page3, controller, controller.getUserAdmin().getAppConfigData().generalData());
+		dataExPage = new DataExplorerPage(page3, controller, controller.getUserAdmin().getAppConfigData().globalData());
 		WidgetPage<?> page4 = widgetApp.createWidgetPage("naviOverview.html");
 		NavigationPageData navi = new NavigationPageData(BaseDataService.BUILDING_NAVI_PROVIDER, null, "", null);
 		naviPage = new NaviOverviewPage(page4, controller, navi);

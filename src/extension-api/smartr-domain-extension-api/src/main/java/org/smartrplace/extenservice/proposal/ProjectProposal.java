@@ -1,6 +1,7 @@
 package org.smartrplace.extenservice.proposal;
 
 import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.StringResource;
 
 public interface ProjectProposal extends CalculatedData {
 	/** Total cost to be paid if project is done as planned. This includes cost for additional
@@ -14,7 +15,7 @@ public interface ProjectProposal extends CalculatedData {
 	 * specified by the planner. 
 	 */
 	FloatResource costOfProjectIncludingInternal();
-	FloatResource yearlyEstimatedSavings();
+	FloatResource yearlySavings();
 	/** Number of working hours estimated for the client if the project is
 	 * done as planned. For private customers this is the number of hours done as
 	 * Do-it-Yourself (DIY), for commercial customers this is the number of hours
@@ -23,4 +24,7 @@ public interface ProjectProposal extends CalculatedData {
 	FloatResource ownHours();
 	/** CO2 emission savings in kg/year*/
 	FloatResource yearlyCO2savings();
+	
+	/** Name of the planner. The value must exist as user name on the system.*/
+	StringResource plannerUserName();
 }

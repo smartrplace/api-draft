@@ -12,6 +12,7 @@ import org.ogema.core.model.Resource;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
+import org.smartrplace.extensionservice.ExtensionGeneralData;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.config.SmartEffAdminData;
@@ -62,8 +63,8 @@ public class SpEffAdminController {
 		}
 
 		@Override
-		public Resource generalData() {
-			return userAdmin.getAppConfigData().generalData();
+		public ExtensionGeneralData generalData() {
+			return userAdmin.getAppConfigData().globalData();
 		}
 
 		@Override

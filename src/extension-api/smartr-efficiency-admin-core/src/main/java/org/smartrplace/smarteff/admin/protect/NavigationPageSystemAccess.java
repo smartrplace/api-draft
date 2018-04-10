@@ -46,7 +46,7 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 			Resource parent) {
 		Class<? extends Resource> type = pageData.getEntryTypes().get(entryIdx).getType();
 		ExtensionResourceTypeDeclaration<? extends Resource> typeDecl = appExt.getTypeDeclaration(type);
-		String name = CapabilityHelper.getnewDecoratorName(ValueFormat.firstLowerCase(type.getSimpleName()), parent);
+		String name = CapabilityHelper.getNewMultiResourceName(type, parent);
 		NewResourceResult<? extends Resource> newResource = getNewResource(parent, name, typeDecl);
 		if(newResource.result != ResourceAccessResult.OK) {
 			System.out.println("Error while trying to create "+parent.getLocation()+"/"+name+": "+newResource.result);

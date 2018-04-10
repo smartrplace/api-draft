@@ -3,6 +3,7 @@ package org.smartrplace.extenservice.resourcecreate;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
+import org.smartrplace.extensionservice.ExtensionUserData;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 
 public interface ExtensionResourceAccessInitData {
@@ -17,7 +18,7 @@ public interface ExtensionResourceAccessInitData {
 
 	/**Domain-specific reference to user data.
 	 */
-	Resource userData();
+	ExtensionUserData userData();
 	
 	/** User data than cannot be edited by the user*/
 	ExtensionUserDataNonEdit userDataNonEdit();

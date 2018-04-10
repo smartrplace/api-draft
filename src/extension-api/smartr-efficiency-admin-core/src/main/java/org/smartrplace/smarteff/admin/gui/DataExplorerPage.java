@@ -59,7 +59,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resou
 		return result ;
 	}
 	private <T extends Resource> List<T> getPublicResources(Class<T> type) {
-		List<T> result = app.getUserAdmin().getAppConfigData().generalData().getSubResources(type, true);
+		List<T> result = app.getUserAdmin().getAppConfigData().globalData().getSubResources(type, true);
 		return result ;
 	}
 	private <T extends Resource> List<T> getAllResourcesToAccess(Class<T> resType, SmartEffUserDataNonEdit userData) {
