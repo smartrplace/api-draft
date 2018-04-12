@@ -36,8 +36,6 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 		public TablePage(ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage, ApplicationManagerMinimal appManMin) {
 			super(exPage.getPage(), null, null);
 			this.exPage = exPage;
-			//this.appManMin = appManMin;
-			triggerPageBuild();
 		}
 
 		@Override
@@ -56,7 +54,7 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 				row.addCell("Calculate", calculateButton);					
 				vh.linkingButton("Results", id, object, row, "Show Results", "results.html");
 			} else {
-				vh.stringLabel("Name");
+				vh.registerHeaderEntry("Name");
 				vh.registerHeaderEntry("Calculate");
 				vh.registerHeaderEntry("Results");
 			}

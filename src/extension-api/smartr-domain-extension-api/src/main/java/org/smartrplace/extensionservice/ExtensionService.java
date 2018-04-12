@@ -16,6 +16,7 @@ public interface ExtensionService<T extends Resource>  {
 		return null;
 	}
 	
+	/**Only initialize internal variables, perform no logic in start*/
 	void start(ApplicationManagerSPExt appManExt);
 	void stop(AppStopReason reason);
 	

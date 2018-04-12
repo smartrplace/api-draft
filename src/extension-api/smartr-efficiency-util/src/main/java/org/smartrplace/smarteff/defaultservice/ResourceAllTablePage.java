@@ -44,11 +44,6 @@ public class ResourceAllTablePage extends ResourceTablePage {
 	}
 
 	@Override
-	protected void addWidgets() {
-		tablePage = new TablePage(exPage, appManExt);		
-	}
-
-	@Override
 	protected String getHeader(OgemaHttpRequest req) {
 		return "All Resources in "+super.getHeader(req);
 	}

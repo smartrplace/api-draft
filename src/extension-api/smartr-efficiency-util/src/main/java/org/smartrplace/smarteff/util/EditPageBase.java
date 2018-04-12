@@ -15,8 +15,8 @@ import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.form.button.Button;
+import de.iwes.widgets.html.form.button.RedirectButton;
 import de.iwes.widgets.html.form.button.TemplateInitSingleEmpty;
-import extensionmodel.smarteff.api.base.BuildingData;
 
 public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 	protected abstract void getEditTableLines(EditTableBuilder etb);
@@ -42,6 +42,7 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		//Exactly one of the following should be non-null
 		OgemaWidget widget;
 		String stringForWidget;
+		RedirectButton decriptionLink = null;
 		
 		public EditElement(String title, OgemaWidget widget) {
 			this.title = title;
@@ -55,6 +56,9 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 			this.widgetForTitle = ogemaWidgetForTitle;
 			this.widget = widget;
 		}
+		public void setDescriptionUrl(RedirectButton button) {
+			decriptionLink = button;
+		}
 	}
 	public class EditTableBuilder {
 		List<EditElement> editElements = new ArrayList<>();
@@ -66,6 +70,11 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		}
 		public void addEditLine(String title, String stringForWidget) {
 			editElements.add(new EditElement(title, stringForWidget));
+		}
+		public void addEditLine(OgemaWidget widgetForTitle, OgemaWidget widget, RedirectButton descriptionLink) {
+			EditPageBase<T>.EditElement el = new EditElement(widgetForTitle, widget);
+			el.setDescriptionUrl(descriptionLink);
+			editElements.add(el);
 		}
 	}
 	
@@ -93,11 +102,13 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		int c = 0;
 		for(EditPageBase<T>.EditElement etl: etb.editElements) {
 			if((etl.title != null)&&(etl.widget != null))
-				table.setContent(c, 0, etl.title).setContent(c,1, etl.widget);
+				table.setContent(c, 1, etl.title).setContent(c,2, etl.widget);
 			else if((etl.title != null)&&(etl.stringForWidget != null))
-				table.setContent(c, 0, etl.title).setContent(c,1, etl.stringForWidget);
-			else if((etl.widgetForTitle != null)&&(etl.widget != null))
-				table.setContent(c, 0, etl.widgetForTitle).setContent(c,1, etl.stringForWidget);
+				table.setContent(c, 1, etl.title).setContent(c,2, etl.stringForWidget);
+			else if((etl.widgetForTitle != null)&&(etl.widget != null)) {
+				table.setContent(c, 1, etl.widgetForTitle).setContent(c,2, etl.widget);
+				if(etl.decriptionLink != null) table.setContent(c, 3, etl.decriptionLink);
+			}
 			else throw new IllegalStateException("Something went wrong with building the edit line "+c+" Obj:"+etl);
 			c++;
 		}

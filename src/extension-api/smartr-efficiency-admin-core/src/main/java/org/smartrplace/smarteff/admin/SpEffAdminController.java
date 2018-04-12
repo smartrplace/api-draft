@@ -48,8 +48,10 @@ public class SpEffAdminController {
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T extends Resource> ExtensionResourceTypeDeclaration<T> getTypeDeclaration(
-				Class<T> resourceType) {
-			return (ExtensionResourceTypeDeclaration<T>) typeAdmin.resourceTypes.get(resourceType).typeDeclaration;
+				Class<? extends T> resourceType) {
+			SmartrEffExtResourceTypeData typeData = typeAdmin.resourceTypes.get(resourceType);
+			if(typeData == null) return null;
+			return (ExtensionResourceTypeDeclaration<T>) typeData.typeDeclaration;
 		}
 		
 		public List<Class<? extends Resource>> getSubTypes(Class<? extends Resource> parentType) {
@@ -63,8 +65,9 @@ public class SpEffAdminController {
 		}
 
 		@Override
-		public ExtensionGeneralData generalData() {
-			return userAdmin.getAppConfigData().globalData();
+		public ExtensionGeneralData globalData() {
+			SmartEffAdminData appCD = getUserAdmin().getAppConfigData();
+			return appCD.globalData();
 		}
 
 		@Override
@@ -101,11 +104,12 @@ public class SpEffAdminController {
     }
 
     public void processNewService(SmartEffExtensionService service) {
-    	servicesKnown.add(service);
+    	service.start(appManExt);
      	
     	typeAdmin.registerService(service);
     	guiPageAdmin.registerService(service);
-    	service.start(appManExt);
+
+    	servicesKnown.add(service);
     }
     
     public void unregisterService(SmartEffExtensionService service) {

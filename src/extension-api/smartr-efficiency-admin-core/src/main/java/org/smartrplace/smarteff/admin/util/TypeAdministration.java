@@ -20,13 +20,20 @@ public class TypeAdministration {
 	}
 
 	public void registerService(SmartEffExtensionService service) {
+		int i = 0;
     	for(ExtensionResourceTypeDeclaration<? extends SmartEffResource> rtd: service.resourcesDefined()) {
-    		Class<? extends SmartEffResource> rt = rtd.dataType();
-    		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
-    		if(data == null) {
-    			data = new SmartrEffExtResourceTypeData(rtd, service, app);
-    			resourceTypes.put(rt, data );    			
-    		} else data.addParent(service);
+    		try {
+	    		Class<? extends SmartEffResource> rt = rtd.dataType();
+	    		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
+	    		if(data == null) {
+	    			data = new SmartrEffExtResourceTypeData(rtd, service, app);
+	    			resourceTypes.put(rt, data );    			
+	    		} else data.addParent(service);
+	    		i++;
+    		} catch(Exception e) {
+    			System.out.println("Error in service "+service.getClass().getName()+" Resource Type "+i);
+    			throw e;
+    		}
     	}
 		
 	}

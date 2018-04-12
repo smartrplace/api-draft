@@ -52,7 +52,9 @@ public class GUIPageAdministation {
 	
 	public void registerService(SmartEffExtensionService service) {
     	ServiceCapabilities caps = SmartrEffExtResourceTypeData.getServiceCaps(service);
+    	int i=0;
     	for(NavigationGUIProvider navi: caps.naviProviders) {
+try {    		
     		String id = WidgetHelper.getValidWidgetId(SPPageUtil.buildId(navi));
     		String url = SPPageUtil.getProviderURL(navi);
     		WidgetPage<?> page = app.widgetApp.createWidgetPage(url);
@@ -78,11 +80,16 @@ public class GUIPageAdministation {
 					listPub.add(dataPub);
 				}
 			}
+}catch(Exception e) {
+	System.out.println("Navi-Provider["+i+"] failed: Label:"+navi.label(null)+" service:"+service.getClass().getSimpleName());throw e;
+}
+			i++;
     	}
     	
     	for(ProposalProvider navi: caps.proposalProviders) {
     		ProposalProviderData data = new ProposalProviderData(navi, service);
 			proposalProviders.add(data);
+			if(navi.getEntryTypes() == null) continue;
 			for(EntryType t: navi.getEntryTypes()) {
 				List<ProposalPublicData> listPub = proposalInfo.get(t.getType());
 				if(listPub == null) {

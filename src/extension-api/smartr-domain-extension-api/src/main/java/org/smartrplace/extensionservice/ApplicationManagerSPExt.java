@@ -7,10 +7,10 @@ import org.ogema.core.model.Resource;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 
 public interface ApplicationManagerSPExt extends ApplicationManagerMinimal {
-	public ExtensionGeneralData generalData();
+	public ExtensionGeneralData globalData();
 	
 	/** Get type declaration from extension resource type*/
-	public <T extends Resource> ExtensionResourceTypeDeclaration<T> getTypeDeclaration(Class<T> resourceType);
+	public <T extends Resource> ExtensionResourceTypeDeclaration<T> getTypeDeclaration(Class<? extends T> resourceType);
 	
 	/** Get all types declaring this type as parent or types from which parent is inherited*/
 	public List<Class<? extends Resource>> getSubTypes(Class<? extends Resource> parentType);

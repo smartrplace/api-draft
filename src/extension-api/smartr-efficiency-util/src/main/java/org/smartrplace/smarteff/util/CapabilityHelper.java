@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.FloatResource;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
@@ -91,6 +93,10 @@ public class CapabilityHelper {
 	
 	/** Get resource to be used for a user. If a user-specific resource is available for the resource
 	 * requested it will be returned, otherwise the global default resource. <br>
+	 * Note that this method can only be used to access resources that have a single cardinality
+	 * in all levels of its resource tree below globalData. This can also be used to access a
+	 * user-specific default resource. It does not support to find a respective default value for
+	 * a certain building-type or similar, though.<br>
 	 * Note that this concept could be extended in the future to manage even more variants of a
 	 * resource.
 	 * 
@@ -104,6 +110,9 @@ public class CapabilityHelper {
 		T userResource = (T) ResourceHelper.getSubResource(userData, subPath , resourceInGlobal.getResourceType());
 		if((userResource == null) || (!userResource.isActive())) return resourceInGlobal;
 		return userResource;
+	}
+	public static float floatParam(FloatResource resourceInGlobal, ExtensionResourceAccessInitData data) {
+		return getForUser(resourceInGlobal, data.userData()).getValue();
 	}
 	
 	private static EntryType getEntryType(Class<? extends Resource> type) {

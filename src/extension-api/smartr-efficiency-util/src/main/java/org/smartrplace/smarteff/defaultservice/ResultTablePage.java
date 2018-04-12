@@ -58,7 +58,7 @@ public class ResultTablePage extends NaviPageBase<ProjectProposal> {
 				vh.floatLabel("Savings/a (EUR)", id, object.yearlySavings(), row, "%.2f");
 				vh.floatLabel("CO2-Saved/a (kg)", id, object.yearlyCO2savings(), row, "%.2f");
 				vh.floatLabel("Interest rate", id, CapabilityHelper.getForUser(
-						((SmartEffGeneralData)appManExt.generalData()).smartEffPriceData().yearlyInterestRate()
+						((SmartEffGeneralData)appManExt.globalData()).smartEffPriceData().yearlyInterestRate()
 						, appData.userData()), row, "%.2f%%");
 			} else {
 				vh.registerHeaderEntry("Name");

@@ -2,6 +2,7 @@ package org.smartrplace.smarteff.admin.object;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -55,10 +56,10 @@ public class SmartrEffExtResourceTypeData {
 	}
 	
 	public static class ServiceCapabilities {
-		public final Set<ProposalProvider> proposalProviders = new HashSet<>();
-		public final Set<NavigationGUIProvider> naviProviders = new HashSet<>();
-		public final Set<SmartEffRecommendationProvider> recommendationProviders = new HashSet<>();
-		public final Set<ExtensionCapability> otherProviders = new HashSet<>();
+		public final Set<ProposalProvider> proposalProviders = new LinkedHashSet<>();
+		public final Set<NavigationGUIProvider> naviProviders = new LinkedHashSet<>();
+		public final Set<SmartEffRecommendationProvider> recommendationProviders = new LinkedHashSet<>();
+		public final Set<ExtensionCapability> otherProviders = new LinkedHashSet<>();
 	}
 	public static ServiceCapabilities getServiceCaps(SmartEffExtensionService service) {
 		ServiceCapabilities result = new ServiceCapabilities();
