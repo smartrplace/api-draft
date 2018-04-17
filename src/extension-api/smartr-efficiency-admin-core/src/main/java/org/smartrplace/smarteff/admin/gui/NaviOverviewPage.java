@@ -16,17 +16,12 @@ import de.iwes.widgets.api.extended.WidgetData;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
 
-/**
- * An HTML page, generated from the Java code.
- */
+/** Page that shows all Navi-pages in the system and allows to open top-level pages directly*/
 public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Resource> {
-	public static final float MIN_COMFORT_TEMP = 4;
-	public static final float MAX_COMFORT_TEMP = 30;
-	public static final float DEFAULT_COMFORT_TEMP = 21;
-	
 	private final SpEffAdminController app;
 	
 	ValueResourceTextField<TimeResource> updateInterval;
@@ -66,10 +61,22 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 		vh.stringLabel("Entry Types", id, text, row);
 		//ExtensionResourceAccessInitData systemAccess = app.getUserAdmin().getAccessData(null, req, object.provider);
 		//SPPageUtil.addOpenButton("Open", null, null, vh, id, row, object, systemAccess.systemAccess(), "Open", "--");
-		if(object.provider.getEntryTypes() == null)
+		if(object.provider.getEntryTypes() == null) {
 			vh.linkingButton("Open", id, null, row, "Open", object.url);
-		else
+			if(req != null) {
+				Button favoriteButton = new Button(vh.getParent(), "favoriteButton"+id, "Add to Favourites", req) {
+					private static final long serialVersionUID = 8917341845056555889L;
+					@Override
+					public void onPOSTComplete(String data, OgemaHttpRequest req) {
+						app.pageAdmin.addPageToMenu(object.provider);
+					}
+				};
+				row.addCell("Favourite", favoriteButton);
+			} else vh.registerHeaderEntry("Favourite");
+		} else {
 			vh.stringLabel("Open", id, "--", row);
+			vh.stringLabel("Favourite", id, "--", row);
+		}
 	}
 	
 	@Override
@@ -80,6 +87,6 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 	@Override
 	public String getLineId(NavigationPageData object) {
 		String name = SPPageUtil.buildValidWidgetId(object.provider);
-		return name + super.getLineId(object);
+		return name; // + super.getLineId(object);
 	}
 }

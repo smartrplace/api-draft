@@ -9,6 +9,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.StringResource;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -28,7 +29,13 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 		LINK_BUTTON_TEXTS.put(FR, "Info en Wiki");
 	}
 
-	public abstract void setData();
+	private T sampleResource;
+	private int sampleResourceLength;
+	
+	/** In this method the page data shall be provided with methods like getLabel
+	 * @param sr virtual resource that shall be used to provide paths
+	 */
+	public abstract void setData(T sr);
 	
 	Map<String, Map<OgemaLocale, String>> labels = new LinkedHashMap<>();
 	Map<String, Map<OgemaLocale, String>> links = new HashMap<>();
@@ -47,15 +54,25 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 		}
 		innerMap.put(locale, text);
 	}
+	protected void setLabel(Resource res, OgemaLocale locale, String text) {
+		setLabel(getSubPath(res), locale, text);
+	}
 	protected void setLabel(String resourceName, OgemaLocale locale, String text, OgemaLocale locale2, String text2) {
 		setLabel(resourceName, locale, text);
 		setLabel(resourceName, locale2, text2);
+	}
+	protected void setLabel(Resource res, OgemaLocale locale, String text, OgemaLocale locale2, String text2) {
+		setLabel(getSubPath(res), locale, text, locale2, text2);		
 	}
 	protected void setLabel(String resourceName, OgemaLocale locale, String text,
 			OgemaLocale locale2, String text2, float min, float max) {
 		setLabel(resourceName, locale, text);
 		setLabel(resourceName, locale2, text2);
 		setLimits(resourceName, min, max);
+	}
+	protected void setLabel(Resource res, OgemaLocale locale, String text,
+			OgemaLocale locale2, String text2, float min, float max) {
+		setLabel(getSubPath(res), locale, text, locale2, text2, min, max);
 	}
 	protected void setLink(String resourceName, OgemaLocale locale, String text) {
 		Map<OgemaLocale, String> innerMap = links.get(resourceName);
@@ -65,23 +82,29 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 		}
 		innerMap.put(locale, text);		
 	}
+	protected void setLink(Resource res, OgemaLocale locale, String text) {
+		setLink(getSubPath(res), locale, text);
+	}
 	protected void setLimits(String resourceName, float min, float max) {
 		lowerLimits.put(resourceName, min);		
 		upperLimits.put(resourceName, max);		
 	}
-	
+	protected void setLimits(Resource res, float min, float max) {
+		setLimits(getSubPath(res), min, max);
+	}
+		
 	public void setDefaultLocale(OgemaLocale locale) {
 		localeDefault = locale;
 	}
 	
 	@Override
 	public String label(OgemaLocale locale) {
-		return typeClass().getSimpleName()+" Edit Page";
+		return primaryEntryTypeClass().getSimpleName()+" Edit Page";
 	}
 	
 	public boolean checkResource(T res) {
 		if(!checkResourceBase(res, false)) return false;
-		String newName = CapabilityHelper.getnewDecoratorName(typeClass().getSimpleName(), res.getParent());
+		String newName = CapabilityHelper.getnewDecoratorName(primaryEntryTypeClass().getSimpleName(), res.getParent());
 		Resource name = res.getSubResource("name");
 		if ((name != null) && (name instanceof StringResource)) {
 			ValueResourceHelper.setIfNew((StringResource)name, newName);
@@ -107,7 +130,7 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 	@Override
 	protected void getEditTableLines(EditPageBase<T>.EditTableBuilder etb) {
 		types = new HashMap<>();
-		for(Method m: typeClass().getDeclaredMethods()) {
+		for(Method m: primaryEntryTypeClass().getDeclaredMethods()) {
 			Class<?> rawClass = m.getReturnType();
 			if(Resource.class.isAssignableFrom(rawClass)) {
 				types.put(m.getName(), (Class<? extends Resource>) rawClass);				
@@ -122,16 +145,17 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 			} else if(FloatResource.class.isAssignableFrom(type)) {
 				Float low = lowerLimits.get(sub);
 				Float up = upperLimits.get(sub);
-				float lowv = (low!=null)?up:0;
+				float lowv = (low!=null)?low:0;
 				float upv = (up!=null)?up:999999f;
 				widget = mh.floatEdit((String)sub, alert, lowv, upv,
 						sub+" limits:"+lowv+" to "+upv);
+				widget.registerDependentWidget(widget);
 			} else {
 				continue;
 			}
 
 			final Map<OgemaLocale, String> innerMap = labels.get(sub);
-			Label label = new Label(page, "label"+pid()) {
+			Label label = new Label(page, "label"+sub+pid()) {
 				private static final long serialVersionUID = -2849170377959516221L;
 				@Override
 				public void onGET(OgemaHttpRequest req) {
@@ -144,7 +168,7 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 			RedirectButton linkButton = null;
 			final Map<OgemaLocale, String> linkMap = links.get(sub);
 			if((linkMap != null) && (!linkMap.isEmpty())) {
-				linkButton = new RedirectButton(page, "linkButton"+pid(), "") {
+				linkButton = new RedirectButton(page, "linkButton"+sub+pid(), "") {
 					private static final long serialVersionUID = 1L;
 					@Override
 					public void onGET(OgemaHttpRequest req) {
@@ -165,4 +189,16 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 			etb.addEditLine(label, widget, linkButton);
 		}
 	}
+	
+	@Override
+	protected void addWidgets() {
+		sampleResource = ResourceHelper.getSampleResource(primaryEntryTypeClass());
+		sampleResourceLength = sampleResource.getPath().length()+1;
+		setData(sampleResource);
+		super.addWidgets();
+	}
+	private String getSubPath(Resource res) {
+		return res.getPath().substring(sampleResourceLength);
+	}
+
 }

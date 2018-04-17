@@ -5,7 +5,9 @@ import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitDa
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 
+import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class TableOpenButton extends NaviOpenButton{
@@ -15,5 +17,12 @@ public class TableOpenButton extends NaviOpenButton{
 			Class<? extends Resource> type,
 			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage) {
 		super(page, id, pid, text, type, exPage, PageType.TABLE_PAGE, false);
+	}
+
+	public TableOpenButton(OgemaWidget parent, String id, String pid, String text,
+			Class<? extends Resource> type,
+			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage,
+			OgemaHttpRequest req) {
+		super(parent, id, pid, text, type, exPage, PageType.TABLE_PAGE, false, req);
 	}
 }

@@ -5,6 +5,7 @@ import org.smartrplace.smarteff.util.EditPageBase;
 
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+import extensionmodel.smarteff.smartrheating.SmartrHeatingData;
 
 public class SmartrHeatingEditPage extends EditPageBase<SmartrHeatingData> {
 	@Override
@@ -22,7 +23,7 @@ public class SmartrHeatingEditPage extends EditPageBase<SmartrHeatingData> {
 	}
 
 	@Override
-	protected Class<SmartrHeatingData> typeClass() {
+	protected Class<SmartrHeatingData> primaryEntryTypeClass() {
 		return SmartrHeatingData.class;
 	}
 

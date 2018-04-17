@@ -4,26 +4,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.ValueResource;
-import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
-import org.smartrplace.smarteff.util.CapabilityHelper;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
+import extensionmodel.smarteff.api.base.SmartEffUserData;
 
-public class ResourceAllTablePage extends ResourceTablePage {
-	public ResourceAllTablePage() {
+public class TopConfigTablePage extends ResourceTablePage {
+	public TopConfigTablePage() {
 		super();
 	}
 
 	@Override
 	protected List<Resource> provideResourcesInTable(OgemaHttpRequest req) {
-		List<Resource> resultAll = getReqData(req).getSubResources(false);
+		ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
+		List<Resource> resultAll = ((SmartEffUserData)appData.userData()).getSubResources(false);
+		//List<Resource> resultAll = getReqData(req).getSubResources(false);
 		List<Resource> result = new ArrayList<>();
 		for(Resource r: resultAll) {
-			if(!(r instanceof ValueResource)) result.add(r);
+			if(!((r instanceof ValueResource) || (r instanceof ResourceList))) result.add(r);
 		}
 		return result;
 	}
@@ -35,31 +37,25 @@ public class ResourceAllTablePage extends ResourceTablePage {
 	
 	@Override //optional
 	public String pid() {
-		return ResourceAllTablePage.class.getSimpleName();
+		return TopConfigTablePage.class.getSimpleName();
 	}
 
 	@Override
 	protected String label(OgemaLocale locale) {
-		return "Generic All-Resource Overview Table";
+		return "Top Level Config Overview Table";
 	}
 
 	@Override
 	protected String getHeader(OgemaHttpRequest req) {
-		return "All Resources in "+super.getHeader(req);
+		return "Top Level config resources for "+super.getUserName(req);
 	}
 	
 	@Override
 	protected List<EntryType> getEntryTypes() {
-		return CapabilityHelper.getStandardEntryTypeList(primaryEntryTypeClass());
-	}
-
-	@Override
-	protected PageType getPageType() {
-		return PageType.TABLE_PAGE;
+		return null;
 	}
 	
 	@Override
-	protected PagePriority getPriority() {
-		return PagePriority.HIDDEN;
+	protected void addWidgetsAboveTable(Class<? extends Resource> resourceType) {
 	}
 }

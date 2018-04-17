@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.extenservice.proposal.ProjectProposal;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
@@ -26,7 +27,9 @@ import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import extensionmodel.smarteff.api.base.SmartEffGeneralData;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
-public class ResultTablePage extends NaviPageBase<ProjectProposal> {
+public class ResultTablePage extends NaviPageBase<Resource> {
+	public final static Class<ProjectProposal> TYPE_SHOWN = ProjectProposal.class;
+	
 	protected TablePage tablePage;
 	
 	public ResultTablePage() {
@@ -50,22 +53,17 @@ public class ResultTablePage extends NaviPageBase<ProjectProposal> {
 			ExtensionResourceAccessInitData appData = null;
 			if(req != null) appData = exPage.getAccessData(req);
 			vh.stringLabel("Type", id, object.getResourceType().getSimpleName(), row);
-			if(object.exists()) {
-				vh.stringLabel("Name", id, ResourceTablePage.getSimpleName(object), row);
-				SPPageUtil.addResEditOpenButton("Open", object, object.getResourceType(), vh, id, row, appData);
-				vh.floatLabel("Total Cost (EUR)", id, object.costOfProject(), row, "%.0f");
-				vh.floatLabel("+ Work (h)", id, object.ownHours(), row, "%.1f");
-				vh.floatLabel("Savings/a (EUR)", id, object.yearlySavings(), row, "%.2f");
-				vh.floatLabel("CO2-Saved/a (kg)", id, object.yearlyCO2savings(), row, "%.2f");
-				vh.floatLabel("Interest rate", id, CapabilityHelper.getForUser(
-						((SmartEffGeneralData)appManExt.globalData()).smartEffPriceData().yearlyInterestRate()
-						, appData.userData()), row, "%.2f%%");
-			} else {
-				vh.registerHeaderEntry("Name");
-				vh.registerHeaderEntry("Open");
-				vh.registerHeaderEntry("Evaluate All");
-				vh.registerHeaderEntry("Delete");
-			}
+			vh.stringLabel("Name", id, ResourceTablePage.getSimpleName(object), row);
+			SPPageUtil.addResEditOpenButton("Open", object, vh, id, row, appData);
+			vh.floatLabel("Total Cost (EUR)", id, object.costOfProject(), row, "%.0f");
+			vh.floatLabel("+ Work (h)", id, object.ownHours(), row, "%.1f");
+			vh.floatLabel("Savings/a (EUR)", id, object.yearlySavings(), row, "%.2f");
+			vh.floatLabel("CO2-Saved/a (kg)", id, object.yearlyCO2savings(), row, "%.2f");
+			if(req != null) {
+			vh.floatLabel("Interest rate", id, CapabilityHelper.getForUser(
+					((SmartEffGeneralData)appManExt.globalData()).smartEffPriceData().yearlyInterestRate()
+					, appData.userData()), row, "%.2f%%");
+			} else vh.registerHeaderEntry("Interest rate");
 		}
 
 		@Override
@@ -93,14 +91,14 @@ public class ResultTablePage extends NaviPageBase<ProjectProposal> {
 		
 		@Override
 		public List<ProjectProposal> getResourcesInTable(OgemaHttpRequest req) {
-			return getReqData(req).getSubResources(ProjectProposal.class, true);
+			return getReqData(req).getSubResources(TYPE_SHOWN, true);
 		}
 	}
 
 	
 	@Override
-	protected Class<ProjectProposal> typeClass() {
-		return ProjectProposal.class;
+	protected Class<Resource> primaryEntryTypeClass() {
+		return Resource.class;
 	}
 	
 	@Override
@@ -115,12 +113,12 @@ public class ResultTablePage extends NaviPageBase<ProjectProposal> {
 
 	@Override
 	protected String getHeader(OgemaHttpRequest req) {
-		return "Results for "+super.getHeader(req)+" (+Subtree)";
+		return "Results for "+ResourceUtils.getHumanReadableName(getReqData(req))+" (+Subtree)";
 	}
 	
 	@Override
 	protected List<EntryType> getEntryTypes() {
-		return CapabilityHelper.getStandardEntryTypeList(typeClass());
+		return CapabilityHelper.getStandardEntryTypeList(primaryEntryTypeClass());
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.tools.resource.util.ResourceUtils;
+import org.smartrplace.extenservice.proposal.ProjectProposal;
 import org.smartrplace.extenservice.proposal.ProposalPublicData;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
@@ -12,6 +14,7 @@ import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.smarteff.util.CapabilityHelper;
 import org.smartrplace.smarteff.util.NaviPageBase;
+import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -51,8 +54,9 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 						object.calculate(appData);
 					}
 				};
-				row.addCell("Calculate", calculateButton);					
-				vh.linkingButton("Results", id, object, row, "Show Results", "results.html");
+				row.addCell("Calculate", calculateButton);
+				ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
+				SPPageUtil.addResultTableOpenButton("Results", getReqData(req), vh, id, row, appData);
 			} else {
 				vh.registerHeaderEntry("Name");
 				vh.registerHeaderEntry("Calculate");
@@ -78,7 +82,7 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 	}
 	
 	@Override
-	protected Class<Resource> typeClass() {
+	protected Class<Resource> primaryEntryTypeClass() {
 		return Resource.class;
 	}
 	
@@ -99,12 +103,12 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 
 	@Override
 	protected String getHeader(OgemaHttpRequest req) {
-		return "Proposal providers for "+super.getHeader(req);
+		return "Proposal providers for "+ResourceUtils.getHumanReadableName(getReqData(req)); //super.getHeader(req);
 	}
 	
 	@Override
 	protected List<EntryType> getEntryTypes() {
-		return CapabilityHelper.getStandardEntryTypeList(typeClass());
+		return CapabilityHelper.getStandardEntryTypeList(primaryEntryTypeClass());
 	}
 
 	@Override

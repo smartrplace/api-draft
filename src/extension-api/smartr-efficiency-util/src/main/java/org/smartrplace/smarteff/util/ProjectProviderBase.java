@@ -27,11 +27,16 @@ public abstract class ProjectProviderBase<T extends SmartEffResource>  implement
 	/** Return true if resource shall be activated*/
 	protected boolean initParams(SmartEffResource params) {return false;};
 	
+	/**override this if the param type can be attached to another param type*/
+	private Class<? extends SmartEffResource> getParentParamType() {
+		return null;
+	}
+	
 	/** Override these methods if more than one result shall be supported*/
 	@Override
 	public List<Resource> calculate(ExtensionResourceAccessInitData data) {
 		T input = getReqData(data);
-		ProjectProposal result = input.addDecorator(CapabilityHelper.getSingleResourceName(typeClass()), getResultType());
+		ProjectProposal result = input.addDecorator(CapabilityHelper.getSingleResourceName(getResultType()), getResultType());
 		calculateProposal(input, result, data);
 		result.activate(true);
 		return Arrays.asList(new ProjectProposal[] {result});
@@ -59,10 +64,10 @@ public abstract class ProjectProviderBase<T extends SmartEffResource>  implement
 		//ProjectProviderBase.this.appManExt = appManExt;
 		//add param and init
 		if(getParamType() != null) {
-			SmartEffResource params = CapabilityHelper.getSubResourceSingle(appManExt.globalData(), getParamType());
+			SmartEffResource params = CapabilityHelper.getSubResourceSingle(appManExt.globalData(), getParamType(), appManExt);
 			params.create();
 			if(initParams(params)) params.activate(true);
-			}
+		}
 	}
 	
 	public ProjectProviderBase(ApplicationManagerSPExt appManExt) {
@@ -109,7 +114,7 @@ public abstract class ProjectProviderBase<T extends SmartEffResource>  implement
 
 					@Override
 					public Class<? extends SmartEffResource> parentType() {
-						return typeClass();
+						return getParentParamType();
 					}
 
 					@Override

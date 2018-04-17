@@ -11,6 +11,7 @@ import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
 import org.smartrplace.extensionservice.ExtensionUserData;
+import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 import org.smartrplace.util.format.ValueFormat;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -83,7 +84,11 @@ public class CapabilityHelper {
 			if(appManExt == null) return null;
 			ExtensionResourceTypeDeclaration<T> decl = appManExt.getTypeDeclaration(type);
 			if(decl == null) throw new IllegalStateException("Using resource type without type declaration!");
-			if(!decl.parentType().isAssignableFrom(parent.getResourceType()))
+			if(decl.parentType() == null) {
+				if(!((parent instanceof ExtensionUserData)||(parent instanceof ExtensionUserDataNonEdit)))
+					throw new IllegalStateException("Requested sub type from resource "+parent.getLocation()+" for toplevel-type!");
+			}
+			else if(!decl.parentType().isAssignableFrom(parent.getResourceType()))
 				throw new IllegalStateException("Requested sub type from resource "+parent.getLocation()+" for type with parent "+decl.parentType().getName());
 			return parent.getSubResource(getSingleResourceName(decl), type);
 		}

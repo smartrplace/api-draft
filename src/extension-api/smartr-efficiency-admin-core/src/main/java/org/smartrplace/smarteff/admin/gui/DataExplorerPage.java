@@ -8,13 +8,13 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 import org.smartrplace.smarteff.admin.util.SmartrEffUtil.AccessType;
-import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
-import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
-import org.smartrplace.util.format.WidgetHelper;
+import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
+import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
 
 import de.iwes.widgets.api.extended.WidgetData;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -30,9 +30,14 @@ import de.iwes.widgets.template.DefaultDisplayTemplate;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 /**
- * An HTML page, generated from the Java code.
+ * Page that shows all resources of a certain type
+ * TODO: Inherit from NaviPageBase and use same addWidgets method as ResourceTablePage and ResourceAllTablePage.
+ * TODO: For this probably for the transmission of the resource type not configId can be used but a
+ * different HTML parameter has to be used. This could be a relevant general concept if a NaviPage needs
+ * more input than just input resources. This could also be solved by a parameters Map accessible in 
+ * {@link ExtensionResourceAccessInitData}.
  */
-public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resource> {
+public class DataExplorerPage extends ResourceGUITablePage<SmartEffResource> {
 	protected static final String pid = DataExplorerPage.class.getSimpleName();
 
 	public static final float MIN_COMFORT_TEMP = 4;
@@ -46,7 +51,8 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resou
 
 	public DataExplorerPage(final WidgetPage<?> page, final SpEffAdminController app,
 			SmartEffResource initData) {
-		super(page, app.appMan, initData);
+		//super(page, app.appMan, initData);
+		super(page, app.appMan, SmartEffResource.class);
 		this.app = app;
 	}
 	
@@ -71,7 +77,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resou
 	
 	@Override
 	public void addWidgetsAboveTable() {
-		TemplateInitSingleEmpty<SmartrEffExtResourceTypeData> init = new TemplateInitSingleEmpty<SmartrEffExtResourceTypeData>(page, "init", false) {
+		TemplateInitSingleEmpty<SmartrEffExtResourceTypeData> initResType = new TemplateInitSingleEmpty<SmartrEffExtResourceTypeData>(page, "initResType", false) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -91,7 +97,7 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resou
 				System.out.println("Data Explorer: Finished init");
 			}
 		};
-		page.append(init);
+		page.append(initResType);
 		
 		Header header = new Header(page, "header", "Data Explorer");
 		header.addDefaultStyle(WidgetData.TEXT_ALIGNMENT_LEFT);
@@ -109,12 +115,12 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resou
 		//Note: Synchronization issues with triggerAction
 		//init.triggerOnPOST(selectProvider);
 		//selectProvider.triggerOnPOST(mainTable);
-		init.registerDependentWidget(selectProvider);
+		initResType.registerDependentWidget(selectProvider);
 		selectProvider.registerDependentWidget(mainTable);
 	}
 	
 	@Override
-	public Collection<SmartEffResource> getObjectsInTable(OgemaHttpRequest req) {
+	public List<SmartEffResource> getResourcesInTable(OgemaHttpRequest req) {
 		SmartrEffExtResourceTypeData item = selectProvider.getSelectedItem(req);
 		if(item == null) throw new IllegalStateException("Widget dependencies not processed correctly!");
 		System.out.println("Item:"+item.resType.getName());
@@ -125,16 +131,17 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resou
 	}
 
 	@Override
-	public void addWidgets(SmartEffResource object, ObjectResourceGUIHelper<SmartEffResource, Resource> vh,
+	public void addWidgets(SmartEffResource object, ResourceGUIHelper<SmartEffResource> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 		//if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+		//ResourceTablePage.addWidgets(object, vh, id, req, row, appMan, pid, app.appManExt, exPage);
 		id = pid + id;
 		vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 		vh.stringLabel("Elements", id, ""+object.getSubResources(false).size(), row);
 		vh.linkingButton("Export", id, object, row, "Export", "export.html");
 		vh.linkingButton("View", id, object, row, "Export", "view.html");
 		vh.linkingButton("Evaluate", id, object, row, "Export", "evaluate.html");
-		if(!(SmartrEffUtil.getAccessType(object) == AccessType.READWRITE)) {
+		if((!(SmartrEffUtil.getAccessType(object) == AccessType.READWRITE)) || (req == null)) {
 			vh.stringLabel("Edit", id, "--", row);
 			vh.stringLabel("Delete", id, "--", row);
 		} else {
@@ -150,14 +157,14 @@ public class DataExplorerPage extends ObjectGUITablePage<SmartEffResource, Resou
 		}
 	}
 	
-	@Override
-	public Resource getResource(SmartEffResource object, OgemaHttpRequest req) {
+	/*@Override
+	public SmartEffResource getResource(SmartEffResource object, OgemaHttpRequest req) {
 		return null;
-	}
+	}*/
 	
-	@Override
+	/*@Override
 	public String getLineId(SmartEffResource object) {
 		String name = WidgetHelper.getValidWidgetId(ResourceUtils.getHumanReadableName(object));
 		return name + super.getLineId(object);
-	}
+	}*/
 }

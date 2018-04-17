@@ -69,9 +69,9 @@ public class BuildingExampleAnalysis extends ProjectProviderBase<BuildingData> {
 	@Override
 	protected boolean initParams(SmartEffResource paramsIn) {
 		DefaultProviderParams params = (DefaultProviderParams)paramsIn;
-		if(ValueResourceHelper.setIfNew(params.basePriceBuildingAnalysis(), 400) ||
-				ValueResourceHelper.setIfNew(params.pricePerSQMBuildingAnalysis(), 1.5f) ||
-				ValueResourceHelper.setIfNew(params.defaultKwhPerSQM(), 140f) ||
+		if(ValueResourceHelper.setIfNew(params.basePriceBuildingAnalysis(), 400) |
+				ValueResourceHelper.setIfNew(params.pricePerSQMBuildingAnalysis(), 1.5f) |
+				ValueResourceHelper.setIfNew(params.defaultKwhPerSQM(), 140f) |
 				ValueResourceHelper.setIfNew(params.costOfCustomerHour(), 40f)) {
 			return true;
 		}

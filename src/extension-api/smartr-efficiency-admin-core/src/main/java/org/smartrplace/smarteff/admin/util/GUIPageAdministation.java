@@ -30,8 +30,6 @@ import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
-import de.iwes.widgets.api.widgets.navigation.MenuConfiguration;
-import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class GUIPageAdministation {
@@ -53,20 +51,17 @@ public class GUIPageAdministation {
 	public void registerService(SmartEffExtensionService service) {
     	ServiceCapabilities caps = SmartrEffExtResourceTypeData.getServiceCaps(service);
     	int i=0;
-    	for(NavigationGUIProvider navi: caps.naviProviders) {
-try {    		
+    	for(NavigationGUIProvider navi: caps.naviProviders) try {
     		String id = WidgetHelper.getValidWidgetId(SPPageUtil.buildId(navi));
     		String url = SPPageUtil.getProviderURL(navi);
     		WidgetPage<?> page = app.widgetApp.createWidgetPage(url);
-    		NavigationMenu menu = app.getNavigationMenu();
-    		MenuConfiguration mc = page.getMenuConfiguration();
-    		mc.setCustomNavigation(menu);
   		
   			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> dataExPage = app.getUserAdmin().
   					getNaviPage(page, url, "dataExplorer.html", id, navi);
     		navi.initPage(dataExPage, app.appManExt);
     		
     		NavigationPageData data = new NavigationPageData(navi, service, url, dataExPage);
+    		app.pageAdmin.registerPage(data, page);
 			if(navi.getEntryTypes() == null) startPages.add(data);
 			else {
 				navigationPages.add(data);
@@ -78,15 +73,19 @@ try {
 					}
 					NavigationPublicPageData dataPub = new NavigationPublicPageDataImpl(data);
 					listPub.add(dataPub);
+					System.out.println("Navi-URL: "+url+" EntryType:"+t.getType().getSimpleName()+" List# now:"+listPub.size());				 
 				}
 			}
-}catch(Exception e) {
-	System.out.println("Navi-Provider["+i+"] failed: Label:"+navi.label(null)+" service:"+service.getClass().getSimpleName());throw e;
-}
 			i++;
-    	}
+    	} catch(Exception e) {
+			System.out.println("Navi-Provider["+i+"] failed: Label:"+navi.label(null)+" service:"+service.getClass().getSimpleName());
+			e.printStackTrace();
+		}
     	
-    	for(ProposalProvider navi: caps.proposalProviders) {
+    	i = 0;
+    	for(ProposalProvider navi: caps.proposalProviders) try {
+    		navi.init(app.appManExt);
+    		
     		ProposalProviderData data = new ProposalProviderData(navi, service);
 			proposalProviders.add(data);
 			if(navi.getEntryTypes() == null) continue;
@@ -99,7 +98,11 @@ try {
 				ProposalPublicDataImpl dataPub = new ProposalPublicDataImpl(data);
 				listPub.add(dataPub);
 			}
-    	}
+			i++;
+    	} catch(Exception e) {
+			System.out.println("Proposal-Provider["+i+"] failed: Label:"+navi.label(null)+" service:"+service.getClass().getSimpleName());				
+			e.printStackTrace();
+		}
 	}
 	
 	public void unregisterService(SmartEffExtensionService service) {

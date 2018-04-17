@@ -50,12 +50,14 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 
 			vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 			vh.floatLabel("Heated Area", id, object.heatedLivingSpace(), row, "%.0f m2");
-			SPPageUtil.addResEditOpenButton("Edit", object, BuildingData.class, vh, id, row, appData);
-			SPPageUtil.addResTableOpenButton("Open", object, BuildingData.class, vh, id, row, appData);
-			if(object.isActive())
-				vh.linkingButton("Evaluate All", id, object, row, "Evaluate All", "evalAll.html");
-			else
-				vh.stringLabel("Evaluate All", id, "Inactive", row);
+			SPPageUtil.addResEditOpenButton("Edit", object, vh, id, row, appData);
+			SPPageUtil.addResTableOpenButton("Open", object, vh, id, row, appData);
+			if(object.isActive()) {
+				SPPageUtil.addProviderTableOpenButton("Evaluations", object, vh, id, row, appData);
+				//TableOpenButton proposalTableOpenButton = new StandardProposalTableOpenButton(vh.getParent(), "proposalTableOpenButton", pid(), "Proposal providers", object.getResourceType(), exPage, req);
+				//row.addCell("Evaluations", proposalTableOpenButton);
+			} else
+				vh.stringLabel("Evaluations", id, "Inactive", row);
 			vh.linkingButton("Delete", id, object, row, "Delete", "delete.html");
 		}
 
@@ -80,7 +82,7 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 	}
 
 	@Override
-	protected Class<BuildingData> typeClass() {
+	protected Class<BuildingData> primaryEntryTypeClass() {
 		return BuildingData.class;
 	}
 	

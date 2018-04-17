@@ -1,9 +1,10 @@
-package org.sp.example.smartrheating;
+package extensionmodel.smarteff.smartrheating;
 
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
+import org.sp.example.smartrheating.SmartrHeatingRadiatorTypeData;
 
 public interface SmartrHeatingData extends SmartEffResource {
 	/** 1: Standard on radiators<br>

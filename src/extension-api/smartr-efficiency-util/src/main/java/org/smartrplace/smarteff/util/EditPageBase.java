@@ -24,7 +24,7 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 	
 	@Override
 	protected List<EntryType> getEntryTypes() {
-		return CapabilityHelper.getStandardEntryTypeList(typeClass());
+		return CapabilityHelper.getStandardEntryTypeList(primaryEntryTypeClass());
 	}
 
 	protected ObjectResourceGUIHelper<T, T> mh;
@@ -92,6 +92,7 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 			}
 			
 		};
+		mh.setDoRegisterDependentWidgets(true);
 		alert = new Alert(page, "alert"+pid(), "");
 		page.append(alert);
 		
@@ -132,7 +133,7 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 				appData.systemAccess().activateResource(res);
 			}
 		};
-		TableOpenButton tableButton = new TableOpenButton(page, "addEntry", pid(), "Data Explorer", typeClass(), exPage);
+		TableOpenButton tableButton = new TableOpenButton(page, "addEntry", pid(), "Data Explorer", primaryEntryTypeClass(), exPage);
 		table.setContent(c, 0, activateButton).setContent(c, 1, tableButton);
 
 		page.append(table);

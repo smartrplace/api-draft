@@ -18,7 +18,7 @@ import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class NaviOpenButton extends RedirectButton {
 	protected static final long serialVersionUID = -4145439981103486352L;
-	private final Class<? extends Resource> defaultType;
+	protected final Class<? extends Resource> defaultType;
 	protected final ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
 	protected final PageType pageType;
 	//doCreate only relevant for pageType EDIT

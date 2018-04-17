@@ -16,6 +16,7 @@ import org.smartrplace.smarteff.util.NaviPageBase;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import extensionmodel.smarteff.api.base.BuildingData;
+import extensionmodel.smarteff.smartrheating.SmartrHeatingData;
 
 @Service(SmartEffExtensionService.class)
 @Component

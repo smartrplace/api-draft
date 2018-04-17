@@ -26,12 +26,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                    	<!--  export only if it shall be available alos to other -->
-                        <!-- <Export-Package>com.jcraft.jsch;version=0.1.53</Export-Package> -->
-                        <Import-Package>
-                        org.json;version="[${org.json.version.min},${org.json.version.max})",
-                        *</Import-Package>
-  		                <Embed-Dependency>*;artifactId=jsch,jzlib;scope=compile|runtime</Embed-Dependency>
+
                      </instructions>
                   </configuration>
             </plugin>

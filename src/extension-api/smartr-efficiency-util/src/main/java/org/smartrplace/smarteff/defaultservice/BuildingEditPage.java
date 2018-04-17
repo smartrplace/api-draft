@@ -18,7 +18,7 @@ public class BuildingEditPage extends EditPageBase<BuildingData> {
 	}
 
 	@Override
-	protected Class<BuildingData> typeClass() {
+	protected Class<BuildingData> primaryEntryTypeClass() {
 		return BuildingData.class;
 	}
 

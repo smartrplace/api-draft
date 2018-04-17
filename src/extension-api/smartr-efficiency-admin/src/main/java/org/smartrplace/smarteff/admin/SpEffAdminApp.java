@@ -17,22 +17,11 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
-import org.smartrplace.smarteff.admin.gui.DataExplorerPage;
-import org.smartrplace.smarteff.admin.gui.NaviOverviewPage;
-import org.smartrplace.smarteff.admin.gui.ResTypePage;
-import org.smartrplace.smarteff.admin.gui.ServiceDetailPage;
-import org.smartrplace.smarteff.admin.gui.ServicePage;
-import org.smartrplace.smarteff.admin.object.NavigationPageData;
-import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
-import org.smartrplace.smarteff.defaultservice.BaseDataService;
 import org.smartrplace.smarteff.util.SPPageUtil;
 
 import de.iwes.timeseries.eval.base.provider.BasicEvaluationProvider;
 import de.iwes.widgets.api.OgemaGuiService;
 import de.iwes.widgets.api.widgets.WidgetApp;
-import de.iwes.widgets.api.widgets.WidgetPage;
-import de.iwes.widgets.api.widgets.navigation.MenuConfiguration;
-import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 
 /**
  * Template OGEMA application class
@@ -61,12 +50,12 @@ public class SpEffAdminApp implements Application, ServiceAccess {
 	@Reference
 	private OgemaGuiService guiService;
 	
-	public ServicePage mainPage;
+	/*public ServicePage mainPage;
 	public ServiceDetailPage offlineEvalPage;
 	public ResTypePage resTypePage;
 	public DataExplorerPage dataExPage;
 	public NaviOverviewPage naviPage;
-	public NavigationMenu menu;
+	public NavigationMenu menu;*/
 	
 	private final Map<String,SmartEffExtensionService> evaluationProviders = Collections.synchronizedMap(new LinkedHashMap<String,SmartEffExtensionService>());
 	public Map<String, SmartEffExtensionService> getEvaluations() {
@@ -74,6 +63,7 @@ public class SpEffAdminApp implements Application, ServiceAccess {
 	}
 
 	public BasicEvaluationProvider basicEvalProvider = null;
+
 
 	/*
      * This is the entry point to the application.
@@ -90,36 +80,36 @@ public class SpEffAdminApp implements Application, ServiceAccess {
         controller = new SpEffAdminController(appMan, this, widgetApp);
 		
 		//register a web page with dynamically generated HTML
-		WidgetPage<?> page = widgetApp.createStartPage();
+		/*WidgetPage<?> page = widgetApp.createStartPage();
 		mainPage = new ServicePage(page, controller);
-		WidgetPage<?> page1 = widgetApp.createWidgetPage("Details.html");
-		offlineEvalPage = new ServiceDetailPage(page1, controller);
-		WidgetPage<?> page2 = widgetApp.createWidgetPage("resTypes.html");
+		WidgetPage<?> pageDetails = widgetApp.createWidgetPage("Details.html");
+		offlineEvalPage = new ServiceDetailPage(pageDetails, controller);
+		WidgetPage<?> pageResTypes = widgetApp.createWidgetPage("resTypes.html");
 		SmartrEffExtResourceTypeData rtd = new SmartrEffExtResourceTypeData(BaseDataService.BUILDING_DATA, null, null);
-		resTypePage = new ResTypePage(page2, controller, rtd );
+		resTypePage = new ResTypePage(pageResTypes, controller, rtd );
 		WidgetPage<?> page3 = widgetApp.createWidgetPage("dataExplorer.html");
 		dataExPage = new DataExplorerPage(page3, controller, controller.getUserAdmin().getAppConfigData().globalData());
-		WidgetPage<?> page4 = widgetApp.createWidgetPage("naviOverview.html");
+		WidgetPage<?> pageNavis = widgetApp.createWidgetPage("naviOverview.html");
 		NavigationPageData navi = new NavigationPageData(BaseDataService.BUILDING_NAVI_PROVIDER, null, "", null);
-		naviPage = new NaviOverviewPage(page4, controller, navi);
+		naviPage = new NaviOverviewPage(pageNavis, controller, navi);
 
 		menu = new NavigationMenu("Select Page");
 		menu.addEntry("Services Overview Page", page);
-		menu.addEntry("Services Details Page", page1);
-		menu.addEntry("Data Types", page2);
-		menu.addEntry("Data Explorer", page3);
-		menu.addEntry("Navigation Pages", page4);
+		menu.addEntry("Services Details Page", pageDetails);
+		menu.addEntry("Data Types", pageResTypes);
+		//menu.addEntry("Data Explorer", page3);
+		menu.addEntry("Navigation Pages", pageNavis);
 		
 		MenuConfiguration mc = page.getMenuConfiguration();
 		mc.setCustomNavigation(menu);
-		mc = page1.getMenuConfiguration();
+		mc = pageDetails.getMenuConfiguration();
 		mc.setCustomNavigation(menu);
-		mc = page2.getMenuConfiguration();
+		mc = pageResTypes.getMenuConfiguration();
 		mc.setCustomNavigation(menu);
 		mc = page3.getMenuConfiguration();
 		mc.setCustomNavigation(menu);
-		mc = page4.getMenuConfiguration();
-		mc.setCustomNavigation(menu);
+		mc = pageNavis.getMenuConfiguration();
+		mc.setCustomNavigation(menu);*/
 
 		initDone = true;
         controller.processOpenServices();
@@ -161,9 +151,5 @@ public class SpEffAdminApp implements Application, ServiceAccess {
 			public void delayedExecution() {
 				controller.unregisterService(provider);			}
 		};
-    }
-    
-    public NavigationMenu getMenu() {
-    	return menu;
     }
 }

@@ -19,7 +19,7 @@ import de.iwes.widgets.html.form.label.Header;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public abstract class NaviPageBase<T extends Resource>  {
-	protected abstract Class<T> typeClass();
+	protected abstract Class<T> primaryEntryTypeClass();
 	protected abstract String label(OgemaLocale locale);
 	protected abstract void addWidgets();
 	protected abstract List<EntryType> getEntryTypes();
@@ -29,7 +29,7 @@ public abstract class NaviPageBase<T extends Resource>  {
 		return getReqData(req).getLocation();
 	}
 	protected String pid() {
-		return typeClass().getSimpleName();
+		return primaryEntryTypeClass().getSimpleName();
 	}
 	protected PagePriority getPriority() {
 		return PagePriority.STANDARD;
@@ -118,6 +118,7 @@ public abstract class NaviPageBase<T extends Resource>  {
 	}
 	
 	protected String getUserName(OgemaHttpRequest req) {
-		return getReqData(req).getParent().getParent().getName();
+		ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
+		return appData.userDataNonEdit().getName();
 	}
 }

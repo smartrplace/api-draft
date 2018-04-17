@@ -42,6 +42,7 @@ public class SpEffAdminController {
 	public ConfigIdAdministration configIdAdmin = new ConfigIdAdministration();
 	public TypeAdministration typeAdmin;
 	private UserAdmin userAdmin;
+	public StandardPageAdmin pageAdmin;
 	
 	public final ApplicationManagerSPExt appManExt = new ApplicationManagerSPExt() {
 		
@@ -95,6 +96,7 @@ public class SpEffAdminController {
 		userAdmin = new UserAdmin(this);
 		this.typeAdmin = new TypeAdministration(this);
 		this.guiPageAdmin = new GUIPageAdministation(this);    	
+		pageAdmin = new StandardPageAdmin(widgetApp, this);
     }
     
     public void processOpenServices() {
@@ -138,7 +140,7 @@ public class SpEffAdminController {
 	}
 
 	public NavigationMenu getNavigationMenu() {
-		return serviceAccess.getMenu();
+		return pageAdmin.menu;
 	}
 	
 	public UserAdmin getUserAdmin() {
