@@ -5,12 +5,15 @@ import java.util.Collection;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.TimeResource;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.extended.WidgetData;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -19,6 +22,7 @@ import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
+import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 /** Page that shows all Navi-pages in the system and allows to open top-level pages directly*/
 public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Resource> {
@@ -48,9 +52,10 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 	@Override
 	public void addWidgets(NavigationPageData object, ObjectResourceGUIHelper<NavigationPageData, Resource> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-		if(req != null)
+		ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage = null;
+		if(req != null) {
 			vh.stringLabel("Name", id, object.provider.label(req.getLocale()), row);
-		else
+		} else
 			vh.registerHeaderEntry("Name");
 		String text = null;
 		if(object.provider.getEntryTypes() == null) text = "Start Page";

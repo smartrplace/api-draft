@@ -8,6 +8,7 @@ import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.extenservice.proposal.ProjectProposal;
 import org.smartrplace.extenservice.proposal.ProposalPublicData;
 import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForCreate;
+import org.smartrplace.extenservice.resourcecreate.ExtensionPageSystemAccessForPageOpening;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
@@ -26,11 +27,11 @@ public class SPPageUtil {
 	public static OgemaWidget addOpenButton(String columnName, Resource object,
 			ObjectResourceGUIHelper<?,?> vh, String id, Row row,
 			NavigationPublicPageData pageData,
-			ExtensionPageSystemAccessForCreate systemAccess,
+			ExtensionPageSystemAccessForPageOpening systemAccess,
 			String text, String alternativeText, boolean openWhenLocked,
 			PageType pageType) {
 		if(pageData != null) {
-			if((!systemAccess.isLocked(object)) || openWhenLocked) {
+			if(openWhenLocked ||(!((ExtensionPageSystemAccessForCreate)systemAccess).isLocked(object))) {
 				//String configId = NaviOpenButton.getConfigId(pageType, object, type, systemAccess, pageData);
 				//Here we never create a new resource
 				Class<? extends Resource> type = object.getResourceType();

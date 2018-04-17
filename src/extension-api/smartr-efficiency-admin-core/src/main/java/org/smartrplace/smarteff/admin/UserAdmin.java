@@ -58,10 +58,10 @@ public class UserAdmin {
 				//SmartEffUserDataNonEdit userDataNonEdit = loggedIn.getSelectedItem(req);
 				SmartEffUserDataNonEdit userDataNonEdit = userDataNE;
 				NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
-						navi.label(req.getLocale()),
+						(navi!=null?navi.label(req.getLocale()):providerId),
 						app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
 						app.guiPageAdmin.proposalInfo);
-				if(navi.getEntryTypes() == null || configId == null) {
+				if((navi == null) || (navi.getEntryTypes() == null) || (configId == null)) {
 					ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
 							userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
 					return result;
@@ -108,7 +108,7 @@ public class UserAdmin {
 	protected ExtensionResourceAccessInitData getAccessData(String configId, OgemaHttpRequest req,
 			NavigationGUIProvider navi, SmartEffUserDataNonEdit userDataNonEdit,
 			SpEffAdminController app) {
-		if(navi.getEntryTypes() == null || configId == null) {
+		if(navi == null || navi.getEntryTypes() == null || configId == null) {
 			ExtensionUserData editableData = null;
 			NavigationPageSystemAccessForPageOpening systemAccess;
 			if(userDataNonEdit != null) {

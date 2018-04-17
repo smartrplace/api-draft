@@ -1,8 +1,8 @@
 package extensionmodel.smarteff.api.base;
 
-import org.ogema.core.model.ResourceList;
-import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ExtensionUserData;
+
+import extensionmodel.smarteff.api.common.MasterUserData;
 
 /**Top-level data specification. For models defining SmartEffUserData or ExtensionUserData as
  * parent that are not specified here respective decorators with names defined in
@@ -11,4 +11,5 @@ import org.smartrplace.extensionservice.ExtensionUserData;
  * default element for generalData). The name starts with "default".
  */
 public interface SmartEffUserData extends SmartEffTopLevelData, ExtensionUserData {
+	MasterUserData masterUserData();
 }

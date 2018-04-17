@@ -16,14 +16,18 @@ import org.smartrplace.extensionservice.ExtensionGeneralData;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.config.SmartEffAdminData;
+import org.smartrplace.smarteff.admin.gui.NaviOverviewPage;
+import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration;
 import org.smartrplace.smarteff.admin.util.GUIPageAdministation;
 import org.smartrplace.smarteff.admin.util.ResourceLockAdministration;
 import org.smartrplace.smarteff.admin.util.TypeAdministration;
+import org.smartrplace.smarteff.defaultservice.BaseDataService;
 import org.smartrplace.util.format.ValueFormat;
 
 import de.iwes.widgets.api.widgets.WidgetApp;
+import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
@@ -145,5 +149,9 @@ public class SpEffAdminController {
 	
 	public UserAdmin getUserAdmin() {
 		return userAdmin;
+	}
+
+	public NaviOverviewPage getNaviPage(WidgetPage<?> pageNavis, NavigationPageData navi) {
+		return new NaviOverviewPage(pageNavis, this, navi);
 	}
 }

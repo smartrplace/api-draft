@@ -21,7 +21,7 @@ public class TypeAdministration {
 
 	public void registerService(SmartEffExtensionService service) {
 		int i = 0;
-    	for(ExtensionResourceTypeDeclaration<? extends SmartEffResource> rtd: service.resourcesDefined()) {
+    	if(service.resourcesDefined() != null) for(ExtensionResourceTypeDeclaration<? extends SmartEffResource> rtd: service.resourcesDefined()) {
     		try {
 	    		Class<? extends SmartEffResource> rt = rtd.dataType();
 	    		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
@@ -39,7 +39,7 @@ public class TypeAdministration {
 	}
 	
 	public void unregisterService(SmartEffExtensionService service) {
-     	for(ExtensionResourceTypeDeclaration<? extends SmartEffResource> rtd: service.resourcesDefined()) {
+		if(service.resourcesDefined() != null) for(ExtensionResourceTypeDeclaration<? extends SmartEffResource> rtd: service.resourcesDefined()) {
     		Class<? extends SmartEffResource> rt = rtd.dataType();
     		SmartrEffExtResourceTypeData data = resourceTypes.get(rt);
     		if(data == null) {

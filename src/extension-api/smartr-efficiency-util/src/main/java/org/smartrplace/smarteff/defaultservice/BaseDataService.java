@@ -8,19 +8,22 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application.AppStopReason;
 import org.ogema.core.model.Resource;
+import org.smartrplace.commontypes.BuildingEditPage;
+import org.smartrplace.commontypes.BuildingTablePage;
+import org.smartrplace.commontypes.MasterUserRegistration;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
-import org.smartrplace.smarteff.defaultproposal.BuildingExampleAnalysis;
 import org.smartrplace.smarteff.util.NaviPageBase;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
-import extensionmodel.smarteff.api.base.BuildingData;
 import extensionmodel.smarteff.api.base.SmartEffGeneralData;
 import extensionmodel.smarteff.api.base.SmartEffPriceData;
-import extensionmodel.smarteff.example.DefaultProviderParamsPage;
+import extensionmodel.smarteff.api.common.BuildingData;
+import extensionmodel.smarteff.defaultproposal.BuildingExampleAnalysis;
+import extensionmodel.smarteff.defaultproposal.DefaultProviderParamsPage;
 
 @Service(SmartEffExtensionService.class)
 @Component
@@ -96,7 +99,8 @@ public class BaseDataService implements SmartEffExtensionService {
 	public Collection<ExtensionCapability> getCapabilities() {
 		return Arrays.asList(new ExtensionCapability[] {new BuildingTablePage().provider, new BuildingEditPage().provider, RESOURCE_NAVI_PROVIDER, RESOURCEALL_NAVI_PROVIDER,
 				PROPOSALTABLE_PROVIDER, RESULTTABLE_PROVIDER, new TopConfigTablePage().provider,
-				BUILDINGANALYSIS_PROVIDER, new DefaultProviderParamsPage().provider});
+				BUILDINGANALYSIS_PROVIDER, new DefaultProviderParamsPage().provider,
+				new MasterUserRegistration.EditPage().provider});
 	}
 
 	@Override
@@ -107,6 +111,7 @@ public class BaseDataService implements SmartEffExtensionService {
 		result.add(PRICE_DATA);
 		result.add(BUILDINGANALYSIS_PROVIDER.getTypeDeclaration());
 		if(BUILDINGANALYSIS_PROVIDER.getParamTypeDeclaration() != null) result.add(BUILDINGANALYSIS_PROVIDER.getParamTypeDeclaration());
+		result.add(new MasterUserRegistration.TypeDeclaration());
 		return result ;
 	}
 }

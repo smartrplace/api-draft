@@ -1,4 +1,4 @@
-package extensionmodel.smarteff.api.base;
+package extensionmodel.smarteff.api.common;
 
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;

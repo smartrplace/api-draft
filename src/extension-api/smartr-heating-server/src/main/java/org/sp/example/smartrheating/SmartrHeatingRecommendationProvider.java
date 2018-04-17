@@ -9,7 +9,7 @@ import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitDa
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
-import extensionmodel.smarteff.api.base.BuildingData;
+import extensionmodel.smarteff.api.common.BuildingData;
 
 public class SmartrHeatingRecommendationProvider implements ProposalProvider {
 

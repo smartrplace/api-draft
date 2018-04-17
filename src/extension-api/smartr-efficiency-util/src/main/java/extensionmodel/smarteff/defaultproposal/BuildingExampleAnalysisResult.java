@@ -1,4 +1,4 @@
-package extensionmodel.smarteff.example;
+package extensionmodel.smarteff.defaultproposal;
 
 import org.ogema.core.model.simple.FloatResource;
 import org.smartrplace.extenservice.proposal.ProjectProposal;

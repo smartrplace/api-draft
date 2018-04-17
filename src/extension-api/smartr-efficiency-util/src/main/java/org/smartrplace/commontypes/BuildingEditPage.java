@@ -1,9 +1,9 @@
-package org.smartrplace.smarteff.defaultservice;
+package org.smartrplace.commontypes;
 
 import org.smartrplace.smarteff.util.EditPageBase;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
-import extensionmodel.smarteff.api.base.BuildingData;
+import extensionmodel.smarteff.api.common.BuildingData;
 
 public class BuildingEditPage extends EditPageBase<BuildingData> {
 	@Override

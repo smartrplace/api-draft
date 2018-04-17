@@ -1,6 +1,6 @@
-package extensionmodel.smarteff.example;
+package extensionmodel.smarteff.defaultproposal;
 
-import org.smartrplace.smarteff.util.EditPageGeneric;
+import org.smartrplace.smarteff.util.editgeneric.EditPageGeneric;
 
 public class DefaultProviderParamsPage extends EditPageGeneric<DefaultProviderParams> {
 	@Override

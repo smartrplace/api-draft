@@ -1,4 +1,4 @@
-package org.smartrplace.smarteff.defaultservice;
+package org.smartrplace.commontypes;
 
 import java.util.List;
 
@@ -20,9 +20,9 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.button.RedirectButton;
-import extensionmodel.smarteff.api.base.BuildingData;
 import extensionmodel.smarteff.api.base.SmartEffUserData;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
+import extensionmodel.smarteff.api.common.BuildingData;
 
 public class BuildingTablePage extends NaviPageBase<BuildingData> {
 	protected TablePage tablePage;

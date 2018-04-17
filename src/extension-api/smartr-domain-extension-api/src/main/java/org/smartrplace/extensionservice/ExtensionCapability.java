@@ -14,5 +14,5 @@ public interface ExtensionCapability extends LabelledItem, ExtensionCapabilityPu
 		return label(locale);
 	}
 
-
+	default String userName() {return null;}
 }

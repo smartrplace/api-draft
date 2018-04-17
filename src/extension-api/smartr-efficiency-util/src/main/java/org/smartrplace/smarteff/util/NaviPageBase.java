@@ -34,6 +34,7 @@ public abstract class NaviPageBase<T extends Resource>  {
 	protected PagePriority getPriority() {
 		return PagePriority.STANDARD;
 	}
+	protected String getMaintainer() { return null;}
 
 	protected EditPage editPage;
 	public final Provider provider;	
@@ -108,6 +109,11 @@ public abstract class NaviPageBase<T extends Resource>  {
 		@Override
 		public PagePriority getPriority() {
 			return NaviPageBase.this.getPriority();
+		}
+		
+		@Override
+		public String userName() {
+			return NaviPageBase.this.getMaintainer();
 		}
 	}
 	

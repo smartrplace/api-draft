@@ -64,7 +64,7 @@ public class StandardPageAdmin {
 		dataExPage = new DataExplorerPage(page3, controller, controller.getUserAdmin().getAppConfigData().globalData());
 		pageNavis = widgetApp.createWidgetPage("naviOverview.html");
 		NavigationPageData navi = new NavigationPageData(BaseDataService.RESOURCEALL_NAVI_PROVIDER, null, "", null);
-		naviPage = new NaviOverviewPage(pageNavis, controller, navi);
+		naviPage = controller.getNaviPage(pageNavis, navi);
 
 		updatePageMenus();
 	}

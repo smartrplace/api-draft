@@ -1,4 +1,4 @@
-package org.smartrplace.smarteff.defaultproposal;
+package extensionmodel.smarteff.defaultproposal;
 
 import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extenservice.proposal.ProjectProposal;
@@ -9,9 +9,7 @@ import org.smartrplace.smarteff.util.ProjectProviderBase;
 
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
-import extensionmodel.smarteff.api.base.BuildingData;
-import extensionmodel.smarteff.example.BuildingExampleAnalysisResult;
-import extensionmodel.smarteff.example.DefaultProviderParams;
+import extensionmodel.smarteff.api.common.BuildingData;
 
 public class BuildingExampleAnalysis extends ProjectProviderBase<BuildingData> {
 	//private Resource generalData;	
