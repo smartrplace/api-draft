@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData.ConfigInfo;
 import org.smartrplace.extensionservice.ExtensionUserData;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
@@ -13,7 +14,6 @@ import org.smartrplace.smarteff.admin.gui.ExtensionNavigationPage;
 import org.smartrplace.smarteff.admin.protect.ExtensionResourceAccessInitDataImpl;
 import org.smartrplace.smarteff.admin.protect.NavigationPageSystemAccess;
 import org.smartrplace.smarteff.admin.protect.NavigationPageSystemAccessForPageOpening;
-import org.smartrplace.smarteff.admin.util.ConfigIdAdministration.ConfigInfo;
 
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -57,18 +57,25 @@ public class UserAdmin {
 			protected ExtensionResourceAccessInitData getItemById(String configId, OgemaHttpRequest req) {
 				//SmartEffUserDataNonEdit userDataNonEdit = loggedIn.getSelectedItem(req);
 				SmartEffUserDataNonEdit userDataNonEdit = userDataNE;
-				NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
-						(navi!=null?navi.label(req.getLocale()):providerId),
-						app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
-						app.guiPageAdmin.proposalInfo);
 				if((navi == null) || (navi.getEntryTypes() == null) || (configId == null)) {
-					ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
+					NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
+							(navi!=null?navi.label(req.getLocale()):providerId),
+							app.guiPageAdmin.navigationPublicData, app.guiPageAdmin.startPagesData,
+							app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
+							app.guiPageAdmin.proposalInfo, null, url);
+					ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null, null,
 							userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
 					return result;
 				} else {
 					ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
+					NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
+							(navi!=null?navi.label(req.getLocale()):providerId),
+							app.guiPageAdmin.navigationPublicData, app.guiPageAdmin.startPagesData,
+							app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
+							app.guiPageAdmin.proposalInfo,
+							(c.entryResources !=null && (!c.entryResources.isEmpty()))?c.entryResources.get(0):null, url);
 					ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(c.entryIdx,
-							c.entryResources,
+							c.entryResources, c,
 							userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
 					return result;
 				}
@@ -102,12 +109,12 @@ public class UserAdmin {
 	}
 	
 	public ExtensionResourceAccessInitData getAccessData(String configId, OgemaHttpRequest req,
-			NavigationGUIProvider navi) {
-		return getAccessData(configId, req, navi, getUserData(), app);
+			NavigationGUIProvider navi, String url) {
+		return getAccessData(configId, req, navi, getUserData(), app, url);
 	}	
 	protected ExtensionResourceAccessInitData getAccessData(String configId, OgemaHttpRequest req,
 			NavigationGUIProvider navi, SmartEffUserDataNonEdit userDataNonEdit,
-			SpEffAdminController app) {
+			SpEffAdminController app, String url) {
 		if(navi == null || navi.getEntryTypes() == null || configId == null) {
 			ExtensionUserData editableData = null;
 			NavigationPageSystemAccessForPageOpening systemAccess;
@@ -115,24 +122,27 @@ public class UserAdmin {
 				editableData = userDataNonEdit.editableData().getLocationResource();
 				systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
 						navi.label(req.getLocale()),
-						app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
-						app.guiPageAdmin.proposalInfo);
+						app.guiPageAdmin.navigationPublicData, app.guiPageAdmin.startPagesData,
+						app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
+						app.guiPageAdmin.proposalInfo, null, url);
 			} else {
 				systemAccess = new NavigationPageSystemAccessForPageOpening(
-					app.guiPageAdmin.navigationPublicData, app.configIdAdmin,
-					app.guiPageAdmin.proposalInfo);
+					app.guiPageAdmin.navigationPublicData, app.guiPageAdmin.startPagesData, app.configIdAdmin,
+					app.guiPageAdmin.proposalInfo, null, url);
 			}
-			ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null,
+			ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null, null,
 					editableData , userDataNonEdit, systemAccess);
 			return result;
 		} else {
+			ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
 			NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
 					navi.label(req.getLocale()),
-					app.guiPageAdmin.navigationPublicData, app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
-					app.guiPageAdmin.proposalInfo);
-			ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
+					app.guiPageAdmin.navigationPublicData, app.guiPageAdmin.startPagesData,
+					app.lockAdmin, app.configIdAdmin, app.typeAdmin, app.appManExt,
+					app.guiPageAdmin.proposalInfo,
+					(c.entryResources !=null && (!c.entryResources.isEmpty()))?c.entryResources.get(0):null, url);
 			ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(c.entryIdx,
-					c.entryResources,
+					c.entryResources, c,
 					userDataNonEdit.editableData().getLocationResource(), userDataNonEdit, systemAccess);
 			return result;
 		}

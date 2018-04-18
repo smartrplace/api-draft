@@ -17,6 +17,11 @@ public class ResourceAllTablePage extends ResourceTablePage {
 	public ResourceAllTablePage() {
 		super();
 	}
+	
+	@Override
+	protected boolean isInherited() {
+		return true;
+	}
 
 	@Override
 	protected List<Resource> provideResourcesInTable(OgemaHttpRequest req) {

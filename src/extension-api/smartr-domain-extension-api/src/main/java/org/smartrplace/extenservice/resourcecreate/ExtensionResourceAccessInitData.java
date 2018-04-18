@@ -5,8 +5,20 @@ import java.util.List;
 import org.ogema.core.model.Resource;
 import org.smartrplace.extensionservice.ExtensionUserData;
 import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
+import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 
 public interface ExtensionResourceAccessInitData {
+	public static class ConfigInfo {
+		public ConfigInfo(int entryIdx, List<Resource> entryResources) {
+			this.entryIdx = entryIdx;
+			this.entryResources = entryResources;
+		}
+		public int entryIdx;
+		public List<Resource> entryResources;
+		public Resource lastPrimaryResource;
+		public NavigationPublicPageData lastPage;
+	}
+
 	/** index within {@link #getEntryTypes()} used to open the page*/
 	int entryTypeIdx();
 	
@@ -15,6 +27,8 @@ public interface ExtensionResourceAccessInitData {
 	 * 		the cardinality allows zero the list may be empty.
 	 */
 	List<Resource> entryResources();
+	
+	ConfigInfo getConfigInfo();
 
 	/**Domain-specific reference to user data.
 	 */

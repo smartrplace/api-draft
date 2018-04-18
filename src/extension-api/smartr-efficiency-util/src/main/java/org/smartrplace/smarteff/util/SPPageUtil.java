@@ -2,6 +2,7 @@ package org.smartrplace.smarteff.util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.core.model.Resource;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
@@ -17,19 +18,31 @@ import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.defaultservice.BaseDataService;
 import org.smartrplace.smarteff.defaultservice.ResultTablePage;
+import org.smartrplace.smarteff.util.button.AddEditButton;
+import org.smartrplace.smarteff.util.button.ButtonControlProvider;
+import org.smartrplace.smarteff.util.button.ProposalProvTableOpenButton;
+import org.smartrplace.smarteff.util.button.ProposalResTableOpenButton;
+import org.smartrplace.smarteff.util.button.ResourceTableOpenButton;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.OgemaWidget;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.button.TemplateRedirectButton;
 
 public class SPPageUtil {
+	public static final String OPEN_NEW_TAB_STRING = "New Tab";
+	public static final String OPEN_SAME_TAB_STRING = "Same Tab";
+
 	public static OgemaWidget addOpenButton(String columnName, Resource object,
 			ObjectResourceGUIHelper<?,?> vh, String id, Row row,
 			NavigationPublicPageData pageData,
 			ExtensionPageSystemAccessForPageOpening systemAccess,
 			String text, String alternativeText, boolean openWhenLocked,
-			PageType pageType) {
+			PageType pageType,
+			ButtonControlProvider controlProvider, OgemaHttpRequest req) {
 		if(pageData != null) {
 			if(openWhenLocked ||(!((ExtensionPageSystemAccessForCreate)systemAccess).isLocked(object))) {
 				//String configId = NaviOpenButton.getConfigId(pageType, object, type, systemAccess, pageData);
@@ -37,7 +50,32 @@ public class SPPageUtil {
 				Class<? extends Resource> type = object.getResourceType();
 				String configId = systemAccess.accessPage(pageData, getEntryIdx(pageData, type),
 						Arrays.asList(new Resource[]{object}));
-				return vh.linkingButton(columnName, id, null, row, text, pageData.getUrl()+"?configId="+configId);
+				/*String columnId = ResourceUtils.getValidResourceName(columnName);
+				ResourceRedirectButton<Resource> button = new ResourceRedirectButton<Resource>(vh.getParent(), columnId+id, text, pageData.getUrl(), req) { //pageData.getUrl()+"?configId="+configId
+					private static final long serialVersionUID = 1L;
+					@Override
+					protected String getConfigId(Resource object) {
+						return configId;
+					}
+					@Override
+					public void onGET(OgemaHttpRequest req) {
+						super.onGET(req);
+						ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
+						List<CalculatedData> data = object.getSubResources(CalculatedData.class, true);
+						String text = BUTTON_TEXTS.get(req.getLocale());
+						if(text == null) text = BUTTON_TEXTS.get(OgemaLocale.ENGLISH);
+						setText(text+"("+data.size()+")", req);
+					}
+					
+				};
+				row.addCell(columnId, button);*/
+				TemplateRedirectButton<?> button = vh.linkingButton(columnName, id, null, row, text, pageData.getUrl()+"?configId="+configId);
+				if(controlProvider != null) {
+					button.setOpenInNewTab(controlProvider.openInNewTab(req), req);
+				} else {
+					button.setDefaultOpenInNewTab(false);					
+				}
+				return button;
 			} else {
 				return vh.stringLabel(columnName, id, alternativeText, row);						
 			}
@@ -47,11 +85,14 @@ public class SPPageUtil {
 	}
 	public static OgemaWidget addResEditOpenButton(String columnName, Resource object,
 			ObjectResourceGUIHelper<?,?> vh, String id, Row row,
-			ExtensionResourceAccessInitData appData) {
+			ExtensionResourceAccessInitData appData,
+			ButtonControlProvider controlProvider, OgemaHttpRequest req) {
 		if(appData != null) {
 			NavigationPublicPageData pageData = getPageData(appData, object.getResourceType(), PageType.EDIT_PAGE);
+			int size = AddEditButton.getSize(object, appData);
+			String text = getLocaleString(req, AddEditButton.BUTTON_TEXTS);
 			return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
-					"Edit", "Locked", false, PageType.EDIT_PAGE);
+					text+"("+size+")", "Locked", false, PageType.EDIT_PAGE, controlProvider, req);
 		} else {
 			vh.registerHeaderEntry(columnName);
 			return null;
@@ -59,11 +100,13 @@ public class SPPageUtil {
 	}
 	public static OgemaWidget addResTableOpenButton(String columnName, Resource object,
 			ObjectResourceGUIHelper<?,?> vh, String id, Row row,
-			ExtensionResourceAccessInitData appData) {
+			ExtensionResourceAccessInitData appData, ButtonControlProvider controlProvider, OgemaHttpRequest req) {
 		if(appData != null) {
 			NavigationPublicPageData pageData = getPageData(appData, object.getResourceType(), PageType.TABLE_PAGE);
+			String text = getLocaleString(req, ResourceTableOpenButton.BUTTON_TEXTS);
+			int size = ResourceTableOpenButton.getSize(object, appData);
 			return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
-					"Open Table", "No Page", true, PageType.TABLE_PAGE);
+					text+"("+size+")", "No Page", true, PageType.TABLE_PAGE, controlProvider, req);
 		} else {
 			vh.registerHeaderEntry(columnName);
 			return null;
@@ -71,15 +114,17 @@ public class SPPageUtil {
 	}
 	public static OgemaWidget addProviderTableOpenButton(String columnName, Resource object,
 			ObjectResourceGUIHelper<?,?> vh, String id, Row row,
-			ExtensionResourceAccessInitData appData) {
+			ExtensionResourceAccessInitData appData, ButtonControlProvider controlProvider, OgemaHttpRequest req) {
 		if(appData != null) {
 			List<ProposalPublicData> provs = appData.systemAccessForPageOpening().getProposalProviders(object.getResourceType());
 			if(provs.isEmpty()) {
 				return vh.stringLabel("Evaluations", id, "No Providers", row);
 			} else {
 				NavigationPublicPageData pageData = appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.PROPOSALTABLE_PROVIDER));
+				String text = getLocaleString(req, ProposalProvTableOpenButton.BUTTON_TEXTS);
+				int size = ProposalProvTableOpenButton.getSize(object, appData);
 				return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
-						"Evaluations", "No BaseEval", true, PageType.TABLE_PAGE);
+						text+"("+size+")", "No BaseEval", true, PageType.TABLE_PAGE, controlProvider, req);
 			}
 		} else {
 			vh.registerHeaderEntry(columnName);
@@ -88,15 +133,17 @@ public class SPPageUtil {
 	}
 	public static OgemaWidget addResultTableOpenButton(String columnName, Resource object,
 			ObjectResourceGUIHelper<?,?> vh, String id, Row row,
-			ExtensionResourceAccessInitData appData) {
+			ExtensionResourceAccessInitData appData, ButtonControlProvider controlProvider, OgemaHttpRequest req) {
 		if(appData != null) {
 			List<ProjectProposal> resultsAvail = object.getSubResources(ResultTablePage.TYPE_SHOWN, true);
 			if(resultsAvail.isEmpty()) {
 				return vh.stringLabel("Results", id, "No Results", row);
 			} else {
 				NavigationPublicPageData pageData = appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESULTTABLE_PROVIDER));
+				String text = getLocaleString(req, ProposalResTableOpenButton.BUTTON_TEXTS);
+				int size = ProposalResTableOpenButton.getSize(object, appData);
 				return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
-						"Results", "No BaseResult", true, PageType.TABLE_PAGE);
+						text+"("+size+")", "No BaseResult", true, PageType.TABLE_PAGE, controlProvider, req);
 			}
 		} else {
 			vh.registerHeaderEntry(columnName);
@@ -104,19 +151,12 @@ public class SPPageUtil {
 		}
 	}
 	
-	static NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
+	public static NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
 			Class<? extends Resource> type, PageType typeRequested) {
 		return appData.systemAccessForPageOpening().getMaximumPriorityPage(type, typeRequested);
-		/*
-		List<NavigationPublicPageData> pages = appData.systemAccessForPageOpening().getPages(type);
-		if(pages.isEmpty()) return null;
-		if(typeRequested == null) return pages.get(0);
-		for(NavigationPublicPageData p: pages) {
-			if(p.getPageType() == typeRequested) return p;
-		}
-		return null;*/
 	}
-	static int getEntryIdx(NavigationPublicPageData navi, Class<? extends Resource> type) {
+	
+	public static int getEntryIdx(NavigationPublicPageData navi, Class<? extends Resource> type) {
 		int idx = 0;
 		for(EntryType et: navi.getEntryTypes()) {
 			if(et.getType().isAssignableFrom(type)) {
@@ -151,4 +191,9 @@ public class SPPageUtil {
 		return false;
 	}
 
+	private static String getLocaleString(OgemaHttpRequest req, Map<OgemaLocale, String> texts) {
+		String text = texts.get(req.getLocale());
+		if(text == null) return texts.get(OgemaLocale.ENGLISH);
+		return text;
+	}
 }

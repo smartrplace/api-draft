@@ -9,6 +9,7 @@ import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.defaultservice.BaseDataService;
+import org.smartrplace.smarteff.util.button.TableOpenButton;
 
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -19,16 +20,16 @@ public class StandardProposalTableOpenButton extends TableOpenButton {
 	private static final long serialVersionUID = 1L;
 	
 	public  StandardProposalTableOpenButton(WidgetPage<?> page, String id, String pid, String text,
-			Class<? extends Resource> type,
+			//Class<? extends Resource> type,
 			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage) {
-		super(page, id, pid, text, type, exPage);
+		super(page, id, pid, text, exPage, null);
 	}
 
 	public  StandardProposalTableOpenButton(OgemaWidget parent, String id, String pid, String text,
-			Class<? extends Resource> type,
+			//Class<? extends Resource> type,
 			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage,
 			OgemaHttpRequest req) {
-		super(parent, id, pid, text, type, exPage, req);
+		super(parent, id, pid, text, exPage, null, req);
 	}
 	
 	@Override
@@ -39,7 +40,9 @@ public class StandardProposalTableOpenButton extends TableOpenButton {
 	
 	@Override
 	public void onGET(OgemaHttpRequest req) {
-		List<ProposalPublicData> provs = exPage.getAccessData(req).systemAccessForPageOpening().getProposalProviders(defaultType);
+		ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
+		Class<? extends Resource> type = getResource(appData, req).getResourceType();
+		List<ProposalPublicData> provs = appData.systemAccessForPageOpening().getProposalProviders(type);
 		if(provs.isEmpty()) disable(req);
 		else enable(req);
 	}

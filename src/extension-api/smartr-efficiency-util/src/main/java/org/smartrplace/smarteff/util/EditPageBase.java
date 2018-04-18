@@ -8,6 +8,9 @@ import org.ogema.model.prototypes.Data;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
+import org.smartrplace.smarteff.util.button.BackButton;
+import org.smartrplace.smarteff.util.button.ProposalProvTableOpenButton;
+import org.smartrplace.smarteff.util.button.TableOpenButton;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.widgets.api.widgets.OgemaWidget;
@@ -97,24 +100,6 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		page.append(alert);
 		registerWidgetsAboveTable();
 		
-		EditPageBase<T>.EditTableBuilder etb = new EditTableBuilder();
-		getEditTableLines(etb);
-
-		StaticTable table = new StaticTable(etb.editElements.size()+1, 4, new int[]{1,5,5,1});
-		int c = 0;
-		for(EditPageBase<T>.EditElement etl: etb.editElements) {
-			if((etl.title != null)&&(etl.widget != null))
-				table.setContent(c, 1, etl.title).setContent(c,2, etl.widget);
-			else if((etl.title != null)&&(etl.stringForWidget != null))
-				table.setContent(c, 1, etl.title).setContent(c,2, etl.stringForWidget);
-			else if((etl.widgetForTitle != null)&&(etl.widget != null)) {
-				table.setContent(c, 1, etl.widgetForTitle).setContent(c,2, etl.widget);
-				if(etl.decriptionLink != null) table.setContent(c, 3, etl.decriptionLink);
-			}
-			else
-				throw new IllegalStateException("Something went wrong with building the edit line "+c+" Obj:"+etl);
-			c++;
-		}
 		Button activateButton = new Button(page, "activateButton", "activate") {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -135,8 +120,54 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 				appData.systemAccess().activateResource(res);
 			}
 		};
-		TableOpenButton tableButton = new TableOpenButton(page, "addEntry", pid(), "Data Explorer", primaryEntryTypeClass(), exPage);
+		activateButton.registerDependentWidget(activateButton);
+		
+		EditPageBase<T>.EditTableBuilder etb = new EditTableBuilder();
+		getEditTableLines(etb);
+
+		StaticTable table = new StaticTable(etb.editElements.size()+1, 4, new int[]{1,5,5,1});
+		int c = 0;
+		for(EditPageBase<T>.EditElement etl: etb.editElements) {
+			if((etl.title != null)&&(etl.widget != null)) {
+				table.setContent(c, 1, etl.title).setContent(c,2, etl.widget);
+				etl.widget.registerDependentWidget(activateButton);
+			} else if((etl.title != null)&&(etl.stringForWidget != null))
+				table.setContent(c, 1, etl.title).setContent(c,2, etl.stringForWidget);
+			else if((etl.widgetForTitle != null)&&(etl.widget != null)) {
+				table.setContent(c, 1, etl.widgetForTitle).setContent(c,2, etl.widget);
+				if(etl.decriptionLink != null) table.setContent(c, 3, etl.decriptionLink);
+				etl.widget.registerDependentWidget(activateButton);
+			}
+			else
+				throw new IllegalStateException("Something went wrong with building the edit line "+c+" Obj:"+etl);
+			c++;
+		}
+		/*ExtensionResourceTypeDeclaration<T> parentDecl = appManExt.getTypeDeclaration(primaryEntryTypeClass());
+		Class<? extends T> parentType = null;
+		if(parentDecl != null) {
+			if(SPPageUtil.isMulti(parentDecl.cardinality())) parentType = primaryEntryTypeClass();
+			else parentType = parentDecl.parentType();
+		}
+		if(parentType != null) {*/
+		TableOpenButton tableButton = new BackButton(page, "addEntry", pid(), exPage, null);
+		/*new ResourceTableOpenButton(page, "addEntry", pid(), exPage, null) {
+			private static final long serialVersionUID = 1L;
+			@Override
+			protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
+					Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
+				return appData.getConfigInfo().lastPage;
+			}
+			@Override
+			protected Resource getResource(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {
+				return appData.getConfigInfo().lastPrimaryResource;
+			}
+		};*/
 		table.setContent(c, 0, activateButton).setContent(c, 1, tableButton);
+		//} else {
+		//	table.setContent(c, 0, activateButton).setContent(c, 1, "No parent");
+		//}
+		TableOpenButton proposalTableOpenButton = new ProposalProvTableOpenButton(page, "proposalTableOpenButton", pid(), exPage, null);
+		table.setContent(c, 2, proposalTableOpenButton);
 
 		page.append(table);
 		exPage.registerAppTableWidgetsDependentOnInit(table);

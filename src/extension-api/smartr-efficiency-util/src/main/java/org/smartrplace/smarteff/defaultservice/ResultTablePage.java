@@ -11,11 +11,12 @@ import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.P
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
-import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.util.CapabilityHelper;
 import org.smartrplace.smarteff.util.NaviPageBase;
 import org.smartrplace.smarteff.util.SPPageUtil;
-import org.smartrplace.smarteff.util.TableOpenButton;
+import org.smartrplace.smarteff.util.button.ProposalProvTableOpenButton;
+import org.smartrplace.smarteff.util.button.ResourceTableOpenButton;
+import org.smartrplace.smarteff.util.button.TableOpenButton;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
 import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
@@ -54,7 +55,7 @@ public class ResultTablePage extends NaviPageBase<Resource> {
 			if(req != null) appData = exPage.getAccessData(req);
 			vh.stringLabel("Type", id, object.getResourceType().getSimpleName(), row);
 			vh.stringLabel("Name", id, ResourceTablePage.getSimpleName(object), row);
-			SPPageUtil.addResEditOpenButton("Open", object, vh, id, row, appData);
+			SPPageUtil.addResEditOpenButton("Open", object, vh, id, row, appData, null, req);
 			vh.floatLabel("Total Cost (EUR)", id, object.costOfProject(), row, "%.0f");
 			vh.floatLabel("+ Work (h)", id, object.ownHours(), row, "%.1f");
 			vh.floatLabel("Savings/a (EUR)", id, object.yearlySavings(), row, "%.2f");
@@ -69,22 +70,16 @@ public class ResultTablePage extends NaviPageBase<Resource> {
 		@Override
 		public void addWidgetsAboveTable() {
 			StaticTable topTable = new StaticTable(1, 3);
-			TableOpenButton resourceButton2 = new TableOpenButton(page, "resourceButton", pid(), "Resources", resourceType, exPage) {
+			TableOpenButton resourceButton2 = new ResourceTableOpenButton(page, "resourceButton", pid(), exPage, null);
+			/*new TableOpenButton(page, "resourceButton", pid(), "Resources", resourceType, exPage) {
 				private static final long serialVersionUID = 1L;
 				@Override
 				protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
 						Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
 					return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESOURCE_NAVI_PROVIDER));
 				}
-			};
-			TableOpenButton proposalTableOpenButton = new TableOpenButton(page, "proposalTableOpenButton", pid(), "Proposal providers", resourceType, exPage) {
-				private static final long serialVersionUID = 1L;
-				@Override
-				protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
-						Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
-					return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.PROPOSALTABLE_PROVIDER));//super.getPageData(appData, type, typeRequested);
-				}
-			};
+			};*/
+			ProposalProvTableOpenButton proposalTableOpenButton = new ProposalProvTableOpenButton(page, "proposalTableOpenButton", pid(), exPage, null);
 			topTable.setContent(0, 0, "--").setContent(0, 1, resourceButton2).setContent(0, 2, proposalTableOpenButton);
 			page.append(topTable);
 		}
@@ -128,6 +123,6 @@ public class ResultTablePage extends NaviPageBase<Resource> {
 	
 	@Override
 	protected PagePriority getPriority() {
-		return PagePriority.SECONDARY;
+		return PagePriority.HIDDEN;
 	}
 }

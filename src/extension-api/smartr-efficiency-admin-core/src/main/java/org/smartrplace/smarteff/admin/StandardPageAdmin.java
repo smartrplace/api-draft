@@ -22,6 +22,7 @@ import de.iwes.widgets.api.widgets.navigation.MenuConfiguration;
 import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 
 public class StandardPageAdmin {
+	public static final String NAVI_OVERVIEW_URL = "naviOverview.html";
 	public final ServicePage mainPage;
 	public final ServiceDetailPage offlineEvalPage;
 	public final ResTypePage resTypePage;
@@ -62,7 +63,7 @@ public class StandardPageAdmin {
 		resTypePage = new ResTypePage(pageResTypes, controller, rtd );
 		page3 = widgetApp.createWidgetPage("dataExplorer.html");
 		dataExPage = new DataExplorerPage(page3, controller, controller.getUserAdmin().getAppConfigData().globalData());
-		pageNavis = widgetApp.createWidgetPage("naviOverview.html");
+		pageNavis = widgetApp.createWidgetPage(NAVI_OVERVIEW_URL);
 		NavigationPageData navi = new NavigationPageData(BaseDataService.RESOURCEALL_NAVI_PROVIDER, null, "", null);
 		naviPage = controller.getNaviPage(pageNavis, navi);
 

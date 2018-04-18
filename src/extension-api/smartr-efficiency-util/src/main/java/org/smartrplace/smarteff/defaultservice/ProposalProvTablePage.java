@@ -5,7 +5,6 @@ import java.util.List;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.tools.resource.util.ResourceUtils;
-import org.smartrplace.extenservice.proposal.ProjectProposal;
 import org.smartrplace.extenservice.proposal.ProposalPublicData;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
@@ -56,7 +55,7 @@ public class ProposalProvTablePage extends NaviPageBase<Resource> {
 				};
 				row.addCell("Calculate", calculateButton);
 				ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
-				SPPageUtil.addResultTableOpenButton("Results", getReqData(req), vh, id, row, appData);
+				SPPageUtil.addResultTableOpenButton("Results", getReqData(req), vh, id, row, appData, null, req);
 			} else {
 				vh.registerHeaderEntry("Name");
 				vh.registerHeaderEntry("Calculate");

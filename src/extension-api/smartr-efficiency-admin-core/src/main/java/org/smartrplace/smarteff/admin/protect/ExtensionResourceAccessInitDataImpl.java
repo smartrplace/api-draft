@@ -12,11 +12,12 @@ import org.smartrplace.extensionservice.ExtensionUserDataNonEdit;
 public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAccessInitData {
 	private final int entryTypeIdx;
 	private final List<Resource> entryResources;
+	private final ConfigInfo configInfo;
 	private final ExtensionUserData userData;
 	private final ExtensionUserDataNonEdit userDataNonEdit;
 	private final ExtensionPageSystemAccessForPageOpening systemAccess;
 	
-	public ExtensionResourceAccessInitDataImpl(int entryTypeIdx, List<Resource> entryResources,
+	public ExtensionResourceAccessInitDataImpl(int entryTypeIdx, List<Resource> entryResources, ConfigInfo configInfo,
 			ExtensionUserData userData, ExtensionUserDataNonEdit userDataNonEdit,
 			ExtensionPageSystemAccessForPageOpening systemAccess) {
 		this.entryTypeIdx = entryTypeIdx;
@@ -24,6 +25,7 @@ public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAcc
 		this.userData = userData;
 		this.userDataNonEdit = userDataNonEdit;
 		this.systemAccess = systemAccess;
+		this.configInfo = configInfo;
 	}
 
 	@Override
@@ -55,5 +57,10 @@ public class ExtensionResourceAccessInitDataImpl implements ExtensionResourceAcc
 	@Override
 	public ExtensionPageSystemAccessForPageOpening systemAccessForPageOpening() {
 		return systemAccess;
+	}
+
+	@Override
+	public ConfigInfo getConfigInfo() {
+		return configInfo;
 	}
 }

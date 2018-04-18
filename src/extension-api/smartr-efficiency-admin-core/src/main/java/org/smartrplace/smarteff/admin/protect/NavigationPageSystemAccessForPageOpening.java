@@ -16,16 +16,24 @@ import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 
 public class NavigationPageSystemAccessForPageOpening implements ExtensionPageSystemAccessForPageOpening {
 	protected final Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo;
+	private final List<NavigationPublicPageData> startPagesData;
 	protected final Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo;
 	protected final ConfigIdAdministration configIdAdmin;
+	private final Resource myPrimaryResource;
+	private final NavigationPublicPageData myNaviData;
 	
 	public NavigationPageSystemAccessForPageOpening(
 			Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo,
+			List<NavigationPublicPageData> startPagesData,
 			ConfigIdAdministration configIdAdmin,
-			Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo) {
+			Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo,
+			Resource myPrimaryResource, String myUrl) {
 		this.pageInfo = pageInfo;
+		this.startPagesData = startPagesData;
 		this.configIdAdmin = configIdAdmin;
 		this.proposalInfo = proposalInfo;
+		this.myNaviData = getPageByProvider(myUrl);
+		this.myPrimaryResource = myPrimaryResource;
 	}
 
 	@Override
@@ -56,7 +64,12 @@ public class NavigationPageSystemAccessForPageOpening implements ExtensionPageSy
 		}
 		return result;
 	}
-
+	
+	@Override
+	public	List<NavigationPublicPageData> getStartPages() {
+		return new ArrayList<>(startPagesData);
+	}
+	
 	@Override
 	public NavigationPublicPageData getPageByProvider(String url) {
 		for(List<NavigationPublicPageData> list: pageInfo.values()) {
@@ -65,14 +78,22 @@ System.out.println("Navi-URL: "+navi.getUrl()+ " Searched:"+url);
 				if(navi.getUrl().equals(url)) return navi;
 			}
 		}
+		for(NavigationPublicPageData navi: startPagesData) {
+			if(navi.getUrl().equals(url)) return navi;
+		}
 		return null;
 	}
 
 	@Override
 	public String accessPage(NavigationPublicPageData pageData, int entryIdx,
 			List<Resource> entryResources) {
-		return configIdAdmin.getConfigId(entryIdx, entryResources);
+		return configIdAdmin.getConfigId(entryIdx, entryResources, myNaviData, myPrimaryResource);
 	}
+	/*@Override
+	public String accessPage(NavigationPublicPageData pageData, int entryIdx,
+			List<Resource> entryResources, NavigationPublicPageData currentPage, Resource currentPrimaryResource) {
+		return configIdAdmin.getConfigId(entryIdx, entryResources, currentPage, currentPrimaryResource);
+	}*/
 
 	@Override
 	public List<ProposalPublicData> getProposalProviders(Class<? extends Resource> type) {

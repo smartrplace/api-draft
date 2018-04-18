@@ -9,10 +9,11 @@ import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitDa
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
-import org.smartrplace.smarteff.util.AddEntryButton;
 import org.smartrplace.smarteff.util.NaviPageBase;
 import org.smartrplace.smarteff.util.SPPageUtil;
+import org.smartrplace.smarteff.util.button.AddEntryButton;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
+import org.smartrplace.util.directresourcegui.GUIHelperExtension;
 import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
 import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
 
@@ -50,15 +51,16 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 
 			vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 			vh.floatLabel("Heated Area", id, object.heatedLivingSpace(), row, "%.0f m2");
-			SPPageUtil.addResEditOpenButton("Edit", object, vh, id, row, appData);
-			SPPageUtil.addResTableOpenButton("Open", object, vh, id, row, appData);
+			SPPageUtil.addResEditOpenButton("Edit", object, vh, id, row, appData, null, req);
+			SPPageUtil.addResTableOpenButton("Open", object, vh, id, row, appData, null, req);
 			if(object.isActive()) {
-				SPPageUtil.addProviderTableOpenButton("Evaluations", object, vh, id, row, appData);
+				SPPageUtil.addProviderTableOpenButton("Evaluations", object, vh, id, row, appData, null, req);
 				//TableOpenButton proposalTableOpenButton = new StandardProposalTableOpenButton(vh.getParent(), "proposalTableOpenButton", pid(), "Proposal providers", object.getResourceType(), exPage, req);
 				//row.addCell("Evaluations", proposalTableOpenButton);
 			} else
 				vh.stringLabel("Evaluations", id, "Inactive", row);
-			vh.linkingButton("Delete", id, object, row, "Delete", "delete.html");
+			GUIHelperExtension.addDeleteButton(null, object, mainTable, id, alert, row, vh, req);
+			//vh.linkingButton("Delete", id, object, row, "Delete", "delete.html");
 		}
 
 		@Override

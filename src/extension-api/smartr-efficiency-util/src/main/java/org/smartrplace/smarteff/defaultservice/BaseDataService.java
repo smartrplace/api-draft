@@ -13,6 +13,7 @@ import org.smartrplace.commontypes.BuildingTablePage;
 import org.smartrplace.commontypes.MasterUserRegistration;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
+import org.smartrplace.extenservice.proposal.CalculatedData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;

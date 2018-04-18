@@ -19,6 +19,11 @@ public class TopConfigTablePage extends ResourceTablePage {
 	}
 
 	@Override
+	protected boolean isInherited() {
+		return true;
+	}
+
+	@Override
 	protected List<Resource> provideResourcesInTable(OgemaHttpRequest req) {
 		ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
 		List<Resource> resultAll = ((SmartEffUserData)appData.userData()).getSubResources(false);

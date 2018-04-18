@@ -29,11 +29,13 @@ public class NavigationPageSystemAccess extends NavigationPageSystemAccessForPag
 	
 	public NavigationPageSystemAccess(String userName, String applicationName,
 			Map<Class<? extends Resource>, List<NavigationPublicPageData>> pageInfo,
+			List<NavigationPublicPageData> startPagesData,
 			ResourceLockAdministration lockAdmin, ConfigIdAdministration configIdAdmin,
 			TypeAdministration typeAdmin,
 			ApplicationManagerSPExt appExt,
-			Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo) {
-		super(pageInfo, configIdAdmin, proposalInfo);
+			Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo,
+			Resource myPrimaryResource, String myUrl) {
+		super(pageInfo, startPagesData, configIdAdmin, proposalInfo, myPrimaryResource, myUrl);
 		this.userName = userName;
 		this.applicationName = applicationName;
 		this.lockAdmin = lockAdmin;

@@ -1,10 +1,13 @@
 package org.smartrplace.smarteff.defaultservice;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.extenservice.proposal.CalculatedData;
@@ -16,12 +19,16 @@ import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
-import org.smartrplace.smarteff.util.AddEditButton;
-import org.smartrplace.smarteff.util.AddEntryButton;
 import org.smartrplace.smarteff.util.CapabilityHelper;
 import org.smartrplace.smarteff.util.NaviPageBase;
 import org.smartrplace.smarteff.util.SPPageUtil;
-import org.smartrplace.smarteff.util.TableOpenButton;
+import org.smartrplace.smarteff.util.button.AddEditButton;
+import org.smartrplace.smarteff.util.button.AddEntryButton;
+import org.smartrplace.smarteff.util.button.ButtonControlProvider;
+import org.smartrplace.smarteff.util.button.ProposalProvTableOpenButton;
+import org.smartrplace.smarteff.util.button.ProposalResTableOpenButton;
+import org.smartrplace.smarteff.util.button.ResourceTableOpenButton;
+import org.smartrplace.smarteff.util.button.TableOpenButton;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
 import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
@@ -30,46 +37,84 @@ import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.html.form.button.RedirectButton;
 import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 public class ResourceTablePage extends NaviPageBase<Resource> {
+	public static final Map<OgemaLocale, String> RESALL_BUTTON_TEXTS = new HashMap<>();
+	static {
+		RESALL_BUTTON_TEXTS.put(OgemaLocale.ENGLISH, "All Sub-Resources");
+		RESALL_BUTTON_TEXTS.put(OgemaLocale.GERMAN, "Alle Unterressourcen");
+		RESALL_BUTTON_TEXTS.put(OgemaLocale.FRENCH, "Tous Sub-Ressources");
+	}
+
+	private ButtonControlProvider newTabController;
+
+	protected boolean isInherited() { return false;}
+	
 	protected void addWidgetsAboveTable(Class<? extends Resource> resourceType) {
-		RedirectButton editResource = new AddEditButton(page, "editEntry", pid(), "Edit", Resource.class, exPage) {
+		Button tabButton = new Button(page, "tabButton"+pid(), SPPageUtil.OPEN_SAME_TAB_STRING) {
 			private static final long serialVersionUID = 1L;
+			private boolean openNewTab(OgemaHttpRequest req) {
+				return getText(req).equals(SPPageUtil.OPEN_NEW_TAB_STRING);
+			}
+			/*@Override
+			public void onGET(OgemaHttpRequest req) {
+				if(openNewTab(req)) setText(SPPageUtil.OPEN_NEW_TAB_STRING, req);
+				else setText(SPPageUtil.OPEN_SAME_TAB_STRING, req);
+			}*/
 			@Override
-			protected Class<? extends Resource> type(ExtensionResourceAccessInitData appData,
-					OgemaHttpRequest req) {
-				return getResource(appData, req).getResourceType();
+			public void onPrePOST(String data, OgemaHttpRequest req) {
+				if(!openNewTab(req)) setText(SPPageUtil.OPEN_NEW_TAB_STRING, req);
+				else setText(SPPageUtil.OPEN_SAME_TAB_STRING, req);
 			}
 		};
-		StaticTable topTable = new StaticTable(1, 4);
-		TableOpenButton allResourceButton2 = new TableOpenButton(page, "allResourceButton", pid(), "All Resources", resourceType, exPage) {
-			private static final long serialVersionUID = 1L;
+		tabButton.registerDependentWidget(tabButton);
+		newTabController = new ButtonControlProvider() {
 			@Override
-			protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
-					Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
-				return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESOURCEALL_NAVI_PROVIDER));//super.getPageData(appData, type, typeRequested);
+			public boolean openInNewTab(OgemaHttpRequest req) {
+				return tabButton.getText(req).equals(SPPageUtil.OPEN_NEW_TAB_STRING);
 			}
 		};
-		TableOpenButton proposalTableOpenButton = new TableOpenButton(page, "proposalTableOpenButton", pid(), "Proposal providers", resourceType, exPage) {
-			private static final long serialVersionUID = 1L;
-			@Override
-			protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
-					Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
-				return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.PROPOSALTABLE_PROVIDER));//super.getPageData(appData, type, typeRequested);
-			}
-		};
-		TableOpenButton resultTableOpenButton = new TableOpenButton(page, "resultTableOpenButton", pid(), "Project Proposals", resourceType, exPage) {
-			private static final long serialVersionUID = 1L;
-			@Override
-			protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
-					Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
-				return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESULTTABLE_PROVIDER));//super.getPageData(appData, type, typeRequested);
-			}
-		};
+		
+		RedirectButton editResource = new AddEditButton(page, "editEntry", pid(), exPage,
+				newTabController);
+		StaticTable topTable = new StaticTable(1, 6);
+		TableOpenButton allResourceButton2;
+		if(isInherited()) {
+			allResourceButton2 = new ResourceTableOpenButton(page, "allResourceButton", pid(), exPage, newTabController);
+		} else {
+			allResourceButton2 = new TableOpenButton(page, "allResourceButton", pid(), "All Resources", exPage, newTabController) {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
+						Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
+					return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESOURCEALL_NAVI_PROVIDER));//super.getPageData(appData, type, typeRequested);
+				}
+				@Override
+				public void onGET(OgemaHttpRequest req) {
+					super.onGET(req);
+					ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
+					List<Resource> resultAll = getResource(appData, req).getSubResources(false);
+					List<Resource> result = new ArrayList<>();
+					for(Resource r: resultAll) {
+						if(!(r instanceof ValueResource)) result.add(r);
+					}
+					String text = RESALL_BUTTON_TEXTS.get(req.getLocale());
+					if(text == null) text = RESALL_BUTTON_TEXTS.get(OgemaLocale.ENGLISH);
+					setText(text+"("+result.size()+")", req);
+				}
+			};
+			allResourceButton2.setDefaultOpenInNewTab(false);
+		}
+		TableOpenButton proposalTableOpenButton = new ProposalProvTableOpenButton(page, "proposalTableOpenButton", pid(), exPage, newTabController);
+		TableOpenButton resultTableOpenButton = new ProposalResTableOpenButton(page, "resultTableOpenButton", pid(), exPage, newTabController);
+		TableOpenButton upTableOpenButton = new ResourceTableOpenButton(page, "upTableOpenButton", pid(), exPage, newTabController,true);
+		
 		topTable.setContent(0, 0, editResource).setContent(0, 1, allResourceButton2).
-				setContent(0, 2, proposalTableOpenButton).setContent(0, 3, resultTableOpenButton);
+				setContent(0, 2, proposalTableOpenButton).setContent(0, 3, resultTableOpenButton).
+				setContent(0,  4, upTableOpenButton).setContent(0, 5, tabButton);
 		page.append(topTable);
 		
 	};
@@ -94,7 +139,7 @@ public class ResourceTablePage extends NaviPageBase<Resource> {
 		@Override
 		public void addWidgets(Resource object, ResourceGUIHelper<Resource> vh, String id,
 				OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-			ResourceTablePage.addWidgets(object, vh, id, req, row, appMan, pid(), appManExt, exPage);
+			ResourceTablePage.addWidgets(object, vh, id, req, row, appMan, pid(), appManExt, exPage, newTabController);
 		}
 
 		@Override
@@ -176,7 +221,8 @@ public class ResourceTablePage extends NaviPageBase<Resource> {
 	public static void addWidgets(Resource object, ResourceGUIHelper<Resource> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			String pid, ApplicationManagerSPExt appManExt,
-			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage) {
+			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage,
+			ButtonControlProvider tabController) {
 		ExtensionResourceAccessInitData appData = null;
 		if(req != null) appData = exPage.getAccessData(req);
 		vh.stringLabel("Type", id, object.getResourceType().getSimpleName(), row);
@@ -184,15 +230,15 @@ public class ResourceTablePage extends NaviPageBase<Resource> {
 			vh.stringLabel("Name", id, getSimpleName(object), row);
 			if(object instanceof CalculatedData) {
 				vh.stringLabel("Edit", id, "Result Resource", row);
-				SPPageUtil.addResEditOpenButton("Open", object, vh, id, row, appData);
+				SPPageUtil.addResEditOpenButton("Open", object, vh, id, row, appData, tabController, req);
 				vh.stringLabel("Evaluations", id, "--", row);
 				vh.stringLabel("Delete", id, "--", row);
 				vh.stringLabel("AddResource", id, "--", row);
 			} else {
-				SPPageUtil.addResEditOpenButton("Edit", object, vh, id, row, appData);
-				SPPageUtil.addResTableOpenButton("Open", object, vh, id, row, appData);
+				SPPageUtil.addResEditOpenButton("Edit", object, vh, id, row, appData, tabController, req);
+				SPPageUtil.addResTableOpenButton("Open", object, vh, id, row, appData, tabController, req);
 				if(object.isActive()) {
-					SPPageUtil.addProviderTableOpenButton("Evaluations", object, vh, id, row, appData);
+					SPPageUtil.addProviderTableOpenButton("Evaluations", object, vh, id, row, appData, tabController, req);
 					//TableOpenButton proposalTableOpenButton = new StandardProposalTableOpenButton(vh.getParent(), "proposalTableOpenButton", PID, "Proposal providers", object.getResourceType(), exPage, req);
 					//row.addCell("Evaluations", proposalTableOpenButton);
 				} else
@@ -200,7 +246,7 @@ public class ResourceTablePage extends NaviPageBase<Resource> {
 				vh.linkingButton("Delete", id, object, row, "Delete", "delete.html");
 				ExtensionResourceTypeDeclaration<? extends Resource> typeDecl = appManExt.getTypeDeclaration(object.getResourceType());
 				if(SPPageUtil.isMulti(typeDecl.cardinality())) {
-					AddEntryButton addButton = new AddEntryButton(vh.getParent(), id, pid, "Add Sub Resource", object.getResourceType(), exPage, req);
+					AddEntryButton addButton = new AddEntryButton(vh.getParent(), id, pid, "Add Sub Resource",  object.getResourceType(), exPage, req);
 					row.addCell("AddResource", addButton);					
 				} else {
 					vh.stringLabel("AddResource", id, "SingleResource", row);

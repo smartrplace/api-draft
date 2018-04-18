@@ -37,6 +37,7 @@ public class GUIPageAdministation {
 	public List<NavigationPageData> navigationPages = new ArrayList<>();
 	public List<ProposalProviderData> proposalProviders = new ArrayList<>();
 	public Map<Class<? extends Resource>, List<NavigationPublicPageData>> navigationPublicData = new HashMap<>();
+	public List<NavigationPublicPageData> startPagesData = new ArrayList<>();
 	public Map<Class<? extends Resource>, List<ProposalPublicData>> proposalInfo = new HashMap<>();
 	private final SpEffAdminController app;
 	
@@ -62,7 +63,10 @@ public class GUIPageAdministation {
     		
     		NavigationPageData data = new NavigationPageData(navi, service, url, dataExPage);
     		app.pageAdmin.registerPage(data, page);
-			if(navi.getEntryTypes() == null) startPages.add(data);
+			if(navi.getEntryTypes() == null) {
+				startPages.add(data);
+				startPagesData.add(new NavigationPublicPageDataImpl(data));
+			}
 			else {
 				navigationPages.add(data);
 				for(EntryType t: navi.getEntryTypes()) {

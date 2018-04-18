@@ -1,6 +1,5 @@
-package org.smartrplace.smarteff.util;
+package org.smartrplace.smarteff.util.button;
 
-import org.ogema.core.model.Resource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
@@ -14,15 +13,16 @@ public class TableOpenButton extends NaviOpenButton{
 	private static final long serialVersionUID = 1L;
 	
 	public TableOpenButton(WidgetPage<?> page, String id, String pid, String text,
-			Class<? extends Resource> type,
-			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage) {
-		super(page, id, pid, text, type, exPage, PageType.TABLE_PAGE, false);
+			//Class<? extends Resource> type,
+			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage,
+			ButtonControlProvider controlProvider) {
+		super(page, id, pid, text, exPage, PageType.TABLE_PAGE, false, controlProvider);
 	}
 
 	public TableOpenButton(OgemaWidget parent, String id, String pid, String text,
-			Class<? extends Resource> type,
+			//Class<? extends Resource> type,
 			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage,
-			OgemaHttpRequest req) {
-		super(parent, id, pid, text, type, exPage, PageType.TABLE_PAGE, false, req);
+			ButtonControlProvider controlProvider, OgemaHttpRequest req) {
+		super(parent, id, pid, text, exPage, PageType.TABLE_PAGE, false, controlProvider, req);
 	}
 }

@@ -5,27 +5,24 @@ import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.model.Resource;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData.ConfigInfo;
+import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 
 /** TODO: This is not thread-safe yet
  * TODO: This has no clean-up mechanism yet
  * TODO: Generate configId randomly individually*/
 public class ConfigIdAdministration {
-	public static class ConfigInfo {
-		public ConfigInfo(int entryIdx, List<Resource> entryResources) {
-			this.entryIdx = entryIdx;
-			this.entryResources = entryResources;
-		}
-		public int entryIdx;
-		public List<Resource> entryResources;
-	}
 	Map<String, ConfigInfo> resourcesLocked = new HashMap<>();
 	
 	private int counter = 1000;
 	
-	public String getConfigId(int entryIdx, List<Resource> entryResources) {
+	public String getConfigId(int entryIdx, List<Resource> entryResources, NavigationPublicPageData currentPage, Resource currentPrimaryResource) {
 		String result = ""+counter;
 		counter++;
-		resourcesLocked.put(result, new ConfigInfo(entryIdx, entryResources));
+		ConfigInfo newConfig = new ConfigInfo(entryIdx, entryResources);
+		newConfig.lastPage = currentPage;
+		newConfig.lastPrimaryResource = currentPrimaryResource;
+		resourcesLocked.put(result, newConfig );
 		return result;
 	}
 	
