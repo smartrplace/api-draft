@@ -11,9 +11,9 @@ import org.ogema.core.model.Resource;
 import org.smartrplace.commontypes.BuildingEditPage;
 import org.smartrplace.commontypes.BuildingTablePage;
 import org.smartrplace.commontypes.MasterUserRegistration;
+import org.smartrplace.commontypes.RoomRegistration;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
-import org.smartrplace.extenservice.proposal.CalculatedData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
@@ -83,6 +83,7 @@ public class BaseDataService implements SmartEffExtensionService {
 	public final static NaviPageBase<Resource>.Provider RESOURCEALL_NAVI_PROVIDER = new ResourceAllTablePage().provider;
 	public final static NaviPageBase<Resource>.Provider PROPOSALTABLE_PROVIDER = new ProposalProvTablePage().provider;
 	public final static NaviPageBase<Resource>.Provider RESULTTABLE_PROVIDER = new ResultTablePage().provider;
+	public final static NaviPageBase<Resource>.Provider RESBYTYPE_PROVIDER = new ResourceByTypeTablePage().provider;
 	//public final static NaviPageBase<DefaultProviderParams>.Provider BA_PARAMSEDIT_PROVIDER = new DefaultProviderParamsPage().provider;
 	//public final static NaviPageBase<Resource>.Provider TOPCONFIG_NAVI_PROVIDER = new TopConfigTablePage().provider;
 	public BuildingExampleAnalysis BUILDINGANALYSIS_PROVIDER;
@@ -101,7 +102,8 @@ public class BaseDataService implements SmartEffExtensionService {
 		return Arrays.asList(new ExtensionCapability[] {new BuildingTablePage().provider, new BuildingEditPage().provider, RESOURCE_NAVI_PROVIDER, RESOURCEALL_NAVI_PROVIDER,
 				PROPOSALTABLE_PROVIDER, RESULTTABLE_PROVIDER, new TopConfigTablePage().provider,
 				BUILDINGANALYSIS_PROVIDER, new DefaultProviderParamsPage().provider,
-				new MasterUserRegistration.EditPage().provider});
+				new MasterUserRegistration.EditPage().provider, new RoomRegistration.EditPage().provider,
+				RESBYTYPE_PROVIDER});
 	}
 
 	@Override
@@ -113,6 +115,7 @@ public class BaseDataService implements SmartEffExtensionService {
 		result.add(BUILDINGANALYSIS_PROVIDER.getTypeDeclaration());
 		if(BUILDINGANALYSIS_PROVIDER.getParamTypeDeclaration() != null) result.add(BUILDINGANALYSIS_PROVIDER.getParamTypeDeclaration());
 		result.add(new MasterUserRegistration.TypeDeclaration());
+		result.add(new RoomRegistration.TypeDeclaration());
 		return result ;
 	}
 }

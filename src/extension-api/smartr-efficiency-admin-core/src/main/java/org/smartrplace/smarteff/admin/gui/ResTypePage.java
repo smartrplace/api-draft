@@ -5,8 +5,15 @@ import java.util.Collection;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.TimeResource;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
+import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
+import org.smartrplace.smarteff.admin.UserAdmin;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
+import org.smartrplace.smarteff.defaultservice.BaseDataService;
+import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
@@ -17,6 +24,7 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
+import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 /**
  * An HTML page, generated from the Java code.
@@ -56,14 +64,32 @@ public class ResTypePage extends ObjectGUITablePage<SmartrEffExtResourceTypeData
 			vh.stringLabel("Name", id, object.typeDeclaration.label(req.getLocale()), row);
 		} else vh.registerHeaderEntry("Name");
 		vh.stringLabel("Resource Type", id, object.resType.getName(), row);
-		vh.stringLabel("Public", id, ""+object.numberPublic, row);
-		vh.stringLabel("ReadOnly", id, ""+object.numberNonEdit, row);
-		vh.stringLabel("ReadWrite", id, ""+(object.numberTotal-object.numberNonEdit-object.numberPublic), row);
-		vh.linkingButton("Data Explorer", id, object, row, "Resources", "dataExplorer.html");
+		if(req != null) {
+			vh.stringLabel("Public", id, ""+app.appManExt.globalData().getSubResources(object.resType, true).size(), row);
+			int editNum = getEditNum(object.resType);
+			int nonEditNum = getNonEditNum(object.resType);
+			vh.stringLabel("ReadOnly", id, ""+(nonEditNum-editNum), row);
+			vh.stringLabel("ReadWrite", id, ""+editNum, row);
+			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage =
+					new ExtensionNavigationPageMinimal(page, getUserAdmin());
+					//appM.getUserAdmin().getNaviPage(page, "navioverview/url", "dataExplorer.html", myId, null);
+			ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
+			
+			NavigationPublicPageData pageData = appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESBYTYPE_PROVIDER));
+			String context = object.resType.getName();
+			SPPageUtil.addOpenButton("Data Explorer", null, vh, id, row, pageData ,
+					appData.systemAccessForPageOpening(), "Resources", "No ResPage", true, PageType.TABLE_PAGE,
+					null, context, req);
+		} else {
+			vh.registerHeaderEntry("Public");
+			vh.registerHeaderEntry("ReadOnly");
+			vh.registerHeaderEntry("ReadWrite");
+			vh.registerHeaderEntry("Data Explorer");
+		}
 //if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
 		
 	}
-	
+
 	@Override
 	public Resource getResource(SmartrEffExtResourceTypeData object, OgemaHttpRequest req) {
 		return null;
@@ -73,5 +99,15 @@ public class ResTypePage extends ObjectGUITablePage<SmartrEffExtResourceTypeData
 	public String getLineId(SmartrEffExtResourceTypeData object) {
 		String name = WidgetHelper.getValidWidgetId(object.typeDeclaration.label(null));
 		return name + super.getLineId(object);
+	}
+	
+	protected UserAdmin getUserAdmin() {
+		return app.getUserAdmin();
+	}
+	protected int getEditNum(Class<? extends Resource> resType) {
+		return getUserAdmin().getUserData().editableData().getSubResources(resType, true).size();
+	}
+	protected int getNonEditNum(Class<? extends Resource> resType) {
+		return getUserAdmin().getUserData().getSubResources(resType, true).size();
 	}
 }

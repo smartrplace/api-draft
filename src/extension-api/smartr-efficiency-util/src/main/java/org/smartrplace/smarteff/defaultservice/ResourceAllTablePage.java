@@ -7,7 +7,6 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
 import org.smartrplace.extenservice.resourcecreate.ProviderPublicDataForCreate.PagePriority;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
-import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.smarteff.util.CapabilityHelper;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -58,11 +57,6 @@ public class ResourceAllTablePage extends ResourceTablePage {
 		return CapabilityHelper.getStandardEntryTypeList(primaryEntryTypeClass());
 	}
 
-	@Override
-	protected PageType getPageType() {
-		return PageType.TABLE_PAGE;
-	}
-	
 	@Override
 	protected PagePriority getPriority() {
 		return PagePriority.HIDDEN;

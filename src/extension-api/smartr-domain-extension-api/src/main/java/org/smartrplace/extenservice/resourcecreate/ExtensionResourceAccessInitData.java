@@ -15,8 +15,11 @@ public interface ExtensionResourceAccessInitData {
 		}
 		public int entryIdx;
 		public List<Resource> entryResources;
+		
 		public Resource lastPrimaryResource;
 		public NavigationPublicPageData lastPage;
+		
+		public Object context; 
 	}
 
 	/** index within {@link #getEntryTypes()} used to open the page*/

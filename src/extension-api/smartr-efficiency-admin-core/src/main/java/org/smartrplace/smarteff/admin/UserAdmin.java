@@ -115,6 +115,10 @@ public class UserAdmin {
 	protected ExtensionResourceAccessInitData getAccessData(String configId, OgemaHttpRequest req,
 			NavigationGUIProvider navi, SmartEffUserDataNonEdit userDataNonEdit,
 			SpEffAdminController app, String url) {
+		ConfigInfo c = null;
+		if(configId != null) {
+			c = app.configIdAdmin.getConfigInfo(configId);
+		}
 		if(navi == null || navi.getEntryTypes() == null || configId == null) {
 			ExtensionUserData editableData = null;
 			NavigationPageSystemAccessForPageOpening systemAccess;
@@ -130,11 +134,16 @@ public class UserAdmin {
 					app.guiPageAdmin.navigationPublicData, app.guiPageAdmin.startPagesData, app.configIdAdmin,
 					app.guiPageAdmin.proposalInfo, null, url);
 			}
-			ExtensionResourceAccessInitData result = new ExtensionResourceAccessInitDataImpl(-1, null, null,
-					editableData , userDataNonEdit, systemAccess);
+			ExtensionResourceAccessInitData result;
+			if(c == null) {
+				result = new ExtensionResourceAccessInitDataImpl(-1, null, null,
+						editableData , userDataNonEdit, systemAccess);
+			} else {
+				result = new ExtensionResourceAccessInitDataImpl(c.entryIdx, c.entryResources, c,
+						editableData , userDataNonEdit, systemAccess);
+			}
 			return result;
 		} else {
-			ConfigInfo c = app.configIdAdmin.getConfigInfo(configId);
 			NavigationPageSystemAccess systemAccess = new NavigationPageSystemAccess(userDataNonEdit.ogemaUserName().getValue(),
 					navi.label(req.getLocale()),
 					app.guiPageAdmin.navigationPublicData, app.guiPageAdmin.startPagesData,

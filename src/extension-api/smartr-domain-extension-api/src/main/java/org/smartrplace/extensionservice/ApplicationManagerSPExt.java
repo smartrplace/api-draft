@@ -15,5 +15,7 @@ public interface ApplicationManagerSPExt extends ApplicationManagerMinimal {
 	/** Get all types declaring this type as parent or types from which parent is inherited*/
 	public List<Class<? extends Resource>> getSubTypes(Class<? extends Resource> parentType);
 	
+	public List<ExtensionResourceTypeDeclaration<?>> getAllTypeDeclararions();
+	
 	public OgemaLogger log();
 }

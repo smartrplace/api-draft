@@ -49,10 +49,12 @@ public class BackButton extends TableOpenButton {
 	@Override
 	protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
 			Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
+		if(appData.getConfigInfo() == null) return null;
 		return appData.getConfigInfo().lastPage;
 	}
 	@Override
 	protected Resource getResource(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {
+		if(appData.getConfigInfo() == null) return null;
 		return appData.getConfigInfo().lastPrimaryResource;
 	}
 

@@ -42,15 +42,19 @@ public class SPPageUtil {
 			ExtensionPageSystemAccessForPageOpening systemAccess,
 			String text, String alternativeText, boolean openWhenLocked,
 			PageType pageType,
-			ButtonControlProvider controlProvider, OgemaHttpRequest req) {
+			ButtonControlProvider controlProvider, Object context, OgemaHttpRequest req) {
 		if(pageData != null) {
 			if(openWhenLocked ||(!((ExtensionPageSystemAccessForCreate)systemAccess).isLocked(object))) {
 				//String configId = NaviOpenButton.getConfigId(pageType, object, type, systemAccess, pageData);
 				//Here we never create a new resource
-				Class<? extends Resource> type = object.getResourceType();
-				String configId = systemAccess.accessPage(pageData, getEntryIdx(pageData, type),
-						Arrays.asList(new Resource[]{object}));
-				/*String columnId = ResourceUtils.getValidResourceName(columnName);
+				final String configId;
+				if(object == null) {
+					configId = systemAccess.accessPage(pageData, -1, null, context);					
+				} else {
+					Class<? extends Resource> type = object.getResourceType();
+					configId = systemAccess.accessPage(pageData, getEntryIdx(pageData, type),
+							Arrays.asList(new Resource[]{object}), context);
+				}/*String columnId = ResourceUtils.getValidResourceName(columnName);
 				ResourceRedirectButton<Resource> button = new ResourceRedirectButton<Resource>(vh.getParent(), columnId+id, text, pageData.getUrl(), req) { //pageData.getUrl()+"?configId="+configId
 					private static final long serialVersionUID = 1L;
 					@Override
@@ -92,7 +96,7 @@ public class SPPageUtil {
 			int size = AddEditButton.getSize(object, appData);
 			String text = getLocaleString(req, AddEditButton.BUTTON_TEXTS);
 			return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
-					text+"("+size+")", "Locked", false, PageType.EDIT_PAGE, controlProvider, req);
+					text+"("+size+")", "Locked", false, PageType.EDIT_PAGE, controlProvider, null, req);
 		} else {
 			vh.registerHeaderEntry(columnName);
 			return null;
@@ -106,7 +110,7 @@ public class SPPageUtil {
 			String text = getLocaleString(req, ResourceTableOpenButton.BUTTON_TEXTS);
 			int size = ResourceTableOpenButton.getSize(object, appData);
 			return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
-					text+"("+size+")", "No Page", true, PageType.TABLE_PAGE, controlProvider, req);
+					text+"("+size+")", "No Page", true, PageType.TABLE_PAGE, controlProvider, null, req);
 		} else {
 			vh.registerHeaderEntry(columnName);
 			return null;
@@ -124,7 +128,7 @@ public class SPPageUtil {
 				String text = getLocaleString(req, ProposalProvTableOpenButton.BUTTON_TEXTS);
 				int size = ProposalProvTableOpenButton.getSize(object, appData);
 				return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
-						text+"("+size+")", "No BaseEval", true, PageType.TABLE_PAGE, controlProvider, req);
+						text+"("+size+")", "No BaseEval", true, PageType.TABLE_PAGE, controlProvider, null, req);
 			}
 		} else {
 			vh.registerHeaderEntry(columnName);
@@ -143,7 +147,7 @@ public class SPPageUtil {
 				String text = getLocaleString(req, ProposalResTableOpenButton.BUTTON_TEXTS);
 				int size = ProposalResTableOpenButton.getSize(object, appData);
 				return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
-						text+"("+size+")", "No BaseResult", true, PageType.TABLE_PAGE, controlProvider, req);
+						text+"("+size+")", "No BaseResult", true, PageType.TABLE_PAGE, controlProvider, null, req);
 			}
 		} else {
 			vh.registerHeaderEntry(columnName);

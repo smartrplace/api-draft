@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
-import org.smartrplace.smarteff.admin.gui.DataExplorerPage;
 import org.smartrplace.smarteff.admin.gui.NaviOverviewPage;
 import org.smartrplace.smarteff.admin.gui.ResTypePage;
 import org.smartrplace.smarteff.admin.gui.ServiceDetailPage;
@@ -26,7 +25,7 @@ public class StandardPageAdmin {
 	public final ServicePage mainPage;
 	public final ServiceDetailPage offlineEvalPage;
 	public final ResTypePage resTypePage;
-	public final DataExplorerPage dataExPage;
+	//public final DataExplorerPage dataExPage;
 	public final NaviOverviewPage naviPage;
 	public NavigationMenu menu;
 
@@ -34,7 +33,7 @@ public class StandardPageAdmin {
 	private final WidgetPage<?> pageServiceDetails;
 	private final WidgetPage<?> pageResTypes;
 	private final WidgetPage<?> pageNavis;
-	private final WidgetPage<?> page3;
+	//private final WidgetPage<?> page3;
 	
 	private final SpEffAdminController controller;
 	
@@ -60,9 +59,9 @@ public class StandardPageAdmin {
 		offlineEvalPage = new ServiceDetailPage(pageServiceDetails, controller);
 		pageResTypes = widgetApp.createWidgetPage("resTypes.html");
 		SmartrEffExtResourceTypeData rtd = new SmartrEffExtResourceTypeData(BaseDataService.BUILDING_DATA, null, null);
-		resTypePage = new ResTypePage(pageResTypes, controller, rtd );
-		page3 = widgetApp.createWidgetPage("dataExplorer.html");
-		dataExPage = new DataExplorerPage(page3, controller, controller.getUserAdmin().getAppConfigData().globalData());
+		resTypePage = controller.getResTypePage(pageResTypes, rtd);
+		//page3 = widgetApp.createWidgetPage("dataExplorer.html");
+		//dataExPage = new DataExplorerPage(page3, controller, controller.getUserAdmin().getAppConfigData().globalData());
 		pageNavis = widgetApp.createWidgetPage(NAVI_OVERVIEW_URL);
 		NavigationPageData navi = new NavigationPageData(BaseDataService.RESOURCEALL_NAVI_PROVIDER, null, "", null);
 		naviPage = controller.getNaviPage(pageNavis, navi);
@@ -88,8 +87,8 @@ public class StandardPageAdmin {
 		mc.setCustomNavigation(menu);
 		mc = pageResTypes.getMenuConfiguration();
 		mc.setCustomNavigation(menu);
-		mc = page3.getMenuConfiguration();
-		mc.setCustomNavigation(menu);
+		//mc = page3.getMenuConfiguration();
+		//mc.setCustomNavigation(menu);
 		mc = pageNavis.getMenuConfiguration();
 		mc.setCustomNavigation(menu);
 		

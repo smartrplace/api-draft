@@ -16,12 +16,13 @@ public class ConfigIdAdministration {
 	
 	private int counter = 1000;
 	
-	public String getConfigId(int entryIdx, List<Resource> entryResources, NavigationPublicPageData currentPage, Resource currentPrimaryResource) {
+	public String getConfigId(int entryIdx, List<Resource> entryResources, NavigationPublicPageData currentPage, Resource currentPrimaryResource, Object context) {
 		String result = ""+counter;
 		counter++;
 		ConfigInfo newConfig = new ConfigInfo(entryIdx, entryResources);
 		newConfig.lastPage = currentPage;
 		newConfig.lastPrimaryResource = currentPrimaryResource;
+		newConfig.context = context;
 		resourcesLocked.put(result, newConfig );
 		return result;
 	}

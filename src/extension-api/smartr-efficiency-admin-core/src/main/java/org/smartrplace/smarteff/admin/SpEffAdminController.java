@@ -17,13 +17,13 @@ import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.config.SmartEffAdminData;
 import org.smartrplace.smarteff.admin.gui.NaviOverviewPage;
+import org.smartrplace.smarteff.admin.gui.ResTypePage;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.admin.object.SmartrEffExtResourceTypeData;
 import org.smartrplace.smarteff.admin.util.ConfigIdAdministration;
 import org.smartrplace.smarteff.admin.util.GUIPageAdministation;
 import org.smartrplace.smarteff.admin.util.ResourceLockAdministration;
 import org.smartrplace.smarteff.admin.util.TypeAdministration;
-import org.smartrplace.smarteff.defaultservice.BaseDataService;
 import org.smartrplace.util.format.ValueFormat;
 
 import de.iwes.widgets.api.widgets.WidgetApp;
@@ -65,6 +65,15 @@ public class SpEffAdminController {
 				if((e.getValue().typeDeclaration.parentType() != null) && e.getValue().typeDeclaration.parentType().isAssignableFrom(parentType)) {
 					result.add(e.getKey());
 				}
+			}
+			return result;
+		}
+
+		@Override
+		public List<ExtensionResourceTypeDeclaration<?>> getAllTypeDeclararions() {
+			List<ExtensionResourceTypeDeclaration<?>> result = new ArrayList<>();
+			for(SmartrEffExtResourceTypeData data: typeAdmin.resourceTypes.values()) {
+				result.add(data.typeDeclaration);
 			}
 			return result;
 		}
@@ -154,4 +163,8 @@ public class SpEffAdminController {
 	public NaviOverviewPage getNaviPage(WidgetPage<?> pageNavis, NavigationPageData navi) {
 		return new NaviOverviewPage(pageNavis, this, navi);
 	}
+	public ResTypePage getResTypePage(WidgetPage<?> pageNavis, SmartrEffExtResourceTypeData initData) {
+		return new ResTypePage(pageNavis, this, initData);
+	}
+
 }

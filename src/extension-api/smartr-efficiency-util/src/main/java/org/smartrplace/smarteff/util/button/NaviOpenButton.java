@@ -32,6 +32,7 @@ public class NaviOpenButton extends RedirectButton {
 	//Override especially for pages that declare opening resource types == 0
 	/** Adapt this if {@link EditPageBase#getReqData(OgemaHttpRequest) is changed}*/
 	protected Resource getResource(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {
+		if(appData.entryResources() == null) return null;
 		return appData.entryResources().get(0);
 	}
 	//protected Class<? extends Resource> type(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {

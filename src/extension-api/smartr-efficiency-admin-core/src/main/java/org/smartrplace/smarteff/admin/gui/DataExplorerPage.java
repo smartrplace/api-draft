@@ -37,6 +37,7 @@ import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
  * more input than just input resources. This could also be solved by a parameters Map accessible in 
  * {@link ExtensionResourceAccessInitData}.
  */
+@Deprecated
 public class DataExplorerPage extends ResourceGUITablePage<SmartEffResource> {
 	protected static final String pid = DataExplorerPage.class.getSimpleName();
 

@@ -1,7 +1,6 @@
 package org.smartrplace.smarteff.admin.object;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,15 +15,14 @@ import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
-import org.smartrplace.smarteff.admin.util.SmartrEffUtil;
 
 public class SmartrEffExtResourceTypeData {
 	public final Class<? extends Resource> resType;
 	public final ExtensionResourceTypeDeclaration<? extends Resource> typeDeclaration;
 	public final List<SmartEffExtensionService> requiredBy = new ArrayList<>();
-	public int numberTotal;
-	public int numberPublic;
-	public int numberNonEdit;
+	//public int numberTotal;
+	//public int numberPublic;
+	//public int numberNonEdit;
 	
 	public SmartrEffExtResourceTypeData(ExtensionResourceTypeDeclaration<? extends SmartEffResource> typeDeclaration,
 			SmartEffExtensionService parent, SpEffAdminController app) {
@@ -35,9 +33,9 @@ public class SmartrEffExtResourceTypeData {
 	}
 	
 	public void resetResourceStatistics(SpEffAdminController app) {
-		numberTotal = app.appMan.getResourceAccess().getResources(resType).size();
-		numberPublic = app.getUserAdmin().getAppConfigData().globalData().getSubResources(resType, true).size();
-		numberNonEdit = app.getUserAdmin().getAllUserResource().getSubResources(resType, true).size();		
+		//numberTotal = app.appMan.getResourceAccess().getResources(resType).size();
+		//numberPublic = app.getUserAdmin().getAppConfigData().globalData().getSubResources(resType, true).size();
+		//numberNonEdit = app.getUserAdmin().getAllUserResource().getSubResources(resType, true).size();		
 	}
 
 	public void addParent(SmartEffExtensionService parent) {
@@ -74,7 +72,7 @@ public class SmartrEffExtResourceTypeData {
 
 	@SuppressWarnings("incomplete-switch")
 	public void registerElement(Resource res) {
-		numberTotal++;
+		/*numberTotal++;
 		switch(SmartrEffUtil.getAccessType(res)) {
 		case PUBLIC:
 			numberPublic++;
@@ -82,11 +80,11 @@ public class SmartrEffExtResourceTypeData {
 		case READONLY:
 			numberNonEdit++;
 			break;
-		}		
+		}*/		
 	}
 	@SuppressWarnings("incomplete-switch")
 	public void unregisterElement(SmartEffResource res) {
-		numberTotal--;
+		/*numberTotal--;
 		switch(SmartrEffUtil.getAccessType(res)) {
 		case PUBLIC:
 			numberPublic--;
@@ -94,7 +92,7 @@ public class SmartrEffExtResourceTypeData {
 		case READONLY:
 			numberNonEdit--;
 			break;
-		}		
+		}*/		
 	}
 	
 	@Override

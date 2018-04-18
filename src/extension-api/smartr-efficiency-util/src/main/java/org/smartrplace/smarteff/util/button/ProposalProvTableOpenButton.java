@@ -57,9 +57,14 @@ public class ProposalProvTableOpenButton extends TableOpenButton {
 		ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
 		/*Class<? extends Resource> type = getResource(appData, req).getResourceType();
 		List<ProposalPublicData> provs = appData.systemAccessForPageOpening().getProposalProviders(type);*/
-		int size = getSize(getResource(appData, req), appData);
+		Resource myRes = getResource(appData, req);
 		String text = BUTTON_TEXTS.get(req.getLocale());
 		if(text == null) text = BUTTON_TEXTS.get(OgemaLocale.ENGLISH);
+		if(myRes == null) {
+			setText(text, req);
+			return;
+		}
+		int size = getSize(myRes, appData);
 		setText(text+"("+size+")", req);
 	}
 	

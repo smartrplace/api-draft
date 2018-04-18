@@ -87,13 +87,11 @@ System.out.println("Navi-URL: "+navi.getUrl()+ " Searched:"+url);
 	@Override
 	public String accessPage(NavigationPublicPageData pageData, int entryIdx,
 			List<Resource> entryResources) {
-		return configIdAdmin.getConfigId(entryIdx, entryResources, myNaviData, myPrimaryResource);
+		return configIdAdmin.getConfigId(entryIdx, entryResources, myNaviData, myPrimaryResource, null);
 	}
-	/*@Override
-	public String accessPage(NavigationPublicPageData pageData, int entryIdx,
-			List<Resource> entryResources, NavigationPublicPageData currentPage, Resource currentPrimaryResource) {
-		return configIdAdmin.getConfigId(entryIdx, entryResources, currentPage, currentPrimaryResource);
-	}*/
+	public String accessPage(NavigationPublicPageData pageData, int entryIdx, List<Resource> entryResources, Object context) {
+		return configIdAdmin.getConfigId(entryIdx, entryResources, myNaviData, myPrimaryResource, context);		
+	}
 
 	@Override
 	public List<ProposalPublicData> getProposalProviders(Class<? extends Resource> type) {

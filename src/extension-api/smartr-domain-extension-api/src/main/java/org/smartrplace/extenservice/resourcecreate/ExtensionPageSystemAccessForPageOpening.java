@@ -17,4 +17,5 @@ public interface ExtensionPageSystemAccessForPageOpening {
 	
 	/**Get configId to put as parameter into page request when opening new page*/
 	String accessPage(NavigationPublicPageData pageData, int entryIdx, List<Resource> entryResources);
+	String accessPage(NavigationPublicPageData pageData, int entryIdx, List<Resource> entryResources, Object context);
 }

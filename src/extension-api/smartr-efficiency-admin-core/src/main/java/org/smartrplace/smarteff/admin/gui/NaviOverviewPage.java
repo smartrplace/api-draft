@@ -13,7 +13,6 @@ import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
-import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.extended.WidgetData;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -52,7 +51,7 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 	@Override
 	public void addWidgets(NavigationPageData object, ObjectResourceGUIHelper<NavigationPageData, Resource> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-		ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage = null;
+		//ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage = null;
 		if(req != null) {
 			vh.stringLabel("Name", id, object.provider.label(req.getLocale()), row);
 		} else

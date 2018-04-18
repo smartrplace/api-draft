@@ -1,14 +1,18 @@
 package org.smartrplace.commontypes;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.smartrplace.efficiency.api.base.SmartEffResource;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.smarteff.util.editgeneric.EditPageGeneric;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
+import extensionmodel.smarteff.api.base.SmartEffUserData;
 import extensionmodel.smarteff.api.common.MasterUserData;
 
 public class MasterUserRegistration {
@@ -106,5 +110,26 @@ public class MasterUserRegistration {
 		protected String getHeader(OgemaHttpRequest req) {
 			return getReqData(req).getParent().getParent().getName();
 		}
+		
+		/**************** For Starter page configuration *********
+		 */
+		@Override
+		protected List<EntryType> getEntryTypes() {
+			return null;
+		}
+		protected List<EntryType> getEntryTypesSuper() {
+			return super.getEntryTypes();
+		}
+		
+		@Override
+		protected MasterUserData getReqData(OgemaHttpRequest req) {
+			ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
+			SmartEffUserData userData = ((SmartEffUserData)appData.userData());
+			return userData.masterUserData();
+		}
+		protected MasterUserData getReqDataSuper(OgemaHttpRequest req) {
+			return super.getReqData(req);
+		}
+
 	}
 }
