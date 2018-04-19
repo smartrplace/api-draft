@@ -2,7 +2,6 @@ package org.smartrplace.smarteff.util;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.ogema.core.model.Resource;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
@@ -24,10 +23,10 @@ import org.smartrplace.smarteff.util.button.ProposalProvTableOpenButton;
 import org.smartrplace.smarteff.util.button.ProposalResTableOpenButton;
 import org.smartrplace.smarteff.util.button.ResourceTableOpenButton;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.ValueFormat;
 import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.OgemaWidget;
-import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.button.TemplateRedirectButton;
@@ -75,7 +74,10 @@ public class SPPageUtil {
 				row.addCell(columnId, button);*/
 				TemplateRedirectButton<?> button = vh.linkingButton(columnName, id, null, row, text, pageData.getUrl()+"?configId="+configId);
 				if(controlProvider != null) {
+					//This does not have much effect as the tabButton is used when the page is opened
 					button.setOpenInNewTab(controlProvider.openInNewTab(req), req);
+					//This should work
+					controlProvider.registerRedirectButtonForStateSetting(button);
 				} else {
 					button.setDefaultOpenInNewTab(false);					
 				}
@@ -94,7 +96,7 @@ public class SPPageUtil {
 		if(appData != null) {
 			NavigationPublicPageData pageData = getPageData(appData, object.getResourceType(), PageType.EDIT_PAGE);
 			int size = AddEditButton.getSize(object, appData);
-			String text = getLocaleString(req, AddEditButton.BUTTON_TEXTS);
+			String text = ValueFormat.getLocaleString(req, AddEditButton.BUTTON_TEXTS);
 			return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
 					text+"("+size+")", "Locked", false, PageType.EDIT_PAGE, controlProvider, null, req);
 		} else {
@@ -107,7 +109,7 @@ public class SPPageUtil {
 			ExtensionResourceAccessInitData appData, ButtonControlProvider controlProvider, OgemaHttpRequest req) {
 		if(appData != null) {
 			NavigationPublicPageData pageData = getPageData(appData, object.getResourceType(), PageType.TABLE_PAGE);
-			String text = getLocaleString(req, ResourceTableOpenButton.BUTTON_TEXTS);
+			String text = ValueFormat.getLocaleString(req, ResourceTableOpenButton.BUTTON_TEXTS);
 			int size = ResourceTableOpenButton.getSize(object, appData);
 			return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
 					text+"("+size+")", "No Page", true, PageType.TABLE_PAGE, controlProvider, null, req);
@@ -125,7 +127,7 @@ public class SPPageUtil {
 				return vh.stringLabel("Evaluations", id, "No Providers", row);
 			} else {
 				NavigationPublicPageData pageData = appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.PROPOSALTABLE_PROVIDER));
-				String text = getLocaleString(req, ProposalProvTableOpenButton.BUTTON_TEXTS);
+				String text = ValueFormat.getLocaleString(req, ProposalProvTableOpenButton.BUTTON_TEXTS);
 				int size = ProposalProvTableOpenButton.getSize(object, appData);
 				return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
 						text+"("+size+")", "No BaseEval", true, PageType.TABLE_PAGE, controlProvider, null, req);
@@ -144,7 +146,7 @@ public class SPPageUtil {
 				return vh.stringLabel("Results", id, "No Results", row);
 			} else {
 				NavigationPublicPageData pageData = appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESULTTABLE_PROVIDER));
-				String text = getLocaleString(req, ProposalResTableOpenButton.BUTTON_TEXTS);
+				String text = ValueFormat.getLocaleString(req, ProposalResTableOpenButton.BUTTON_TEXTS);
 				int size = ProposalResTableOpenButton.getSize(object, appData);
 				return addOpenButton(columnName, object, vh, id, row, pageData, appData.systemAccess(),
 						text+"("+size+")", "No BaseResult", true, PageType.TABLE_PAGE, controlProvider, null, req);
@@ -193,11 +195,5 @@ public class SPPageUtil {
 	public static boolean isMulti(Cardinality card) {
 		if(card == Cardinality.MULTIPLE_OPTIONAL || card == Cardinality.MULTIPLE_REQUIRED) return true;
 		return false;
-	}
-
-	private static String getLocaleString(OgemaHttpRequest req, Map<OgemaLocale, String> texts) {
-		String text = texts.get(req.getLocale());
-		if(text == null) return texts.get(OgemaLocale.ENGLISH);
-		return text;
 	}
 }

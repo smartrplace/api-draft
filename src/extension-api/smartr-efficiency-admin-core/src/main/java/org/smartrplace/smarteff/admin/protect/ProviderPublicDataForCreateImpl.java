@@ -36,4 +36,9 @@ public class ProviderPublicDataForCreateImpl implements ProviderPublicDataForCre
 		return inputProvider.label(locale);
 	}
 
+	@Override
+	public List<Class<? extends Resource>> typesListedInTable() {
+		return inputProvider.typesListedInTable();
+	}
+
 }

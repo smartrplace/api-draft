@@ -38,9 +38,21 @@ public class NavigationPageSystemAccessForPageOpening implements ExtensionPageSy
 
 	@Override
 	public List<NavigationPublicPageData> getPages(Class<? extends Resource> type) {
+		return getPages(type, false);
+	}
+
+	@Override
+	public List<NavigationPublicPageData> getPages(Class<? extends Resource> type, boolean includeHidden) {
 		List<NavigationPublicPageData> result = new ArrayList<>();
-		processResultType(result, pageInfo.get(type));
-		processResultType(result, pageInfo.get(Resource.class));
+		if(includeHidden) {
+			List<NavigationPublicPageData> l = pageInfo.get(type);
+			if(l != null) result.addAll(l);
+			l = pageInfo.get(Resource.class);
+			if(l != null) result.addAll(l);
+		} else {
+			processResultType(result, pageInfo.get(type));
+			processResultType(result, pageInfo.get(Resource.class));
+		}
 		return result;
 	}
 	private void processResultType(List<NavigationPublicPageData> result, List<NavigationPublicPageData> resultAll) {

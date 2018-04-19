@@ -1,6 +1,7 @@
 package extensionmodel.smarteff.api.common;
 
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
@@ -38,7 +39,7 @@ public interface BuildingData extends SmartEffResource {
 	
 	/** Only to be provided if different from current building heat source
 	 * 1: L gas
-	 * 1: H gas
+	 * 2: H gas
 	 * 10: oil
 	 * 11: charcoal
 	 * 12: lignite
@@ -48,11 +49,12 @@ public interface BuildingData extends SmartEffResource {
 	 * 21: building-internal heat meter
 	 * 30: heat pump
 	 * 31: night storage heating
-	 * 22: direct electric heating
+	 * 32: direct electric heating
 	 */
 	IntegerResource heatSource();
+	BooleanResource coGeneration();
 
-	ResourceList<HeatCostBillingInfo> billingInfo();
+	ResourceList<HeatCostBillingInfo> heatCostBillingInfo();
 	
 	//TODO: add further elements
 }

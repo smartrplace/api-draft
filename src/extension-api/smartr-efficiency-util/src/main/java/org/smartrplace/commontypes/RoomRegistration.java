@@ -2,7 +2,6 @@ package org.smartrplace.commontypes;
 
 import org.ogema.core.model.units.AreaResource;
 import org.ogema.core.model.units.VolumeResource;
-import org.ogema.model.locations.Room;
 import org.smartrplace.efficiency.api.base.SmartEffResource;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.smarteff.util.editgeneric.EditPageGeneric;

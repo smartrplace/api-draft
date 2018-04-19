@@ -16,11 +16,19 @@ import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.StringResource;
+import org.ogema.core.model.simple.TimeResource;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
+import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
+import org.smartrplace.smarteff.defaultservice.BaseDataService;
 import org.smartrplace.smarteff.util.CapabilityHelper;
 import org.smartrplace.smarteff.util.EditPageBase;
+import org.smartrplace.smarteff.util.SPPageUtil;
+import org.smartrplace.smarteff.util.button.ResourceTableOpenButton;
 import org.smartrplace.smarteff.util.editgeneric.EditLineProvider.ColumnType;
 import org.smartrplace.smarteff.util.editgeneric.EditLineProvider.Visibility;
+import org.smartrplace.util.format.ValueConverter;
 import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -35,6 +43,7 @@ import de.iwes.widgets.html.emptywidget.EmptyWidget;
 import de.iwes.widgets.html.form.button.RedirectButton;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.html.form.textfield.TextField;
+import de.iwes.widgets.resource.widget.calendar.DatepickerTimeResource;
 import de.iwes.widgets.resource.widget.dropdown.ValueResourceDropdown;
 import de.iwes.widgets.resource.widget.textfield.BooleanResourceCheckbox;
 
@@ -66,10 +75,13 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 	Map<String, Map<OgemaLocale, String>> links = new HashMap<>();
 	Map<String, Float> lowerLimits = new HashMap<>();
 	Map<String, Float> upperLimits = new HashMap<>();
-	
 	Map<String, Map<OgemaLocale, Map<String, String>>> displayOptions = new HashMap<>();
+	
 	Map<String, EditLineProvider> providers = new HashMap<>();
+	//Widgets that are governed by an EditLineProvider
 	Map<String, OgemaWidget> labelWidgets = new HashMap<>();
+	//Subs that shall trigger alert2 that triggers all widgets
+	List<String> triggeringSubs = new ArrayList<>();
 	
 	protected boolean defaultIsEditable = true;
 	Map<String, Boolean> isEditable = new HashMap<>();
@@ -106,20 +118,32 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 		}
 		return subTypeMap;
 	}
-	private Class<? extends Resource> getType(String subPath) {
+	class TypeResult {
+		public Class<? extends Resource> type;
+		public TypeResult(Class<? extends Resource> type) {
+			this.type = type;
+		}
+		public Class<? extends Resource> elementType = null;
+	}
+	private TypeResult getType(String subPath) {
 		String[] els = subPath.split("/");
-		Class<? extends Resource> cr = getTypes().get(els[0]);
-		for(int i=1; i<els.length; i++) {
+		Class<? extends Resource> cr = primaryEntryTypeClass();
+		for(int i=0; i<=els.length; i++) {
 			if(cr == null) return null;
-			if(i == (els.length-1)) {
-				return getSubTypes(cr).get(els[i]);
+			if(i == els.length) {
+				if(ResourceList.class.isAssignableFrom(cr)) {
+					TypeResult result = new TypeResult(cr);
+					result.elementType = CapabilityHelper.getTypeFromName(els[i-1], appManExt).dataType();
+					return result;
+				}
+				return new TypeResult(cr);
 			}
 			//we cannot go over ValueResources and ResourceLists here
 			if(ValueResource.class.isAssignableFrom(cr)) throw new IllegalStateException("Path "+subPath+" includes a ValueResouce in middle!");
 			if(ResourceList.class.isAssignableFrom(cr)) throw new IllegalStateException("Path "+subPath+" includes a ResourceList in middle!");
 			cr = getSubTypes(cr).get(els[i]);
 		}
-		if(els.length == 1) return cr;
+		//if(els.length == 1) return new TypeResult(cr);
 		throw new IllegalStateException("we should never get here");		
 	}
 	
@@ -197,6 +221,13 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 		setDisplayOptions(getSubPath(res), locale, options);
 	}
 	
+	protected void setTriggering(String resourceName) {
+		triggeringSubs.add(resourceName);
+	}
+	protected void setTriggering(Resource res) {
+		setTriggering(getSubPath(res));
+	}
+	
 	public void setDefaultLocale(OgemaLocale locale) {
 		localeDefault = locale;
 	}
@@ -215,15 +246,16 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 		}
 		//Map<String, Class<? extends Resource>> types = getTypes();
 		for(String sub: labels.keySet()) {
-			Class<? extends Resource> type = getType(sub);
+			TypeResult type = getType(sub);
 			if(type == null) continue;
-			if(FloatResource.class.isAssignableFrom(type)) {
+			if(FloatResource.class.isAssignableFrom(type.type)) {
 				Float low = lowerLimits.get(sub);
 				Float up = upperLimits.get(sub);
 				float lowv = (low!=null)?up:0;
 				float upv = (up!=null)?up:999999f;
 				FloatResource valRes = res.getSubResource(sub);
-				if((valRes.getValue() < lowv)||(valRes.getValue() > upv)) {
+				float val = valRes.getValue();
+				if(Float.isNaN(val) || (val < lowv)||(val > upv)) {
 					return false;
 				}
 			}
@@ -232,14 +264,14 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 	}
 	
 	@Override
-	protected void getEditTableLines(EditPageBase<T>.EditTableBuilder etb) {
+	protected void getEditTableLines(EditTableBuilder etb) {
 		//Map<String, Class<? extends Resource>> types = getTypes();
 		for(String sub: labels.keySet()) {
 			if(sub.equals(HEADER_LABEL_ID) || sub.equals(HEADER_LINK_ID)) continue;
 			OgemaWidget valueWidget = null;
 			OgemaWidget label = null;
 			OgemaWidget linkButton = null;
-			Class<? extends Resource> type = getType(sub);
+			TypeResult type = getType(sub);
 			if(type == null)
 				continue;
 			
@@ -254,8 +286,15 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 				}
 			}
 			
+			if(label == null) {
+				final Map<OgemaLocale, String> innerMap = labels.get(sub);
+				label = getLabel(sub, innerMap, widgetProvider);
+			}
 			if(valueWidget == null) {
-				valueWidget = createValueWidget(sub, type);
+				if(label instanceof Label)
+					valueWidget = createValueWidget(sub, type, (Label)label);
+				else
+					valueWidget = createValueWidget(sub, type, null);
 				if(valueWidget == null) continue;
 				if(widgetProvider != null) {
 					labelWidgets.put(sub, valueWidget);
@@ -263,18 +302,21 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 				}
 			}
 
-			if(label == null) {
-				final Map<OgemaLocale, String> innerMap = labels.get(sub);
-				label = getLabel(sub, innerMap, widgetProvider);
-			}
 			if(linkButton == null) {
 				final Map<OgemaLocale, String> linkMap = links.get(sub);
 				if((linkMap != null) && (!linkMap.isEmpty())) {
 					linkButton = getLinkButton(sub, linkMap, widgetProvider);
 				}
 			}
-			etb.addEditLine(label, valueWidget, linkButton);
+			if(triggeringSubs.contains(sub)) valueWidget.registerDependentWidget(alert2);
+			performAddEditLine(label, valueWidget, linkButton, sub, type, etb);
 		}
+	}
+	
+	protected void performAddEditLine(OgemaWidget label, OgemaWidget valueWidget, OgemaWidget linkButton,
+			String sub, TypeResult type,
+			EditTableBuilder etb) {
+		etb.addEditLine(label, valueWidget, linkButton);		
 	}
 	
 	@Override
@@ -338,7 +380,7 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 		};
 	}
 	
-	private String getSubPath(Resource res) {
+	protected String getSubPath(Resource res) {
 		return res.getPath().substring(sampleResourceLength);
 	}
 
@@ -402,12 +444,13 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 		else return specific;
 	}
 	
-	protected OgemaWidget createValueWidget(String sub, Class<? extends Resource> type) {
+	protected OgemaWidget createValueWidget(String sub, TypeResult type2,
+			Label labelWidgetForValue) {
 		String subId = WidgetHelper.getValidWidgetId(sub);
-		if(StringResource.class.isAssignableFrom(type)) {
+		if(StringResource.class.isAssignableFrom(type2.type)) {
 			if(isEditable(sub))	return mh.stringEdit(sub, alert);
 			else return mh.stringLabel(sub);
-		} else if(FloatResource.class.isAssignableFrom(type)) {
+		} else if(FloatResource.class.isAssignableFrom(type2.type)) {
 			if(isEditable(sub))	{
 				Float low = lowerLimits.get(sub);
 				Float up = upperLimits.get(sub);
@@ -418,13 +461,13 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 				valueWidget.registerDependentWidget(valueWidget);
 				return valueWidget;
 			} else return mh.floatLabel(sub, "%.2f");
-		} else if(BooleanResource.class.isAssignableFrom(type)) {
+		} else if(BooleanResource.class.isAssignableFrom(type2.type)) {
 			if(isEditable(sub))	{
 				BooleanResourceCheckbox valueWidget = mh.booleanEdit((String)sub);
 				valueWidget.registerDependentWidget(valueWidget);
 				return valueWidget;
 			} else return mh.resourceLabel(sub, 20);
-		} else if(IntegerResource.class.isAssignableFrom(type)) {
+		} else if(IntegerResource.class.isAssignableFrom(type2.type)) {
 			if(isEditable(sub))	{
 				Map<OgemaLocale, Map<String, String>> innerMap = displayOptions.get(sub);
 				if(innerMap != null) {
@@ -478,12 +521,59 @@ public abstract class EditPageGeneric<T extends Resource> extends EditPageBase<T
 					Float up = upperLimits.get(sub);
 					int lowv = (low!=null)?(int)(float)low:0;
 					int upv = (up!=null)?(int)(float)up:999999;
-					TextField valueWidget = mh.integerEdit((String)sub, alert, lowv, upv,
-							sub+" limits:"+lowv+" to "+upv);
+					ValueConverter checker = new ValueConverter(sub, alert, (float)lowv, (float)upv) {
+						@Override
+						protected String getFieldName(OgemaHttpRequest req) {
+							if(labelWidgetForValue != null)
+								return labelWidgetForValue.getText(req);
+							else return sub;
+						}
+					};
+					TextField valueWidget = mh.integerEditExt((String)sub, checker);
 					valueWidget.registerDependentWidget(valueWidget);
 					return valueWidget;
 				}
 			} else return mh.intLabel(sub, 0);
+		} else if(TimeResource.class.isAssignableFrom(type2.type)) {
+			if(isEditable(sub))	{
+				final String format;
+				if(sub.contains("Day")) format = "YYYY-MM-DD";
+				else format = "YYYY-MM-DD HH:mm:ss";
+				DatepickerTimeResource valueWidget = mh.datepicker((String)sub, format, (String)null, (String)null);
+				valueWidget.registerDependentWidget(valueWidget);
+				return valueWidget;
+			} else return mh.timeLabel(sub, 0);
+		} else if(ResourceList.class.isAssignableFrom(type2.type)) {
+			if(isEditable(sub))	{
+				RedirectButton valueWidget = new ResourceTableOpenButton(page, "open_"+sub, pid(), exPage, null) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
+							Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
+						List<NavigationPublicPageData> provs = appData.systemAccessForPageOpening().
+								getPages(primaryEntryTypeClass(), true);
+						String url = null;
+						for(NavigationPublicPageData p: provs) {
+							if((p.typesListedInTable() != null) &&
+									p.typesListedInTable().contains(type2.elementType)) {
+								url = p.getUrl();
+								break;
+							}
+						}
+						//TODO: In this case we have to inject the type into configInfo
+						if(url == null) url = SPPageUtil.getProviderURL(BaseDataService.RESBYTYPE_PROVIDER);
+						return appData.systemAccessForPageOpening().getPageByProvider(url);//super.getPageData(appData, type, typeRequested);
+					}
+					
+					@Override
+					protected Object getContext(ExtensionResourceAccessInitData appData, Resource object) {
+						return object.getResourceType().getName();
+					}
+				};
+				valueWidget.registerDependentWidget(valueWidget);
+				return valueWidget;
+			} else return new Label(page, "noEdit_"+sub, "Not Allowed");
 		} else {
 			return null;
 		}

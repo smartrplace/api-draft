@@ -28,7 +28,7 @@ public class BuildingExampleAnalysis extends ProjectProviderBase<BuildingData> {
 		
 		float yearlykWh;
 		float yearlyCost;
-		if(input.billingInfo().isActive()) {
+		if(input.heatCostBillingInfo().isActive()) {
 			//Calculate yearly energy consumption based on billing info
 			throw new UnsupportedOperationException("BillingInfo usage not implemented yet");
 		} else {

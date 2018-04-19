@@ -35,6 +35,7 @@ public abstract class NaviPageBase<T extends Resource>  {
 		return PagePriority.STANDARD;
 	}
 	protected String getMaintainer() { return null;}
+	protected List<Class<? extends Resource>> typesListedInTable() {return null;}
 
 	protected EditPage editPage;
 	public final Provider provider;	
@@ -42,6 +43,8 @@ public abstract class NaviPageBase<T extends Resource>  {
 	protected ApplicationManagerSPExt appManExt;
 	protected ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
 	protected WidgetPage<?> page;
+	
+	public boolean providerInitDone = false;
 
 	public NaviPageBase() {
 		this.provider = new Provider();
@@ -72,7 +75,7 @@ public abstract class NaviPageBase<T extends Resource>  {
 	}
 	
 	public class Provider implements NavigationGUIProvider {
-		//private Resource generalData;	
+		//private Resource generalData;
 	
 		@Override
 		public String label(OgemaLocale locale) {
@@ -94,6 +97,7 @@ public abstract class NaviPageBase<T extends Resource>  {
 			//Label test = new Label(page.page, "test", "Hello World!");
 			//page.page.append(test);
 			editPage = new EditPage(page, appManExt);
+			providerInitDone = true;
 		}
 	
 		@Override
@@ -114,6 +118,11 @@ public abstract class NaviPageBase<T extends Resource>  {
 		@Override
 		public String userName() {
 			return NaviPageBase.this.getMaintainer();
+		}
+		
+		@Override
+		public List<Class<? extends Resource>> typesListedInTable() {
+			return NaviPageBase.this.typesListedInTable();
 		}
 	}
 	

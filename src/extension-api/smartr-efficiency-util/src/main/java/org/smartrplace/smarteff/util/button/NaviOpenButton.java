@@ -26,6 +26,7 @@ public class NaviOpenButton extends RedirectButton {
 	protected final PageType pageType;
 	//doCreate only relevant for pageType EDIT
 	protected final boolean doCreate;
+	protected Object getContext(ExtensionResourceAccessInitData appData, Resource object) {return null;}
 	
 	protected final ButtonControlProvider controlProvider;
 	
@@ -82,13 +83,13 @@ public class NaviOpenButton extends RedirectButton {
 		if(controlProvider != null) {
 			setOpenInNewTab(controlProvider.openInNewTab(req), req);
 		}
-		super.onPrePOST(data, req);
 
 		ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
 		final Resource object = getResource(appData, req);
 		final Class<? extends Resource> type = getEntryType(appData, req);
 		NavigationPublicPageData pageData = getPageData(appData, type, pageType, req);
-		final String configId = getConfigId(pageType, object, appData.systemAccessForPageOpening(), pageData, doCreate, type); //type(appData, req)
+		final String configId = getConfigId(pageType, object, appData.systemAccessForPageOpening(),
+				pageData, doCreate, type, getContext(appData, object)); //type(appData, req)
 		if(configId.startsWith(CapabilityHelper.ERROR_START)) setUrl("error/"+configId, req);
 		else setUrl(pageData.getUrl()+"?configId="+configId, req);
 	}
@@ -106,19 +107,25 @@ public class NaviOpenButton extends RedirectButton {
 	protected String getConfigId(PageType pageType, Resource object,
 			ExtensionPageSystemAccessForPageOpening systemAccess,
 			NavigationPublicPageData pageData, boolean doCreate,
-			Class<? extends Resource> type) {
+			Class<? extends Resource> type, Object context) {
 		if((this instanceof CreateButtonI) && doCreate) { //if((pageType == PageType.EDIT_PAGE) && doCreate) {
 			return ((ExtensionPageSystemAccessForCreate)systemAccess).accessCreatePage(pageData, SPPageUtil.getEntryIdx(pageData, type),
 				object);
 		} else {
 			if(object == null)  {
-				return systemAccess.accessPage(pageData, -1, null);			
+				return systemAccess.accessPage(pageData, -1, null, context);			
 			}
 			else {
 				return systemAccess.accessPage(pageData, SPPageUtil.getEntryIdx(pageData, type),
-						Arrays.asList(new Resource[]{object}));			
+						Arrays.asList(new Resource[]{object}), context);			
 			}
 		}
 		
 	}
+	
+	//This does not make sense for a RedirectButton
+	@Override
+	public void registerDependentWidget(OgemaWidget other) {}
+	@Override
+	public void registerDependentWidget(OgemaWidget other, OgemaHttpRequest req) {}
 }

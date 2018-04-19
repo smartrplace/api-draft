@@ -17,16 +17,17 @@ public class AddEntryButton extends NaviOpenButton implements CreateButtonI {
 	
 	public AddEntryButton(WidgetPage<?> page, String id, String pid, String text,
 			Class<? extends Resource> type,
-			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage) {
-		super(page, id, pid, text, exPage, PageType.EDIT_PAGE, true, null);
+			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage,
+			ButtonControlProvider tabButton) {
+		super(page, id, pid, text, exPage, PageType.EDIT_PAGE, true, tabButton);
 		this.type = type;
 	}
 	
 	public AddEntryButton(OgemaWidget parent, String id, String pid, String text,
 			Class<? extends Resource> type,
 			ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage,
-			OgemaHttpRequest req) {
-		super(parent, id, pid, text, exPage, PageType.EDIT_PAGE, true, null, req);
+			ButtonControlProvider tabButton, OgemaHttpRequest req) {
+		super(parent, id, pid, text, exPage, PageType.EDIT_PAGE, true, tabButton, req);
 		this.type = type;
 	}
 

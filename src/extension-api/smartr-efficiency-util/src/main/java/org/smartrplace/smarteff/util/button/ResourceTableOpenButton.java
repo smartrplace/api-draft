@@ -91,8 +91,8 @@ public class ResourceTableOpenButton extends TableOpenButton {
 	public void onGET(OgemaHttpRequest req) {
 		super.onGET(req);
 		ExtensionResourceAccessInitData appData = exPage.getAccessData(req);
-		Resource parent = getResource(appData, req);
-		if(parent == null) {
+		Resource destination = getResource(appData, req);
+		if(destination == null) {
 			disable(req);
 			setText("--", req);
 			return;
@@ -103,7 +103,7 @@ public class ResourceTableOpenButton extends TableOpenButton {
 			if(!(r instanceof ValueResource)) result.add(r);
 		}*/
 
-		int size = getSize(parent, appData);
+		int size = getSize(destination, appData);
 		String text;
 		if(isUp) {
 			text = UPBUTTON_TEXTS.get(req.getLocale());

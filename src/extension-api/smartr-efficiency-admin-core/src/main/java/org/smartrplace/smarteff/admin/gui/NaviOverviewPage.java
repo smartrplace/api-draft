@@ -5,9 +5,7 @@ import java.util.Collection;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.TimeResource;
-import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
-import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI;
 import org.smartrplace.smarteff.admin.SpEffAdminController;
 import org.smartrplace.smarteff.admin.object.NavigationPageData;
 import org.smartrplace.smarteff.util.SPPageUtil;
@@ -19,9 +17,9 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.button.Button;
+import de.iwes.widgets.html.form.button.TemplateRedirectButton;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.resource.widget.textfield.ValueResourceTextField;
-import extensionmodel.smarteff.api.base.SmartEffUserDataNonEdit;
 
 /** Page that shows all Navi-pages in the system and allows to open top-level pages directly*/
 public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Resource> {
@@ -66,7 +64,8 @@ public class NaviOverviewPage extends ObjectGUITablePage<NavigationPageData, Res
 		//ExtensionResourceAccessInitData systemAccess = app.getUserAdmin().getAccessData(null, req, object.provider);
 		//SPPageUtil.addOpenButton("Open", null, null, vh, id, row, object, systemAccess.systemAccess(), "Open", "--");
 		if(object.provider.getEntryTypes() == null) {
-			vh.linkingButton("Open", id, null, row, "Open", object.url);
+			TemplateRedirectButton<NavigationPageData> but = vh.linkingButton("Open", id, null, row, "Open", object.url);
+			but.setDefaultOpenInNewTab(false);
 			if(req != null) {
 				Button favoriteButton = new Button(vh.getParent(), "favoriteButton"+id, "Add to Favourites", req) {
 					private static final long serialVersionUID = 8917341845056555889L;

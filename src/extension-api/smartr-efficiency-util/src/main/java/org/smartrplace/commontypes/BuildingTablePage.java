@@ -12,11 +12,13 @@ import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.smarteff.util.NaviPageBase;
 import org.smartrplace.smarteff.util.SPPageUtil;
 import org.smartrplace.smarteff.util.button.AddEntryButton;
+import org.smartrplace.smarteff.util.button.TabButton;
 import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directresourcegui.GUIHelperExtension;
 import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
 import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
 
+import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
@@ -35,6 +37,7 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 	public class TablePage extends ResourceGUITablePage<BuildingData> {
 		//private final ApplicationManagerMinimal appManMin;
 		private ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage;
+		protected TabButton tabButton;
 		
 		public TablePage(ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData> exPage, ApplicationManagerMinimal appManMin) {
 			super(exPage.getPage(), null, appManMin, BuildingData.class, false);
@@ -51,10 +54,10 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 
 			vh.stringLabel("Name", id, ResourceUtils.getHumanReadableName(object), row);
 			vh.floatLabel("Heated Area", id, object.heatedLivingSpace(), row, "%.0f m2");
-			SPPageUtil.addResEditOpenButton("Edit", object, vh, id, row, appData, null, req);
-			SPPageUtil.addResTableOpenButton("Open", object, vh, id, row, appData, null, req);
+			SPPageUtil.addResEditOpenButton("Edit", object, vh, id, row, appData, (tabButton!=null)?tabButton.control:null, req);
+			SPPageUtil.addResTableOpenButton("Open", object, vh, id, row, appData, (tabButton!=null)?tabButton.control:null, req);
 			if(object.isActive()) {
-				SPPageUtil.addProviderTableOpenButton("Evaluations", object, vh, id, row, appData, null, req);
+				SPPageUtil.addProviderTableOpenButton("Evaluations", object, vh, id, row, appData, (tabButton!=null)?tabButton.control:null, req);
 				//TableOpenButton proposalTableOpenButton = new StandardProposalTableOpenButton(vh.getParent(), "proposalTableOpenButton", pid(), "Proposal providers", object.getResourceType(), exPage, req);
 				//row.addCell("Evaluations", proposalTableOpenButton);
 			} else
@@ -65,14 +68,17 @@ public class BuildingTablePage extends NaviPageBase<BuildingData> {
 
 		@Override
 		public void addWidgetsAboveTable() {
-			RedirectButton addEntry = new AddEntryButton(page, "addEntry", pid(), "Add Building", BuildingData.class, exPage) {
+			tabButton = new TabButton(page, "tabButton", pid());
+			RedirectButton addEntry = new AddEntryButton(page, "addEntry", pid(), "Add Building", BuildingData.class, exPage, tabButton.control) {
 				private static final long serialVersionUID = 1L;
 				@Override
 				protected Resource getResource(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {
 					return appData.userData();
 				}
 			};
-			page.append(addEntry);
+			StaticTable topTable = new StaticTable(1, 2, new int[]{10,2});
+			topTable.setContent(0, 0, addEntry).setContent(0, 1, tabButton);
+			page.append(topTable);
 			exPage.registerDependentWidgetOnInit(mainTable);
 		}
 		

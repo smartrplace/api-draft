@@ -10,6 +10,7 @@ import org.ogema.core.application.Application.AppStopReason;
 import org.ogema.core.model.Resource;
 import org.smartrplace.commontypes.BuildingEditPage;
 import org.smartrplace.commontypes.BuildingTablePage;
+import org.smartrplace.commontypes.HeatBillRegistration;
 import org.smartrplace.commontypes.MasterUserRegistration;
 import org.smartrplace.commontypes.RoomRegistration;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
@@ -18,11 +19,14 @@ import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.smarteff.util.NaviPageBase;
+import org.smartrplace.smarteff.util.editgeneric.EditPageGenericWithTable;
+import org.smartrplace.smarteff.util.editgeneric.GenericResourceByTypeTablePageBase;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import extensionmodel.smarteff.api.base.SmartEffGeneralData;
 import extensionmodel.smarteff.api.base.SmartEffPriceData;
 import extensionmodel.smarteff.api.common.BuildingData;
+import extensionmodel.smarteff.api.common.HeatCostBillingInfo;
 import extensionmodel.smarteff.defaultproposal.BuildingExampleAnalysis;
 import extensionmodel.smarteff.defaultproposal.DefaultProviderParamsPage;
 
@@ -83,7 +87,12 @@ public class BaseDataService implements SmartEffExtensionService {
 	public final static NaviPageBase<Resource>.Provider RESOURCEALL_NAVI_PROVIDER = new ResourceAllTablePage().provider;
 	public final static NaviPageBase<Resource>.Provider PROPOSALTABLE_PROVIDER = new ProposalProvTablePage().provider;
 	public final static NaviPageBase<Resource>.Provider RESULTTABLE_PROVIDER = new ResultTablePage().provider;
+	//This one opens as start page (shows alls resources of type in UserData)
 	public final static NaviPageBase<Resource>.Provider RESBYTYPE_PROVIDER = new ResourceByTypeTablePage().provider;
+	//This one opens for a certain resources, requires a resource as entry point
+	public final static NaviPageBase<Resource>.Provider RESBYTYPE_ENTRYPOINT_PROVIDER = new GenericResourceByTypeTablePageBase<Resource>().provider;
+	public final static EditPageGenericWithTable<HeatCostBillingInfo> BILLEDIT = new HeatBillRegistration.EditPage();
+	public final static GenericResourceByTypeTablePageBase<HeatCostBillingInfo> BILLTABLE = BILLEDIT.getTablePage();
 	//public final static NaviPageBase<DefaultProviderParams>.Provider BA_PARAMSEDIT_PROVIDER = new DefaultProviderParamsPage().provider;
 	//public final static NaviPageBase<Resource>.Provider TOPCONFIG_NAVI_PROVIDER = new TopConfigTablePage().provider;
 	public BuildingExampleAnalysis BUILDINGANALYSIS_PROVIDER;
@@ -103,7 +112,8 @@ public class BaseDataService implements SmartEffExtensionService {
 				PROPOSALTABLE_PROVIDER, RESULTTABLE_PROVIDER, new TopConfigTablePage().provider,
 				BUILDINGANALYSIS_PROVIDER, new DefaultProviderParamsPage().provider,
 				new MasterUserRegistration.EditPage().provider, new RoomRegistration.EditPage().provider,
-				RESBYTYPE_PROVIDER});
+				RESBYTYPE_PROVIDER, RESBYTYPE_ENTRYPOINT_PROVIDER,
+				BILLEDIT.provider, BILLTABLE.provider});
 	}
 
 	@Override
@@ -116,6 +126,7 @@ public class BaseDataService implements SmartEffExtensionService {
 		if(BUILDINGANALYSIS_PROVIDER.getParamTypeDeclaration() != null) result.add(BUILDINGANALYSIS_PROVIDER.getParamTypeDeclaration());
 		result.add(new MasterUserRegistration.TypeDeclaration());
 		result.add(new RoomRegistration.TypeDeclaration());
+		result.add(new HeatBillRegistration.TypeDeclaration());
 		return result ;
 	}
 }

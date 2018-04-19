@@ -9,6 +9,8 @@ import org.smartrplace.extensionservice.gui.NavigationPublicPageData;
 
 public interface ExtensionPageSystemAccessForPageOpening {
 	List<NavigationPublicPageData> getPages(Class<? extends Resource> type);
+	List<NavigationPublicPageData> getPages(Class<? extends Resource> type, boolean includeHidden);
+
 	NavigationPublicPageData getMaximumPriorityPage(Class<? extends Resource> type, PageType pageType);
 	List<NavigationPublicPageData> getStartPages();
 	

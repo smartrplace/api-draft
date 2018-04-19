@@ -47,6 +47,16 @@ public class CapabilityHelper {
 		return ValueFormat.firstLowerCase(type.getSimpleName());		
 	}
 	
+	public static ExtensionResourceTypeDeclaration<?> getTypeFromName(String elementName, ApplicationManagerSPExt appManExt) {
+		final String nameToUse;
+		if(elementName.startsWith("default")) nameToUse = ValueFormat.firstUpperCase(elementName.substring(7));
+		else  nameToUse = ValueFormat.firstUpperCase(elementName);
+		for(ExtensionResourceTypeDeclaration<?> decl: appManExt.getAllTypeDeclararions()) {
+			if(decl.dataType().getSimpleName().equals(nameToUse)) return decl;
+		}
+		return null;
+	}
+	
 	@SafeVarargs
 	public static List<EntryType> getStandardEntryTypeList(Class<? extends Resource>... types) {
 		List<EntryType> result = new ArrayList<>();

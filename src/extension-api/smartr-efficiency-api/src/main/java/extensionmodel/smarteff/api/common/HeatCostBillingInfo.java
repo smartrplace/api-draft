@@ -9,17 +9,19 @@ public interface HeatCostBillingInfo extends SmartEffResource {
 	/** 1: gas in m3
 	 *  2: oil in l
 	 *  3: solid fuel in kg
-	 *  3: kWh (input, for heat pump this would be electricity)
-	 *  4: kWh heat measured for heat pump
+	 *  4: kWh (input, for heat pump this would be electricity)
+	 *  5: kWh heat measured for heat pump
 	 */
 	IntegerResource unit();
 	
 	/** Only to be provided if different from current building heat source
 	 * see {@link BuildingData#heatSource()}
+	 * Negative or zero values indicate that not used.
 	 */
 	IntegerResource heatSource();
 
-	TimeResource beginningOfBillingPeriod();
-	TimeResource endOfBillingPeriod();
+	TimeResource beginningOfBillingPeriodDay();
+	TimeResource endOfBillingPeriodDay();
 	FloatResource billedConsumption();
+	FloatResource cost();
 }

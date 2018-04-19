@@ -37,15 +37,15 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		super();
 	}
 	
-	private class EditElement {
+	public class EditElement {
 		//Exactly one of the following should be non-null
-		String title;
-		OgemaWidget widgetForTitle;
+		public String title;
+		public OgemaWidget widgetForTitle;
 		
 		//Exactly one of the following should be non-null
-		OgemaWidget widget;
-		String stringForWidget;
-		OgemaWidget decriptionLink = null;
+		public OgemaWidget widget;
+		public String stringForWidget;
+		public OgemaWidget decriptionLink = null;
 		
 		public EditElement(String title, OgemaWidget widget) {
 			this.title = title;
@@ -64,7 +64,7 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		}
 	}
 	public class EditTableBuilder {
-		List<EditElement> editElements = new ArrayList<>();
+		public List<EditElement> editElements = new ArrayList<>();
 		public void addEditLine(String title, OgemaWidget widget) {
 			editElements.add(new EditElement(title, widget));
 		}
@@ -100,6 +100,12 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		page.append(alert);
 		registerWidgetsAboveTable();
 		
+		
+		buildMainTable();
+		
+	}
+	
+	protected void buildMainTable() {
 		Button activateButton = new Button(page, "activateButton", "activate") {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -121,8 +127,8 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 			}
 		};
 		activateButton.registerDependentWidget(activateButton);
-		
-		EditPageBase<T>.EditTableBuilder etb = new EditTableBuilder();
+
+		EditTableBuilder etb = new EditTableBuilder();
 		getEditTableLines(etb);
 
 		StaticTable table = new StaticTable(etb.editElements.size()+1, 4, new int[]{1,5,5,1});
@@ -142,30 +148,8 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 				throw new IllegalStateException("Something went wrong with building the edit line "+c+" Obj:"+etl);
 			c++;
 		}
-		/*ExtensionResourceTypeDeclaration<T> parentDecl = appManExt.getTypeDeclaration(primaryEntryTypeClass());
-		Class<? extends T> parentType = null;
-		if(parentDecl != null) {
-			if(SPPageUtil.isMulti(parentDecl.cardinality())) parentType = primaryEntryTypeClass();
-			else parentType = parentDecl.parentType();
-		}
-		if(parentType != null) {*/
-		TableOpenButton tableButton = new BackButton(page, "addEntry", pid(), exPage, null);
-		/*new ResourceTableOpenButton(page, "addEntry", pid(), exPage, null) {
-			private static final long serialVersionUID = 1L;
-			@Override
-			protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
-					Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
-				return appData.getConfigInfo().lastPage;
-			}
-			@Override
-			protected Resource getResource(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {
-				return appData.getConfigInfo().lastPrimaryResource;
-			}
-		};*/
+		TableOpenButton tableButton = new BackButton(page, "back", pid(), exPage, null);
 		table.setContent(c, 0, activateButton).setContent(c, 1, tableButton);
-		//} else {
-		//	table.setContent(c, 0, activateButton).setContent(c, 1, "No parent");
-		//}
 		TableOpenButton proposalTableOpenButton = new ProposalProvTableOpenButton(page, "proposalTableOpenButton", pid(), exPage, null);
 		table.setContent(c, 2, proposalTableOpenButton);
 
