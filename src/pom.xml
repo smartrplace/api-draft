@@ -37,6 +37,7 @@
 		<module>driver-concepts-sp</module>
 		<module>example-apps</module> 
 		<module>extension-api</module>
+		<module>util-public</module>
     </modules>
 
     <build>
