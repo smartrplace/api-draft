@@ -49,16 +49,6 @@ public class TypeAdministration {
     	}
 	}
 
-	/*@SuppressWarnings("unchecked")
-	public List<EntryType> getStandardEntryTypeList(Class<? extends Resource>... types) {
-		List<EntryType> result = new ArrayList<>();
-		for(Class<? extends Resource> t: types) {
-			EntryType r = getEntryType(resourceTypes.get(t).typeDeclaration);
-			result.add(r);
-		}
-		return result ;
-	}*/
-	
 	public void registerElement(Resource res) {
 		SmartrEffExtResourceTypeData data = resourceTypes.get(res.getResourceType());
 		if(data == null) return;

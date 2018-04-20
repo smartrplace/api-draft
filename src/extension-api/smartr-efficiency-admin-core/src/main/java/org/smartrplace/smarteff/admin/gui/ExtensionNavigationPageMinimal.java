@@ -1,5 +1,7 @@
 package org.smartrplace.smarteff.admin.gui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
@@ -19,6 +21,7 @@ implements ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAc
 	private final WidgetPage<?> page;
 	private final UserAdmin userAdmin;
 	//private final String userName;
+	private final List<InitListener> initListeners = new ArrayList<>();
 
 	@Override
 	public void finalize(StaticTable table) {
@@ -31,6 +34,12 @@ implements ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAc
 
 	@Override
 	public void registerDependentWidgetOnInit(OgemaWidget widget) {}
+
+	
+	@Override
+	public void registerInitExtension(InitListener initListener) {
+		initListeners.add(initListener);
+	}
 
 	@Override
 	public void registerAppTableWidgetsDependentOnInit(StaticTable table) {}

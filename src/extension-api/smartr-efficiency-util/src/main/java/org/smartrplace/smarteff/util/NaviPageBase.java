@@ -37,7 +37,7 @@ public abstract class NaviPageBase<T extends Resource>  {
 	protected String getMaintainer() { return null;}
 	protected List<Class<? extends Resource>> typesListedInTable() {return null;}
 
-	protected EditPage editPage;
+	protected EditPage editOrTablePage;
 	public final Provider provider;	
 
 	protected ApplicationManagerSPExt appManExt;
@@ -96,7 +96,7 @@ public abstract class NaviPageBase<T extends Resource>  {
 				(ExtensionNavigationPageI<SmartEffUserDataNonEdit, ExtensionResourceAccessInitData>) pageIn;
 			//Label test = new Label(page.page, "test", "Hello World!");
 			//page.page.append(test);
-			editPage = new EditPage(page, appManExt);
+			editOrTablePage = new EditPage(page, appManExt);
 			providerInitDone = true;
 		}
 	

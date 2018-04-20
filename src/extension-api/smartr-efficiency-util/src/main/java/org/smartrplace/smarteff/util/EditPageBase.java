@@ -8,6 +8,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.model.prototypes.Data;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
+import org.smartrplace.extensionservice.gui.ExtensionNavigationPageI.InitListener;
 import org.smartrplace.extensionservice.gui.NavigationGUIProvider.PageType;
 import org.smartrplace.smarteff.util.button.BackButton;
 import org.smartrplace.smarteff.util.button.ProposalProvTableOpenButton;
@@ -110,9 +111,15 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		page.append(alert);
 		registerWidgetsAboveTable();
 		
-		
 		buildMainTable();
 		
+		exPage.registerInitExtension(new InitListener() {
+			@Override
+			public void onInitComplete(OgemaHttpRequest req) {
+				T data = getReqData(req);
+				checkResource(data);
+			}
+		});
 	}
 	
 	protected void buildMainTable() {

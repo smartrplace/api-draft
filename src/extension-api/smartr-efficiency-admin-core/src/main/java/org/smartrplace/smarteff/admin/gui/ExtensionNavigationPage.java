@@ -1,5 +1,6 @@
 package org.smartrplace.smarteff.admin.gui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,8 @@ public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit
 	public final TemplateInitSingleEmpty<C> init;
 	protected void init(OgemaHttpRequest req) {};
 	protected abstract  C getItemById(String configId, OgemaHttpRequest req);
-
+	private final List<InitListener> initListeners = new ArrayList<>();
+	
 	public ExtensionNavigationPage(final WidgetPage<?> page, String url, String overviewUrl,
 			String providerId) {
 		this.page = page;
@@ -58,10 +60,13 @@ public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit
 						}
 					}
 				}
-				if (res == null)
+				if (res == null) {
+					for(InitListener il: initListeners) il.onInitComplete(req);
 					return;
+				}
 				getData(req).selectItem(res);
 				ExtensionNavigationPage.this.init(req);
+				for(InitListener il: initListeners) il.onInitComplete(req);
 			}
 			@Override
 			protected C getItemById(String configId) {
@@ -85,6 +90,11 @@ public abstract class ExtensionNavigationPage<T extends ExtensionUserDataNonEdit
 		return page;
 	}
 	
+	@Override
+	public void registerInitExtension(InitListener initListener) {
+		initListeners.add(initListener);
+	}
+
 	@Override
 	public void registerDependentWidgetOnInit(OgemaWidget widget) {
 		init.registerDependentWidget(widget);

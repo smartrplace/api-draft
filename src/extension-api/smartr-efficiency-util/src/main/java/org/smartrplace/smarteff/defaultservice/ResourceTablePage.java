@@ -27,6 +27,7 @@ import org.smartrplace.smarteff.util.button.AddEntryButton;
 import org.smartrplace.smarteff.util.button.ButtonControlProvider;
 import org.smartrplace.smarteff.util.button.ProposalProvTableOpenButton;
 import org.smartrplace.smarteff.util.button.ProposalResTableOpenButton;
+import org.smartrplace.smarteff.util.button.ResourceOfTypeTableOpenButton;
 import org.smartrplace.smarteff.util.button.ResourceTableOpenButton;
 import org.smartrplace.smarteff.util.button.TabButton;
 import org.smartrplace.smarteff.util.button.TableOpenButton;
@@ -240,7 +241,18 @@ public class ResourceTablePage extends NaviPageBase<Resource> {
 		} else {
 			vh.registerHeaderEntry("Name");
 			vh.registerHeaderEntry("Edit");
-			vh.registerHeaderEntry("Open");
+			ExtensionResourceTypeDeclaration<? extends Resource> decl = appManExt.getTypeDeclaration(object.getResourceType());
+			if(req != null && decl != null && SPPageUtil.isMulti(decl.cardinality())) {
+				ResourceOfTypeTableOpenButton openButton = new ResourceOfTypeTableOpenButton(vh.getParent(), "ResourceOfTypeTableButton", pid, exPage, tabController, req) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					protected Class<? extends Resource> typeToOpen(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {
+						return object.getResourceType();
+					}
+				};
+				row.addCell("Open", openButton);
+			} else vh.registerHeaderEntry("Open");
 			vh.registerHeaderEntry("Evaluations");
 			vh.registerHeaderEntry("Delete");
 			if(req != null) {

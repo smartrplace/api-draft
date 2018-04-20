@@ -16,6 +16,11 @@ public interface ExtensionNavigationPageI<T extends ExtensionUserDataNonEdit, C 
 	
 	public WidgetPage<?> getPage();
 	
+	public static interface InitListener {
+		void onInitComplete(OgemaHttpRequest req);
+	}
+	public void registerInitExtension(InitListener initListener);
+	
 	public void registerDependentWidgetOnInit(OgemaWidget widget);
 
 	public void registerAppTableWidgetsDependentOnInit(StaticTable table);

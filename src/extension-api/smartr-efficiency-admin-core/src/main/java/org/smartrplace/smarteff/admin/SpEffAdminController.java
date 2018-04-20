@@ -138,7 +138,7 @@ public class SpEffAdminController {
     }
 
 	/** Here the action is performed without checking user permissions*/
-	public <T extends SmartEffResource> T addResource(SmartEffResource parent,
+	/*public <T extends SmartEffResource> T addResource(SmartEffResource parent,
 			String name, Class<T> type, SmartEffUserDataNonEdit userData, NavigationGUIProvider entryProvider) {
 		T result = parent.getSubResource(name, type);
 		result.create();
@@ -146,7 +146,7 @@ public class SpEffAdminController {
 		SmartrEffExtResourceTypeData rtd = typeAdmin.resourceTypes.get(type);
 		rtd.registerElement(result);
 		return result;
-	}
+	}*/
 	public void removeResource(SmartEffResource object) {
 		// TODO Auto-generated method stub
 		
