@@ -5,9 +5,11 @@ import java.util.Map;
 
 import org.ogema.core.model.simple.IntegerResource;
 import org.smartrplace.smarteff.util.editgeneric.EditLineProvider;
+import org.smartrplace.smarteff.util.editgeneric.EditLineProviderDisabling;
 import org.smartrplace.smarteff.util.editgeneric.EditPageGeneric;
 import org.smartrplace.util.format.ValueConverter;
 
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -22,6 +24,8 @@ public class BuildingEditPage extends EditPageGeneric<BuildingData> {
 	
 	public static final Map<String, String> HEATTYPEMAP_EN = new HashMap<>();
 	public static final Map<String, String> HEATTYPEMAP_DE = new HashMap<>();
+	public static final Map<String, String> RECSTATMAP_EN = new HashMap<>();
+	public static final Map<String, String> RECSTATMAP_DE = new HashMap<>();
 
 	static {
 		BTYPEMAP_EN.put("1", "single family home (SFH)");
@@ -75,6 +79,12 @@ public class BuildingEditPage extends EditPageGeneric<BuildingData> {
 	    HEATTYPEMAP_DE.put("31", "Nachtspeicherheizung");
 	    HEATTYPEMAP_DE.put("32", "Elektro-Direktheizung");
 
+		RECSTATMAP_EN.put("1", "Not reconstructed");
+		RECSTATMAP_EN.put("2", "Partially reconstructed");
+		RECSTATMAP_EN.put("3", "Fully reconstructed to the state-of-the-art of the year of reconstruction");
+		RECSTATMAP_DE.put("1", "nicht saniert");
+		RECSTATMAP_DE.put("2", "teilsaniert");
+		RECSTATMAP_DE.put("3", "vollsaniert auf den Stand der Technik des Sanierungsjahres");
 	}
 	
 	@Override
@@ -89,6 +99,9 @@ public class BuildingEditPage extends EditPageGeneric<BuildingData> {
 		setDisplayOptions(sr.typeOfUser(), EN, USERTYPEMAP_EN);
 		setDisplayOptions(sr.typeOfUser(), DE, USERTYPEMAP_DE);
 		
+		// Example how to insert a special widget into the automated generated page
+		// In this case also the standard intEdit could be generated and an EditLineProviderDisabling
+		// be set, see provider for yearOfReconstruction below
 		ValueConverter checker = new ValueConverter("numberOfUnitsInBuilding", alert, 1f, 99999f);
 		TextField numberOfUnitsInBuildingEdit = new TextField(page, "numberOfUnitsInBuildingEdit") {
 			private static final long serialVersionUID = 1L;
@@ -120,7 +133,7 @@ public class BuildingEditPage extends EditPageGeneric<BuildingData> {
 				}
 			}
 		};
-		//Dependency is registered automatically
+		//Dependency is registered automatically for all widgets
 		//numberOfUnitsInBuildingEdit.registerDependentWidget(checker.getAlert());
 		EditLineProvider nrRoomProv = new EditLineProvider() {
 			@Override
@@ -142,6 +155,21 @@ public class BuildingEditPage extends EditPageGeneric<BuildingData> {
 		setDisplayOptions(sr.address().country(), EN, MasterUserRegistration.COUNTRYMAP_EN);
 		setDisplayOptions(sr.address().country(), DE, MasterUserRegistration.COUNTRYMAP_DE);
 
+		setLabel(sr.yearOfConstruction(), EN, "Year of construction", DE, "Baujahr");
+		setLabel(sr.reconstructionStatus(), EN, "The building was", DE, "Das Gebäude wurde");
+		setTriggering(sr.reconstructionStatus());
+		setDisplayOptions(sr.reconstructionStatus(), EN, RECSTATMAP_EN);
+		setDisplayOptions(sr.reconstructionStatus(), DE, RECSTATMAP_DE);
+		setLabel(sr.yearOfReconstruction(), EN, "in year", DE, "im Jahr");
+		setLineProvider(sr.yearOfReconstruction(), new EditLineProviderDisabling() {
+			@Override
+			protected boolean enable(OgemaHttpRequest req) {
+				BuildingData res = getReqData(req);
+				if(res.reconstructionStatus().getValue() < 2) return false;
+				return true;
+			}
+		});
+		
 		setLabel(sr.heatedLivingSpace(), EN, "Heated Ground Floor in sqm", DE, "Beheizte Fläche m2");
 		setLabel(sr.heatSource(), EN, "Type of Heating", DE, "Art der Heizung");
 		setDisplayOptions(sr.heatSource(), EN, HEATTYPEMAP_EN);
@@ -158,5 +186,21 @@ public class BuildingEditPage extends EditPageGeneric<BuildingData> {
 	@Override //optional
 	public String label(OgemaLocale locale) {
 		return "Standard Building Edit Page";
+	}
+	
+	@Override
+	public boolean checkResource(BuildingData res) {
+		ValueResourceHelper.setIfNew(res.typeOfBuilding(), 4);
+		ValueResourceHelper.setIfNew(res.typeOfUser(), 1);
+		ValueResourceHelper.setIfNew(res.numberOfUnitsInBuilding(), 1);
+		ValueResourceHelper.setIfNew(res.address().country(), 49);
+		ValueResourceHelper.setIfNew(res.heatedLivingSpace(), 10000);
+		ValueResourceHelper.setIfNew(res.yearOfConstruction(), 1970);
+		ValueResourceHelper.setIfNew(res.reconstructionStatus(), 1);
+
+		if(res.reconstructionStatus().getValue() > 1 &&
+				res.yearOfReconstruction().getValue() <= res.yearOfConstruction().getValue()) return false;
+		
+		return super.checkResource(res);
 	}
 }

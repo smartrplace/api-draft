@@ -31,7 +31,9 @@ public class UserAdmin {
 		userDataNE = app.appMan.getResourceAccess().getResource("master");
 		if(!userDataNE.isActive()) {
 			initTestData();
-		}		
+			
+		}
+		cleanUpAccount(userDataNE);
 	}
 
 	public SmartEffUserDataNonEdit getUserData() {
@@ -156,5 +158,11 @@ public class UserAdmin {
 			return result;
 		}
 	}
-
+	
+	protected void cleanUpAccount(SmartEffUserDataNonEdit userDataNE2) {
+		userDataNE2.editableData().temporaryResources().create();
+		for(Resource r: userDataNE2.editableData().temporaryResources().getAllElements()) {
+			r.delete();
+		}
+	}
 }

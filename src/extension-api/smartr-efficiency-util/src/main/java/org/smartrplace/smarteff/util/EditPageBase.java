@@ -3,6 +3,7 @@ package org.smartrplace.smarteff.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.model.prototypes.Data;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
@@ -14,6 +15,7 @@ import org.smartrplace.smarteff.util.button.TableOpenButton;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.widgets.api.widgets.OgemaWidget;
+import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
@@ -30,7 +32,7 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		return CapabilityHelper.getStandardEntryTypeList(primaryEntryTypeClass());
 	}
 
-	protected ObjectResourceGUIHelper<T, T> mh;
+	protected ObjectResourceGUIHelperExt mh;
 	protected Alert alert;
 	
 	public EditPageBase() {
@@ -81,20 +83,28 @@ public abstract class EditPageBase<T extends Resource> extends NaviPageBase<T> {
 		}
 	}
 	
+	protected class ObjectResourceGUIHelperExt extends ObjectResourceGUIHelper<T, T> {
+
+		public ObjectResourceGUIHelperExt(WidgetPage<?> page, TemplateInitSingleEmpty<T> init,
+				ApplicationManager appMan, boolean acceptMissingResources) {
+			super(page, init, appMan, acceptMissingResources);
+			// TODO Auto-generated constructor stub
+		}
+		
+		@Override
+		protected T getResource(T object, OgemaHttpRequest req) {
+			return object;
+		}
+		
+		@Override
+		public T getGatewayInfo(OgemaHttpRequest req) {
+			return getReqData(req);
+		}
+	}
+	
 	@Override
 	protected void addWidgets() {
-		mh = new ObjectResourceGUIHelper<T, T>(page, (TemplateInitSingleEmpty<T>)null , null, false) {
-
-			@Override
-			protected T getResource(T object, OgemaHttpRequest req) {
-				return object;
-			}
-			@Override
-			protected T getGatewayInfo(OgemaHttpRequest req) {
-				return getReqData(req);
-			}
-			
-		};
+		mh = new ObjectResourceGUIHelperExt(page, (TemplateInitSingleEmpty<T>)null , null, false);
 		mh.setDoRegisterDependentWidgets(true);
 		alert = new Alert(page, "alert"+pid(), "");
 		page.append(alert);

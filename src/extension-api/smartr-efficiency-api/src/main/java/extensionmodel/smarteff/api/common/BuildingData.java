@@ -37,6 +37,15 @@ public interface BuildingData extends SmartEffResource {
 	
 	FloatResource heatedLivingSpace();
 	
+	IntegerResource yearOfConstruction();
+	
+	/** 1: Not reconstructed
+	 *  2: Partially reconstructed
+	 *  3: Fully reconstructed to the state-of-the-art of the year of reconstruction
+	 */
+	IntegerResource reconstructionStatus();
+	IntegerResource yearOfReconstruction();
+	
 	/** Only to be provided if different from current building heat source
 	 * 1: L gas
 	 * 2: H gas

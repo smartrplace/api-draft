@@ -1,8 +1,8 @@
 package extensionmodel.smarteff.defaultproposal;
 
-import org.smartrplace.smarteff.util.editgeneric.EditPageGeneric;
+import org.smartrplace.smarteff.util.editgeneric.EditPageGenericParams;
 
-public class DefaultProviderParamsPage extends EditPageGeneric<DefaultProviderParams> {
+public class DefaultProviderParamsPage extends EditPageGenericParams<DefaultProviderParams> {
 	@Override
 	public void setData(DefaultProviderParams sr) {
 		setLabel(sr.basePriceBuildingAnalysis(), EN, "Price component per building independently of size",

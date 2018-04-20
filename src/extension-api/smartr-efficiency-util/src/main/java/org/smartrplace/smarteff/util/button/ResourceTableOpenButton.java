@@ -63,12 +63,6 @@ public class ResourceTableOpenButton extends TableOpenButton {
 		setDefaultOpenInNewTab(false);
 	}
 
-	/*@Override
-	protected NavigationPublicPageData getPageData(ExtensionResourceAccessInitData appData,
-			Class<? extends Resource> type, PageType typeRequested, OgemaHttpRequest req) {
-		return appData.systemAccessForPageOpening().getPageByProvider(SPPageUtil.getProviderURL(BaseDataService.RESULTTABLE_PROVIDER));//super.getPageData(appData, type, typeRequested);
-	}*/
-	
 	@Override
 	protected Resource getResource(ExtensionResourceAccessInitData appData, OgemaHttpRequest req) {
 		if(isUp) {
@@ -97,11 +91,6 @@ public class ResourceTableOpenButton extends TableOpenButton {
 			setText("--", req);
 			return;
 		}
-		/*List<Resource> resultAll = parent.getSubResources(false);
-		List<Resource> result = new ArrayList<>();
-		for(Resource r: resultAll) {
-			if(!(r instanceof ValueResource)) result.add(r);
-		}*/
 
 		int size = getSize(destination, appData);
 		String text;

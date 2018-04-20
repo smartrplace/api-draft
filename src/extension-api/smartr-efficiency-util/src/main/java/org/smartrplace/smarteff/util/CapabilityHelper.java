@@ -8,6 +8,7 @@ import org.ogema.core.model.simple.FloatResource;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapabilityPublicData.EntryType;
+import org.smartrplace.extensionservice.ExtensionGeneralData;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration.Cardinality;
 import org.smartrplace.extensionservice.ExtensionUserData;
@@ -126,8 +127,56 @@ public class CapabilityHelper {
 		if((userResource == null) || (!userResource.isActive())) return resourceInGlobal;
 		return userResource;
 	}
+	/** Like {@link #getForUser(Resource, ExtensionUserData)}, but also return user resource if it does not
+	 * exists (as virtual resource then) or if it is not active
+	 * @param resourceInGlobal
+	 * @param userData
+	 */
+	public static <T extends Resource> T getForUserVirtual(T resourceInGlobal, ExtensionUserData userData) {
+		String subPath = resourceInGlobal.getLocation().substring(STD_LOCATION_LENGTH);
+		@SuppressWarnings("unchecked")
+		T userResource = (T) ResourceHelper.getSubResource(userData, subPath , resourceInGlobal.getResourceType());
+		return userResource;
+	}
+	public static <T extends Resource> T getGlobalVirtual(T resourceInUser, ExtensionGeneralData globalData) {
+		
+		String[] els = resourceInUser.getLocation().split("/", 3);
+		if(els.length < 3) throw new IllegalStateException("Not a subpath of userDataSpace");
+		String subPath = els[2];
+		@SuppressWarnings("unchecked")
+		T globalResource = (T) ResourceHelper.getSubResource(globalData, subPath , resourceInUser.getResourceType());
+		return globalResource;
+	}
+	/**
+	 * @deprecated use {@link MyParam} instead	 * 
+	 */
 	public static float floatParam(FloatResource resourceInGlobal, ExtensionResourceAccessInitData data) {
 		return getForUser(resourceInGlobal, data.userData()).getValue();
+	}
+	/** Get parameter object access for a certain type merged from global and user data*/
+	public static <T extends Resource> MyParam<T> getMyParams(Class<T> type,
+			ExtensionUserData userData, ApplicationManagerSPExt appManExt) {
+		T glob = getSubResourceSingle(appManExt.globalData(), type, appManExt);
+		T myRes = getForUser(glob, userData);
+		MyParam<T> result = new MyParam<T>(glob, myRes, userData);
+		return result;
+	}
+	
+	public static class ParamVariants<T extends Resource> {
+		public T globalVariant;
+		public T userVariant;
+	}
+	public static <T extends Resource> ParamVariants<T> getParamVariants(T globalOrUser,
+			ExtensionUserData userData, ApplicationManagerSPExt appManExt) {
+		ParamVariants<T> result = new ParamVariants<T>();
+		if(globalOrUser.getLocation().startsWith(STD_LOCATION)) {
+			result.globalVariant = globalOrUser;
+			result.userVariant = getForUserVirtual(globalOrUser, userData);
+		} else {
+			result.userVariant = globalOrUser;
+			result.globalVariant = getGlobalVirtual(globalOrUser, appManExt.globalData());			
+		}
+		return result;
 	}
 	
 	private static EntryType getEntryType(Class<? extends Resource> type) {

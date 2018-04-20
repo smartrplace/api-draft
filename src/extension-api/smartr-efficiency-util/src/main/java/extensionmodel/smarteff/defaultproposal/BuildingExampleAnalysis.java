@@ -5,6 +5,7 @@ import org.smartrplace.extenservice.proposal.ProjectProposal;
 import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
 import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.smarteff.util.CapabilityHelper;
+import org.smartrplace.smarteff.util.MyParam;
 import org.smartrplace.smarteff.util.ProjectProviderBase;
 
 import de.iwes.util.resource.ValueResourceHelper;
@@ -20,11 +21,18 @@ public class BuildingExampleAnalysis extends ProjectProviderBase<BuildingData> {
 	}
 	@Override
 	protected void calculateProposal(BuildingData input, ProjectProposal result, ExtensionResourceAccessInitData data) {
-		DefaultProviderParams params = CapabilityHelper.getSubResourceSingle(appManExt.globalData(), DefaultProviderParams.class);
-		float baseCost = CapabilityHelper.floatParam(params.basePriceBuildingAnalysis(), data);
+		//DefaultProviderParams params = CapabilityHelper.getSubResourceSingle(appManExt.globalData(), DefaultProviderParams.class);
+		MyParam<DefaultProviderParams> paramHelper = CapabilityHelper.getMyParams(DefaultProviderParams.class, data.userData(), appManExt);
+		DefaultProviderParams myPar = paramHelper.get();
+		float baseCost = myPar.basePriceBuildingAnalysis().getValue();
+		float varCost = myPar.pricePerSQMBuildingAnalysis().getValue();
+		float customerHourCost = myPar.costOfCustomerHour().getValue();
+		float kwHpSQM = myPar.defaultKwhPerSQM().getValue();
+		/*float baseCost = CapabilityHelper.floatParam(params.basePriceBuildingAnalysis(), data);
 		float varCost = CapabilityHelper.floatParam(params.pricePerSQMBuildingAnalysis(), data);
 		float customerHourCost = CapabilityHelper.floatParam(params.costOfCustomerHour(), data);
 		float kwHpSQM = CapabilityHelper.floatParam(params.defaultKwhPerSQM(), data);
+		*/
 		
 		float yearlykWh;
 		float yearlyCost;
@@ -49,6 +57,7 @@ public class BuildingExampleAnalysis extends ProjectProviderBase<BuildingData> {
 		
 		result.costOfProjectIncludingInternal().create();
 		result.costOfProjectIncludingInternal().setValue(cost + customerHours*customerHourCost);
+		paramHelper.close();
 	}
 	
 	@Override

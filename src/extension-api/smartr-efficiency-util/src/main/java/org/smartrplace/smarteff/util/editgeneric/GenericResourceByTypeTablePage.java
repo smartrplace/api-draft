@@ -52,7 +52,10 @@ public class GenericResourceByTypeTablePage<T extends Resource> extends GenericR
 			Map<String, Map<OgemaLocale, String>> locMap = creatingPage.tableHeaders;
 			for(String sub: locMap.keySet()) {
 				Resource cellObject = ResourceHelper.getSubResource(object, sub);
-				String text = ValueFormat.getLocaleString(req, locMap.get(sub));
+				
+				//TODO: Language-specific headers are not supported yet by GUIHelper
+				String text = ValueFormat.getLocaleString(OgemaLocale.ENGLISH, locMap.get(sub));
+				
 				if(cellObject == null)
 					vh.stringLabel(text, id, "n/a", row);
 				else if(cellObject instanceof FloatResource)
