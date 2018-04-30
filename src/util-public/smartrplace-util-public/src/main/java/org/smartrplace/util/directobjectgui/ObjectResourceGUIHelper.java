@@ -1203,7 +1203,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		return result.myLabel;
 	}
 	
-	protected void triggerOnPost(OgemaWidget governor, OgemaWidget target) {
+	public void triggerOnPost(OgemaWidget governor, OgemaWidget target) {
 		if(doRegisterDependentWidgets) governor.registerDependentWidget(target);
 		else governor.triggerAction(target, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST);
 	}

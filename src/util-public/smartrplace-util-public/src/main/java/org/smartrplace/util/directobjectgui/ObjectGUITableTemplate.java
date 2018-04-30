@@ -25,6 +25,8 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 	}
 	protected final ObjectTableProvider<T> tableProvider;
 	
+	protected final boolean hasDynamicHeader;
+	
 	//TODO: We sometimes get 2 or 3 onGET calls for the same object on the same request, which leads to a Widget with
 	//   id already exists exception (IllegalArgumentException)
 	/*@Deprecated
@@ -37,14 +39,16 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 		this.appMan = appMan;
 		this.page = page;
 		this.tableProvider = null;
+		this.hasDynamicHeader = false;
 		
 		init(initDefaultObject);
 	}
 	public ObjectGUITableTemplate(ObjectTableProvider<T> tableProvider,
-			T initDefaultObject, ApplicationManager appMan)  {
+			T initDefaultObject, ApplicationManager appMan, boolean hasDynamicHeader)  {
 		this.appMan = appMan;
 		this.page = null;
 		this.tableProvider = tableProvider;
+		this.hasDynamicHeader = hasDynamicHeader;
 		
 		init(initDefaultObject);
 	}
@@ -121,6 +125,7 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 	}
 	
 	public Map<String,Object> getHeader() {
+		if(hasDynamicHeader) return null;
 		if(mhInit != null) {
 			LinkedHashMap<String,Object> map2 = mhInit.getHeader();
 			//addToHeader(map2);
