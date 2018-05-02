@@ -116,7 +116,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 			protected Row addRow(final T object,
 					final  ObjectResourceGUIHelper<T, R> vh, final String id, OgemaHttpRequest req) {
 				final Row row = new Row();
-				if((headerObject != null) && object.toString().equals(headerObject.toString())) {
+				if((headerObject != null) && (req != null) && object.toString().equals(headerObject.toString())) {
 					LinkedHashMap<String,Object> map2 = mhInit.getHeader();
 					for(String columnId: map2.keySet()) {
 						String headerText = getHeaderText(columnId, vh, req);
