@@ -2,6 +2,9 @@ package org.smartrplace.util.format;
 
 import java.util.Map;
 
+import org.ogema.core.model.Resource;
+import org.ogema.core.resourcemanager.ResourceManagement;
+
 import de.iwes.util.resourcelist.SensorResourceListHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -55,6 +58,9 @@ public class ValueFormat {
 	}
 	public static String firstUpperCase(String in) {
 		return in.substring(0, 1).toUpperCase()+in.substring(1);		
+	}
+	public static <T extends Resource> T getStdTopLevelResource(Class<T> type, ResourceManagement resMan) {
+		return resMan.createResource(firstLowerCase(type.getSimpleName()), type);
 	}
 	
 	public static String getLocaleString(OgemaHttpRequest req, Map<OgemaLocale, String> texts) {

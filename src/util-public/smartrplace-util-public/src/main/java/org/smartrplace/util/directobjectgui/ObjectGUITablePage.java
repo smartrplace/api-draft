@@ -69,6 +69,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	protected final ApplicationManager appMan;
 	protected final T initSampleObject;
 	protected final T headerObject;
+	protected long retardationOnGET = 0;
 	
 	public ObjectGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			T initSampleObject) {
@@ -82,11 +83,11 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		headerObject = getHeaderObject();
 		
 		//init all widgets
-		alert = new Alert(page, "alert", "");
+		alert = new Alert(page, "alert"+pid(), "");
 		
-		knownWidgets = new KnownWidgetHolder<T>(page, "knownWidgets");
+		knownWidgets = new KnownWidgetHolder<T>(page, "knownWidgets"+pid());
 		page.append(knownWidgets);
-		popMore1 = new ClosingPopup<T>(page, "popMore1",
+		popMore1 = new ClosingPopup<T>(page, "popMore1"+pid(),
 				"More Information", true, ClosingMode.CLOSE) {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -154,6 +155,11 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 					data.addAll(getObjectsInTable(req));
 				} else data = getObjectsInTable(req);
 				updateRows(data, req);
+				if(retardationOnGET > 0) try {
+					Thread.sleep(retardationOnGET);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		};
 		mainTable.setRowTemplate(mainTableRowTemplate);
