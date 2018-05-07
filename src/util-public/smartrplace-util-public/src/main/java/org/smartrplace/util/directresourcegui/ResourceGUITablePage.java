@@ -8,7 +8,10 @@ import org.smartrplace.util.directobjectgui.ApplicationManagerMinimal;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
+import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.dynamics.TriggeredAction;
+import de.iwes.widgets.api.widgets.dynamics.TriggeringAction;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
@@ -23,7 +26,9 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 	protected final WidgetPage<?> page;
 	protected ResourceGUITableTemplate<T> mainTableRowTemplate;
 	protected ResourceTable<T> mainTable;
-	protected ResourceGUIHelper<T> vhGlobal;
+	//protected ResourceGUIHelper<T> vhGlobal;
+	
+	protected final boolean registerDependentWidgets;
 	
 	protected final ClosingPopup<T> popMore1;
 	protected final KnownWidgetHolder<T> knownWidgets;
@@ -32,6 +37,7 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 	
 	protected final ApplicationManager appMan;
 	protected final ApplicationManagerMinimal appManMin;
+	protected long retardationOnGET = 0;
 	/*protected long getFrameworkTime() {
 		if(appMan != null) return appMan.getFrameworkTime();
 		return appManMin.getFrameworkTime();
@@ -66,10 +72,16 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 	public ResourceGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			final ApplicationManagerMinimal appManMin, Class<T> resourceType,
 			boolean autoBuildPage) {
+		this(page, appMan, null, resourceType, autoBuildPage, true);
+	}
+	public ResourceGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
+			final ApplicationManagerMinimal appManMin, Class<T> resourceType,
+			boolean autoBuildPage, final boolean registerDependentWidgets) {
 		this.page = page;
 		this.appMan = appMan;
 		this.appManMin = appManMin;
 		this.resourceType = resourceType;
+		this.registerDependentWidgets = registerDependentWidgets;
 
 		//init all widgets
 		
@@ -98,7 +110,7 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 						return mainTable;
 					}
 					
-				}, resourceType, appMan, appManMin) {
+				}, resourceType, appMan, appManMin, registerDependentWidgets) {
 
 			@Override
 			protected Row addRow(final T object,
@@ -114,9 +126,13 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 			public void onGET(OgemaHttpRequest req) {
 				List<T> data = getResourcesInTable(req);
 				updateRows(data, req);
+				if(retardationOnGET > 0) try {
+					Thread.sleep(retardationOnGET);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		};
-
 		
 		//build page
 		addWidgetsAboveTable();
@@ -139,5 +155,10 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 	public T getResource(T object, OgemaHttpRequest req) {
 		throw new IllegalStateException("getResource should not be used with ResourceGUITablePage");
 	}
-}
+	
+	@SuppressWarnings("deprecation")
+	public void triggerOnPost(OgemaWidget governor, OgemaWidget target) {
+		if(registerDependentWidgets) governor.registerDependentWidget(target);
+		else governor.triggerAction(target, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST);
+	}}
 

@@ -11,7 +11,10 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.util.directresourcegui.KnownWidgetHolder;
 import org.smartrplace.util.format.WidgetHelper;
 
+import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.dynamics.TriggeredAction;
+import de.iwes.widgets.api.widgets.dynamics.TriggeringAction;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.complextable.DynamicTable;
@@ -61,7 +64,8 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	protected final WidgetPage<?> page;
 	protected ObjectGUITableTemplate<T, R> mainTableRowTemplate;
 	protected DynamicTable<T> mainTable;
-	protected ObjectResourceGUIHelper<T, R> vhGlobal;
+	//protected ObjectResourceGUIHelper<T, R> vhGlobal;
+	protected final boolean registerDependentWidgets;
 	
 	protected final ClosingPopup<T> popMore1;
 	protected final KnownWidgetHolder<T> knownWidgets;
@@ -77,9 +81,14 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	}
 	public ObjectGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			T initSampleObject, boolean autoBuildPage) {
+		this(page, appMan, initSampleObject, autoBuildPage, true);
+	}
+	public ObjectGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
+			T initSampleObject, boolean autoBuildPage, boolean registerDependentWidgets) {
 		this.page = page;
 		this.appMan = appMan;
 		this.initSampleObject = initSampleObject;
+		this.registerDependentWidgets = registerDependentWidgets;
 		headerObject = getHeaderObject();
 		
 		//init all widgets
@@ -111,7 +120,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 						return mainTable;
 					}
 					
-				}, initSampleObject, appMan, (headerObject != null)) {
+				}, initSampleObject, appMan, (headerObject != null), registerDependentWidgets) {
 
 			@Override
 			protected Row addRow(final T object,
@@ -173,6 +182,12 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	
 	public WidgetPage<?> getPage() {
 		return page;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public void triggerOnPost(OgemaWidget governor, OgemaWidget target) {
+		if(registerDependentWidgets) governor.registerDependentWidget(target);
+		else governor.triggerAction(target, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST);
 	}
 }
 

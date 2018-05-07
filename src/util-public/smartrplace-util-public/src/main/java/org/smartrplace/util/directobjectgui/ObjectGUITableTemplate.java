@@ -26,6 +26,7 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 	protected final ObjectTableProvider<T> tableProvider;
 	
 	protected final boolean hasDynamicHeader;
+	protected final boolean registerDependentWidgets;
 	
 	//TODO: We sometimes get 2 or 3 onGET calls for the same object on the same request, which leads to a Widget with
 	//   id already exists exception (IllegalArgumentException)
@@ -35,20 +36,22 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 	long lastAccessTime = -1;
 	*/
 	public ObjectGUITableTemplate(WidgetPage<?> page,
-			T initDefaultObject, ApplicationManager appMan)  {
+			T initDefaultObject, ApplicationManager appMan, final boolean registerDependentWidgets)  {
 		this.appMan = appMan;
 		this.page = page;
 		this.tableProvider = null;
 		this.hasDynamicHeader = false;
+		this.registerDependentWidgets = registerDependentWidgets;
 		
 		init(initDefaultObject);
 	}
 	public ObjectGUITableTemplate(ObjectTableProvider<T> tableProvider,
-			T initDefaultObject, ApplicationManager appMan, boolean hasDynamicHeader)  {
+			T initDefaultObject, ApplicationManager appMan, boolean hasDynamicHeader, final boolean registerDependentWidgets)  {
 		this.appMan = appMan;
 		this.page = null;
 		this.tableProvider = tableProvider;
 		this.hasDynamicHeader = hasDynamicHeader;
+		this.registerDependentWidgets = registerDependentWidgets;
 		
 		init(initDefaultObject);
 	}
@@ -89,6 +92,7 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 					}
 					
 				};
+				result.vh.setDoRegisterDependentWidgets(registerDependentWidgets);
 			} else {
 				mhInit = result.vh = new ObjectResourceGUIHelper<T, R>(page, (T)null, appMan, false) {
 
@@ -97,6 +101,7 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 						return ObjectGUITableTemplate.this.getResource(object, req);
 					}
 				};
+				result.vh.setDoRegisterDependentWidgets(registerDependentWidgets);
 			}
 			result.id = "";
 		}
@@ -110,6 +115,7 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 						return ObjectGUITableTemplate.this.getResource(object, req);
 					}
 				};
+				result.vh.setDoRegisterDependentWidgets(registerDependentWidgets);
 			} else {
 				result.vh = new ObjectResourceGUIHelper<T, R>(page, object, appMan, false) {
 
@@ -118,6 +124,7 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 						return ObjectGUITableTemplate.this.getResource(object, req);
 					}
 				};
+				result.vh.setDoRegisterDependentWidgets(registerDependentWidgets);
 			}
 			result.id = getLineId(object);
 		}

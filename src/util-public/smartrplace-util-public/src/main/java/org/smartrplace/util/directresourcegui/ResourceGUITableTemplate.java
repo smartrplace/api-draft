@@ -31,7 +31,9 @@ public abstract class ResourceGUITableTemplate<T extends Resource> extends Defau
 		ResourceTable<P> getTable(OgemaHttpRequest req);
 	}
 	protected final TableProvider<T> tableProvider;
-	
+
+	protected final boolean registerDependentWidgets;
+
 	//TODO: We sometimes get 2 or 3 onGET calls for the same object on the same request, which leads to a Widget with
 	//   id already exists exception (IllegalArgumentException)
 	@Deprecated
@@ -40,28 +42,33 @@ public abstract class ResourceGUITableTemplate<T extends Resource> extends Defau
 	long lastAccessTime = -1;
 	
 	public ResourceGUITableTemplate(WidgetPage<?> page,
-			Class<T> resourceType, ApplicationManager appMan)  {
-		this(page, resourceType, appMan, null);
+			Class<T> resourceType, ApplicationManager appMan,
+			final boolean registerDependentWidgets)  {
+		this(page, resourceType, appMan, null, registerDependentWidgets);
 	}
 	public ResourceGUITableTemplate(WidgetPage<?> page,
-			Class<T> resourceType, ApplicationManager appMan, ApplicationManagerMinimal appManMin)  {
+			Class<T> resourceType, ApplicationManager appMan, ApplicationManagerMinimal appManMin,
+			final boolean registerDependentWidgets)  {
 		this.appMan = appMan;
 		this.appManMinimal = appManMin;
 		this.page = page;
 		this.tableProvider = null;
+		this.registerDependentWidgets = registerDependentWidgets;
 		
 		init(resourceType);
 	}
 	public ResourceGUITableTemplate(TableProvider<T> tableProvider,
-			Class<T> resourceType, ApplicationManager appMan)  {
-		this(tableProvider, resourceType, appMan, null);
+			Class<T> resourceType, ApplicationManager appMan, final boolean registerDependentWidgets)  {
+		this(tableProvider, resourceType, appMan, null, registerDependentWidgets);
 	}
 	public ResourceGUITableTemplate(TableProvider<T> tableProvider,
-			Class<T> resourceType, ApplicationManager appMan, ApplicationManagerMinimal appManMin)  {
+			Class<T> resourceType, ApplicationManager appMan, ApplicationManagerMinimal appManMin,
+			final boolean registerDependentWidgets)  {
 		this.appMan = appMan;
 		this.appManMinimal = appManMin;
 		this.page = null;
 		this.tableProvider = tableProvider;
+		this.registerDependentWidgets = registerDependentWidgets;
 		
 		init(resourceType);
 	}
@@ -101,6 +108,7 @@ public abstract class ResourceGUITableTemplate<T extends Resource> extends Defau
 				mhInit = result.vh = new ResourceGUIHelper<T>(table, req, (T)null, appMan, false);
 			} else
 				mhInit = result.vh = new ResourceGUIHelper<T>(page, (T)null, appMan, false);
+			result.vh.setDoRegisterDependentWidgets(registerDependentWidgets);
 			result.id = "";
 		}
 		else {
@@ -109,6 +117,7 @@ public abstract class ResourceGUITableTemplate<T extends Resource> extends Defau
 				result.vh = new ResourceGUIHelper<T>(table, req, object, appMan, false);
 			} else
 				result.vh = new ResourceGUIHelper<T>(page, object, appMan, false);
+			result.vh.setDoRegisterDependentWidgets(registerDependentWidgets);
 			result.id = getLineId(object);
 		}
 		return result;
