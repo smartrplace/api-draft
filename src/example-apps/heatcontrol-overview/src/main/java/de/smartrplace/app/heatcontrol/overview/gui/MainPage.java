@@ -97,8 +97,10 @@ public class MainPage extends ObjectGUITablePage<HeatControlExtRoomData, Room>{
 	public void addWidgets(HeatControlExtRoomData object, ObjectResourceGUIHelper<HeatControlExtRoomData, Room> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 		HeatcontrolOverviewData configRes = object.getRoomExtensionData(true, HeatcontrolOverviewData.class);
+		if (object.getRoom() == null)
+			return;
 		String roomName = ResourceUtils.getHumanReadableShortName(object.getRoom());
-		if(configRes != null) id = roomName + id;
+		if (configRes != null) id = roomName + id;
 		Label sl = vh.stringLabel("Room name", id, roomName, row);
 //if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
 if(sl != null) System.out.println("Room name "+ResourceUtils.getHumanReadableShortName(object.getRoom())+" in "+sl.getId());
