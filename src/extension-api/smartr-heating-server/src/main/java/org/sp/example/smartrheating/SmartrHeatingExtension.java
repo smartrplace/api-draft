@@ -7,22 +7,25 @@ import java.util.Collection;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application.AppStopReason;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
 import org.smartrplace.efficiency.api.base.SmartEffExtensionService;
-import org.smartrplace.extensionservice.ApplicationManagerMinimal;
+import org.smartrplace.efficiency.api.base.SmartEffResource;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 import org.smartrplace.extensionservice.ExtensionCapability;
 import org.smartrplace.extensionservice.ExtensionResourceTypeDeclaration;
+import org.smartrplace.smarteff.util.NaviPageBase;
 
-import extensionmodel.smarteff.api.base.BuildingData;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+import extensionmodel.smarteff.api.common.BuildingData;
+import extensionmodel.smarteff.smartrheating.SmartrHeatingData;
 
 @Service(SmartEffExtensionService.class)
 @Component
 public class SmartrHeatingExtension implements SmartEffExtensionService {
-	private ApplicationManagerMinimal appManMin;
+	//private ApplicationManagerSPExt appManExt;
 	
 	@Override
-	public void start(ApplicationManagerMinimal appManMin) {
-		this.appManMin = appManMin;
+	public void start(ApplicationManagerSPExt appManExt) {
+		//this.appManExt = appManExt;
 		//Do nothing more here !
 	}
 
@@ -30,30 +33,31 @@ public class SmartrHeatingExtension implements SmartEffExtensionService {
 	public void stop(AppStopReason reason) {
 	}
 
+	public final static NaviPageBase<SmartrHeatingData>.Provider EDIT_PROVIDER = new SmartrHeatingEditPage().provider;
 	@Override
 	public Collection<ExtensionCapability> getCapabilities() {
-		return Arrays.asList(new ExtensionCapability[] {new SmartrHeatingEditPage(appManMin),
+		return Arrays.asList(new ExtensionCapability[] {EDIT_PROVIDER,
 				new SmartrHeatingRecommendationProvider()});
 	}
 
 	@Override
-	public Collection<ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType>> resourcesDefined() {
-		Collection<ExtensionResourceTypeDeclaration<? extends SmartEffExtensionResourceType>> result = 
+	public Collection<ExtensionResourceTypeDeclaration<? extends SmartEffResource>> resourcesDefined() {
+		Collection<ExtensionResourceTypeDeclaration<? extends SmartEffResource>> result = 
 				new ArrayList<>();
-		result.add(new ExtensionResourceTypeDeclaration<SmartEffExtensionResourceType>() {
+		result.add(new ExtensionResourceTypeDeclaration<SmartEffResource>() {
 
 			@Override
-			public Class<? extends SmartEffExtensionResourceType> resourceType() {
+			public Class<? extends SmartEffResource> dataType() {
 				return SmartrHeatingData.class;
 			}
 
 			@Override
-			public String resourceName() {
+			public String label(OgemaLocale locale) {
 				return "smartrHeatingData";
 			}
 
 			@Override
-			public Class<? extends SmartEffExtensionResourceType> parentType() {
+			public Class<? extends SmartEffResource> parentType() {
 				return BuildingData.class;
 			}
 

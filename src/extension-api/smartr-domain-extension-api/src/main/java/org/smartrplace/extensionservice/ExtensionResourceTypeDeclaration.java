@@ -1,13 +1,20 @@
 package org.smartrplace.extensionservice;
 
-public interface ExtensionResourceTypeDeclaration<T extends ExtensionResourceType> {
+import org.ogema.core.model.Resource;
+
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+
+/** Each type on the system that has an ExtensionResourceTypeDeclaration should only be used
+ * as child of the declared parent type. Usually not two types that have a child-parent
+ * inheritance relation should both have an ExtionsionResourceTypeDeclaration as this
+ * would lead to confusion when searching for the right ExtensionResourceTypeDeclaration.
+ */
+public interface ExtensionResourceTypeDeclaration<T extends Resource> {
 	/**Resource type required by app module to store its persistent data*/
-	Class<? extends T> resourceType();
-	/**Name of the element or the resource list. The name needs to be unique among the sub elements of the
-	 * parent type. If null returned the name is chosen automatically (to be tested if a good idea to be
-	 * defined as default).
+	Class<? extends T> dataType();
+	/** Human readable label of the type.
 	 */
-	String resourceName();
+	String label(OgemaLocale locale);
 	
 	/**Super type to which new resource or resource list shall be applied. The element shall be 
 	 * created as decorator if not (yet) defined as regular element. If the extension element is

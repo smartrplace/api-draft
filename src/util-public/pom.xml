@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Parent-POM: OGEMA master pom with project-wide settings -->
+    <parent>
+        <groupId>org.smartrplace.api</groupId>
+        <artifactId>root</artifactId>
+        <version>2.1.3-SNAPSHOT</version>
+    </parent>
+	
+	<groupId>org.smartrplace.apps</groupId>
+    <artifactId>util-public</artifactId>
+	<name>Smartrplace Apps</name>
+    <packaging>pom</packaging>
+	
+    <!-- Sub-projects: OGEMA Applications (in alphabetical order) -->
+    <modules>
+		<module>smartrplace-util-public</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

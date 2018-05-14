@@ -21,6 +21,7 @@ import de.iwes.widgets.template.DisplayTemplate;
  * TODO: The Dropdown should not be mandatory part of the page. This could be replaced by other
  * visual elements in the future.
  */
+@Deprecated
 public abstract class ExtensionResourceEditPage<T extends Resource> {
 	protected abstract List<T> getOptionItems(OgemaHttpRequest req);
 	
@@ -104,7 +105,7 @@ public abstract class ExtensionResourceEditPage<T extends Resource> {
 	}
 	public static void registerDependentWidgets(OgemaWidget governor, StaticTable table) {
 		for(OgemaWidget el: table.getSubWidgets()) {
-			governor.registerDependentWidget(el);
+			governor.triggerOnPOST(el);
 		}
 	}
 }

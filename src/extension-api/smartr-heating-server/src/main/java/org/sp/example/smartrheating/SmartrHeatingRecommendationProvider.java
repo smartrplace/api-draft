@@ -1,18 +1,17 @@
 package org.sp.example.smartrheating;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
-import org.smartrplace.efficiency.api.capabilities.RecommendationProvider;
-import org.smartrplace.extensionservice.gui.DataEntryProvider;
+import org.ogema.core.model.Resource;
+import org.smartrplace.efficiency.api.capabilities.SmartEffRecommendationProvider.Recommendation;
+import org.smartrplace.extenservice.proposal.ProposalProvider;
+import org.smartrplace.extenservice.resourcecreate.ExtensionResourceAccessInitData;
+import org.smartrplace.extensionservice.ApplicationManagerSPExt;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
-import extensionmodel.smarteff.api.base.BuildingData;
-import extensionmodel.smarteff.api.base.SmartEffGeneralData;
-import extensionmodel.smarteff.api.base.SmartEffUserData;
+import extensionmodel.smarteff.api.common.BuildingData;
 
-public class SmartrHeatingRecommendationProvider implements RecommendationProvider {
+public class SmartrHeatingRecommendationProvider implements ProposalProvider {
 
 	@Override
 	public String id() {
@@ -29,17 +28,17 @@ public class SmartrHeatingRecommendationProvider implements RecommendationProvid
 		return label(locale);
 	}
 
-	@Override
-	public List<Class<? extends SmartEffExtensionResourceType>> inputResourceTypes() {
-		List<Class<? extends SmartEffExtensionResourceType>> result = new ArrayList<>();
+	/*@Override
+	public List<Class<? extends SmartEffResource>> inputResourceTypes() {
+		List<Class<? extends SmartEffResource>> result = new ArrayList<>();
 		result .add(BuildingData.class);
 		result.add(SmartrHeatingData.class);
 		return result;
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public void updateRecommendations(SmartEffUserData userData, SmartEffGeneralData generalData,
-			List<SmartEffExtensionResourceType> resourcesChanged, List<Recommendation> recommendations) {
+			List<SmartEffResource> resourcesChanged, List<Recommendation> recommendations) {
 		final List<BuildingData> buildings;
 		if(resourcesChanged == null) {
 			buildings = userData.buildings().getAllElements();
@@ -55,7 +54,7 @@ public class SmartrHeatingRecommendationProvider implements RecommendationProvid
 				}
 			}
 		}
-	}
+	}*/
 
 	private class SrtrHeatingRecommendation implements Recommendation {
 		public BuildingData building;
@@ -98,18 +97,35 @@ public class SmartrHeatingRecommendationProvider implements RecommendationProvid
 		
 	}
 	
-	private List<BuildingData> getBuildingsChanged(List<SmartEffExtensionResourceType> resourcesChanged) {
+	/*private List<BuildingData> getBuildingsChanged(List<SmartEffResource> resourcesChanged) {
 		//TODO
 		return null;
 	}
 	private SrtrHeatingRecommendation checkBuilding(BuildingData building) {
 		//TODO
 		return null;
+	}*/
+
+	public List<EntryType> getEntryTypes() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public <S extends SmartEffExtensionResourceType> DataEntryProvider<S> resultPageDefinition() {
-		// TODO: A result page is foreseen in the mockup
+	public void init(ApplicationManagerSPExt appManExt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Resource> calculate(ExtensionResourceAccessInitData data) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<CalculationResultType> resultTypes() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

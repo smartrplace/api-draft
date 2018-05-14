@@ -1,19 +1,9 @@
 package extensionmodel.smarteff.api.base;
 
-import org.ogema.core.model.simple.FloatResource;
-import org.ogema.core.model.simple.IntegerResource;
-import org.smartrplace.efficiency.api.base.SmartEffExtensionResourceType;
+import org.smartrplace.extensionservice.ExtensionGeneralData;
 
-/** Data that is accessible for all users.*/
-public interface SmartEffGeneralData extends SmartEffExtensionResourceType {
-	FloatResource defaultGasPricePerkWh();
-	FloatResource defaultGasPriceBase();
-	FloatResource defaultOilPricePerkWh();
-	FloatResource defaultOilPriceBase();
-	FloatResource defaultElectrictiyPricePerkWh();
-	FloatResource defaultElectrictiyPriceBase();
-	
-	FloatResource defaultYearlyInterestRate();
-
-	IntegerResource standardRoomNum();
+/** Data that is accessible for all users. The data entries are default values that can
+ * be override by user specific resources at the same location relative to this
+ * model inside ExtensionUserData.*/
+public interface SmartEffGeneralData extends SmartEffTopLevelData, ExtensionGeneralData {
 }
