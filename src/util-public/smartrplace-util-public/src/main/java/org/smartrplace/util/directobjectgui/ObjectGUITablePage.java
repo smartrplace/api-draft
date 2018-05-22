@@ -36,9 +36,13 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	 * @return
 	 */
 	protected T getHeaderObject() {return null;};
-	/** Only relevant if {@link #getHeaderObject()} returns not null*/
+	/** Only relevant if {@link #getHeaderObject()} returns not null. If getHeaderObject is non-null
+	 * and getHeaderText returns null then getHeaderWidget is evaluated to get a widget for the respective
+	 * header position.*/
 	protected String getHeaderText(String columnId, final ObjectResourceGUIHelper<T, R> vh,
 			OgemaHttpRequest req) {return "Header n/a";};
+	protected OgemaWidget getHeaderWidget(String columnId, final ObjectResourceGUIHelper<T, R> vh,
+			OgemaHttpRequest req) {return null;};
 	
 	/** Overwrite this method to provide set of objects
 	 * @param req
@@ -130,7 +134,11 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 					LinkedHashMap<String,Object> map2 = mhInit.getHeader();
 					for(String columnId: map2.keySet()) {
 						String headerText = getHeaderText(columnId, vh, req);
-						row.addCell(columnId, headerText);
+						if(headerText != null) row.addCell(columnId, headerText);
+						else {
+							OgemaWidget w = getHeaderWidget(columnId, vh, req);
+							row.addCell(columnId, w);
+						}
 					}
 					return row;
 				}
