@@ -19,6 +19,11 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 	public ObjectResourceGUIHelper<T, R> mhInit = null;
 	private boolean isInInit = false;
 	private final ApplicationManager appMan;
+	private final ApplicationManagerMinimal appManMinimal;
+	protected long getFrameworkTime() {
+		if(appMan != null) return appMan.getFrameworkTime();
+		return appManMinimal.getFrameworkTime();
+	}
 	protected final WidgetPage<?> page;
 	public interface ObjectTableProvider<P> {
 		DynamicTable<P> getTable(OgemaHttpRequest req);
@@ -36,8 +41,10 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 	long lastAccessTime = -1;
 	*/
 	public ObjectGUITableTemplate(WidgetPage<?> page,
-			T initDefaultObject, ApplicationManager appMan, final boolean registerDependentWidgets)  {
+			T initDefaultObject, ApplicationManager appMan, ApplicationManagerMinimal appManMinimal, 
+			final boolean registerDependentWidgets)  {
 		this.appMan = appMan;
+		this.appManMinimal = appManMinimal;
 		this.page = page;
 		this.tableProvider = null;
 		this.hasDynamicHeader = false;
@@ -46,8 +53,10 @@ public abstract class ObjectGUITableTemplate<T, R extends Resource> extends Defa
 		init(initDefaultObject);
 	}
 	public ObjectGUITableTemplate(ObjectTableProvider<T> tableProvider,
-			T initDefaultObject, ApplicationManager appMan, boolean hasDynamicHeader, final boolean registerDependentWidgets)  {
+			T initDefaultObject, ApplicationManager appMan, ApplicationManagerMinimal appManMinimal, 
+			boolean hasDynamicHeader, final boolean registerDependentWidgets)  {
 		this.appMan = appMan;
+		this.appManMinimal = appManMinimal;
 		this.page = null;
 		this.tableProvider = tableProvider;
 		this.hasDynamicHeader = hasDynamicHeader;

@@ -75,6 +75,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	protected final KnownWidgetHolder<T> knownWidgets;
 	protected final Alert alert;
 	protected final ApplicationManager appMan;
+	protected final ApplicationManagerMinimal appManMin;
 	protected final T initSampleObject;
 	protected final T headerObject;
 	protected long retardationOnGET = 0;
@@ -89,8 +90,14 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	}
 	public ObjectGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			T initSampleObject, boolean autoBuildPage, boolean registerDependentWidgets) {
+		this(page, appMan, null, initSampleObject, autoBuildPage, true);
+	}
+	public ObjectGUITablePage(final WidgetPage<?> page,
+			final ApplicationManager appMan, final ApplicationManagerMinimal appManMin,
+			T initSampleObject, boolean autoBuildPage, boolean registerDependentWidgets) {
 		this.page = page;
 		this.appMan = appMan;
+		this.appManMin = appManMin;
 		this.initSampleObject = initSampleObject;
 		this.registerDependentWidgets = registerDependentWidgets;
 		headerObject = getHeaderObject();
@@ -124,7 +131,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 						return mainTable;
 					}
 					
-				}, initSampleObject, appMan, (headerObject != null), registerDependentWidgets) {
+				}, initSampleObject, appMan, appManMin, (headerObject != null), registerDependentWidgets) {
 
 			@Override
 			protected Row addRow(final T object,

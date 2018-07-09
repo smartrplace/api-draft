@@ -72,7 +72,7 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 	public ResourceGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			final ApplicationManagerMinimal appManMin, Class<T> resourceType,
 			boolean autoBuildPage) {
-		this(page, appMan, null, resourceType, autoBuildPage, true);
+		this(page, appMan, appManMin, resourceType, autoBuildPage, true);
 	}
 	public ResourceGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			final ApplicationManagerMinimal appManMin, Class<T> resourceType,

@@ -1,5 +1,6 @@
-package org.ogema.util.eval;
+package org.smartrplace.util.eval;
 
+import java.io.Closeable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,13 +16,12 @@ import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.tools.resourcemanipulator.timer.CountDownAbsoluteTimer;
 
-import de.iwes.tools.statistics.StatisticalProvider;
 import de.iwes.util.timer.AbsolutePersistentTimer;
 import de.iwes.util.timer.AbsoluteTimerListener;
 
 /**Aggregate a list of evaluation results into a new result.
   */
-public class EvalScheduleSumUpCreator implements AbsoluteTimerListener, StatisticalProvider {
+public class EvalScheduleSumUpCreator implements AbsoluteTimerListener, Closeable {
 	final private int mode;
 	final private Schedule destination;
 	

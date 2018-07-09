@@ -1,8 +1,7 @@
-package org.ogema.util.eval;
+package org.smartrplace.util.eval;
 
 import java.util.Collection;
 
-import org.smartrplace.remotesupervision.transfer.util.EvalSumUpCreator;
 
 /**Aggregates according to modes as defined in {@link EvalSumUpCreator}
  * 
