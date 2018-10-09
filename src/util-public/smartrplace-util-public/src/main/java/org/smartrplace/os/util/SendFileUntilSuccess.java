@@ -33,9 +33,13 @@ public class SendFileUntilSuccess {
 	final TimeResource serverUnavailableUntil;
 	int attemptCount = 0;
 
+	public static String getServerPortAdress(String host, int port) {
+		return "https://"+host+":"+port+"/org/smartrplace/tools/upload/servlet";
+	}
+	
 	public SendFileUntilSuccess(Path sourceToUse, String dest, String host, int port, String user, String pw,
 			ApplicationManager appMan, int maxRetryNum, long retryInterval) {
-		this(sourceToUse, dest, "https://"+host+":"+port+"/org/smartrplace/tools/upload/servlet",
+		this(sourceToUse, dest, getServerPortAdress(host, port),
 				user, pw, appMan, maxRetryNum, retryInterval);
 	}
 	public SendFileUntilSuccess(Path sourceToUse, String dest, String serverPortAddress, String user, String pw,
