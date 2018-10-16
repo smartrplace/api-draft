@@ -16,7 +16,7 @@
 
 #add here manually if required:
 # - (java.util.PropertyPermission "<property_name>" "read")
-(org.ogema.accesscontrol.WebAccessPermission "name=de.iwes.widgets.ogema-js-bundle")
+(org.ogema.accesscontrol.WebAccessPermission "name=org.ogema.widgets.ogema-js-bundle")
 
 
 #Automated Generation Below:
