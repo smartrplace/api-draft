@@ -1207,6 +1207,10 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		if(doRegisterDependentWidgets) governor.registerDependentWidget(target);
 		else governor.triggerAction(target, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST);
 	}
+	public void triggerOnPostForRequest(OgemaWidget governor, OgemaWidget target) {
+		if(doRegisterDependentWidgets) governor.registerDependentWidget(target, req);
+		else governor.triggerAction(target, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST, req);
+	}
 	public void setDoRegisterDependentWidgets(boolean doRegisterDependentWidgets) {
 		this.doRegisterDependentWidgets = doRegisterDependentWidgets;
 	}

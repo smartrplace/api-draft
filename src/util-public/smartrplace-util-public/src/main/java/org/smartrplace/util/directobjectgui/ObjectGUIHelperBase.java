@@ -37,7 +37,7 @@ import de.iwes.widgets.resource.widget.textfield.BooleanResourceCheckbox;
 public class ObjectGUIHelperBase<T> {
 	protected final WidgetPage<?> page;
 	protected final OgemaWidget parent;
-	private final OgemaHttpRequest req;
+	protected final OgemaHttpRequest req;
 	public PageSnippet pageSnippet = null;
 	public List<WidgetEntryData> popTableData = null;
 	
