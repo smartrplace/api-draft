@@ -1,0 +1,56 @@
+# OGEMA standard permissions
+(org.osgi.framework.ServicePermission "org.ogema.core.application.Application" "register")
+(org.osgi.framework.ServicePermission "javax.servlet.Servlet" "register")
+(org.osgi.framework.ServicePermission "org.ogema.accesscontrol.PermissionManager" "get")
+
+(org.osgi.framework.PackagePermission "org.ogema.tools.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.util.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.core.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.model.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.pattern.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.widgets.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.tools.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.util.*" "import")
+(org.osgi.framework.PackagePermission "org.slf4j" "import")
+(org.osgi.framework.PackagePermission "org.joda.time" "import")
+(org.osgi.framework.PackagePermission "org.json" "import")
+(org.osgi.framework.PackagePermission "javax.servlet" "import")
+(org.osgi.framework.PackagePermission "javax.servlet.*" "import")
+
+# export custom resource types
+(org.osgi.framework.PackagePermission "com.example.app.template.config" "exportonly")
+
+# Resource permissions
+# all resource permissions for custom types
+(org.ogema.accesscontrol.ResourcePermission "type=com.example.app.template.config.TemplateConfig" "read,write,addsub,create,activity,delete")
+(org.ogema.accesscontrol.ResourcePermission "type=com.example.app.template.config.TemplateProgramConfig" "read,write,addsub,create,activity,delete")
+# Read permissions (at least) for pattern model types
+(org.ogema.accesscontrol.ResourcePermission "type=org.ogema.model.sensors.TemperatureSensor" "read")
+(org.ogema.accesscontrol.ResourcePermission "type=org.ogema.model.sensors.HumiditySensor" "read,write")
+
+Automated Generation Below:
+# import permissions
+(org.osgi.framework.PackagePermission "org.ogema.accesscontrol.AppDomainCombiner"  "import")
+(org.osgi.framework.PackagePermission "javax.servlet.ServletException"  "import")
+(org.osgi.framework.PackagePermission "org.apache.felix.scr.annotations.ReferenceCardinality"  "import")
+(org.osgi.framework.PackagePermission "org.ogema.accesscontrol.UserRightsProxy"  "import")
+(org.osgi.framework.PackagePermission "org.slf4j.LoggerFactory"  "import")
+(org.osgi.framework.PackagePermission "org.eclipse.jetty.util.MultiPartInputStreamParser"  "import")
+(org.osgi.framework.PackagePermission "javax.servlet.http.HttpServletRequest"  "import")
+(org.osgi.framework.PackagePermission "org.apache.felix.scr.annotations.Reference"  "import")
+(org.osgi.framework.PackagePermission "org.slf4j.Logger"  "import")
+(org.osgi.framework.PackagePermission "javax.servlet.http.HttpServlet"  "import")
+(org.osgi.framework.PackagePermission "javax.servlet.Servlet"  "import")
+(org.osgi.framework.PackagePermission "javax.servlet.http.HttpServletResponse"  "import")
+(org.osgi.framework.PackagePermission "org.apache.felix.scr.annotations.Property"  "import")
+(org.osgi.framework.PackagePermission "org.apache.commons.io.FileUtils"  "import")
+(org.osgi.framework.PackagePermission "javax.servlet.MultipartConfigElement"  "import")
+(org.osgi.framework.PackagePermission "org.apache.felix.scr.annotations.Component"  "import")
+(org.osgi.framework.PackagePermission "org.apache.felix.scr.annotations.Service"  "import")
+(org.osgi.framework.PackagePermission "javax.servlet.http.Part"  "import")
+(org.osgi.framework.PackagePermission "org.apache.felix.scr.annotations.ReferencePolicy"  "import")
+(org.osgi.framework.PackagePermission "org.ogema.accesscontrol.PermissionManager"  "import")
+
+# export/custom type permissions
+
+# resource permissions
