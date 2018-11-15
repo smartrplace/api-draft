@@ -161,9 +161,12 @@ public class FileUploadUtil {
 	 */
 	public static int upload(Path path, String remotePath, String remoteUser, String remotePw, String serverPortAddress,
 			ApplicationManager am) throws IOException, KeyManagementException, NoSuchAlgorithmException {
-		if(remoteUser == null) remoteUser = REMOTE_USER;
-		if(remotePw == null) remotePw = REMOTE_PW;
-		if(serverPortAddress == null) serverPortAddress = UPLOAD_SERVLET;
+		if (remoteUser == null) remoteUser = REMOTE_USER;
+		if (remotePw == null) remotePw = REMOTE_PW;
+		if (serverPortAddress == null) 
+			serverPortAddress = UPLOAD_SERVLET;
+		if (serverPortAddress.endsWith("/"))
+			serverPortAddress = serverPortAddress.substring(0, serverPortAddress.length()-1);
 		Path parent = path.getParent();
 		String pathInfo;
 		if(remotePath == null) {
@@ -171,10 +174,15 @@ public class FileUploadUtil {
 		} else {
 			pathInfo = remotePath.replace("\\", "/");
 		}
-		String userInfo = "?user=" + remoteUser + "&pw=" + remotePw;
- 		
-		HttpPost post = new HttpPost(serverPortAddress + pathInfo + userInfo);
-		am.getLogger().debug("Sending POST to {}, file {}",serverPortAddress + pathInfo + userInfo, path);
+		final StringBuilder address = new StringBuilder();
+		address.append(serverPortAddress);
+		if (!pathInfo.isEmpty() && !pathInfo.startsWith("/"))
+			address.append('/');
+		address.append(pathInfo)
+			.append("?user=").append(remoteUser).append("&pw=").append(remotePw);
+		
+		HttpPost post = new HttpPost(address.toString());
+		am.getLogger().debug("Sending POST to {}, file {}", address, path);
 		FileBody fileBody = new FileBody(path.toFile(), ContentType.APPLICATION_OCTET_STREAM); // or DEFAULT_BINARY?
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -186,9 +194,15 @@ public class FileUploadUtil {
 		HttpResponse response = client.execute(post);
 		StatusLine sl = response.getStatusLine();
 		int sc = sl.getStatusCode();
-		am.getLogger().info("Upload response: " + sc + ", reason: " + sl.getReasonPhrase());
-		if (sc < 300) return 0;
-		else return sc;
+		if (sc < 300) {
+			am.getLogger().debug("Upload response: {}", sc);
+			return 0;
+		}
+		else {
+			// FIXME do not log pw
+			am.getLogger().info("Upload response: {}, reason {}, address {}", sc, sl.getReasonPhrase(), address);
+			return sc;
+		}
 	}
 	
 	private static CloseableHttpClient getClient() throws KeyManagementException, NoSuchAlgorithmException {
