@@ -1,4 +1,4 @@
-package org.smartrplace.tools.upload.server;
+package org.smartrplace.tools.uploadservlet2.server;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,8 @@ import java.security.DomainCombiner;
 import java.security.ProtectionDomain;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
@@ -34,9 +36,16 @@ import org.ogema.accesscontrol.PermissionManager;
 import org.ogema.accesscontrol.UserRightsProxy;
 import org.ogema.core.application.Application;
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.simple.TimeResource;
+import org.ogema.model.gateway.EvalCollection;
+import org.ogema.tools.resource.util.TimeUtils;
+import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartrplace.logging.fendodb.DataRecorderReference;
+import org.smartrplace.logging.fendodb.FendoDbFactory;
 
+import de.iwes.util.logconfig.EvalHelper;
 import de.iwes.widgets.api.OgemaGuiService;
 import de.iwes.widgets.api.messaging.Message;
 import de.iwes.widgets.api.messaging.MessagePriority;
@@ -58,11 +67,20 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 	private boolean errorActive  =false;
 	private ApplicationManager am;
 	
+	final static String startString = "/home/user/ogemaCollect/rest/";
+	final static int startIdx = startString.length();
+	final static String resNameStart = "fos_lastrecv"; 
+	
 	@Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY, policy=ReferencePolicy.DYNAMIC)
 	volatile OgemaGuiService widgetService;
 	
 	@Reference
 	PermissionManager permMan;
+	
+	@Reference
+	FendoDbFactory fendoFactory;
+	
+	volatile CountDownDelayedExecutionTimer fendoUpdateTimer = null;
 	
 	@Override
 	public void start(ApplicationManager appManager) {
@@ -71,6 +89,35 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 			widgetService.getMessagingService().registerMessagingApp(am.getAppID(), "File upload server app");
 		}
 		am.getLogger().info("Fileupload servlet started");
+		
+		//FIXME
+		EvalCollection evalC = EvalHelper.getEvalCollection(am);
+		TimeResource res = evalC.getSubResource(resNameStart, TimeResource.class);
+		res.create();
+		long prevVal = res.getValue();
+		res.setValue(am.getFrameworkTime());
+
+		//FIXME testing
+		/*if(fendoUpdateTimer == null) {
+			fendoUpdateTimer = new CountDownDelayedExecutionTimer(am, 5000) {
+				
+				@Override
+				public void delayedExecution() {
+					//update Fendo
+					Map<Path, DataRecorderReference> dbs = fendoFactory.getAllInstances();
+					logger.info("Updating "+dbs.size()+" FendoDB instances...");
+					for(Entry<Path, DataRecorderReference> e: dbs.entrySet()) {
+						try {
+							e.getValue().getDataRecorder().reloadDays();
+						} catch (IOException e1) {
+							logger.warn("Could not update:", e1);
+						}
+					}
+					fendoUpdateTimer = null;
+				}
+			};
+		}*/
+
 	}
 	
 	@Override
@@ -120,6 +167,50 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 	    }
 	    resp.setStatus(HttpServletResponse.SC_OK);
 		logger.info("New file from user {} at {}",user,target);
+		String gwId;
+		String targets = target.toString();
+		if(targets.startsWith(startString) && targets.length() >= (startIdx+6)) {
+			gwId = targets.substring(startIdx, startIdx+6);
+			//Execute this in application thread, does not work here
+			new CountDownDelayedExecutionTimer(am, 1) {
+				@Override
+				public void delayedExecution() {
+					EvalCollection evalC = EvalHelper.getEvalCollection(am);
+					TimeResource res = evalC.getSubResource(resNameStart+gwId, TimeResource.class);
+					res.create();
+					long prevVal = res.getValue();
+					res.setValue(am.getFrameworkTime());
+					if((am.getFrameworkTime() - prevVal) > 10*60000) {
+						for(TimeResource tr: evalC.getSubResources(TimeResource.class, false)) {
+							String name = tr.getName();
+							if(name.startsWith(resNameStart)) {
+								logger.info("Last data received from "+name.substring(resNameStart.length())+" at "+TimeUtils.getDateAndTimeString(tr.getValue()));
+							}
+						}
+					}
+				}
+			};
+		}
+		if(fendoUpdateTimer == null) {
+			fendoUpdateTimer = new CountDownDelayedExecutionTimer(am, 15*60000) {
+				
+				@Override
+				public void delayedExecution() {
+					//update Fendo
+					Map<Path, DataRecorderReference> dbs = fendoFactory.getAllInstances();
+					logger.info("Updating "+dbs.size()+" FendoDB instances...");
+					for(Entry<Path, DataRecorderReference> e: dbs.entrySet()) {
+						try {
+							e.getValue().getDataRecorder().reloadDays();
+						} catch (Exception e1) {
+							logger.warn("Could not update "+e.getKey().toString()+":", e1);
+						}
+					}
+					fendoUpdateTimer = null;
+				}
+			};
+			logger.info("Scheduled update of FendoDB instances after 15 minutes...");
+		}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;

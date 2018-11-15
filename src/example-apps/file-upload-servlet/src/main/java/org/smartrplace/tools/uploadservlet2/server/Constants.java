@@ -1,4 +1,4 @@
-package org.smartrplace.tools.upload.server;
+package org.smartrplace.tools.uploadservlet2.server;
 
 public class Constants {
 	
