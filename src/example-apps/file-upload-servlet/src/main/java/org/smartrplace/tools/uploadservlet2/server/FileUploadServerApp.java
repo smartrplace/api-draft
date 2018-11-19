@@ -7,9 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.AccessControlContext;
 import java.security.DomainCombiner;
-import java.security.ProtectionDomain;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -31,9 +29,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.jetty.util.MultiPartInputStreamParser;
-import org.ogema.accesscontrol.AppDomainCombiner;
 import org.ogema.accesscontrol.PermissionManager;
-import org.ogema.accesscontrol.UserRightsProxy;
+import org.ogema.accesscontrol.RestAccess;
 import org.ogema.core.application.Application;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.simple.TimeResource;
@@ -53,14 +50,13 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 @Property(name="osgi.http.whiteboard.servlet.pattern", value={"/org/smartrplace/tools/upload/servlet/*"})
 @Service({Servlet.class, Application.class})
-@Component(specVersion = "1.2", immediate = true)
+@Component(specVersion = "1.2")
 public class FileUploadServerApp extends HttpServlet implements Application  {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(FileUploadServerApp.class);
 	public static final String OTPNAME = "pw";
 	public static final String OTUNAME = "user";
-	private final DomainCombiner domainCombiner = new AppDomainCombiner();
 	private long lastUpdate = Long.MIN_VALUE;
 	private long cachedSize = Long.MIN_VALUE;
 	private boolean warningActive = false;
@@ -75,8 +71,12 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 	volatile OgemaGuiService widgetService;
 	
 	@Reference
-	PermissionManager permMan;
+	private PermissionManager permMan;
 	
+	@Reference
+	private RestAccess restAccess;
+	
+	// FIXME remove
 	@Reference
 	FendoDbFactory fendoFactory;
 	
@@ -132,10 +132,8 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		logger.trace("POST request received");
 		String path = req.getPathInfo();
-		String user = checkAccess(req, path);
+		String user = checkAccess(req, resp, path);
 		if (user == null) {
-			resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			logger.trace("Unauthorized request for user "+user+" to "+path);
 			return;
 		}
 		try {
@@ -309,43 +307,10 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 	}
 	
 	
-	// copied form OGEMA rest bundle
-	private String checkAccess(HttpServletRequest req, String resourcePath) {
-		/*
-		 * Get The authentication information
-		 */
-		String usr = req.getParameter(OTUNAME);
-		String pwd = req.getParameter(OTPNAME);
-
-		if (usr == null) {
-			logger.debug("REST access to {} without user name", resourcePath);
+	private String checkAccess(HttpServletRequest req, HttpServletResponse resp, String resourcePath) throws ServletException, IOException {
+		if (restAccess.authenticate(req, resp) == null)
 			return null;
-		}
-		if (pwd == null) {
-			logger.debug("REST access to {} without user password", resourcePath);
-			return null;
-		}
-
-		if (permMan.getAccessManager().authenticate(usr, pwd, false)) {
-			UserRightsProxy urp = permMan.getAccessManager().getUrp(usr);
-			if (urp == null) {
-				logger.info("RestAccess denied for externally authenticated user " + usr);
-				return null;
-			}
-			ProtectionDomain pda[] = new ProtectionDomain[1];
-			pda[0] = urp.getClass().getProtectionDomain();
-			if (checkAppAccess(pda, req.getMethod(), resourcePath)) {
-				logger.info("RestAccess permitted for external authenticated user " + usr);
-				return usr;
-			}
-		}
-		return null;
-	}
-	
-	private boolean checkAppAccess(ProtectionDomain pda[], String method, String path) {
-		final AccessControlContext acc = new AccessControlContext(new AccessControlContext(pda), domainCombiner);
-		permMan.setAccessContext(acc);
-		return true;
+		return permMan.getAccessManager().getCurrentUser();
 	}
 	
 	private final static class StorageSizeTooLargeMessage implements Message {
