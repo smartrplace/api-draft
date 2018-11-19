@@ -55,11 +55,11 @@
             <artifactId>util-extended</artifactId>
             <version>2.2.1-SNAPSHOT</version>
         </dependency>
-			<dependency>
-				<groupId>org.smartrplace.logging</groupId>
-				<artifactId>fendodb-api</artifactId>
-				<version>0.0.4-SNAPSHOT</version>
-			</dependency>
+		<dependency>
+			<groupId>org.smartrplace.logging</groupId>
+			<artifactId>fendodb-api</artifactId>
+			<version>0.0.4-SNAPSHOT</version>
+		</dependency>
         <!-- need a newer version than specified by OGEMA -->
  <!--        <dependency>
 			<groupId>javax.servlet</groupId>

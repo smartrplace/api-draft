@@ -1,14 +1,3 @@
-/**
- * Copyright 2009 - 2014
- *
- * Fraunhofer-Gesellschaft zur Förderung der angewandten Wissenschaften e.V.
- *
- * Fraunhofer IIS
- * Fraunhofer ISE
- * Fraunhofer IWES
- *
- * All Rights reserved
- */
 package org.smartrplace.external.actionadmin.patternlistener;
 
 import java.util.ArrayList;
