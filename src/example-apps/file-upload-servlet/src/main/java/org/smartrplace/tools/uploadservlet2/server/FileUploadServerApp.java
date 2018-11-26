@@ -7,11 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.DomainCombiner;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
@@ -39,8 +36,6 @@ import org.ogema.tools.resource.util.TimeUtils;
 import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartrplace.logging.fendodb.DataRecorderReference;
-import org.smartrplace.logging.fendodb.FendoDbFactory;
 
 import de.iwes.util.logconfig.EvalHelper;
 import de.iwes.widgets.api.OgemaGuiService;
@@ -75,12 +70,6 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 	
 	@Reference
 	private RestAccess restAccess;
-	
-	// FIXME remove
-	@Reference
-	FendoDbFactory fendoFactory;
-	
-	volatile CountDownDelayedExecutionTimer fendoUpdateTimer = null;
 	
 	@Override
 	public void start(ApplicationManager appManager) {
@@ -188,26 +177,6 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 					}
 				}
 			};
-		}
-		if(fendoUpdateTimer == null) {
-			fendoUpdateTimer = new CountDownDelayedExecutionTimer(am, 15*60000) {
-				
-				@Override
-				public void delayedExecution() {
-					//update Fendo
-					Map<Path, DataRecorderReference> dbs = fendoFactory.getAllInstances();
-					logger.info("Updating "+dbs.size()+" FendoDB instances...");
-					for(Entry<Path, DataRecorderReference> e: dbs.entrySet()) {
-						try {
-							e.getValue().getDataRecorder().reloadDays();
-						} catch (Exception e1) {
-							logger.warn("Could not update "+e.getKey().toString()+":", e1);
-						}
-					}
-					fendoUpdateTimer = null;
-				}
-			};
-			logger.info("Scheduled update of FendoDB instances after 15 minutes...");
 		}
 		} catch (Exception e) {
 			e.printStackTrace();
