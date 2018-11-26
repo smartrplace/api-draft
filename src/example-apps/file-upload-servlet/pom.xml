@@ -9,6 +9,7 @@
 	
     <artifactId>file-upload-servlet</artifactId>
 	<groupId>org.smartrplace.tools</groupId>
+	<version>2.1.3-SNAPSHOT</version>
     <name>Fileupload servlet</name>
     <description>Allows clients to upload files to this gateway</description>
     
