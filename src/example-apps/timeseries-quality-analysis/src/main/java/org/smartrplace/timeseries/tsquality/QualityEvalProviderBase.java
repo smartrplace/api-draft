@@ -221,8 +221,10 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     			firstGapStart[totalInputIdx] = timeStamp;
        			//gapTimes[totalInputIdx] += (durationLoc - MAX_GAPTIMES_INTERNAL[idxOfRequestedInput]);
     			GaRoDataTypeParam type = getParamType(idxOfRequestedInput);
-    			TimeSeriesDataImpl ts = type.inputInfo.get(idxOfEvaluationInput);
-    			logger.info("Gap in "+currentGwId+":"+ts.id()+" of "+StringFormatHelper.getFormattedValue(durationLoc));
+    			if(type != null && type.inputInfo != null) {
+    				TimeSeriesDataImpl ts = type.inputInfo.get(idxOfEvaluationInput);
+    				logger.info("Gap in "+currentGwId+":"+ts.id()+" of "+StringFormatHelper.getFormattedValue(durationLoc));
+    			} else logger.info("Gap in "+currentGwId+":"+currentGwId+"#(no inputInfo) of "+StringFormatHelper.getFormattedValue(durationLoc));
     		}
     		
     		lastTimes[totalInputIdx] = timeStamp;

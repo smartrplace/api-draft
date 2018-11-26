@@ -19,6 +19,7 @@
 		<module>heatcontrol-overview</module>
 		<module>action-admin</module>
  		<module>file-upload-servlet</module>
+ 		<module>timeseries-quality-analysis</module>
     </modules>
 
     <build>
