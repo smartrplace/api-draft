@@ -16,6 +16,7 @@ import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.tools.resource.util.TimeUtils;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.tissue.util.format.StringFormatHelperSP;
 import org.smartrplace.util.directresourcegui.LabelLongValue;
 import org.smartrplace.util.directresourcegui.SingleValueResourceAccess;
 import org.smartrplace.util.file.ApacheFileAdditions;
@@ -537,7 +538,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				alert, minimumAllowed, maximumAllowed, notAllowedMessage, mode);
 	}
 	public TextField timeEdit(final String subResourceName, final Alert alert,
-			final int minimumAllowed, final int maximumAllowed, String notAllowedMessage,  final int mode) {
+			final long minimumAllowed, final long maximumAllowed, String notAllowedMessage,  final int mode) {
 		counter++;
 		return timeEdit("timeEdit"+counter, null, subResourceName, alert, minimumAllowed, maximumAllowed, notAllowedMessage, mode);
 	}
@@ -586,9 +587,10 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					myField.setValue(source.getValue()/(30*24*60*60000)+"",req);
 					break;
 				case -1:
-					String s = StringFormatHelper.getFormattedValue(source.getValue());
+					String s = StringFormatHelperSP.getFormattedValue(source.getValue(), 360);
 					lastMode.lastMode = getLastMode(s);
 					myField.setValue(s, req);
+					break;
 				default:
 					myField.setValue(source.getValue()+"",req);
 				}

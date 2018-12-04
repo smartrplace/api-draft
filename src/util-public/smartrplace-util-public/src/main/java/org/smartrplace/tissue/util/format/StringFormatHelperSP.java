@@ -29,4 +29,45 @@ public class StringFormatHelperSP {
    		return String.format("%02d:%02d", hours, minutes);
 	}
 
+	/**Convert interval duration to a flexible string giving seconds, minutes, hours, days,
+	 * 		months or years
+	 * as the most readable choice
+	 * @param deltaT interval duration in milliseconds
+	 * @param switchLimit maximum number of seconds, minutes, hours, days etc. shown before
+	 * 		switching to the next higher unit type. Default value is 100, which limits the
+	 * 		number of digits to 2 (except for very large numbers). For edit fields a higher value
+	 * 		(e.g. 360) is recommended.
+	 * @return a one or two digit value plus the time unit chosen by the method
+	 */
+	public static String getFormattedValue(long deltaT, int switchLimit) {
+    	if(deltaT < 0) {
+    		return "--";
+    	}
+		deltaT = deltaT / 1000;
+		if(deltaT < switchLimit) {
+			return String.format("%d sec", deltaT);
+		}
+		deltaT /= 60;
+		if(deltaT < switchLimit) {
+			return String.format("%d min", deltaT);
+		}
+		deltaT /= 60;
+		if(deltaT < switchLimit) {
+			return String.format("%d h", deltaT);
+		}
+		deltaT /= 24;
+		if(deltaT < switchLimit) {
+			return String.format("%d d", deltaT);
+		}
+		float deltaTf = deltaT / (365.25f/12f);
+		if(deltaTf < switchLimit) {
+			return String.format("%d month", Math.round(deltaTf));
+		}
+		deltaTf /= 12;
+		if(deltaTf < 100) {
+			return String.format("%d a", Math.round(deltaTf));
+		}
+		return (">99a");
+	}
+
 }

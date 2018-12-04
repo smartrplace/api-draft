@@ -4,14 +4,14 @@
     <parent>
        <artifactId>apps-master</artifactId>
        <groupId>org.ogema.apps</groupId>
-       <version>2.2.1-SNAPSHOT</version> <!-- FIXME SNAPSHOT -->
+       <version>2.2.0</version>
     </parent>
     
     <artifactId>action-admin</artifactId>
     <groupId>org.smartrplace.external</groupId>
-    <name></name>
+    <name>OGEMA Action Admin</name>
     <version>1.0.0-SNAPSHOT</version>
-    <description></description>
+    <description>Action Admin: Access OGEMA Actions</description>
     
     <packaging>bundle</packaging>
     
