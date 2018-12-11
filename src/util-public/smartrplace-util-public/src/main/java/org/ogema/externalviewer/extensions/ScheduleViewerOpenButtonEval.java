@@ -127,7 +127,7 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		
 		final ScheduleViewerConfiguration viewerConfiguration =
 				ScheduleViewerConfigurationBuilder.newBuilder().setPrograms(programs).
-				setStartTime(startTime).setEndTime(endTime).build();
+				setStartTime(startTime).setEndTime(endTime).setShowManipulator(true).build();
 		
 		String ci = addConfig(new DefaultDedicatedTSSessionConfiguration(result, viewerConfiguration));
 		setConfigId(ci, req);

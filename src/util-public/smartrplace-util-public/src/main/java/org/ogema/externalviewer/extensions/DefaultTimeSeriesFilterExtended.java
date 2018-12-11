@@ -3,7 +3,9 @@ package org.ogema.externalviewer.extensions;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -118,7 +120,14 @@ public class DefaultTimeSeriesFilterExtended implements TimeSeriesFilterExtended
 			type = typeMapRD.get(rd.getPath());
 		} else
 			type = typeMap.get(schedule);
-		if(type == null) return FloatResource.class; //ScheduleViewerUtil.getScheduleLongName(schedule, "nodev-info", null);
+		if(type == null) {
+			if(schedule instanceof Resource) {
+				Resource parent = ((Resource)schedule).getLocationResource().getParent();
+				if(parent instanceof SingleValueResource)
+					return parent.getResourceType();
+			}
+			return FloatResource.class; //ScheduleViewerUtil.getScheduleLongName(schedule, "nodev-info", null);
+		}
 		return type;
 	}
 }
