@@ -104,7 +104,7 @@ public class MainPage extends ObjectGUITablePage<HeatControlExtRoomData, Room>{
 		if (object.getRoom() == null)
 			return;
 		String roomName = (req != null) ? ResourceUtils.getHumanReadableShortName(object.getRoom()) : "";
-		if (configRes != null) id = roomName + id;
+		//if (configRes != null) id = roomName + id;
 		Label sl = vh.stringLabel("Room name", id, roomName, row);
 if(configRes != null) try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
 if(sl != null) System.out.println("Room name "+ResourceUtils.getHumanReadableShortName(object.getRoom())+" in "+sl.getId());
@@ -116,8 +116,8 @@ else System.out.println("Room name for "+id);
 			else if(thDif < 0) addSymbol = "+";
 			String text = ""+object.getThermostats().size()+" / "+object.getRoomTemperatureSensors().size()+addSymbol+" / "+object.getWindowSensors().size();
 			sl = vh.stringLabel("Therm/TH/Win", id, text, row);
-if(sl != null) System.out.println("Therm/TH/Win "+text+" in "+sl.getId());
-else System.out.println("Therm/TH/Win for "+id);
+//if(sl != null) System.out.println("Therm/TH/Win "+text+" in "+sl.getId());
+//else System.out.println("Therm/TH/Win for "+id);
 	
 			String columnId = ResourceUtils.getValidResourceName("T/Setp/Valve/H/Open/Motion/Manu");
 			String widgetId = columnId + id;
