@@ -18,10 +18,13 @@ public abstract class DefaultScheduleViewerConfigurationProviderExtended extends
 	public String addConfig(SessionConfiguration config) {
 		String id = getNextId();
 		configs().put(id, config);
+//System.out.println("addConfig: configs#"+configs().size()+ "obj:"+System.identityHashCode(configs())+" this:"+this.toString()+" / "+System.identityHashCode(this));		
 		return id;
 	}
 
-	protected static volatile DefaultScheduleViewerConfigurationProviderExtended instance = null;
+	//protected static volatile DefaultScheduleViewerConfigurationProviderExtended instance = null;
+	protected abstract DefaultScheduleViewerConfigurationProviderExtended getInstanceObj();
+	protected abstract void setInstance(DefaultScheduleViewerConfigurationProviderExtended instance);
 	
 	/** Note that OSGi creates new instance some times when old instances are still
 	 * on the system. So we make configs static, the static instance just reduces the number
@@ -29,8 +32,8 @@ public abstract class DefaultScheduleViewerConfigurationProviderExtended extends
 	 */
 	public DefaultScheduleViewerConfigurationProviderExtended() {
 		super();
-		if(instance == null)
-			instance = this;
+		if(getInstanceObj() == null)
+			setInstance(this);
 		//else
 		//	throw new IllegalStateException("ScheduleViewerConfigProvEvalOff shall behave like singleton,"
 		//			+ "but needs public condstructor for OSGi service");
@@ -43,6 +46,7 @@ public abstract class DefaultScheduleViewerConfigurationProviderExtended extends
 	
 	@Override
 	public SessionConfiguration getSessionConfiguration(String configurationId) {
+//System.out.println("getSessionConfiguration: configs#"+configs().size()+ "obj:"+System.identityHashCode(configs())+" this:"+this.toString()+" / "+System.identityHashCode(this));		
 		if(configurationId == null) {
 			if(configs().isEmpty()) return null;
 			return configs().values().iterator().next();

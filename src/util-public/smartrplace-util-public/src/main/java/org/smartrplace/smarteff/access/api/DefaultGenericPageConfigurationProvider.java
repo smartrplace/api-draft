@@ -23,7 +23,9 @@ public abstract class DefaultGenericPageConfigurationProvider implements Generic
 		return id;
 	}
 
-	protected static volatile DefaultGenericPageConfigurationProvider instance = null;
+	//protected static volatile DefaultGenericPageConfigurationProvider instance = null;
+	protected abstract DefaultGenericPageConfigurationProvider getInstanceObj();
+	protected abstract void setInstance(DefaultGenericPageConfigurationProvider instance);
 	
 	/** Note that OSGi creates new instance some times when old instances are still
 	 * on the system. So we make configs static, the static instance just reduces the number
@@ -31,8 +33,8 @@ public abstract class DefaultGenericPageConfigurationProvider implements Generic
 	 */
 	public DefaultGenericPageConfigurationProvider() {
 		super();
-		if(instance == null)
-			instance = this;
+		if(getInstanceObj() == null)
+			setInstance(this);
 	}
 	
 	@Override
