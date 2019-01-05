@@ -39,7 +39,6 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.ogema.core.application.ApplicationManager;
-import org.ogema.model.gateway.remotesupervision.FileTransmissionTaskData;
 
 public class FileUploadUtil {
 	public final static String UPLOAD_SERVER_PROPERTY = "org.smartrplace.tools.upload.servlet.url";
@@ -96,24 +95,18 @@ public class FileUploadUtil {
 
 	/**we assume the directory has no subdirectories!*/
 	public static int sendSimpleDirectory(Path path, String remotePath, String remoteUser, String remotePw,
-			String serverPortAddress, ApplicationManager am, FileTransmissionTaskData taskData,
+			String serverPortAddress, ApplicationManager am,
 			SendFileUntilSuccessListener listener) {
-		//try {
-			Collection<File> files2zip = FileUtils.listFiles(path.toFile(), null, true);
-			int retval = 0;
-			for(File f: files2zip) {
-				SendFileUntilSuccess task = new SendFileUntilSuccess(f.toPath(), remotePath, serverPortAddress,
-						remoteUser, remotePw, taskData, am, listener);
-				int st = task.getStatus();
-				if((st != 0)&&(st != 500)) retval++;
-				//retval += upload(f.toPath(), remotePath, remoteUser, remotePw, serverPortAddress, am);
-			}
-			return retval;
-		/*} catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
-			am.getLogger().warn(e.getMessage());
-			am.getLogger().debug("Exception detail:", e);
-			return -1;
-		}*/
+		Collection<File> files2zip = FileUtils.listFiles(path.toFile(), null, true);
+		int retval = 0;
+		for(File f: files2zip) {
+			SendFileUntilSuccess task = new SendFileUntilSuccess(f.toPath(), remotePath, serverPortAddress,
+					remoteUser, remotePw, am, listener);
+			int st = task.getStatus();
+			if((st != 0)&&(st != 500)) retval++;
+			//retval += upload(f.toPath(), remotePath, remoteUser, remotePw, serverPortAddress, am);
+		}
+		return retval;
 	}
 	
 	/**

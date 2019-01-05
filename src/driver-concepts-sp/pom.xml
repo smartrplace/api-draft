@@ -3,37 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.ogema.alliance</groupId>
-		<artifactId>alliance-models</artifactId>
-        <version>2.1.1</version>
-     </parent>
+        <groupId>org.smartrplace.api</groupId>
+        <artifactId>root</artifactId>
+        <version>0.9.0-SNAPSHOT</version>
+    </parent>
 
 	<groupId>org.ogema.model</groupId>
     <artifactId>driver-concepts-sp</artifactId>
     <name>Proposed driver data models and concepts (SP)</name>
 	<description>Proposed driver data models and concepts for discussion and development by partners of the OGEMA Alliance (SP)</description>
     <packaging>bundle</packaging>
-    <version>2.1.3-SNAPSHOT</version>
-
-	<repositories>
-		<repository>
-			<releases />
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>ogema-releases</id>
-			<name>ogema-releases</name>
-			<url>https://www.ogema-source.net/artifactory/libs-release</url>
-		</repository>
-	</repositories>
-	<distributionManagement>
-		<repository>
-			<id>ogema-releases</id>
-			<name>Internal Releases</name>
-			<url>https://www.ogema-source.net/artifactory/libs-release-local</url>
-		</repository>
-	</distributionManagement>
-
+    <version>0.9.0-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -104,11 +84,6 @@
         <dependency>
             <groupId>org.ogema.core</groupId>
             <artifactId>models</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ogema.model</groupId>
-            <artifactId>fhg-proposed</artifactId>
-            <version>2.1.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

@@ -14,6 +14,7 @@ import org.ogema.tools.resource.util.TimeUtils;
 import org.ogema.tools.timeseries.iterator.api.SampledValueDataPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartrplace.tissue.util.format.StringFormatHelperSP;
 
 import de.iwes.timeseries.eval.api.EvaluationInput;
 import de.iwes.timeseries.eval.api.EvaluationInstance.EvaluationListener;
@@ -317,7 +318,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 				thisReqIdx = nextReqInput;
 			}
 			for(Entry<String, GapData> gap: devicesWithGaps.entrySet()) {
-    			logger.info("Total Gap in device "+currentGwId+":"+gap.getKey()+" of "+StringFormatHelper.getFormattedTimeOfDay(gap.getValue().duration, true)+" first starting:"+TimeUtils.getDateAndTimeString(gap.getValue().firstGapStart));
+    			logger.info("Total Gap in device "+currentGwId+":"+gap.getKey()+" of "+StringFormatHelperSP.getFormattedTimeOfDay(gap.getValue().duration, true)+" first starting:"+TimeUtils.getDateAndTimeString(gap.getValue().firstGapStart));
 			}
 			logger.info("Start:"+TimeUtils.getDateString(startTime)+" Gw:"+currentGwId+" Total withData:"+result.withDataNum+" good:"+result.goodNum+" golden:"+result.goodNumGold+" total:"+tsNum);
 			return result;

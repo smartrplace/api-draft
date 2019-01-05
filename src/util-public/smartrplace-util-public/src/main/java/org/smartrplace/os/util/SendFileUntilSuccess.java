@@ -6,7 +6,6 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.application.Timer;
 import org.ogema.core.application.TimerListener;
 import org.ogema.core.model.simple.TimeResource;
-import org.ogema.model.gateway.remotesupervision.FileTransmissionTaskData;
 import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 
 public class SendFileUntilSuccess {
@@ -57,15 +56,12 @@ public class SendFileUntilSuccess {
 	}
 	//TODO: Clean up constructors regarding listeners
 	public SendFileUntilSuccess(Path sourceToUse, String dest, String host, int port, String user, String pw,
-			FileTransmissionTaskData taskData, ApplicationManager appMan) {
+			ApplicationManager appMan) {
 		this(sourceToUse, dest, "https://"+host+":"+port+"/org/smartrplace/tools/upload/servlet",
-				user, pw, taskData, appMan, null);
+				user, pw, appMan, null);
 	}
 	public SendFileUntilSuccess(Path sourceToUse, String dest, String serverPortAddress, String user, String pw,
-			FileTransmissionTaskData taskData,
-			ApplicationManager appMan, SendFileUntilSuccessListener listener) {
-		if(taskData.maxRetry().isActive())
-			this.maxRetryNum = taskData.maxRetry().getValue();
+				ApplicationManager appMan, SendFileUntilSuccessListener listener) {
 		this.listener = listener;
 		this.sourceToUse = sourceToUse;
 		this.dest = dest;
@@ -73,13 +69,7 @@ public class SendFileUntilSuccess {
 		this.serverPortAddress = serverPortAddress;
 		this.user = user;
 		this.pw = pw;
-		if((taskData!= null)&& taskData.serverUnavailableUntil().isActive())
-			this.serverUnavailableUntil = taskData.serverUnavailableUntil();
-		else this.serverUnavailableUntil = null;
-		if((taskData!= null)&& taskData.retryInterval().isActive())
-			this.retryInterval = taskData.retryInterval().getValue();
-		if((taskData!= null)&& taskData.initialDelay().isActive())
-			this.initialDelay = taskData.initialDelay().getValue();
+		this.serverUnavailableUntil = null;
 		init();
 	}
 
