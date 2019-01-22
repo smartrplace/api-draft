@@ -1,7 +1,9 @@
 package org.smartrplace.timeseries.tsquality;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import java.util.Map.Entry;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.core.model.simple.StringResource;
 import org.ogema.tools.resource.util.TimeUtils;
 import org.ogema.tools.timeseries.iterator.api.SampledValueDataPoint;
 import org.slf4j.Logger;
@@ -242,6 +245,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
         public class GapData {
         	public long duration;
         	public long firstGapStart;
+        	public String devId;
         }
         public FinalResult getFinalResult() {
 			if(result != null) return result;
@@ -292,6 +296,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 						GapData gd = new GapData();
 						gd.duration = gapTime;
 						gd.firstGapStart = firstGapStart[idx];
+						String devIdShort = getDeviceName(idx, QualityEvalProviderBase.this);
+						gd.devId = devIdShort;
 						devicesWithGaps.put(devId, gd);
 					}
 				}
@@ -320,6 +326,27 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			for(Entry<String, GapData> gap: devicesWithGaps.entrySet()) {
     			logger.info("Total Gap in device "+currentGwId+":"+gap.getKey()+" of "+StringFormatHelperSP.getFormattedTimeOfDay(gap.getValue().duration, true)+" first starting:"+TimeUtils.getDateAndTimeString(gap.getValue().firstGapStart));
 			}
+			if(result.goodNum > 0) {
+				result.withoutDataSensors = new ArrayList<String>();
+				ArrayList<GapData> sortGaps = new ArrayList<GapData>(devicesWithGaps.values());
+				sortGaps.sort(new Comparator<GapData>() {
+					@Override
+					public int compare(GapData o1, GapData o2) {
+						//reverse oder, longest duration first
+						return Long.compare(o2.duration, o1.duration);
+					}
+				});
+				for(GapData g: sortGaps) {
+					String prop = System.getProperty("org.ogema.evaluationofflinecontrol.scheduleviewer.expert.sensorsToFilterOut."+currentGwId);
+					if(prop != null) {
+						List<String> sensorsToFilterOut = Arrays.asList(prop.split(","));
+						if(sensorsToFilterOut.contains(g.devId))
+							continue;
+					}
+	
+					result.withoutDataSensors.add(g.devId);
+				}
+			}
 			logger.info("Start:"+TimeUtils.getDateString(startTime)+" Gw:"+currentGwId+" Total withData:"+result.withDataNum+" good:"+result.goodNum+" golden:"+result.goodNumGold+" total:"+tsNum);
 			return result;
         }
@@ -329,6 +356,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     	public int goodNum = 0;
     	public int goodNumGold = 0;
        	public int withDataNum = 0;
+		protected ArrayList<String> withoutDataSensors;
     }
 	/**
  	 * Define the results of the evaluation here including the final calculation
@@ -422,9 +450,21 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			return new SingleValueResultImpl<Float>(rt, (float) ((double)cec.durationTime / HOUR_MILLIS), inputData);
 		}
     };
-   private static final List<GenericGaRoResultType> RESULTS = Arrays.asList(TS_TOTAL, TS_WITH_DATA, TS_GOOD, TS_GOLD,
+    public final static GenericGaRoResultType GAP_SENSORS = new GenericGaRoResultType("$GAP_SENSORS",
+    		"IDs of sensors without data or gaps", StringResource.class, null) {
+		@Override
+		public SingleEvaluationResult getEvalResult(GenericGaRoEvaluationCore ec, ResultType rt,
+				List<TimeSeriesData> inputData) {
+			EvalCore cec = ((EvalCore)ec);
+			FinalResult res = cec.getFinalResult();
+			return new SingleValueResultImpl<String>(rt, (res.withoutDataSensors!=null)?stringListToSingle(res.withoutDataSensors):"--", inputData);
+			//return new SingleValueResultImpl<String>(rt, (cec.critSensor!=null)?cec.critSensor:"--", inputData);
+		}
+    };
+    private static final List<GenericGaRoResultType> RESULTS = Arrays.asList(TS_TOTAL, TS_WITH_DATA, TS_GOOD, TS_GOLD,
 		  OVERALL_GAP_REL,
-		   GAP_TIME_REL, ONLY_GAP_REL, TOTAL_TIME, DURATION_TIME); //EVAL_RESULT
+		   GAP_TIME_REL, ONLY_GAP_REL, TOTAL_TIME, DURATION_TIME,
+		   GAP_SENSORS); //EVAL_RESULT
     
 	@Override
 	protected List<GenericGaRoResultType> resultTypesGaRo() {
@@ -458,5 +498,16 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			toTest =deviceLongId.substring(len-6, len-2);
 		} else toTest = deviceLongId.substring(len-4);
 		return toTest;
+	}
+	
+	public static String stringListToSingle(Collection<String> inList) {
+		if(inList == null) return null;
+		String result = null;
+		for(String s: inList) {
+			if(result == null) result = s;
+			else result += ", "+s;
+		}
+		if(result == null) return "";
+		return result ;
 	}
 }
