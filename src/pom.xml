@@ -16,18 +16,20 @@
 	<version>0.9.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<repositories>
+	<!-- <repositories>
 		<repository>
 			<id>ogema-release</id>
 			<name>ogema-release</name>
 			<url>https://www.ogema-source.net/artifactory/libs-release</url>
 		</repository>
 	</repositories>
+	 -->
 
 	<!-- Sub-projects -->
 	<modules>
-		<module>driver-concepts-sp</module>
-		<module>example-apps</module>
+		<!-- <module>driver-concepts-sp</module>
+		 -->
+		 <module>example-apps</module>
 		<module>extension-api</module>
 		<module>util-public</module>
 	</modules>
@@ -66,10 +68,6 @@
 							</goals>
 						</execution>
 					</executions>
-					<configuration>
-						<additionalparam>-Xdoclint:none</additionalparam>
-						<additionalOptions>-Xdoclint:none</additionalOptions>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -96,6 +94,17 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 
 	<profiles>
 		<!-- Sign and deploy locally, for testing. Usage: mvn -Psign install -DskipTests 
