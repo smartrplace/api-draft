@@ -93,4 +93,9 @@ public class SmartEffEditOpenButton extends RedirectButton {
 	protected void setConfigId(String configurationId, OgemaHttpRequest req) {
 		setUrl(GenericPageConfigurationProvider.SMARTREFF_URL_BASEPATH+pageURL+"?providerId="+providerId+"&configId="+configurationId, req);
 	}
+	
+	protected void setConfigId(String configurationId, String pageURLVar, OgemaHttpRequest req) {
+		setUrl(GenericPageConfigurationProvider.SMARTREFF_URL_BASEPATH+pageURLVar+"?providerId="+providerId+"&configId="+configurationId, req);
+	}
+
 }
