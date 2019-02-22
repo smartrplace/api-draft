@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.core.model.Resource;
 import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.externalviewer.extensions.DefaultDedicatedTSSessionConfiguration;
@@ -45,6 +46,9 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 	private static final long serialVersionUID = 1L;
 
 	protected abstract List<TimeSeriesData> getTimeseries(OgemaHttpRequest req);
+	/** This method is only required for generating filter name. If not available
+	 * just return an empty String or any name of the time series set
+	 */
 	protected abstract String getEvaluationProviderId(OgemaHttpRequest req);
 	protected abstract IntervalConfiguration getITVConfiguration(OgemaHttpRequest req);
 	
@@ -56,6 +60,7 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			scheduleViewerProviderInstance);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onPrePOST(String data, OgemaHttpRequest req) {
 		//final GaRoSingleEvalProvider eval = selectProvider.getSelectedItem(req);
@@ -81,6 +86,7 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 				tsId = ((RecordedData)timeSeries).getPath();
 			} else tsId = null;
 			GaRoDataTypeI dataType = null;
+			Class<? extends Resource> type = null;
 			if(tsd instanceof TimeSeriesDataExtendedImpl) {
 				TimeSeriesDataExtendedImpl tse = (TimeSeriesDataExtendedImpl)tsd;
 				if(tse.type instanceof GaRoDataTypeI) {
@@ -104,8 +110,15 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 						shortName = StringListFormatUtils.getStringFromList(tse.getIds(), getDeviceShortId(location), inputLabel);
 					longName = StringListFormatUtils.getStringFromList(tse.getIds(), tsd.label(null), inputLabel);
 				} else {
-					shortName = StringListFormatUtils.getStringFromList(tse.getIds());
-					longName = StringListFormatUtils.getStringFromList(tse.getIds(), tsd.label(null));
+					if(tse.type instanceof Class)
+						type = (Class<? extends Resource>)tse.type;
+					if(tse.getIds() == null) {
+						shortName = tsd.label(null);
+						longName = StringListFormatUtils.getStringFromList(null, "NoGw", tsd.label(null));
+					} else {
+						shortName = StringListFormatUtils.getStringFromList(tse.getIds());
+						longName = StringListFormatUtils.getStringFromList(tse.getIds(), tsd.label(null));
+					}
 				}
 			} else {
 				shortName = tsd.label(null);
@@ -115,10 +128,12 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 				shortNames.put(timeSeries, shortName);
 				longNames.put(timeSeries, longName);
 				if(dataType != null) types.put(timeSeries, dataType.representingResourceType());
+				else if(type != null) types.put(timeSeries, type);
 			} else {
 				shortNamesRD.put(tsId, shortName);
 				longNamesRD.put(tsId, longName);						
 				if(dataType != null) typesRD.put(tsId, dataType.representingResourceType());
+				else if(type != null) typesRD.put(tsId, type);
 			}
 			if(timeSeries != null) result.add(timeSeries);
 		}

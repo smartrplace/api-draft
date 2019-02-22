@@ -29,6 +29,8 @@ public class ConfigInfoExt {
 	
 	public Resource lastPrimaryResource;
 	public Object lastContext;
+	public String lastConfigId;
 	
-	public Object context; 
+	public Object context;
+	//public String configId;
 }
