@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.array.ArrayResource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
@@ -32,6 +33,7 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.tools.resource.util.TimeUtils;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.tissue.util.format.StringFormatHelperSP;
+import org.smartrplace.tissue.util.resource.ValueResourceHelperSP;
 import org.smartrplace.util.directresourcegui.LabelLongValue;
 import org.smartrplace.util.directresourcegui.SingleValueResourceAccess;
 import org.smartrplace.util.file.ApacheFileAdditions;
@@ -94,6 +96,21 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		this.appMan = appMan;
 	}
 
+	public OgemaWidget valueEdit(String widgetId, String lineId, final SingleValueResource source, Row row,
+			 Alert alert) {
+		if(source instanceof StringResource)
+			return stringEdit(widgetId, lineId, (StringResource) source, row, alert);
+		if(source instanceof FloatResource)
+			return floatEdit(widgetId, lineId, (FloatResource) source, row, alert,
+					-Float.MAX_VALUE, Float.MAX_VALUE, null);
+		if(source instanceof BooleanResource)
+			return booleanEdit(widgetId, lineId, (BooleanResource) source, row);
+		if(source instanceof IntegerResource)
+			return integerEdit(widgetId, lineId, (IntegerResource) source, row, alert,
+					Integer.MIN_VALUE, Integer.MAX_VALUE, null);
+		throw new IllegalArgumentException("SingleValueResource type "+source.getResourceType()+ " not supported.");
+	}
+	
 	public Label stringLabel(String widgetId, String lineId, final StringResource source, Row row) {
 		if(checkLineId(widgetId)) return null;
 		widgetId = ResourceUtils.getValidResourceName(widgetId);
@@ -414,6 +431,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				case 20:
 					if(source instanceof SingleValueResource)
 						myLabel.setText(ValueResourceUtils.getValue((SingleValueResource)source), req);
+					else if(source instanceof ArrayResource)
+						myLabel.setText(ValueResourceHelperSP.getValue((ArrayResource)source), req);
 					else
 						myLabel.setText("--", req);
 					break;					

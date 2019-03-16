@@ -15,12 +15,21 @@
  */
 package org.smartrplace.tissue.util.resource;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.ogema.core.model.array.ArrayResource;
+import org.ogema.core.model.array.BooleanArrayResource;
+import org.ogema.core.model.array.ByteArrayResource;
+import org.ogema.core.model.array.FloatArrayResource;
+import org.ogema.core.model.array.IntegerArrayResource;
+import org.ogema.core.model.array.StringArrayResource;
+import org.ogema.core.model.array.TimeArrayResource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.recordeddata.RecordedData;
+import org.ogema.tools.resource.util.ValueResourceUtils;
 
 import de.iwes.util.resource.ValueResourceHelper;
 
@@ -43,5 +52,33 @@ public class ValueResourceHelperSP {
 		if(valueResource instanceof BooleanResource)
 			return ((BooleanResource)valueResource).getHistoricalData();
 		return null;
+	}
+	
+	/** To be moved to {@link ValueResourceUtils}*/
+	public static String getValue(ArrayResource res) {
+		Object[] array;
+		if(res instanceof StringArrayResource)
+			array = ((StringArrayResource)res).getValues();
+		else if(res instanceof FloatArrayResource)
+			array = ArrayUtils.toObject(((FloatArrayResource)res).getValues());
+		else if(res instanceof IntegerArrayResource)
+			array = ArrayUtils.toObject(((IntegerArrayResource)res).getValues());
+		else if(res instanceof BooleanArrayResource)
+			array = ArrayUtils.toObject(((BooleanArrayResource)res).getValues());
+		else if(res instanceof TimeArrayResource)
+			array = ArrayUtils.toObject(((TimeArrayResource)res).getValues());
+		else if(res instanceof ByteArrayResource)
+			array = ArrayUtils.toObject(((ByteArrayResource)res).getValues());
+		else throw new UnsupportedOperationException("ArrayResource of type "+res.getResourceType()+" not supported!");
+		return getAsString(array);
+	}
+	
+	public static String getAsString(Object[] array) {
+		String result = null;
+		for(Object obj: array) {
+			if(result == null) result = obj.toString();
+			else result += ", "+obj.toString();
+		}
+		return result;		
 	}
 }
