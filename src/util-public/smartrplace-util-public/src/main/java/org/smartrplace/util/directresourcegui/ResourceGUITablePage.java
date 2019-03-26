@@ -57,7 +57,7 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 		if(appMan != null) return appMan.getFrameworkTime();
 		return appManMin.getFrameworkTime();
 	}*/
-	private String pid() {
+	protected String pid() {
 		return WidgetHelper.getValidWidgetId(this.getClass().getName());
 	}
 	
