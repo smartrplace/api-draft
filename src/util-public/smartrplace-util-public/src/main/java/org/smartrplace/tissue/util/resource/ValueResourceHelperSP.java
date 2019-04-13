@@ -74,10 +74,18 @@ public class ValueResourceHelperSP {
 	}
 	
 	public static String getAsString(Object[] array) {
+		return getAsString(array, false);
+	}
+	public static String getAsString(Object[] array, boolean addIndices) {
 		String result = null;
+		int idx = 0;
 		for(Object obj: array) {
-			if(result == null) result = obj.toString();
-			else result += ", "+obj.toString();
+			String strEl;
+			if(addIndices) strEl = "["+idx+"]:"+obj.toString();
+			else strEl = obj.toString();
+			if(result == null) result = strEl;
+			else result += ", "+strEl;
+			idx++;
 		}
 		return result;		
 	}
