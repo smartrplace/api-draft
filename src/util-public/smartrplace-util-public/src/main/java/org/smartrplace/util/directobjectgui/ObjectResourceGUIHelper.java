@@ -193,13 +193,22 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					myLabel.setText("n.a.", req);
 					return;
 				}
-				String val;
-				if(format != null) {
-					val = String.format(format, source.getValue());
-				} else {
-					val = String.format("%.1f", source.getValue());
+				
+				float val;
+				if(source instanceof TemperatureResource) {
+					val = ((TemperatureResource) source).getCelsius();
 				}
-				myLabel.setText(val, req);
+				else {
+					val = source.getValue();
+				}
+
+				String valStr;
+				if(format != null) {
+					valStr = String.format(format, val);
+				} else {
+					valStr = String.format("%.1f", val);
+				}
+				myLabel.setText(valStr, req);
 			}
 		};
 		return result.myLabel;
