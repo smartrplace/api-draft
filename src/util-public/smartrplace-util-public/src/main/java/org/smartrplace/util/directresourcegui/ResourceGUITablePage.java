@@ -62,6 +62,8 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 	}
 	
 	public abstract void addWidgetsAboveTable();
+	/** Overwrite if widgets shall be placed below table*/
+	protected void addWidgetsBelowTable() {};
 	/** Overwrite this method to provide a different set of resources
 	 * 
 	 * @param req
@@ -153,6 +155,7 @@ public abstract class ResourceGUITablePage<T extends Resource> implements Resour
 		addWidgetsAboveTable();
 		page.append(alert);
 		page.append(mainTable);
+		addWidgetsBelowTable();
 	}
 	
 	public WidgetPage<?> getPage() {
