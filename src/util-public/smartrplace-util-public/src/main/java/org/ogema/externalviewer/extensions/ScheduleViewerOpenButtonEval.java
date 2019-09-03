@@ -41,7 +41,8 @@ import de.iwes.widgets.reswidget.scheduleviewer.api.TimeSeriesFilterExtended;
 
 public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenButton {
 	private static final long serialVersionUID = 1L;
-
+	protected TimeSeriesNameProvider nameProvider = null;
+	
 	protected abstract List<TimeSeriesData> getTimeseries(OgemaHttpRequest req);
 	/** This method is only required for generating filter name. If not available
 	 * just return an empty String or any name of the time series set
@@ -56,13 +57,17 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			scheduleViewerProviderId,
 			scheduleViewerProviderInstance);
 	}
-	
+
+	public void setNameProvider(TimeSeriesNameProvider nameProvider) {
+		this.nameProvider = nameProvider;
+	}
+
 	@Override
 	public void onPrePOST(String data, OgemaHttpRequest req) {
 		//final GaRoSingleEvalProvider eval = selectProvider.getSelectedItem(req);
 		
 		List<TimeSeriesData> input = getTimeseries(req);
-		TimeSeriesWithFilters filteringResult = getTimeSeriesWithFilters(input, "Filter for "+getEvaluationProviderId(req));
+		TimeSeriesWithFilters filteringResult = getTimeSeriesWithFilters(input, "Filter for "+getEvaluationProviderId(req), nameProvider);
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		List<TimeSeriesFilter> programsInner = (List)filteringResult.filters;
 		//List<ReadOnlyTimeSeries> result = new ArrayList<>();
