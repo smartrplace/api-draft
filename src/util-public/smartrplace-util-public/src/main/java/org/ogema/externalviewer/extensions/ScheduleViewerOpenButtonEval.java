@@ -25,10 +25,6 @@ import java.util.Map;
 import org.ogema.core.model.Resource;
 import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
-import org.ogema.externalviewer.extensions.DefaultDedicatedTSSessionConfiguration;
-import org.ogema.externalviewer.extensions.DefaultScheduleViewerConfigurationProviderExtended;
-import org.ogema.externalviewer.extensions.DefaultTimeSeriesFilterExtended;
-import org.ogema.externalviewer.extensions.ScheduleViewerOpenButton;
 import org.smartrplace.util.format.StringListFormatUtils;
 
 import de.iwes.timeseries.eval.api.TimeSeriesData;
@@ -181,8 +177,45 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		public List<ReadOnlyTimeSeries> timeSeries = new ArrayList<>();
 		public List<TimeSeriesFilterExtended> filters;
 	}
-	@SuppressWarnings("unchecked")
+	
+	public static interface TimeSeriesNameProvider {
+		default String getShortNameForTypeI(GaRoDataTypeI dataType, TimeSeriesDataExtendedImpl tse) {
+			String inputLabel = dataType.label(null).replace("Measurement", "");
+			String location = tse.label(null);
+			if((tse.getIds().size() > 1) && tse.getIds().get(1).equals(GaRoMultiEvalDataProvider.BUILDING_OVERALL_ROOM_ID))
+				return StringListFormatUtils.getStringFromList(null, tse.getIds().get(0), getDeviceShortId(location), inputLabel);
+			else
+				return StringListFormatUtils.getStringFromList(tse.getIds(), getDeviceShortId(location), inputLabel);
+			
+		}
+		default String getLongNameForTypeI(GaRoDataTypeI dataType, TimeSeriesDataExtendedImpl tse) {
+			String inputLabel = dataType.label(null).replace("Measurement", "");
+			return StringListFormatUtils.getStringFromList(tse.getIds(), tse.label(null), inputLabel);
+		};
+		
+		default String getShortNameBase(TimeSeriesDataExtendedImpl tse) {
+			if(tse.getIds() == null) {
+				return tse.label(null);
+			} else {
+				return StringListFormatUtils.getStringFromList(tse.getIds());
+			}
+		}
+
+		default String getLongNameBase(TimeSeriesDataExtendedImpl tse) {
+			if(tse.getIds() == null) {
+				return StringListFormatUtils.getStringFromList(null, "NoGw", tse.label(null));
+			} else {
+				return StringListFormatUtils.getStringFromList(tse.getIds(), tse.label(null));
+			}
+		}
+	}
+	
 	public static TimeSeriesWithFilters getTimeSeriesWithFilters(List<TimeSeriesData> input, String filterName) {
+		return getTimeSeriesWithFilters(input, filterName, new TimeSeriesNameProvider() {});
+	}
+	@SuppressWarnings("unchecked")
+	public static TimeSeriesWithFilters getTimeSeriesWithFilters(List<TimeSeriesData> input,
+			String filterName, TimeSeriesNameProvider nameProvider) {
 		ReadOnlyTimeSeries timeSeries;
 		//List<ReadOnlyTimeSeries> result = new ArrayList<>();
 		TimeSeriesWithFilters result = new TimeSeriesWithFilters();
@@ -217,7 +250,9 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 								if(sensorsToFilterOut.contains(shortId)) continue;
 						}
 					}
-					String location = tsd.label(null);
+					shortName = nameProvider.getShortNameForTypeI(dataType, tse);
+					longName = nameProvider.getLongNameForTypeI(dataType, tse);
+					/*String location = tsd.label(null);
 					if(tsId == null) tsId = location;
 					dataType = (GaRoDataTypeI)tse.type;
 					String inputLabel = dataType.label(null).replace("Measurement", "");
@@ -226,16 +261,19 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 					else
 						shortName = StringListFormatUtils.getStringFromList(tse.getIds(), getDeviceShortId(location), inputLabel);
 					longName = StringListFormatUtils.getStringFromList(tse.getIds(), tsd.label(null), inputLabel);
+					*/
 				} else {
 					if(tse.type instanceof Class)
 						type = (Class<? extends Resource>)tse.type;
-					if(tse.getIds() == null) {
+					shortName = nameProvider.getShortNameBase(tse);
+					longName = nameProvider.getLongNameBase(tse);
+					/*if(tse.getIds() == null) {
 						shortName = tsd.label(null);
 						longName = StringListFormatUtils.getStringFromList(null, "NoGw", tsd.label(null));
 					} else {
 						shortName = StringListFormatUtils.getStringFromList(tse.getIds());
 						longName = StringListFormatUtils.getStringFromList(tse.getIds(), tsd.label(null));
-					}
+					}*/
 				}
 			} else {
 				shortName = tsd.label(null);
