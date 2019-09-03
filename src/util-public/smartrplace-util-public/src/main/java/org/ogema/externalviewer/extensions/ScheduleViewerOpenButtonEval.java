@@ -245,6 +245,7 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			if(tsd instanceof TimeSeriesDataExtendedImpl) {
 				TimeSeriesDataExtendedImpl tse = (TimeSeriesDataExtendedImpl)tsd;
 				if(tse.type instanceof GaRoDataTypeI) {
+					dataType = (GaRoDataTypeI) tse.type;
 					if(tse.getIds().size() > 1) {
 						String gwId = tse.getIds().get(0);
 						String prop = System.getProperty("org.ogema.evaluationofflinecontrol.scheduleviewer.expert.sensorsToFilterOut."+gwId);
