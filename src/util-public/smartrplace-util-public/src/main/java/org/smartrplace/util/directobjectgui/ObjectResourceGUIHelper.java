@@ -520,6 +520,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 			
 		};
 		if(alert != null) triggerOnPost(updateInterval.myField, alert); //updateInterval.myField.triggerAction(alert, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST);
+		updateInterval.myField.setDefaultInputmode("numeric");
 		return updateInterval.myField;
 	}
 	public TextField integerEditExt(String widgetId, String lineId, final IntegerResource source, Row row,
@@ -562,6 +563,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 			
 		};
 		if(checker.getAlert() != null) triggerOnPost(updateInterval.myField, checker.getAlert());
+		updateInterval.myField.setDefaultInputmode("numeric");
 		return updateInterval.myField;
 	}
 
@@ -795,6 +797,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 			
 		};
 		if(alert != null) triggerOnPost(updateInterval.myField, alert); //updateInterval.myField.triggerAction(alert, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST);
+		updateInterval.myField.setDefaultInputmode("decimal");
 		return updateInterval.myField;
 	}
 	
