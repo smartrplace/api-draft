@@ -41,7 +41,7 @@ import de.iwes.widgets.reswidget.scheduleviewer.api.TimeSeriesFilterExtended;
 
 public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenButton {
 	private static final long serialVersionUID = 1L;
-	protected TimeSeriesNameProvider nameProvider = null;
+	protected TimeSeriesNameProvider nameProvider = new TimeSeriesNameProvider() {};
 	
 	protected abstract List<TimeSeriesData> getTimeseries(OgemaHttpRequest req);
 	/** This method is only required for generating filter name. If not available
