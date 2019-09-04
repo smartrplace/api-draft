@@ -213,6 +213,11 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 				return StringListFormatUtils.getStringFromList(tse.getIds(), tse.label(null));
 			}
 		}
+		
+		/** If tse1 is more important return +1, if tse2 is more important return -1*/
+		default int compareInput(String shortName1, String shortName2) {
+			return 0;
+		}
 	}
 	
 	public static TimeSeriesWithFilters getTimeSeriesWithFilters(List<TimeSeriesData> input, String filterName) {
@@ -234,12 +239,13 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			if(!(tsdBase instanceof TimeSeriesDataOffline)) throw new IllegalStateException("getStartAndEndTime only works on TimeSeriesData input!");
 			TimeSeriesDataOffline tsd = (TimeSeriesDataOffline) tsdBase;
 			timeSeries = tsd.getTimeSeries();
-			String tsId;
+			final String tsId;
 			String shortName;
 			String longName;
 			if(timeSeries instanceof RecordedData) {
 				tsId = ((RecordedData)timeSeries).getPath();
 			} else tsId = null;
+			
 			GaRoDataTypeI dataType = null;
 			Class<? extends Resource> type = null;
 			if(tsd instanceof TimeSeriesDataExtendedImpl) {
@@ -284,6 +290,19 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			} else {
 				shortName = tsd.label(null);
 				longName = tsd.description(null);
+			}
+			
+			//avoid overwriting of more significant names
+			if(tsId == null) {
+				if(shortNames.containsKey(timeSeries)) {
+					if(nameProvider.compareInput(shortNames.get(timeSeries), shortName) > 0)
+						continue;
+				}
+			} else {
+				if(shortNamesRD.containsKey(tsId)) {
+					if(nameProvider.compareInput(shortNamesRD.get(tsId), shortName) > 0)
+						continue;
+				}
 			}
 			if(tsId == null) {
 				shortNames.put(timeSeries, shortName);
