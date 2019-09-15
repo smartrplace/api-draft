@@ -1,6 +1,7 @@
 package org.smartrplace.rexometer.driver.emoncms.model;
 
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.model.communication.CommunicationInformation;
 
@@ -10,8 +11,19 @@ import org.ogema.model.communication.CommunicationInformation;
  */
 public interface EmonCMSConnection extends CommunicationInformation {
 	/** List of data that shall be sent to EMonCMS
+	 * TODO: Do not implement yet
 	 */
-	ResourceList<EmonCMSInputConfiguration> inputConfigurations();
+	ResourceList<EmonCMSReadConfiguration> readConfigurations();
+
+	/** List of data that shall be sent to EMonCMS
+	 * TODO: Do not implement yet
+	 */
+	ResourceList<EmonCMSWriteConfiguration> inputConfigurations();
+	
+	/** URL to connect to*/
+	StringResource url();
+	/** Port to connect to if not standard*/
+	IntegerResource port();
 	
 	StringResource apiKeyRead();
 	StringResource apiKeyWrite();

@@ -45,7 +45,7 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
         super(ID, LABEL, DESCRIPTION);
     }
 
-    public static final GaRoDataTypeParam motionType = new GaRoDataTypeParam(GaRoDataType.MotionDetection, false);
+    /*public static final GaRoDataTypeParam motionType = new GaRoDataTypeParam(GaRoDataType.MotionDetection, false);
     public static final GaRoDataTypeParam humidityType = new GaRoDataTypeParam(GaRoDataType.HumidityMeasurement, false);
     public static final GaRoDataTypeParam tempMesRoomType = new GaRoDataTypeParam(GaRoDataType.TemperatureMeasurementRoomSensor, false);
     public static final GaRoDataTypeParam tempMesThermostatType = new GaRoDataTypeParam(GaRoDataType.TemperatureMeasurementThermostat, false);
@@ -56,11 +56,9 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
     public static final GaRoDataTypeParam powerType = new GaRoDataTypeParam(GaRoDataType.PowerMeter, false);
     public static final GaRoDataTypeParam winType = new GaRoDataTypeParam(GaRoDataType.WindowOpen, false);
     public static final GaRoDataTypeParam chargeType = new GaRoDataTypeParam(GaRoDataType.ChargeSensor, false);
+    */
     public static final GaRoDataTypeParam chargeVoltageType = new GaRoDataTypeParam(GaRoDataType.ChargeVoltage, false);
-    public static final GaRoDataTypeParam powerSubPhaseType = new GaRoDataTypeParam(GaRoDataType.PowerMeterSubphase, false);
-    public static final GaRoDataTypeParam powerOutletType = new GaRoDataTypeParam(GaRoDataType.PowerMeterOutlet, false);
-    public static final GaRoDataTypeParam heatPowerType = new GaRoDataTypeParam(GaRoDataType.Heatpower, false);
-   
+       
 	@Override
 	/** Provide your data types here*/
 	public GaRoDataType[] getGaRoInputTypes() {
@@ -76,17 +74,16 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
 	        	winType,
 	        	powerType,
 	        	chargeType,
-	        	chargeVoltageType,
 	        	powerSubPhaseType,
 	        	powerOutletType,
-	        	heatPowerType
+	        	heatPowerType,
+	        	stateFBType,
+	        	chargeVoltageType
 		};
 	}
 	
-	public static final int CHARGE_VOLT_IDX = 11;
-	public static final int POWERSUB_IDX = 12;
-	public static final int POWEROUTLET_IDX = 13;
-	public static final int HEATPOWER_IDX = 14;
+	//Additional entries start with TYPE_NUM, next additional entry would be TYPE_NUM+1 etc.
+	public static final int CHARGE_VOLT_IDX = TYPE_NUM;
 
 	@Override
 	public GaRoDataTypeParam getParamType(int idxOfReqInput) {
@@ -101,11 +98,12 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
     	case WINDOW_IDX: return winType;
     	case POWER_IDX: return powerType;
     	case CHARGE_IDX: return chargeType;
-       	case CHARGE_VOLT_IDX: return chargeVoltageType;
-    	case POWERSUB_IDX: return powerSubPhaseType;
+     	case POWERSUB_IDX: return powerSubPhaseType;
     	case POWEROUTLET_IDX: return powerOutletType;
     	case HEATPOWER_IDX: return heatPowerType;
-    	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
+    	case STATEFB_IDX: return stateFBType;
+    	case CHARGE_VOLT_IDX: return chargeVoltageType;
+   	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
     }
 	

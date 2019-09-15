@@ -85,6 +85,10 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final GaRoDataTypeParam powerType = new GaRoDataTypeParam(GaRoDataType.PowerMeter, false);
     public static final GaRoDataTypeParam winType = new GaRoDataTypeParam(GaRoDataType.WindowOpen, false);
     public static final GaRoDataTypeParam chargeType = new GaRoDataTypeParam(GaRoDataType.ChargeSensor, false);
+    public static final GaRoDataTypeParam powerSubPhaseType = new GaRoDataTypeParam(GaRoDataType.PowerMeterSubphase, false);
+    public static final GaRoDataTypeParam powerOutletType = new GaRoDataTypeParam(GaRoDataType.PowerMeterOutlet, false);
+    public static final GaRoDataTypeParam heatPowerType = new GaRoDataTypeParam(GaRoDataType.Heatpower, false);
+    public static final GaRoDataTypeParam stateFBType = new GaRoDataTypeParam(GaRoDataType.SwitchStateFeedback, false);
     
 	@Override
 	/** Provide your data types here*/
@@ -100,7 +104,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	        	valveType,
 	        	winType,
 	        	powerType,
-	        	chargeType
+	        	chargeType,
+	        	powerSubPhaseType,
+	        	powerOutletType,
+	        	heatPowerType,
+	        	stateFBType
 		};
 	}
 	
@@ -117,7 +125,12 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //Valve
 			3*HOUR_MILLIS, //Window
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //Power
-			6*HOUR_MILLIS}; //Charge
+			6*HOUR_MILLIS,
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //power subphase
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //power outlet
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat power
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //state feedback
+			}; //Charge
 	
 	@Override
 	protected long[] getMaximumGapTimes() {
@@ -126,7 +139,10 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
-				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL};
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL
+				};
 	}
 	/** It is recommended to define the indices of your input here.*/
 	public static final int MOTION_IDX = 0;
@@ -140,7 +156,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final int WINDOW_IDX = 8;
 	public static final int POWER_IDX = 9;
 	public static final int CHARGE_IDX = 10;
-    public static final int TYPE_NUM = 11;
+	public static final int POWERSUB_IDX = 11;
+	public static final int POWEROUTLET_IDX = 12;
+	public static final int HEATPOWER_IDX = 13;
+	public static final int STATEFB_IDX = 14;
+    public static final int TYPE_NUM = 15;
     
     protected GaRoDataTypeParam getParamType(int idxOfReqInput) {
     	switch(idxOfReqInput) {
@@ -155,6 +175,9 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     	case WINDOW_IDX: return winType;
     	case POWER_IDX: return powerType;
     	case CHARGE_IDX: return chargeType;
+    	case POWEROUTLET_IDX: return powerOutletType;
+    	case HEATPOWER_IDX: return heatPowerType;
+    	case STATEFB_IDX: return stateFBType;
     	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
     }

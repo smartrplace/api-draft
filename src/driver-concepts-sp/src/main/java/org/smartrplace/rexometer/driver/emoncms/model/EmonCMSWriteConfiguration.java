@@ -6,11 +6,16 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.model.prototypes.Configuration;
 
-public interface EmonCMSInputConfiguration extends Configuration {
+@Deprecated
+/** not yet implemented / supported. This should be done via a DataProvider in the future.*/
+public interface EmonCMSWriteConfiguration extends Configuration {
 
 	/** OGEMA resource from which data shall be transmitted to EmonCMS*/
 	SingleValueResource source();
 	 
+	/** Id to be used to identify the Emoncms field to write to*/
+	IntegerResource fieldId();
+	
 	/** 1: Transmit current values only<br>
 	 *  2: Transmit log data only<br>
 	 *  3: Transmit current value and log data for intervals that have non been transmitted yet 
