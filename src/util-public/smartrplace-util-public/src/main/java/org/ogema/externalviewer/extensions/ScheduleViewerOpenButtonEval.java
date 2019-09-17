@@ -50,6 +50,16 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 	protected abstract String getEvaluationProviderId(OgemaHttpRequest req);
 	protected abstract IntervalConfiguration getITVConfiguration(OgemaHttpRequest req);
 	
+	protected ScheduleViewerConfiguration getViewerConfiguration(long startTime, long endTime,
+			List<Collection<TimeSeriesFilter>> programs) {
+		final ScheduleViewerConfiguration viewerConfiguration =
+			ScheduleViewerConfigurationBuilder.newBuilder().setPrograms(programs).
+			setStartTime(startTime).setEndTime(endTime).setShowManipulator(true).
+			setShowIndividualConfigBtn(false).setShowPlotTypeSelector(true).build();
+		return viewerConfiguration;
+	}
+
+	
 	public ScheduleViewerOpenButtonEval(WidgetPage<?> page, String widgetId, String text,
 			String scheduleViewerProviderId,
 			DefaultScheduleViewerConfigurationProviderExtended scheduleViewerProviderInstance) {
@@ -87,9 +97,10 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			endTime = itv.multiEnd[itv.multiStart.length-1];
 		}
 		
-		final ScheduleViewerConfiguration viewerConfiguration =
-				ScheduleViewerConfigurationBuilder.newBuilder().setPrograms(programs).
-				setStartTime(startTime).setEndTime(endTime).setShowManipulator(true).build();
+		final ScheduleViewerConfiguration viewerConfiguration = getViewerConfiguration(
+				startTime, endTime, programs);
+		//		ScheduleViewerConfigurationBuilder.newBuilder().setPrograms(programs).
+		//		setStartTime(startTime).setEndTime(endTime).setShowManipulator(true).build();
 		
 		String ci = addConfig(new DefaultDedicatedTSSessionConfiguration(filteringResult.timeSeries, viewerConfiguration));
 		setConfigId(ci, req);
