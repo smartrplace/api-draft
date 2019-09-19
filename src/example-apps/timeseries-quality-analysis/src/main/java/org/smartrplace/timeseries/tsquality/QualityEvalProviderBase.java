@@ -88,6 +88,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final GaRoDataTypeParam powerSubPhaseType = new GaRoDataTypeParam(GaRoDataType.PowerMeterSubphase, false);
     public static final GaRoDataTypeParam powerOutletType = new GaRoDataTypeParam(GaRoDataType.PowerMeterOutlet, false);
     public static final GaRoDataTypeParam heatPowerType = new GaRoDataTypeParam(GaRoDataType.Heatpower, false);
+    public static final GaRoDataTypeParam heatEnergyType = new GaRoDataTypeParam(GaRoDataType.HeatEnergyIntegral, false);
+    public static final GaRoDataTypeParam heatFlowType = new GaRoDataTypeParam(GaRoDataType.HeatFlow, false);
+    public static final GaRoDataTypeParam heatVolumeType = new GaRoDataTypeParam(GaRoDataType.HeatVolumeIntegral, false);
+    public static final GaRoDataTypeParam heatSupplyTempType = new GaRoDataTypeParam(GaRoDataType.HeatSupplyTemperatur, false);
+    public static final GaRoDataTypeParam heatReturnTempType = new GaRoDataTypeParam(GaRoDataType.HeatReturnTemperatur, false);
     public static final GaRoDataTypeParam stateFBType = new GaRoDataTypeParam(GaRoDataType.SwitchStateFeedback, false);
     
 	@Override
@@ -108,6 +113,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	        	powerSubPhaseType,
 	        	powerOutletType,
 	        	heatPowerType,
+	        	heatEnergyType,
+	        	heatFlowType,
+	        	heatVolumeType,
+	        	heatSupplyTempType,
+	        	heatReturnTempType,
 	        	stateFBType
 		};
 	}
@@ -129,6 +139,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //power subphase
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //power outlet
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat power
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat energy
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat flow
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat volume
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat supply temperature
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat return temperature
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //state feedback
 			}; //Charge
 	
@@ -141,7 +156,9 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
-				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL
 				};
 	}
 	/** It is recommended to define the indices of your input here.*/
@@ -159,8 +176,13 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final int POWERSUB_IDX = 11;
 	public static final int POWEROUTLET_IDX = 12;
 	public static final int HEATPOWER_IDX = 13;
-	public static final int STATEFB_IDX = 14;
-    public static final int TYPE_NUM = 15;
+	public static final int HEATENERGY_IDX = 14;
+	public static final int HEATFLOW_IDX = 15;
+	public static final int HEATVOLUME_IDX = 16;
+	public static final int HEATSUPPLY_IDX = 17;
+	public static final int HEATRETURN_IDX = 18;
+	public static final int STATEFB_IDX = 19;
+    public static final int TYPE_NUM = 20;
     
     protected GaRoDataTypeParam getParamType(int idxOfReqInput) {
     	switch(idxOfReqInput) {
@@ -177,6 +199,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     	case CHARGE_IDX: return chargeType;
     	case POWEROUTLET_IDX: return powerOutletType;
     	case HEATPOWER_IDX: return heatPowerType;
+    	case HEATENERGY_IDX: return heatEnergyType;
+    	case HEATFLOW_IDX: return heatFlowType;
+    	case HEATVOLUME_IDX: return heatVolumeType;
+    	case HEATSUPPLY_IDX: return heatSupplyTempType;
+    	case HEATRETURN_IDX: return heatReturnTempType;
     	case STATEFB_IDX: return stateFBType;
     	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
