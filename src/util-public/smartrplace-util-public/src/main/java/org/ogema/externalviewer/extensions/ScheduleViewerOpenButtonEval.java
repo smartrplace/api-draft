@@ -196,9 +196,23 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 						String prop = System.getProperty("org.ogema.evaluationofflinecontrol.scheduleviewer.expert.sensorsToFilterOut."+gwId);
 						if(prop != null) {
 							List<String> sensorsToFilterOut = Arrays.asList(prop.split(","));
-							String shortId = tse.getProperty("deviceName");
-							if(shortId != null)
-								if(sensorsToFilterOut.contains(shortId)) continue;
+							if((!sensorsToFilterOut.isEmpty())&&(sensorsToFilterOut.get(0).length()>4)) {
+								boolean found = false;
+								for(String toRemove: sensorsToFilterOut) {
+									if(tse.id().contains(toRemove)) {
+										found = true;
+										break;
+									}
+								}
+								if(found)
+									continue;
+							} else {
+								String shortId = tse.getProperty("deviceName");
+								if(shortId != null) {
+									if(sensorsToFilterOut.contains(shortId))
+										continue;
+								}
+							}
 						}
 					}
 					shortName = nameProvider.getShortNameForTypeI(dataType, tse);
