@@ -83,6 +83,8 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
 	        	heatSupplyTempType,
 	        	heatReturnTempType,
 	        	stateFBType,
+	        	energyType,
+	        	energySubPhaseType,
 	        	chargeVoltageType
 		};
 	}
@@ -111,6 +113,8 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
     	case HEATVOLUME_IDX: return heatVolumeType;
     	case HEATSUPPLY_IDX: return heatSupplyTempType;
     	case HEATRETURN_IDX: return heatReturnTempType;    	case STATEFB_IDX: return stateFBType;
+    	case ENERGY_IDX: return energyType;
+    	case ENERGYSUB_IDX: return energySubPhaseType;
     	case CHARGE_VOLT_IDX: return chargeVoltageType;
    	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}

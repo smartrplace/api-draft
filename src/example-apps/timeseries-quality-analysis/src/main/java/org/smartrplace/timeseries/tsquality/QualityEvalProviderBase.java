@@ -94,6 +94,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final GaRoDataTypeParam heatSupplyTempType = new GaRoDataTypeParam(GaRoDataType.HeatSupplyTemperatur, false);
     public static final GaRoDataTypeParam heatReturnTempType = new GaRoDataTypeParam(GaRoDataType.HeatReturnTemperatur, false);
     public static final GaRoDataTypeParam stateFBType = new GaRoDataTypeParam(GaRoDataType.SwitchStateFeedback, false);
+    public static final GaRoDataTypeParam energyType = new GaRoDataTypeParam(GaRoDataType.PowerMeterEnergy, false);
+    public static final GaRoDataTypeParam energySubPhaseType = new GaRoDataTypeParam(GaRoDataType.PowerMeterEnergySubphase, false);
     
 	@Override
 	/** Provide your data types here*/
@@ -118,7 +120,9 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	        	heatVolumeType,
 	        	heatSupplyTempType,
 	        	heatReturnTempType,
-	        	stateFBType
+	        	stateFBType,
+	        	energyType,
+	        	energySubPhaseType
 		};
 	}
 	
@@ -144,12 +148,15 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat volume
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat supply temperature
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat return temperature
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //state feedback
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //state feedback
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //energy
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //energy subphase
 			}; //Charge
 	
 	@Override
 	protected long[] getMaximumGapTimes() {
 		return new long[] {2*HOUR_MILLIS, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
@@ -182,7 +189,9 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final int HEATSUPPLY_IDX = 17;
 	public static final int HEATRETURN_IDX = 18;
 	public static final int STATEFB_IDX = 19;
-    public static final int TYPE_NUM = 20;
+	public static final int ENERGY_IDX = 20;
+	public static final int ENERGYSUB_IDX = 21;
+    public static final int TYPE_NUM = 22;
     
     protected GaRoDataTypeParam getParamType(int idxOfReqInput) {
     	switch(idxOfReqInput) {
@@ -205,6 +214,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     	case HEATSUPPLY_IDX: return heatSupplyTempType;
     	case HEATRETURN_IDX: return heatReturnTempType;
     	case STATEFB_IDX: return stateFBType;
+    	case ENERGY_IDX: return energyType;
+    	case ENERGYSUB_IDX: return energySubPhaseType;
     	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
     }
