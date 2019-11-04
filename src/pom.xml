@@ -32,6 +32,7 @@
 		 <module>example-apps</module>
 		<module>extension-api</module>
 		<module>util-public</module>
+		<module>drivers</module>
 	</modules>
 
 	<build>
