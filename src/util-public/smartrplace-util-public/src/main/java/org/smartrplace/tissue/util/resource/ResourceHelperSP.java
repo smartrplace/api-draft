@@ -20,6 +20,7 @@ import java.security.PrivilegedAction;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.locations.Location;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -90,6 +91,38 @@ public class ResourceHelperSP {
 				result.deviceResourceLocation = device.getLocation();
 				return result;			}
 		});		
+	}
+
+	/**Works like {@link Resource#getSubResource(String, Class<? extends Resource>)}, but
+	 * allows to specify a subPath over several sub resources. This resource preserves
+	 * path information of the parent
+	 * @param parent if null the subPath starts on toplevel. In this case works like
+	 * ResourceAccess#getResource, but allows to set a type.
+	 * @param subPath path using separator '/'
+	 * @return resource of requested type (also virtual resource) or null if the path specified
+	 * 		does not exist on the intermediate elements 
+	 */
+	public static <T extends Resource> T getSubResource(Resource parent, String subPath, Class<T> type,
+			ResourceAccess resAcc) {
+		String[] els = subPath.split("/");
+		Resource cr = parent;
+		for(int i=0; i<els.length; i++) {
+			if(cr == null) {
+				if(i==0) {
+					cr = resAcc.getResource(els[0]);
+					if(cr == null) return null;
+				} else
+					return null;
+			}
+			if(i == (els.length-1)) {
+				if(type == null)
+					return cr.getSubResource(els[i]);
+				else
+					return cr.getSubResource(els[i], type);
+			}
+			cr = cr.getSubResource(els[i]);
+		}
+		throw new IllegalStateException("we should never get here");		
 	}
 
 }

@@ -15,6 +15,9 @@
  */
 package org.smartrplace.tissue.util.format;
 
+import java.util.Collection;
+import java.util.List;
+
 /** Content here may be moved to {@link de.iwes.util.format.StringFormatHelper} in the future
  */
 public class StringFormatHelperSP {
@@ -85,4 +88,14 @@ public class StringFormatHelperSP {
 		return (">99a");
 	}
 
+	public static String list2string(List<?> data, int maxEl) {
+		String result = "#:"+data.size();
+		if(!result.isEmpty() && maxEl > 0)
+			result += " [0]:"+data.get(0).toString();
+		int limit = Math.min(data.size(), maxEl);
+		for(int i=1; i<limit; i++) {
+			result += ",["+i+"]:"+data.get(i).toString();			
+		}
+		return result;
+	}
 }

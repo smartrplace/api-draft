@@ -8,9 +8,10 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>drivers</artifactId>
-    <name>Smartrplace Driver Collection Base</name>
-	<description>Smartrplace Open Source Driver Collection Base</description>
+    <artifactId>open-apps</artifactId>
+    <groupId>org.smartrplace.apps</groupId>
+    <name>Smartrplace Open Apps Collection Base</name>
+	<description>Smartrplace Open Source App Collection Base</description>
     <packaging>pom</packaging>
     <version>0.9.0-SNAPSHOT</version>
 
