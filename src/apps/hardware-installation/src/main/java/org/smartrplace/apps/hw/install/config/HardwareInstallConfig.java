@@ -15,16 +15,17 @@
  */
 package org.smartrplace.apps.hw.install.config;
 
-import org.ogema.core.model.simple.StringResource;
-import org.ogema.model.prototypes.Configuration;
+import org.ogema.core.model.ResourceList;
+import org.ogema.core.model.simple.BooleanResource;
+import org.ogema.model.prototypes.Data;
 
 /** 
  * The global configuration resource type for this app.
  */
-public interface HardwareInstallConfig extends Configuration {
+public interface HardwareInstallConfig extends Data {
 
-	StringResource serverIP();
+	ResourceList<InstallAppDevice> knownDevices();
 	
-	// TODO add global settings
-
+	/** If true then listeners are active. If false then listeners are not active for performance reasons*/
+	BooleanResource isInstallationActive();
 }

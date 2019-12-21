@@ -58,14 +58,7 @@ public class HardwareInstallApp implements Application {
 		widgetApp = guiService.createWidgetApp(urlPath, appManager);
 		final WidgetPage<?> page = widgetApp.createStartPage();
 
-		new CountDownDelayedExecutionTimer(appManager, 5000) {
-			
-			@Override
-			public void delayedExecution() {
-				controller = new HardwareInstallController(appMan, page);
-			}
-		};
-		
+		controller = new HardwareInstallController(appMan, page);
      }
 
      /*
