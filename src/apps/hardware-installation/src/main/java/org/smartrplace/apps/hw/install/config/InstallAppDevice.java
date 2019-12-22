@@ -27,11 +27,12 @@ public interface InstallAppDevice extends Data {
 	 * 		(more details in comment)<br>
 	 */
 	public IntegerResource installationStatus();
+	
 	/** A support status different from zero indicates that the device does not operate as expected.
 	 * This can be used to indicate problems that still allow normal operation of the device, but
 	 * indicate to the technical support/development that the device should be checked when possible.
 	 * 0: OK
 	 * 1: Please check device (more details in comment)
 	 */
-	public IntegerResource supportStatus();
+	//public IntegerResource supportStatus();
 }

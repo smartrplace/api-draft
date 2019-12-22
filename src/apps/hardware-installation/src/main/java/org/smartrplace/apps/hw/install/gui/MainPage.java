@@ -1,68 +1,101 @@
-/**
- * ﻿Copyright 2018 Smartrplace UG
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.smartrplace.apps.hw.install.gui;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
-import org.ogema.model.action.Action;
+import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
+import org.ogema.model.devices.buildingtechnology.Thermostat;
+import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
+import org.smartrplace.apps.hw.install.HardwareInstallController;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
+import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
+import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.html.StaticTable;
+import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
-import de.iwes.widgets.html.complextable.DynamicTable;
+import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 
-/**
- * An HTML page, generated from the Java code.
- */
-public class MainPage {
+public class MainPage extends ResourceGUITablePage<InstallAppDevice> {
+	private HardwareInstallController controller;
+	private Header header;
+	private Alert alert;
+	private RoomSelectorDropdown roomsDrop;
 	
-	public final long UPDATE_RATE = 5*1000;
-	
-	public final DynamicTable<Action> gatewayTable;
-	
-	public MainPage(final WidgetPage<?> page, final ApplicationManager appMan) {
+	public MainPage(WidgetPage<?> page, HardwareInstallController controller) {
+		super(page, controller.appMan, null, InstallAppDevice.class, false, true);
+		this.controller = controller;
+		
+		triggerPageBuild();
+	}
 
-		Header header = new Header(page, "header", "Actions available on the system");
-		header.addDefaultStyle(HeaderData.CENTERED);
+	@Override
+	public void addWidgets(InstallAppDevice object, ResourceGUIHelper<InstallAppDevice> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
+		if(!(object.device() instanceof Thermostat)) return;
+		Thermostat device = (Thermostat) object.device();
+		final String name;
+		if(device.getLocation().toLowerCase().contains("homematic")) {
+			name = "HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
+		} else
+			name = ResourceUtils.getHumanReadableShortName(device);
+		vh.stringLabel("Name", id, name, row);
+		vh.floatEdit("Setpoint", id, device.temperatureSensor().settings().setpoint(), row, alert, 4.5f, 30f, "Allowed range: 4.5 to 30°C");
+		vh.floatLabel("Measurement", id, device.temperatureSensor().reading(), row, "%.1f");
+		vh.floatLabel("Battery", id, device.battery().chargeSensor().reading(), row, "%.1f");
+		Map<Room, String> roomsToSet = new HashMap<>();
+		List<Room> rooms = controller.appMan.getResourceAccess().getResources(Room.class);
+		for(Room room: rooms) {
+			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
+		}
+		vh.referenceDropdownFixedChoice("Room", id, device.location().room(), row, roomsToSet );
+		vh.stringEdit("Location", id, object.installationLocation(), row, alert);
+		
+		Map<String, String> valuesToSet = new HashMap<>();
+		valuesToSet.put("0", "unknown");
+		valuesToSet.put("1", "Device installed physically");
+		valuesToSet.put("10", "Physical installation done including all on-site tests");
+		valuesToSet.put("20", "All configuration finished, device is in full operation");
+		valuesToSet.put("-10", "Error in physical installation and/or testing (explain in comment)");
+		valuesToSet.put("-20", "Error in configuration, device cannot be used/requires action for real usage");
+		vh.dropdown("Status", id, object.installationStatus(), row, valuesToSet );
+		
+		vh.stringEdit("Comment", id, object.installationComment(), row, alert);
+	}
+
+	@Override
+	public void addWidgetsAboveTable() {
+		header = new Header(page, "header", "Smartrplace Hardware InstallationApp");
+		header.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
 		page.append(header).linebreak();
 		
-		Alert alert = new Alert(page, "alert", "");
+		alert = new Alert(page, "alert", "");
 		alert.setDefaultVisibility(false);
 		page.append(alert).linebreak();
 		
-		gatewayTable = new DynamicTable<Action>(page, "gatewayTable", true);
-		List<Action> acl = appMan.getResourceAccess().getResources(Action.class);
-		Action ac = null;
-		if(!acl.isEmpty()) ac = acl.get(0);
-		//ActionTemplate template = new ActionTemplate(page, alert, appMan, ac);
-		//gatewayTable.setRowTemplate(template);
+		StaticTable topTable = new StaticTable(1, 5, new int[] {1, 3, 3, 3, 2});
+		BooleanResourceButton installMode = new BooleanResourceButton(page, "installMode", "Installation Mode",
+				controller.appConfigData.isInstallationActive());
+		roomsDrop = new RoomSelectorDropdown(page, "roomsDrop", controller);
 		
-		page.append(gatewayTable);
+		topTable.setContent(0, 0, roomsDrop).setContent(0, 1, installMode);
+		page.append(topTable);
 	}
 	
-	public void addRowIfNotExisting(Action info) {
-		String id = ResourceUtils.getValidResourceName(info.getLocation());		
-		Set<String> rows = gatewayTable.getRows(null);
-		if (!rows.contains(id)) {
-			gatewayTable.addItem(info, null);
-		}
-	}		
+	@Override
+	public List<InstallAppDevice> getResourcesInTable(OgemaHttpRequest req) {
+		return roomsDrop.getDevicesSelected();
+	}
+	
+	@Override
+	protected void addWidgetsBelowTable() {
+	}
 
 }

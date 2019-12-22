@@ -26,6 +26,8 @@ import org.smartrplace.apps.hw.install.patternlistener.ThermostatListener;
 
 import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import org.smartrplace.apps.hw.install.patternlistener.DoorWindowSensorListener;
+import org.smartrplace.apps.hw.install.pattern.DoorWindowSensorPattern;
 
 // here the controller logic is implemented
 public class HardwareInstallController {
@@ -44,13 +46,14 @@ public class HardwareInstallController {
 		this.log = appMan.getLogger();
 		this.advAcc = appMan.getResourcePatternAccess();
 		
-		mainPage = new MainPage(page, appMan);
+		mainPage = new MainPage(page, this);
 
 		initConfigurationResource();
         initDemands();
 	}
 
 	public ThermostatListener actionListener;
+	public DoorWindowSensorListener doorWindowSensorListener;
 
     /*
      * This app uses a central configuration resource, which is accessed here
@@ -79,13 +82,34 @@ public class HardwareInstallController {
      */
     public void initDemands() {
 		actionListener = new ThermostatListener(this);
-		advAcc.addPatternDemand(ThermostatPattern.class, actionListener, AccessPriority.PRIO_LOWEST);
+		doorWindowSensorListener = new DoorWindowSensorListener(this);
+		if(appConfigData.isInstallationActive().getValue()) {
+			startDemands();
+		}
+    }
+    public void checkDemands() {
+    	if(appConfigData.isInstallationActive().getValue())
+    		startDemands();
+    	else
+    		closeDemands();
+    }
+    
+    public boolean demandsActivated = false;
+    public void startDemands() {
+    	advAcc.addPatternDemand(ThermostatPattern.class, actionListener, AccessPriority.PRIO_LOWEST);
+		advAcc.addPatternDemand(DoorWindowSensorPattern.class, doorWindowSensorListener, AccessPriority.PRIO_LOWEST); 
     }
 
-	public void close() {
+	public void closeDemands() {
+		if(!demandsActivated) return;
+		demandsActivated = false;
 		advAcc.removePatternDemand(ThermostatPattern.class, actionListener);
+		advAcc.removePatternDemand(DoorWindowSensorPattern.class, doorWindowSensorListener);
     }
-
+	public void close() {
+		closeDemands();
+	}
+		
 	/*
 	 * if the app needs to consider dependencies between different pattern types,
 	 * they can be processed here.

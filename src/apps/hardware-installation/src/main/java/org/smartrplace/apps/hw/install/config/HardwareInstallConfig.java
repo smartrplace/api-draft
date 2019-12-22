@@ -17,6 +17,7 @@ package org.smartrplace.apps.hw.install.config;
 
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.BooleanResource;
+import org.ogema.core.model.simple.StringResource;
 import org.ogema.model.prototypes.Data;
 
 /** 
@@ -28,4 +29,10 @@ public interface HardwareInstallConfig extends Data {
 	
 	/** If true then listeners are active. If false then listeners are not active for performance reasons*/
 	BooleanResource isInstallationActive();
+	
+	/** If this reference is set then only the room selected shall be displayed, otherwise all rooms. Note that
+	 * we save this information persistently for all users/sessions as this is most efficient during installation in
+	 * many cases.
+	 */
+	StringResource room();
 }

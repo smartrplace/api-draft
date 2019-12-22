@@ -184,6 +184,7 @@ public class UserServlet extends HttpServlet {
 		}
 		
 		for(T obj: objects) {
+			if(obj == null) continue;
 			Map<String, ServletValueProvider> data = pageprov.getProviders(obj, user);
 			final String objStr;
 			final JSONObject subJson = new JSONObject();
