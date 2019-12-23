@@ -26,6 +26,7 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.util.directresourcegui.KnownWidgetHolder;
 import org.smartrplace.util.format.WidgetHelper;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.dynamics.TriggeredAction;
@@ -104,12 +105,29 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		this(page, appMan, initSampleObject, autoBuildPage, true);
 	}
 	public ObjectGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
+			Class<T> resourceType, boolean autoBuildPage) {
+		this(page, appMan, null, null, resourceType, autoBuildPage, true);
+	}
+	
+	public ObjectGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			T initSampleObject, boolean autoBuildPage, boolean registerDependentWidgets) {
 		this(page, appMan, null, initSampleObject, autoBuildPage, true);
 	}
 	public ObjectGUITablePage(final WidgetPage<?> page,
 			final ApplicationManager appMan, final ApplicationManagerMinimal appManMin,
 			T initSampleObject, boolean autoBuildPage, boolean registerDependentWidgets) {
+		this(page, appMan, null, initSampleObject, null, autoBuildPage, true);
+	}
+	@SuppressWarnings("unchecked")
+	public ObjectGUITablePage(final WidgetPage<?> page,
+			final ApplicationManager appMan, final ApplicationManagerMinimal appManMin,
+			T initSampleObject, Class<T> resourceType, boolean autoBuildPage, boolean registerDependentWidgets) {
+		if(resourceType != null) {
+			if(!(Resource.class.isAssignableFrom(resourceType)))
+				throw new IllegalArgumentException("ObjectGUITablePage can only instantiated with resource "
+						+ "type, found:"+resourceType);
+			initSampleObject = (T) ResourceHelper.getSampleResource((Class<? extends Resource>)resourceType);
+		}
 		this.page = page;
 		this.appMan = appMan;
 		this.appManMin = appManMin;

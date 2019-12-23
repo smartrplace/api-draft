@@ -25,15 +25,13 @@ public class DoorWindowSensorListener implements PatternListener<DoorWindowSenso
 	public void patternAvailable(DoorWindowSensorPattern pattern) {
 		availablePatterns.add(pattern);
 		
-		//TODO: work on pattern
-		app.processInterdependies();
+		app.addDeviceIfNew(pattern.model);
 	}
 	@Override
 	public void patternUnavailable(DoorWindowSensorPattern pattern) {
-		// TODO process remove
 		
+		app.removeDevice(pattern.model);
 		availablePatterns.remove(pattern);
-		app.processInterdependies();
 	}
 	
 	

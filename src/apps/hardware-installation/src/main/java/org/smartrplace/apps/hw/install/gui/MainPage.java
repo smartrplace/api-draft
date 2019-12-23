@@ -12,35 +12,40 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
-import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
-import org.smartrplace.util.directresourcegui.ResourceGUITablePage;
+import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
+import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
-import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 
-public class MainPage extends ResourceGUITablePage<InstallAppDevice> {
+public class MainPage extends ObjectGUITablePage<InstallAppDevice,InstallAppDevice> {
 	private HardwareInstallController controller;
 	private Header header;
-	private Alert alert;
+	//private Alert alert;
 	private RoomSelectorDropdown roomsDrop;
 	
 	public MainPage(WidgetPage<?> page, HardwareInstallController controller) {
-		super(page, controller.appMan, null, InstallAppDevice.class, false, true);
+		super(page, controller.appMan, InstallAppDevice.class, false);
 		this.controller = controller;
 		
 		triggerPageBuild();
 	}
 
 	@Override
-	public void addWidgets(InstallAppDevice object, ResourceGUIHelper<InstallAppDevice> vh, String id,
+	public void addWidgets(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-		if(!(object.device() instanceof Thermostat)) return;
-		Thermostat device = (Thermostat) object.device();
+		if(!(object.device() instanceof Thermostat) && (req != null)) return;
+		final Thermostat device;
+		if(req == null)
+			device = ResourceHelper.getSampleResource(Thermostat.class);
+		else
+			device = (Thermostat) object.device();
+		//if(!(object.device() instanceof Thermostat)) return;
 		final String name;
 		if(device.getLocation().toLowerCase().contains("homematic")) {
 			name = "HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
@@ -76,13 +81,17 @@ public class MainPage extends ResourceGUITablePage<InstallAppDevice> {
 		header.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
 		page.append(header).linebreak();
 		
-		alert = new Alert(page, "alert", "");
-		alert.setDefaultVisibility(false);
-		page.append(alert).linebreak();
-		
 		StaticTable topTable = new StaticTable(1, 5, new int[] {1, 3, 3, 3, 2});
 		BooleanResourceButton installMode = new BooleanResourceButton(page, "installMode", "Installation Mode",
-				controller.appConfigData.isInstallationActive());
+				controller.appConfigData.isInstallationActive()) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onPrePOST(String data, OgemaHttpRequest req) {
+				super.onPrePOST(data, req);
+				controller.checkDemands();
+			}
+		};
 		roomsDrop = new RoomSelectorDropdown(page, "roomsDrop", controller);
 		
 		topTable.setContent(0, 0, roomsDrop).setContent(0, 1, installMode);
@@ -90,12 +99,17 @@ public class MainPage extends ResourceGUITablePage<InstallAppDevice> {
 	}
 	
 	@Override
-	public List<InstallAppDevice> getResourcesInTable(OgemaHttpRequest req) {
+	public List<InstallAppDevice> getObjectsInTable(OgemaHttpRequest req) {
 		return roomsDrop.getDevicesSelected();
 	}
 	
 	@Override
 	protected void addWidgetsBelowTable() {
+	}
+
+	@Override
+	public InstallAppDevice getResource(InstallAppDevice object, OgemaHttpRequest req) {
+		return object;
 	}
 
 }

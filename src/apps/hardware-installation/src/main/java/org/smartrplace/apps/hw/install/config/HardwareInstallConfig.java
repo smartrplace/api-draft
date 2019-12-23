@@ -30,7 +30,8 @@ public interface HardwareInstallConfig extends Data {
 	/** If true then listeners are active. If false then listeners are not active for performance reasons*/
 	BooleanResource isInstallationActive();
 	
-	/** If this reference is set then only the room selected shall be displayed, otherwise all rooms. Note that
+	/** Indication of the room selected that shall be displayed or special String indicating that
+	 * devices from all rooms shall be displayed. See {@link RoomSelectorDropdown} for details. Note that
 	 * we save this information persistently for all users/sessions as this is most efficient during installation in
 	 * many cases.
 	 */

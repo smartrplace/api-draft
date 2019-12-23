@@ -18,6 +18,9 @@ import de.iwes.widgets.template.DefaultDisplayTemplate;
 
 public class RoomSelectorDropdown extends TemplateDropdown<String> {
 	private static final long serialVersionUID = 1L;
+	public static final String ALL_DEVICES_ID = "allDevices";
+	public static final String DEVICES_IN_ROOMS_ID = "devicesInRooms";
+	public static final String DEVICES_NOT_IN_ROOMS_ID = "devicesNOTInRooms";
 	private final ResourceAccess resAcc;
 	private final HardwareInstallController controller;
 	private final Map<String, Room> knownRooms = new HashMap<String, Room>();
@@ -29,11 +32,11 @@ public class RoomSelectorDropdown extends TemplateDropdown<String> {
 		setTemplate(new DefaultDisplayTemplate<String>() {
 			@Override
 			public String getLabel(String arg0, OgemaLocale arg1) {
-				if(arg0.equals("allDevices"))
+				if(arg0.equals(ALL_DEVICES_ID))
 					return "All Devices";
-				if(arg0.equals("devicesInRooms"))
+				if(arg0.equals(DEVICES_IN_ROOMS_ID))
 					return "Devices configured for a room";
-				if(arg0.equals("devicesNOTInRooms"))
+				if(arg0.equals(DEVICES_NOT_IN_ROOMS_ID))
 					return "Devices NOT configured for a room";
 				Room room = knownRooms.get(arg0); 
 				//ResourceHelperSP.getSubResource(null, arg0, Room.class, resAcc);
@@ -47,9 +50,9 @@ public class RoomSelectorDropdown extends TemplateDropdown<String> {
 	public void onGET(OgemaHttpRequest req) {
 		List<Room> rooms = resAcc.getResources(Room.class);
 		List<String> items = new ArrayList<>();
-		items.add("allDevices");
-		items.add("devicesInRooms");
-		items.add("devicesNOTInRooms");
+		items.add(ALL_DEVICES_ID);
+		items.add(DEVICES_IN_ROOMS_ID);
+		items.add(DEVICES_NOT_IN_ROOMS_ID);
 		for(Room room: rooms) {
 			addItem(room, items);
 		}
@@ -72,12 +75,12 @@ public class RoomSelectorDropdown extends TemplateDropdown<String> {
 		List<InstallAppDevice> devicesSelected = new ArrayList<>();
 		String arg0 = controller.appConfigData.room().getValue();
 		for(InstallAppDevice dev: controller.appConfigData.knownDevices().getAllElements()) {
-			if(arg0.equals("allDevices"))
+			if(arg0.equals(ALL_DEVICES_ID))
 				devicesSelected.add(dev);
-			else if(arg0.equals("devicesInRooms"))
+			else if(arg0.equals(DEVICES_IN_ROOMS_ID))
 				if(dev.device().location().room().exists())
 					devicesSelected.add(dev);
-			else if(arg0.equals("devicesNOTInRooms"))
+			else if(arg0.equals(DEVICES_NOT_IN_ROOMS_ID))
 				if(!dev.device().location().room().exists())
 					devicesSelected.add(dev);
 			else {

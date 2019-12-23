@@ -34,7 +34,7 @@ public class BooleanResourceButton extends Button {
 	private static final long serialVersionUID = 1L;
 	@Override
 	public void onGET(OgemaHttpRequest req) {
-		if(res.getValue()) {
+		if(!res.getValue()) {
 			//deselected
 			removeStyle(selectedColor, req);
 			addStyle(ButtonData.BOOTSTRAP_DEFAULT, req);

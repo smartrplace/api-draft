@@ -19,7 +19,10 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
 import org.smartrplace.apps.hw.install.gui.MainPage;
 import org.smartrplace.apps.hw.install.pattern.ThermostatPattern;
 import org.smartrplace.apps.hw.install.patternlistener.ThermostatListener;
@@ -46,10 +49,9 @@ public class HardwareInstallController {
 		this.log = appMan.getLogger();
 		this.advAcc = appMan.getResourcePatternAccess();
 		
-		mainPage = new MainPage(page, this);
-
 		initConfigurationResource();
         initDemands();
+		mainPage = new MainPage(page, this);
 	}
 
 	public ThermostatListener actionListener;
@@ -68,9 +70,10 @@ public class HardwareInstallController {
 		}
 		else {
 			appConfigData = (HardwareInstallConfig) appMan.getResourceManagement().createResource(name, HardwareInstallConfig.class);
-			appConfigData.name().create();
-			//TODO provide different sample, provide documentation in code
-			appConfigData.name().setValue("sampleName");
+			appConfigData.isInstallationActive().create();
+			appConfigData.knownDevices().create();
+			appConfigData.room().create();
+			appConfigData.room().setValue(RoomSelectorDropdown.ALL_DEVICES_ID);
 			appConfigData.activate(true);
 			appMan.getLogger().debug("{} started with new config resource", getClass().getName());
 		}
@@ -114,8 +117,19 @@ public class HardwareInstallController {
 	 * if the app needs to consider dependencies between different pattern types,
 	 * they can be processed here.
 	 */
-	public void processInterdependies() {
-		// TODO Auto-generated method stub
-		
+	public InstallAppDevice addDeviceIfNew(PhysicalElement device) {
+		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
+			if(install.equalsLocation(device)) return install;
+		}
+		InstallAppDevice install = appConfigData.knownDevices().add();
+		install.create();
+		install.device().setAsReference(device);
+		install.installationStatus().create();
+		install.activate(true);
+		return install;
+	}
+	public InstallAppDevice removeDevice(PhysicalElement device) {
+		//TODO
+		return null;
 	}
 }

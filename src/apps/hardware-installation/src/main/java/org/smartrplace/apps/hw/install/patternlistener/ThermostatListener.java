@@ -39,15 +39,12 @@ public class ThermostatListener implements PatternListener<ThermostatPattern> {
 	public void patternAvailable(ThermostatPattern pattern) {
 		availablePatterns.add(pattern);
 		
-		//app.mainPage.addRowIfNotExisting(pattern.model);
-		app.processInterdependies();
+		app.addDeviceIfNew(pattern.model);
 	}
 	@Override
 	public void patternUnavailable(ThermostatPattern pattern) {
-		// TODO process remove
-		
+		app.removeDevice(pattern.model);
 		availablePatterns.remove(pattern);
-		app.processInterdependies();
 	}
 	
 	

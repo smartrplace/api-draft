@@ -9,7 +9,6 @@
     
     <artifactId>hardware-installation</artifactId>
     <name>Smartrplace Hardware Installation App</name>
-    <version>0.9.0-SNAPSHOT</version>
     <description>Smartrplace hardware installation support app</description>
     
     <packaging>bundle</packaging>
