@@ -6,6 +6,7 @@
         <groupId>org.smartrplace.api</groupId>
         <artifactId>root</artifactId>
         <version>0.9.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
 	<groupId>org.smartrplace.drivers</groupId>

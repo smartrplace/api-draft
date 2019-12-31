@@ -6,7 +6,7 @@
 	<!-- Parent-POM: OGEMA master pom with project-wide settings -->
 	<parent>
 		<groupId>org.ogema.apps</groupId>
-		<artifactId>apps-master</artifactId>
+		<artifactId>ogema-apps</artifactId>
 		<version>2.2.1</version>
 	</parent>
 
@@ -151,6 +151,31 @@
 			<dependency>
 				<groupId>org.ogema.widgets</groupId>
 				<artifactId>util-extended</artifactId>
+				<version>2.2.1</version>
+			</dependency>
+            <dependency>
+				<groupId>org.ogema.widgets</groupId>
+				<artifactId>widget-collection</artifactId>
+				<version>2.2.1</version>
+			</dependency>
+            <dependency>
+				<groupId>org.ogema.widgets</groupId>
+				<artifactId>ogema-js-bundle</artifactId>
+				<version>2.2.1</version>
+			</dependency>
+            <dependency>
+				<groupId>org.ogema.widgets</groupId>
+				<artifactId>widget-experimental</artifactId>
+				<version>2.2.1</version>
+			</dependency>
+            <dependency>
+				<groupId>org.ogema.widgets</groupId>
+				<artifactId>widget-exam-base</artifactId>
+				<version>2.2.1</version>
+			</dependency>
+            <dependency>
+				<groupId>org.ogema.widgets</groupId>
+				<artifactId>ogema-gui-api</artifactId>
 				<version>2.2.1</version>
 			</dependency>
 			<dependency>
