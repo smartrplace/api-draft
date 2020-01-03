@@ -27,9 +27,8 @@
 
 	<!-- Sub-projects -->
 	<modules>
-		<!-- <module>driver-concepts-sp</module>
-		 -->
-		 <module>example-apps</module>
+		<module>apps</module>
+		<module>example-apps</module>
 		<module>extension-api</module>
 		<module>util-public</module>
 		<module>drivers</module>
