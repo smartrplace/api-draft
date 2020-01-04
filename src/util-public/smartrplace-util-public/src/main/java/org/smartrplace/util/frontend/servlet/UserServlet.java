@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.ogema.core.model.Resource;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -282,7 +283,12 @@ public class UserServlet extends HttpServlet {
 			Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user);
 			for(String key: result.keySet()) {
 				ServletValueProvider prov = userMap.get(key);
-				String value = result.getString(key);
+				String value;
+				try {
+					value = result.getString(key).toString();
+				} catch(JSONException e) {
+					value = result.getJSONObject(key).toString();
+				}
 				prov.setValue(user, key, value);
 			}
 		}
