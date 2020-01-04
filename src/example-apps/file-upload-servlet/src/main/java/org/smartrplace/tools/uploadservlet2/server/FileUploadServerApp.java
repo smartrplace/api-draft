@@ -169,10 +169,9 @@ public class FileUploadServerApp extends HttpServlet implements Application  {
 	    }
 	    resp.setStatus(HttpServletResponse.SC_OK);
 		logger.info("New file from user {} at {}",user,target);
-		String gwId;
 		String targets = target.toString();
 		if(targets.startsWith(startString) && targets.length() >= (startIdx+6)) {
-			gwId = targets.substring(startIdx, startIdx+6);
+			final String gwId = targets.substring(startIdx, startIdx+6);
 			//Execute this in application thread, does not work here
 			new CountDownDelayedExecutionTimer(am, 1) {
 				@Override
