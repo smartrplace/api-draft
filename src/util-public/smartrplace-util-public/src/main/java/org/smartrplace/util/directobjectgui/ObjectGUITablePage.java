@@ -90,6 +90,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	protected final ClosingPopup<T> popMore1;
 	protected final KnownWidgetHolder<T> knownWidgets;
 	protected final Alert alert;
+	protected final boolean isAlertNew;
 	protected final ApplicationManager appMan;
 	protected final ApplicationManagerMinimal appManMin;
 	protected final T initSampleObject;
@@ -118,10 +119,17 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 			T initSampleObject, boolean autoBuildPage, boolean registerDependentWidgets) {
 		this(page, appMan, null, initSampleObject, null, autoBuildPage, true);
 	}
-	@SuppressWarnings("unchecked")
 	public ObjectGUITablePage(final WidgetPage<?> page,
 			final ApplicationManager appMan, final ApplicationManagerMinimal appManMin,
 			T initSampleObject, Class<T> resourceType, boolean autoBuildPage, boolean registerDependentWidgets) {
+		this(page, appMan, appManMin, initSampleObject, resourceType, autoBuildPage, registerDependentWidgets, null);
+	}
+	@SuppressWarnings("unchecked")
+	public ObjectGUITablePage(final WidgetPage<?> page,
+			final ApplicationManager appMan, final ApplicationManagerMinimal appManMin,
+			T initSampleObject, Class<T> resourceType, boolean autoBuildPage, boolean registerDependentWidgets,
+			Alert alert) {
+
 		if(resourceType != null) {
 			if(!(Resource.class.isAssignableFrom(resourceType)))
 				throw new IllegalArgumentException("ObjectGUITablePage can only instantiated with resource "
@@ -136,8 +144,13 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		headerObject = getHeaderObject();
 		
 		//init all widgets
-		alert = new Alert(page, "alert"+pid(), "");
-		
+		if(alert == null) {
+			this.alert = new Alert(page, "alert"+pid(), "");
+			isAlertNew = true;
+		} else {
+			this.alert = alert;
+			isAlertNew = false;
+		}		
 		knownWidgets = new KnownWidgetHolder<T>(page, "knownWidgets"+pid());
 		page.append(knownWidgets);
 		popMore1 = new ClosingPopup<T>(page, "popMore1"+pid(),
@@ -223,7 +236,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		
 		//build page
 		addWidgetsAboveTable();
-		page.append(alert);
+		if(isAlertNew) page.append(alert);
 		page.append(mainTable);
 		addWidgetsBelowTable();
 	}

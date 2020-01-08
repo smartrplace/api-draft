@@ -260,6 +260,52 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		return result.myLabel;
 	}
 	
+	public Label booleanLabel(String widgetId, String lineId, final BooleanResource source, Row row,
+			final int mode) {
+		if(checkLineId(widgetId)) return null;
+		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		Label result = booleanLabel(widgetId + lineId, source, null, mode);
+		finishRowSnippet(row, widgetId, result);	
+		return result;
+	}
+	public Label booleanLabel(final BooleanResource source, final int mode) {
+		counter++;
+		return booleanLabel("intLabel"+counter, source, null, mode);
+	}
+	public Label booleantLabel(final String subResourceName, int mode) {
+		counter++;
+		return intLabel("intLabel"+counter, null, subResourceName, mode);
+	}
+	/**
+	 * 
+	 * @param page
+	 * @param id
+	 * @param source
+	 * @param row
+	 * @param gateway
+	 * @param mode 0: value unmodified
+	 * @return
+	 */
+	private Label booleanLabel(String widgetId, final BooleanResource optSource, String altId, final int mode) {
+		final SingleValueResourceAccess<BooleanResource> sva = new SingleValueResourceAccess<BooleanResource>(optSource, altId);
+		LabelFlex result = new LabelFlex(widgetId, this) {
+			public void onGET(OgemaHttpRequest req) {
+				BooleanResource source = getResource(sva, req, null);
+				if ((source == null)||(!source.isActive())) {
+					myLabel.setText("n.a.", req);
+					return;
+				}
+				String val;
+				switch(mode) {
+				default:
+					val = ""+source.getValue();
+				}
+				myLabel.setText(val, req);
+			};
+		};
+		return result.myLabel;
+	}
+	
 	public interface LongProvider {
 		LabelLongValue getValue(OgemaHttpRequest req);
 	}

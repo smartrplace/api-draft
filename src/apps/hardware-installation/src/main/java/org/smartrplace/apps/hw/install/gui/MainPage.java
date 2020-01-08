@@ -1,45 +1,50 @@
 package org.smartrplace.apps.hw.install.gui;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.Resource;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
-import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
-import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
-import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
+import de.iwes.widgets.html.form.label.Label;
+import de.iwes.widgets.html.form.textfield.TextField;
 
-public class MainPage extends ObjectGUITablePage<InstallAppDevice,InstallAppDevice> {
-	private HardwareInstallController controller;
-	private Header header;
-	//private Alert alert;
-	private RoomSelectorDropdown roomsDrop;
-	
+public class MainPage extends DeviceTablePageFragment {
+
 	public MainPage(WidgetPage<?> page, HardwareInstallController controller) {
-		super(page, controller.appMan, InstallAppDevice.class, false);
-		this.controller = controller;
-		
-		triggerPageBuild();
+		super(page, controller, null, null);
+		super.addWidgetsAboveTable();
+		finishConstructor();
 	}
-
+	
+	protected void finishConstructor() {
+		DoorWindowSensorTable winSensTable = new DoorWindowSensorTable(page, controller, roomsDrop, alert);
+		winSensTable.triggerPageBuild();
+		triggerPageBuild();		
+	}
+	
+	@Override
+	protected Class<? extends Resource> getResourceType() {
+		return Thermostat.class;
+	}
+	
 	@Override
 	public void addWidgets(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-		if(!(object.device() instanceof Thermostat) && (req != null)) return;
+		addWidgetsInternal(object, vh, id, req, row, appMan);
+	}
+	public Thermostat addWidgetsInternal(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
+		//if(!(object.device() instanceof Thermostat) && (req != null)) return null;
 		final Thermostat device;
 		if(req == null)
 			device = ResourceHelper.getSampleResource(Thermostat.class);
@@ -48,68 +53,51 @@ public class MainPage extends ObjectGUITablePage<InstallAppDevice,InstallAppDevi
 		//if(!(object.device() instanceof Thermostat)) return;
 		final String name;
 		if(device.getLocation().toLowerCase().contains("homematic")) {
-			name = "HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
+			name = "Thermostat HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
 		} else
 			name = ResourceUtils.getHumanReadableShortName(device);
 		vh.stringLabel("Name", id, name, row);
-		vh.floatEdit("Setpoint", id, device.temperatureSensor().settings().setpoint(), row, alert, 4.5f, 30f, "Allowed range: 4.5 to 30°C");
-		vh.floatLabel("Measurement", id, device.temperatureSensor().reading(), row, "%.1f");
+		TextField setpointFB = vh.floatEdit("Setpoint", id, device.temperatureSensor().deviceFeedback().setpoint(), row, alert, 4.5f, 30f, "Allowed range: 4.5 to 30°C");
+		if(req != null) {
+			TextField setpointSet = new TextField(mainTable, "setpointSet"+id, req) {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public void onGET(OgemaHttpRequest req) {
+					setValue(String.format("%.1f", device.temperatureSensor().deviceFeedback().setpoint().getCelsius()), req);
+				}
+				@Override
+				public void onPOSTComplete(String data, OgemaHttpRequest req) {
+					String val = getValue(req);
+					val = val.replaceAll("[^\\d.]", "");
+					try {
+						float value  = Float.parseFloat(val);
+						device.temperatureSensor().settings().setpoint().setCelsius(value);
+					} catch (NumberFormatException | NullPointerException e) {
+						if(alert != null) alert.showAlert("Entry "+val+" could not be processed!", false, req);
+						return;
+					}
+				}
+			};
+			row.addCell("Set", setpointSet);
+		} else
+			vh.registerHeaderEntry("Set");
+		Label tempmes = vh.floatLabel("Measurement", id, device.temperatureSensor().reading(), row, "%.1f");
 		vh.floatLabel("Battery", id, device.battery().chargeSensor().reading(), row, "%.1f");
-		Map<Room, String> roomsToSet = new HashMap<>();
-		List<Room> rooms = controller.appMan.getResourceAccess().getResources(Room.class);
-		for(Room room: rooms) {
-			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
+		addWidgetsCommon(object, vh, id, req, row, appMan, device.location().room());
+		if(req != null) {
+			tempmes.setPollingInterval(DEFAULT_POLL_RATE, req);
+			setpointFB.setPollingInterval(DEFAULT_POLL_RATE, req);
 		}
-		vh.referenceDropdownFixedChoice("Room", id, device.location().room(), row, roomsToSet );
-		vh.stringEdit("Location", id, object.installationLocation(), row, alert);
-		
-		Map<String, String> valuesToSet = new HashMap<>();
-		valuesToSet.put("0", "unknown");
-		valuesToSet.put("1", "Device installed physically");
-		valuesToSet.put("10", "Physical installation done including all on-site tests");
-		valuesToSet.put("20", "All configuration finished, device is in full operation");
-		valuesToSet.put("-10", "Error in physical installation and/or testing (explain in comment)");
-		valuesToSet.put("-20", "Error in configuration, device cannot be used/requires action for real usage");
-		vh.dropdown("Status", id, object.installationStatus(), row, valuesToSet );
-		
-		vh.stringEdit("Comment", id, object.installationComment(), row, alert);
+		return device;
 	}
-
+	
 	@Override
 	public void addWidgetsAboveTable() {
-		header = new Header(page, "header", "Smartrplace Hardware InstallationApp");
-		header.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
-		page.append(header).linebreak();
-		
-		StaticTable topTable = new StaticTable(1, 5, new int[] {1, 3, 3, 3, 2});
-		BooleanResourceButton installMode = new BooleanResourceButton(page, "installMode", "Installation Mode",
-				controller.appConfigData.isInstallationActive()) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void onPrePOST(String data, OgemaHttpRequest req) {
-				super.onPrePOST(data, req);
-				controller.checkDemands();
-			}
-		};
-		roomsDrop = new RoomSelectorDropdown(page, "roomsDrop", controller);
-		
-		topTable.setContent(0, 0, roomsDrop).setContent(0, 1, installMode);
-		page.append(topTable);
+		//super.addWidgetsAboveTable();
+		Header headerThermostat = new Header(page, "headerThermostat", "Thermostats");
+		headerThermostat.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
+		page.append(headerThermostat);
 	}
-	
-	@Override
-	public List<InstallAppDevice> getObjectsInTable(OgemaHttpRequest req) {
-		return roomsDrop.getDevicesSelected();
-	}
-	
-	@Override
-	protected void addWidgetsBelowTable() {
-	}
-
-	@Override
-	public InstallAppDevice getResource(InstallAppDevice object, OgemaHttpRequest req) {
-		return object;
-	}
-
 }
+
+

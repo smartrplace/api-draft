@@ -51,9 +51,13 @@ public class HardwareInstallController {
 		
 		initConfigurationResource();
         initDemands();
-		mainPage = new MainPage(page, this);
+		mainPage = getMainPage(page);
 	}
 
+	protected MainPage getMainPage(WidgetPage<?> page) {
+		return new MainPage(page, this);
+	}
+	
 	public ThermostatListener actionListener;
 	public DoorWindowSensorListener doorWindowSensorListener;
 

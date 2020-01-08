@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.smartrplace.apps.hw.install;
+package org.smartrplace.apps.hw.install.expert;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -21,7 +21,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
-import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
+import org.smartrplace.apps.hw.install.HardwareInstallController;
 
 import de.iwes.widgets.api.OgemaGuiService;
 import de.iwes.widgets.api.widgets.WidgetApp;
@@ -32,14 +32,13 @@ import de.iwes.widgets.api.widgets.WidgetPage;
  */
 @Component(specVersion = "1.2", immediate = true)
 @Service(Application.class)
-public class HardwareInstallApp implements Application {
-	public static final String urlPath = "/org/smartrplace/hardwareinstall";
-
+public class HardwareInstallAppExpert implements Application {
 	protected OgemaLogger log;
     protected ApplicationManager appMan;
     protected HardwareInstallController controller;
 
     protected WidgetApp widgetApp;
+	public static final String urlPath = "/org/smartrplace/hardwareinstall/expert";
 
 	@Reference
 	private OgemaGuiService guiService;
@@ -58,7 +57,7 @@ public class HardwareInstallApp implements Application {
 		widgetApp = guiService.createWidgetApp(urlPath, appManager);
 		final WidgetPage<?> page = widgetApp.createStartPage();
 
-		controller = new HardwareInstallController(appMan, page);
+		controller = new HardwareInstallControllerExpert(appMan, page);
      }
 
      /*

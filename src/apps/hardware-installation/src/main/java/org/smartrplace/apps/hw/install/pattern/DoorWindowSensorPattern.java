@@ -1,7 +1,6 @@
 package org.smartrplace.apps.hw.install.pattern;
 
 import org.ogema.core.model.Resource;
-import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.model.sensors.DoorWindowSensor;
 
@@ -13,7 +12,7 @@ public class DoorWindowSensorPattern extends ResourcePattern<DoorWindowSensor> {
 	 */
 	//@Access(mode = AccessMode.READ_ONLY)
 	//@Existence(required=CreateMode.OPTIONAL)
-	public StringResource name = model.name();
+	//public StringResource name = model.name();
 
 	/**
 	 * Constructor for the access pattern. This constructor is invoked by the framework. Must be public.
