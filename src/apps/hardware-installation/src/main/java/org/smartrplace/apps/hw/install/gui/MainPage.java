@@ -8,7 +8,9 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.WidgetHelper;
 
+import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -81,12 +83,20 @@ public class MainPage extends DeviceTablePageFragment {
 			row.addCell("Set", setpointSet);
 		} else
 			vh.registerHeaderEntry("Set");
-		Label tempmes = vh.floatLabel("Measurement", id, device.temperatureSensor().reading(), row, "%.1f");
-		vh.floatLabel("Battery", id, device.battery().chargeSensor().reading(), row, "%.1f");
+		Label tempmes = vh.floatLabel("Measurement", id, device.temperatureSensor().reading(), row, "%.1f#min:-200");
+		vh.floatLabel("Battery", id, device.battery().chargeSensor().reading(), row, "%.1f#min:0.1");
+		Label lastContact = null;
+		if(req != null) {
+			lastContact = new LastContactLabel(device.temperatureSensor().reading(), appMan, mainTable, "lastContact"+id, req);
+			row.addCell(WidgetHelper.getValidWidgetId("Last Contact"), lastContact);
+		} else
+			vh.registerHeaderEntry("Last Contact");
+		
 		addWidgetsCommon(object, vh, id, req, row, appMan, device.location().room());
 		if(req != null) {
 			tempmes.setPollingInterval(DEFAULT_POLL_RATE, req);
 			setpointFB.setPollingInterval(DEFAULT_POLL_RATE, req);
+			lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
 		}
 		return device;
 	}

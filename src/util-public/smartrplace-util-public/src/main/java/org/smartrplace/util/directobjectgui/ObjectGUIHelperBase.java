@@ -103,7 +103,13 @@ public class ObjectGUIHelperBase<T> {
 	}
 
 	protected void finishRowSnippet(Row row, String widgetId, OgemaWidget result) {
-		if(row != null) row.addCell(widgetId, result);
+		finishRowSnippet(row, widgetId, result, 0);
+	}
+	protected void finishRowSnippet(Row row, String widgetId, OgemaWidget result, int columnSize) {
+		if(row != null) if(columnSize < 1)
+			row.addCell(widgetId, result);
+		else
+			row.addCell(widgetId, result, columnSize);
 		else if(pageSnippet != null) pageSnippet.append(result, getReq());
 		else popTableData.add(new WidgetEntryData(widgetId, result));
 	}

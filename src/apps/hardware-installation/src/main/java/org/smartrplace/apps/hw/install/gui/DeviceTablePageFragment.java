@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
@@ -15,11 +16,13 @@ import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.button.RedirectButton;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 
@@ -51,7 +54,7 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 		for(Room room: rooms) {
 			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
 		}
-		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet );
+		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet, 3);
 		
 		Map<String, String> valuesToSet = new HashMap<>();
 		valuesToSet.put("0", "unknown");
@@ -63,13 +66,20 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 		vh.dropdown("Status", id, object.installationStatus(), row, valuesToSet );
 		
 		vh.stringEdit("Comment", id, object.installationComment(), row, alert);
+		if(req != null) {
+			String text = getHomematicCCUId(object.device().getLocation());
+			vh.stringLabel("RT", id, text, row);
+		} else
+			vh.registerHeaderEntry("RT");
 	}
 	
 	protected void addWidgetsCommonExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
 		vh.stringEdit("Location", id, object.installationLocation(), row, alert);
-		
+		IntegerResource source = ResourceHelper.getSubResourceOfSibbling(object.device().getLocationResource(),
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
+		vh.intLabel("RSSI", id, source, row, 0);
 	}
 	
 	@Override
@@ -92,7 +102,9 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 		};
 		roomsDrop = new RoomSelectorDropdown(page, "roomsDrop", controller);
 		
-		topTable.setContent(0, 0, roomsDrop).setContent(0, 1, installMode);
+		RedirectButton roomLinkButton = new RedirectButton(page, "roomLinkButton", "Room Administration", "/de/iwes/apps/roomlink/gui/index.html");
+		
+		topTable.setContent(0, 0, roomsDrop).setContent(0, 1, installMode).setContent(0, 2, roomLinkButton);
 		page.append(topTable);
 	}
 	
@@ -115,6 +127,19 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 	@Override
 	public InstallAppDevice getResource(InstallAppDevice object, OgemaHttpRequest req) {
 		return object;
+	}
+	
+	public static String getHomematicCCUId(String location) {
+		String[] parts = location.split("/");
+		String tail;
+		if(parts[0].toLowerCase().startsWith("homematicip")) {
+			tail = parts[0].substring("homematicip".length());
+		} else {
+			if(!parts[0].startsWith("homematic")) return "n/a";
+			tail = parts[0].substring("homematic".length());			
+		}
+		if(tail.isEmpty()) return "102";
+		else return tail;
 	}
 
 }

@@ -184,8 +184,18 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	 * @param fomat: if null "%.1f" is used
 	 * @return
 	 */
-	private Label floatLabel(String widgetId, final FloatResource optSource, String altId, final String format) {
+	private Label floatLabel(String widgetId, final FloatResource optSource, String altId, final String formatIn) {
 		final SingleValueResourceAccess<FloatResource> sva = new SingleValueResourceAccess<FloatResource>(optSource, altId);
+		Float minValue;
+		String format;
+		if(formatIn.contains("#min:")) {
+			minValue = Float.parseFloat(formatIn.substring(formatIn.indexOf("#min:")+"#min:".length()));
+			format = formatIn.substring(0, formatIn.indexOf("#min:"));
+		} else {
+			minValue = null;
+			format = formatIn;
+		}
+		
 		LabelFlex result = new LabelFlex(widgetId, this) {
 			public void onGET(OgemaHttpRequest req) {
 				FloatResource source = getResource(sva, req, null);
@@ -203,7 +213,9 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				}
 
 				String valStr;
-				if(format != null) {
+				if(val < minValue)
+					valStr = "n/a";
+				else if(format != null) {
 					valStr = String.format(format, val);
 				} else {
 					valStr = String.format("%.1f", val);
@@ -1059,10 +1071,14 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 
 	public <S extends Resource> ResourceDropdown<S> referenceDropdownFixedChoice(String widgetId, String lineId, final S source, Row row,
 			Map<S, String> valuesToSet) {
+		return referenceDropdownFixedChoice(widgetId, lineId, source, row, valuesToSet, 0);
+	}
+	public <S extends Resource> ResourceDropdown<S> referenceDropdownFixedChoice(String widgetId, String lineId, final S source, Row row,
+			Map<S, String> valuesToSet, int columnSize) {
 		if(checkLineId(widgetId)) return null;
 		widgetId = ResourceUtils.getValidResourceName(widgetId);
 		ResourceDropdown<S> result = referenceDropdownFixedChoice(widgetId + lineId, source, null, valuesToSet, null);
-		finishRowSnippet(row, widgetId, result);	
+		finishRowSnippet(row, widgetId, result, columnSize);	
 		return result;
 	}
 	public <S extends Resource> ResourceDropdown<S> referenceDropdownFixedChoice(final S source,

@@ -65,9 +65,7 @@ public class HardwareInstallController {
      * This app uses a central configuration resource, which is accessed here
      */
     private void initConfigurationResource() {
-		//TODO provide Util?
-		String configResourceDefaultName = HardwareInstallConfig.class.getSimpleName().substring(0, 1).toLowerCase()+HardwareInstallConfig.class.getSimpleName().substring(1);
-		final String name = appMan.getResourceManagement().getUniqueResourceName(configResourceDefaultName);
+		String name = HardwareInstallConfig.class.getSimpleName().substring(0, 1).toLowerCase()+HardwareInstallConfig.class.getSimpleName().substring(1);
 		appConfigData = appMan.getResourceAccess().getResource(name);
 		if (appConfigData != null) { // resource already exists (appears in case of non-clean start)
 			appMan.getLogger().debug("{} started with previously-existing config resource", getClass().getName());
@@ -96,13 +94,14 @@ public class HardwareInstallController {
     }
     public void checkDemands() {
     	if(appConfigData.isInstallationActive().getValue())
-    		startDemands();
+     		startDemands();
     	else
     		closeDemands();
     }
     
     public boolean demandsActivated = false;
     public void startDemands() {
+		demandsActivated = true;
     	advAcc.addPatternDemand(ThermostatPattern.class, actionListener, AccessPriority.PRIO_LOWEST);
 		advAcc.addPatternDemand(DoorWindowSensorPattern.class, doorWindowSensorListener, AccessPriority.PRIO_LOWEST); 
     }
@@ -123,7 +122,7 @@ public class HardwareInstallController {
 	 */
 	public InstallAppDevice addDeviceIfNew(PhysicalElement device) {
 		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
-			if(install.equalsLocation(device)) return install;
+			if(install.device().equalsLocation(device)) return install;
 		}
 		InstallAppDevice install = appConfigData.knownDevices().add();
 		install.create();

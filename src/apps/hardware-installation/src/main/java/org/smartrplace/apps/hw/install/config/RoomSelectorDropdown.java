@@ -77,13 +77,13 @@ public class RoomSelectorDropdown extends TemplateDropdown<String> {
 		for(InstallAppDevice dev: controller.appConfigData.knownDevices().getAllElements()) {
 			if(arg0.equals(ALL_DEVICES_ID))
 				devicesSelected.add(dev);
-			else if(arg0.equals(DEVICES_IN_ROOMS_ID))
+			else if(arg0.equals(DEVICES_IN_ROOMS_ID)) {
 				if(dev.device().location().room().exists())
 					devicesSelected.add(dev);
-			else if(arg0.equals(DEVICES_NOT_IN_ROOMS_ID))
+			} else if(arg0.equals(DEVICES_NOT_IN_ROOMS_ID)) {
 				if(!dev.device().location().room().exists())
 					devicesSelected.add(dev);
-			else {
+			} else {
 				if(dev.device().location().room().getLocation().equals(arg0))
 					devicesSelected.add(dev);
 			}

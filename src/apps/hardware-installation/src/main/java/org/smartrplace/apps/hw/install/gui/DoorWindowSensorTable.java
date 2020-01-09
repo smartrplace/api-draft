@@ -9,6 +9,7 @@ import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -52,10 +53,17 @@ public class DoorWindowSensorTable extends DeviceTablePageFragment {
 			name = ResourceUtils.getHumanReadableShortName(device);
 		vh.stringLabel("Name", id, name, row);
 		Label state = vh.booleanLabel("Measured State", id, device.reading(), row, 0);
-		vh.floatLabel("Battery", id, device.battery().chargeSensor().reading(), row, "%.1f");
+		vh.floatLabel("Battery", id, device.battery().chargeSensor().reading(), row, "%.1f#min:0.1");
+		Label lastContact = null;
+		if(req != null) {
+			lastContact = new LastContactLabel(device.reading(), appMan, mainTable, "lastContact"+id, req);
+			row.addCell(WidgetHelper.getValidWidgetId("Last Contact"), lastContact);
+		} else
+			vh.registerHeaderEntry("Last Contact");
 		addWidgetsCommon(object, vh, id, req, row, appMan, device.location().room());
 		if(req != null) {
 			state.setPollingInterval(DEFAULT_POLL_RATE, req);
+			lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
 		}
 		return device;
 	}
