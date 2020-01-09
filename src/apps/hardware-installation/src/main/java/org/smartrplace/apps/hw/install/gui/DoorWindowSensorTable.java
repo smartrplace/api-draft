@@ -53,7 +53,7 @@ public class DoorWindowSensorTable extends DeviceTablePageFragment {
 			name = ResourceUtils.getHumanReadableShortName(device);
 		vh.stringLabel("Name", id, name, row);
 		Label state = vh.booleanLabel("Measured State", id, device.reading(), row, 0);
-		vh.floatLabel("Battery", id, device.battery().chargeSensor().reading(), row, "%.1f#min:0.1");
+		vh.floatLabel("Battery", id, device.battery().internalVoltage().reading(), row, "%.1f#min:0.1");
 		Label lastContact = null;
 		if(req != null) {
 			lastContact = new LastContactLabel(device.reading(), appMan, mainTable, "lastContact"+id, req);

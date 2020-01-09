@@ -213,7 +213,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				}
 
 				String valStr;
-				if(val < minValue)
+				if(minValue != null && val < minValue)
 					valStr = "n/a";
 				else if(format != null) {
 					valStr = String.format(format, val);

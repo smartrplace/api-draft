@@ -10,7 +10,6 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
-import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -59,7 +58,7 @@ public class MainPage extends DeviceTablePageFragment {
 		} else
 			name = ResourceUtils.getHumanReadableShortName(device);
 		vh.stringLabel("Name", id, name, row);
-		TextField setpointFB = vh.floatEdit("Setpoint", id, device.temperatureSensor().deviceFeedback().setpoint(), row, alert, 4.5f, 30f, "Allowed range: 4.5 to 30°C");
+		Label setpointFB = vh.floatLabel("Setpoint", id, device.temperatureSensor().deviceFeedback().setpoint(), row, "%.1f");
 		if(req != null) {
 			TextField setpointSet = new TextField(mainTable, "setpointSet"+id, req) {
 				private static final long serialVersionUID = 1L;
@@ -73,7 +72,10 @@ public class MainPage extends DeviceTablePageFragment {
 					val = val.replaceAll("[^\\d.]", "");
 					try {
 						float value  = Float.parseFloat(val);
-						device.temperatureSensor().settings().setpoint().setCelsius(value);
+						if(value < 4.5f || value> 30.5f) {
+							alert.showAlert("Allowed range: 4.5 to 30°C", false, req);
+						} else
+							device.temperatureSensor().settings().setpoint().setCelsius(value);
 					} catch (NumberFormatException | NullPointerException e) {
 						if(alert != null) alert.showAlert("Entry "+val+" could not be processed!", false, req);
 						return;
@@ -84,7 +86,7 @@ public class MainPage extends DeviceTablePageFragment {
 		} else
 			vh.registerHeaderEntry("Set");
 		Label tempmes = vh.floatLabel("Measurement", id, device.temperatureSensor().reading(), row, "%.1f#min:-200");
-		vh.floatLabel("Battery", id, device.battery().chargeSensor().reading(), row, "%.1f#min:0.1");
+		vh.floatLabel("Battery", id, device.battery().internalVoltage().reading(), row, "%.1f#min:0.1");
 		Label lastContact = null;
 		if(req != null) {
 			lastContact = new LastContactLabel(device.temperatureSensor().reading(), appMan, mainTable, "lastContact"+id, req);
