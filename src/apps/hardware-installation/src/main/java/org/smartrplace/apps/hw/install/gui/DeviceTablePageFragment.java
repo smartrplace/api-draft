@@ -30,6 +30,7 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 	public static final long DEFAULT_POLL_RATE = 5000;
 	
 	protected abstract Class<? extends Resource> getResourceType();
+	protected String getHeader() {return "Smartrplace Hardware InstallationApp";}
 	
 	protected HardwareInstallController controller;
 	private Header header;
@@ -49,12 +50,7 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 	protected void addWidgetsCommon(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
-		Map<Room, String> roomsToSet = new HashMap<>();
-		List<Room> rooms = controller.appMan.getResourceAccess().getResources(Room.class);
-		for(Room room: rooms) {
-			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
-		}
-		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet, 3);
+		addRoomWidget(object, vh, id, req, row, appMan, deviceRoom);
 		
 		Map<String, String> valuesToSet = new HashMap<>();
 		valuesToSet.put("0", "unknown");
@@ -73,19 +69,31 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 			vh.registerHeaderEntry("RT");
 	}
 	
-	protected void addWidgetsCommonExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+	protected void addRoomWidget(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan,
+			Room deviceRoom) {
+		Map<Room, String> roomsToSet = new HashMap<>();
+		List<Room> rooms = controller.appMan.getResourceAccess().getResources(Room.class);
+		for(Room room: rooms) {
+			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
+		}
+		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet, 3);
+	}
+	
+	protected IntegerResource addWidgetsCommonExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
 		vh.stringEdit("Location", id, object.installationLocation(), row, alert);
 		IntegerResource source = ResourceHelper.getSubResourceOfSibbling(object.device().getLocationResource(),
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
 		vh.intLabel("RSSI", id, source, row, 0);
+		return source;
 	}
 	
 	@Override
 	public void addWidgetsAboveTable() {
 		if(roomsDrop != null) return;
-		header = new Header(page, "header", "Smartrplace Hardware InstallationApp");
+		header = new Header(page, "header", getHeader());
 		header.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
 		page.append(header).linebreak();
 		

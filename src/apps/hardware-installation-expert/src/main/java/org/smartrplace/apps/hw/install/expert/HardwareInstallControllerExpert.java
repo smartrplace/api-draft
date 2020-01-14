@@ -19,14 +19,29 @@ import org.ogema.core.application.ApplicationManager;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.gui.MainPage;
 import org.smartrplace.apps.hw.install.gui.expert.MainPageExpert;
+import org.smartrplace.apps.hw.install.gui.expert.RSSIPage;
 
+import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.localisation.LocaleDictionary;
+import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 
 // here the controller logic is implemented
 public class HardwareInstallControllerExpert extends HardwareInstallController {
-
-	public HardwareInstallControllerExpert(ApplicationManager appMan, WidgetPage<?> page) {
+	protected final WidgetApp widgetApp;
+	
+	public HardwareInstallControllerExpert(ApplicationManager appMan, WidgetPage<?> page, WidgetApp widgetApp) {
 		super(appMan, page);
+		this.widgetApp = widgetApp;
+		
+		WidgetPage<LocaleDictionary> rssiPageBase = widgetApp.createWidgetPage("rssipage.hmtl");
+		RSSIPage rssiPage = new RSSIPage(rssiPageBase, this);
+
+		final NavigationMenu menu = new NavigationMenu(" Browse pages");
+		menu.addEntry("Expert page", page);
+		menu.addEntry("Communication quality page", rssiPageBase);
+		page.getMenuConfiguration().setCustomNavigation(menu);
+		rssiPageBase.getMenuConfiguration().setCustomNavigation(menu);
 	}
 
 	@Override

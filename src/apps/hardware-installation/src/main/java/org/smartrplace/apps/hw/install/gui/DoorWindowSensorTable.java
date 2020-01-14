@@ -39,19 +39,7 @@ public class DoorWindowSensorTable extends DeviceTablePageFragment {
 	}
 	public DoorWindowSensor addWidgetsInternal(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-		//if(!(object.device() instanceof DoorWindowSensor) && (req != null)) return null;
-		final DoorWindowSensor device;
-		if(req == null)
-			device = ResourceHelper.getSampleResource(DoorWindowSensor.class);
-		else
-			device = (DoorWindowSensor) object.device();
-		//if(!(object.device() instanceof Thermostat)) return;
-		final String name;
-		if(device.getLocation().toLowerCase().contains("homematic")) {
-			name = "WindowSens HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
-		} else
-			name = ResourceUtils.getHumanReadableShortName(device);
-		vh.stringLabel("Name", id, name, row);
+		final DoorWindowSensor device = addNameWidget(object, vh, id, req, row, appMan);
 		Label state = vh.booleanLabel("Measured State", id, device.reading(), row, 0);
 		vh.floatLabel("Battery", id, device.battery().internalVoltage().reading(), row, "%.1f#min:0.1");
 		Label lastContact = null;
@@ -67,7 +55,23 @@ public class DoorWindowSensorTable extends DeviceTablePageFragment {
 		}
 		return device;
 	}
-
+	public DoorWindowSensor addNameWidget(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
+		//if(!(object.device() instanceof DoorWindowSensor) && (req != null)) return null;
+		final DoorWindowSensor device;
+		if(req == null)
+			device = ResourceHelper.getSampleResource(DoorWindowSensor.class);
+		else
+			device = (DoorWindowSensor) object.device();
+		//if(!(object.device() instanceof Thermostat)) return;
+		final String name;
+		if(device.getLocation().toLowerCase().contains("homematic")) {
+			name = "WindowSens HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
+		} else
+			name = ResourceUtils.getHumanReadableShortName(device);
+		vh.stringLabel("Name", id, name, row);
+		return device;
+	}
 	@Override
 	public void addWidgetsAboveTable() {
 		Header headerWinSens = new Header(page, "headerWinSens", "Window and Door Opening Sensors");

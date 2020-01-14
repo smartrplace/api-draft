@@ -268,10 +268,13 @@ public class UserServlet extends HttpServlet {
 			status = HttpServletResponse.SC_OK;
 		} catch (Exception e) {
 			response = response + "An error occurred: " + e.toString();
+			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+				e.printStackTrace();
 			status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
 		
-		resp.getWriter().write("success");
+		//resp.getWriter().write("success");
+		resp.getWriter().write(response);
 		resp.setStatus(status);
 	}
 	
@@ -283,13 +286,22 @@ public class UserServlet extends HttpServlet {
 			Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user);
 			for(String key: result.keySet()) {
 				ServletValueProvider prov = userMap.get(key);
+				if(prov == null)
+					throw new IllegalStateException(key+" not available for "+pageprov.toString());
 				String value;
 				try {
 					value = result.getString(key).toString();
 				} catch(JSONException e) {
 					value = result.getJSONObject(key).toString();
 				}
-				prov.setValue(user, key, value);
+				try {
+					prov.setValue(user, key, value);
+				} catch(Exception e) {
+					if(objectId != null)
+						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object:"+objectId, e);
+					else
+						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object not provided", e);
+				}
 			}
 		}
 		

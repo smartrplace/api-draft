@@ -206,6 +206,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     	case WINDOW_IDX: return winType;
     	case POWER_IDX: return powerType;
     	case CHARGE_IDX: return chargeType;
+     	case POWERSUB_IDX: return powerSubPhaseType;
     	case POWEROUTLET_IDX: return powerOutletType;
     	case HEATPOWER_IDX: return heatPowerType;
     	case HEATENERGY_IDX: return heatEnergyType;

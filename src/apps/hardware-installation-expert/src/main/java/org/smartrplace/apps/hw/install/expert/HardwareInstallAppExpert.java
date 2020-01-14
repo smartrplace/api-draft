@@ -56,8 +56,8 @@ public class HardwareInstallAppExpert implements Application {
 		//register a web page with dynamically generated HTML
 		widgetApp = guiService.createWidgetApp(urlPath, appManager);
 		final WidgetPage<?> page = widgetApp.createStartPage();
-
-		controller = new HardwareInstallControllerExpert(appMan, page);
+		
+		controller = new HardwareInstallControllerExpert(appMan, page, widgetApp);
      }
 
      /*
