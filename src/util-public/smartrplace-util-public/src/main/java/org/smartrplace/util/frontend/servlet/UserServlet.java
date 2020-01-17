@@ -194,22 +194,29 @@ public class UserServlet extends HttpServlet {
 			else
 				objStr = obj.toString();
 			for(Entry<String, ServletValueProvider> prov: data.entrySet()) {
+				ServletValueProvider valprov = prov.getValue();
 				if(doPoll) {
-					if(prov.getValue().getPollInterval() > pollInterval)
+					if(valprov == null)
+						continue;
+					if(valprov.getPollInterval() > pollInterval)
 						continue;
 				}
-				if(prov.getValue().getValueMode() == ValueMode.STRING) {
-					String value = prov.getValue().getValue(user, prov.getKey());
-					if(!Boolean.getBoolean("org.smartrplace.util.frontend.servlet.initialstructure")) {
-						subJson.put(prov.getKey(), value);
-					} else
-						result.put(objStr+"/"+prov.getKey(), value);
+				try {
+				if(valprov == null) {
+					subJson.put(prov.getKey(), "n/a");
+					continue;
+				}						
+				if(valprov.getValueMode() == ValueMode.STRING) {
+					String value = valprov.getValue(user, prov.getKey());
+					subJson.put(prov.getKey(), value);
 				} else {
-					JSONObject value = prov.getValue().getJSON(user, prov.getKey());
-					if(!Boolean.getBoolean("org.smartrplace.util.frontend.servlet.initialstructure")) {
-						subJson.put(prov.getKey(), value);
-					} else
-						result.put(objStr+"/"+prov.getKey(), value);					
+					JSONObject value = valprov.getJSON(user, prov.getKey());
+					subJson.put(prov.getKey(), value);
+				}
+				} catch(Exception e) {
+					subJson.put(prov.getKey(), e.toString());
+					if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+						e.printStackTrace();
 				}
 			}
 			if(!Boolean.getBoolean("org.smartrplace.util.frontend.servlet.initialstructure")) {

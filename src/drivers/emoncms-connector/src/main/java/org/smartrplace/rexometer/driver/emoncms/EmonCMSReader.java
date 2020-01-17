@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.simple.FloatResource;
-import org.ogema.core.model.units.EnergyResource;
 import org.smartrplace.rexometer.driver.emoncms.model.EmonCMSReadConfiguration;
 import org.smartrplace.rexometer.driver.emoncms.pattern.EmonCMSConnectionPattern;
 
@@ -34,6 +33,8 @@ public class EmonCMSReader {
 
 	public boolean doPull() throws Exception {
 
+		if(Boolean.getBoolean("org.smartrplace.rexometer.driver.emoncms.testwithoutconnection"))
+			return true;
 		String base = conn.url.getValue().replaceAll("/$", "");
 		String endpoint = "/timevalue.json";
 		int id = readConf.fieldId().getValue();
