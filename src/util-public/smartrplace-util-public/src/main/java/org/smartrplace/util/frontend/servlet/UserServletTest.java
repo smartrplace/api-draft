@@ -2,14 +2,10 @@ package org.smartrplace.util.frontend.servlet;
 
 import java.io.IOException;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /** Core class to provide testing variants for servlets based on widgets pages. This servlet
  * does only provide relevant information in the HTTP response when the property 
@@ -17,14 +13,10 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * NOT be the case in any productive instance as this would be a major security leak.
  * This servlet is accessible without any authentification.
 */
-@Component(
-		service=Servlet.class,
-		property= { 
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=/org/smartrplace/apps/smartrplaceheatcontrolv2/userdatatest", // prefix to be set in ServletContextHelper
-				//HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=" + UserServletTest.CONTEXT_FILTER
-		}
-)
-public class UserServletTest extends HttpServlet {
+public abstract class UserServletTest extends HttpServlet {
+	protected abstract UserServlet getUserServlet();
+	
+	/** This is the default property check that may be used also by other servlets if no special property is needed*/
 	protected String getPropertyToCheck() {
 		return "org.smartrplace.apps.heatcontrol.servlet.istestinstance";
 	}
@@ -42,7 +34,7 @@ public class UserServletTest extends HttpServlet {
     	if(!isTestInstance(resp)) return;
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
-    	UserServlet.getInstance().doGet(req, resp);
+    	getUserServlet().doGet(req, resp);
     	resp.addHeader("Access-Control-Allow-Origin", "*");
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
         /*else {
@@ -57,7 +49,7 @@ public class UserServletTest extends HttpServlet {
     	if(!isTestInstance(resp)) return;
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
-    	UserServlet.getInstance().doPost(req, resp);
+    	getUserServlet().doPost(req, resp);
     	resp.addHeader("Access-Control-Allow-Origin", "*");
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
     }

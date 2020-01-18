@@ -70,13 +70,13 @@ public class UserServlet extends HttpServlet {
 	protected String stdPageId = null;
 	
 	//private final SmartrplaceHeatcontrolController controller;
-	private static UserServlet instance = null;
+	/*private static UserServlet instance = null;
 	public static UserServlet getInstance() {
 		if(instance == null) instance = new UserServlet();
 		return instance;
-	}
+	}*/
 	
-	private UserServlet() {
+	public UserServlet() {
 	}
 
 	public void addPage(String pageId, ServletPageProvider<?> prov) {
@@ -84,70 +84,6 @@ public class UserServlet extends HttpServlet {
 			stdPageId = pageId;
 		pages.put(pageId, prov);
 	}
-	
-	/*public void addData(String user, String key, ServletValueProvider value) {
-		Map<String, ServletValueProvider> subMap = data.get(user);
-		if(subMap == null) {
-			subMap = new HashMap<>(dataAllUsers);
-			data.put(user, subMap);
-		}
-		subMap.put(key, value);
-	}
-	
-	public void addDataAllUsers(String key, ServletValueProvider value) {
-		dataAllUsers.put(key, value);
-		for(Map<String, ServletValueProvider> userData: data.values()) {
-			userData.put(key, value);
-		}
-	}
-	
-	public void addData(String user,  Map<String, ServletValueProvider> newData) {
-		for(Entry<String, ServletValueProvider> e: newData.entrySet()) {
-			addData(user, e.getKey(), e.getValue());
-		}
-	}
-	
-	public void addDataAllUsers(Map<String, ServletValueProvider> newData) {
-		for(Entry<String, ServletValueProvider> e: newData.entrySet()) {
-			addDataAllUsers(e.getKey(), e.getValue());
-		}
-	}
-	
-	public void addData(String user, String key, ServletValueProvider value, UseMode mode) {
-		if(mode == UseMode.GET || mode == UseMode.BOTH)
-			addData(user, key, value);
-		if(mode == UseMode.POST || mode == UseMode.BOTH) {
-			Map<String, ServletValueProvider> subMap = postData.get(user);
-			if(subMap == null) {
-				subMap = new HashMap<>(dataAllUsers);
-				postData.put(user, subMap);
-			}
-			subMap.put(key, value);
-		}
-	}
-	
-	public void addDataAllUsers(String key, ServletValueProvider value, UseMode mode) {
-		if(mode == UseMode.GET || mode == UseMode.BOTH)
-			addDataAllUsers(key, value);
-		if(mode == UseMode.POST || mode == UseMode.BOTH) {
-			postDataAllUsers.put(key, value);
-			for(Map<String, ServletValueProvider> userData: postData.values()) {
-				userData.put(key, value);
-			}
-		}
-	}
-	
-	public void addData(String user,  Map<String, ServletValueProvider> newData, UseMode mode) {
-		for(Entry<String, ServletValueProvider> e: newData.entrySet()) {
-			addData(user, e.getKey(), e.getValue(), mode);
-		}
-	}
-	
-	public void addDataAllUsers(Map<String, ServletValueProvider> newData, UseMode mode) {
-		for(Entry<String, ServletValueProvider> e: newData.entrySet()) {
-			addDataAllUsers(e.getKey(), e.getValue(), mode);
-		}
-	}*/
 	
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String user = req.getParameter("user");
