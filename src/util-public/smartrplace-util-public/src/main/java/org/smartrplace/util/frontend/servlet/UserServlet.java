@@ -24,6 +24,7 @@ import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider.Va
  * TODO: Entire package to be moved to smartrplace-util-proposed or similar location for Utils*/
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
+	public static final String TIMEPREFIX = "&time=";
 
 	public interface ServletPageProvider<T extends Object> {
 		Map<String, ServletValueProvider> getProviders(T object, String user);
@@ -89,19 +90,20 @@ public class UserServlet extends HttpServlet {
 		String user = req.getParameter("user");
 		String pageId = req.getParameter("page");
 		String object = req.getParameter("object");
+		String timeStr = req.getParameter("time");
 		if(user == null) return;
 		if(pageId == null) pageId = stdPageId ;
 		ServletPageProvider<?> pageMap = pages.get(pageId);
 		if(pageMap == null) return;
 		String pollStr = req.getParameter("poll");
 		
-		JSONObject result = getJSON(object, user, pollStr, pageMap);
+		JSONObject result = getJSON(object, user, pollStr, timeStr, pageMap);
 		
 		resp.getWriter().write(result.toString());
 		resp.setStatus(200);
 	}
 	
-	protected <T> JSONObject getJSON(String objectId, String user, String pollStr, 
+	protected <T> JSONObject getJSON(String objectId, String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov) {
 		JSONObject result = new JSONObject();
 
@@ -141,12 +143,17 @@ public class UserServlet extends HttpServlet {
 				if(valprov == null) {
 					subJson.put(prov.getKey(), "n/a");
 					continue;
-				}						
+				}
+				String key;
+				if(timeString != null)
+					key = prov.getKey()+TIMEPREFIX+timeString;
+				else
+					key = prov.getKey();
 				if(valprov.getValueMode() == ValueMode.STRING) {
-					String value = valprov.getValue(user, prov.getKey());
+					String value = valprov.getValue(user, key);
 					subJson.put(prov.getKey(), value);
 				} else {
-					JSONObject value = valprov.getJSON(user, prov.getKey());
+					JSONObject value = valprov.getJSON(user, key);
 					subJson.put(prov.getKey(), value);
 				}
 				} catch(Exception e) {
