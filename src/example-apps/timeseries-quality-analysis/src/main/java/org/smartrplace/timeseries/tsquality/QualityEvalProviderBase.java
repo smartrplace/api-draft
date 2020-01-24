@@ -96,6 +96,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final GaRoDataTypeParam stateFBType = new GaRoDataTypeParam(GaRoDataType.SwitchStateFeedback, false);
     public static final GaRoDataTypeParam energyType = new GaRoDataTypeParam(GaRoDataType.PowerMeterEnergy, false);
     public static final GaRoDataTypeParam energySubPhaseType = new GaRoDataTypeParam(GaRoDataType.PowerMeterEnergySubphase, false);
+    public static final GaRoDataTypeParam phValueType = new GaRoDataTypeParam(GaRoDataType.WaterPHValue, false);
+    public static final GaRoDataTypeParam conductivityValueType = new GaRoDataTypeParam(GaRoDataType.WaterConductivityValue, false);
+    public static final GaRoDataTypeParam redoxValueType = new GaRoDataTypeParam(GaRoDataType.WaterRedoxValue, false);
+    public static final GaRoDataTypeParam oxygenValueType = new GaRoDataTypeParam(GaRoDataType.WaterOxygenConcentrationValue, false);
+    public static final GaRoDataTypeParam waterTempValueType = new GaRoDataTypeParam(GaRoDataType.WaterTemperatureValue, false);
     
 	@Override
 	/** Provide your data types here*/
@@ -122,7 +127,12 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	        	heatReturnTempType,
 	        	stateFBType,
 	        	energyType,
-	        	energySubPhaseType
+	        	energySubPhaseType,
+	        	phValueType,
+	        	conductivityValueType,
+	        	redoxValueType,
+	        	oxygenValueType,
+	        	waterTempValueType
 		};
 	}
 	
@@ -150,12 +160,20 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //heat return temperature
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //state feedback
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //energy
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //energy subphase
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //energy subphase
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //waterTempValueType
 			}; //Charge
 	
 	@Override
 	protected long[] getMaximumGapTimes() {
 		return new long[] {2*HOUR_MILLIS, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
@@ -191,7 +209,12 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final int STATEFB_IDX = 19;
 	public static final int ENERGY_IDX = 20;
 	public static final int ENERGYSUB_IDX = 21;
-    public static final int TYPE_NUM = 22;
+	public static final int PH_IDX = 22;
+	public static final int CONDUCTIVITY_IDX = 23;
+	public static final int REDOX_IDX = 24;
+	public static final int OXYGEN_IDX = 25;
+	public static final int WATERTEMP_IDX = 26;
+    public static final int TYPE_NUM = 27;
     
     protected GaRoDataTypeParam getParamType(int idxOfReqInput) {
     	switch(idxOfReqInput) {
@@ -217,6 +240,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     	case STATEFB_IDX: return stateFBType;
     	case ENERGY_IDX: return energyType;
     	case ENERGYSUB_IDX: return energySubPhaseType;
+       	case PH_IDX: return phValueType;
+       	case CONDUCTIVITY_IDX: return conductivityValueType;
+       	case REDOX_IDX: return redoxValueType;
+       	case OXYGEN_IDX: return oxygenValueType;
+       	case WATERTEMP_IDX: return waterTempValueType;
     	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
     }

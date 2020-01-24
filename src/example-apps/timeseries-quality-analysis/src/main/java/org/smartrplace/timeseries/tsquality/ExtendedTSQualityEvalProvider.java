@@ -85,6 +85,11 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
 	        	stateFBType,
 	        	energyType,
 	        	energySubPhaseType,
+	        	phValueType,
+	        	conductivityValueType,
+	        	redoxValueType,
+	        	oxygenValueType,
+	        	waterTempValueType,
 	        	chargeVoltageType
 		};
 	}
@@ -115,7 +120,12 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
     	case HEATRETURN_IDX: return heatReturnTempType;    	case STATEFB_IDX: return stateFBType;
     	case ENERGY_IDX: return energyType;
     	case ENERGYSUB_IDX: return energySubPhaseType;
-    	case CHARGE_VOLT_IDX: return chargeVoltageType;
+       	case PH_IDX: return phValueType;
+       	case CONDUCTIVITY_IDX: return conductivityValueType;
+       	case REDOX_IDX: return redoxValueType;
+       	case OXYGEN_IDX: return oxygenValueType;
+       	case WATERTEMP_IDX: return waterTempValueType;
+       	case CHARGE_VOLT_IDX: return chargeVoltageType;
    	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
     }
