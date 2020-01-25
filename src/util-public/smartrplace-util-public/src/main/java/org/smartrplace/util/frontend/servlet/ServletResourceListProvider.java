@@ -99,15 +99,16 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 				setElementData(allRes.get(i), (JSONObject) json.get(i));
 			}
 		} catch(NumberFormatException e) {
-			//do nothing
+			throw new IllegalArgumentException(e);
 		}
 		else if(postMode == POSTMODE.ADD_ONLY) try {
 			JSONObject jsonobj = new JSONObject(value);
-			T newEl = setElementData(null, jsonobj);
-			if(newEl == null)
-				throw new IllegalArgumentException("Data not accepted for element creation!");
+			//T newEl = 
+			setElementData(null, jsonobj);
+			//if(newEl == null)
+			//	throw new IllegalArgumentException("Data not accepted for element creation!");
 		} catch(NumberFormatException e) {
-			//do nothing
+			throw new IllegalArgumentException(e);
 		}
 	}
 }

@@ -255,9 +255,9 @@ public class UserServlet extends HttpServlet {
 					prov.setValue(user, keyForSetValue, value);
 				} catch(Exception e) {
 					if(objectId != null)
-						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object:"+objectId, e);
+						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object; "+e.getMessage()+objectId, e);
 					else
-						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object not provided", e);
+						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object not provided; "+e.getMessage(), e);
 				}
 			}
 		}
