@@ -189,6 +189,7 @@ public class UserServlet extends HttpServlet {
 		String object = req.getParameter("object");
 		ServletPageProvider<?> pageMap = pages.get(pageId);
 		if(pageMap == null) return;
+		String timeStr = req.getParameter("time");
 		
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = req.getReader();
@@ -207,7 +208,7 @@ public class UserServlet extends HttpServlet {
 
 		try {
 			JSONObject result = new JSONObject(request);
-			postJSON(object, user, result, pageMap, response);
+			postJSON(object, user, result, pageMap, response, timeStr);
 			//Map<String, ServletValueProvider> userMap = postData.get(user);
 			//for(String key: result.keySet()) {
 			//	ServletValueProvider prov = userMap.get(key);
@@ -228,7 +229,8 @@ public class UserServlet extends HttpServlet {
 		resp.setStatus(status);
 	}
 	
-	protected <T> String postJSON(String objectId, String user, JSONObject result, ServletPageProvider<T> pageprov, String response) {
+	protected <T> String postJSON(String objectId, String user, JSONObject result,
+			ServletPageProvider<T> pageprov, String response, String timeString) {
 		Collection<T> objects = getObjects(objectId, user, pageprov);
 		if(objects == null) return response;
 		
@@ -245,7 +247,12 @@ public class UserServlet extends HttpServlet {
 					value = result.getJSONObject(key).toString();
 				}
 				try {
-					prov.setValue(user, key, value);
+					String keyForSetValue;
+					if(timeString != null)
+						keyForSetValue = key+TIMEPREFIX+timeString;
+					else
+						keyForSetValue = key;
+					prov.setValue(user, keyForSetValue, value);
 				} catch(Exception e) {
 					if(objectId != null)
 						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object:"+objectId, e);
