@@ -1,5 +1,7 @@
 package org.smartrplace.util.frontend.servlet;
 
+import org.ogema.core.channelmanager.measurements.StringValue;
+import org.ogema.core.channelmanager.measurements.Value;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 public class ServletStringProvider implements ServletValueProvider {
@@ -27,7 +29,7 @@ public class ServletStringProvider implements ServletValueProvider {
 	}
 	
 	@Override
-	public String getValue(String user, String key) {
-		return text;
+	public Value getValue(String user, String key) {
+		return new StringValue(text);
 	}
 }

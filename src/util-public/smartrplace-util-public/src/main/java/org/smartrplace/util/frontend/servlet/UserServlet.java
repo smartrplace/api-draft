@@ -14,8 +14,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ogema.core.channelmanager.measurements.BooleanValue;
+import org.ogema.core.channelmanager.measurements.DoubleValue;
+import org.ogema.core.channelmanager.measurements.FloatValue;
+import org.ogema.core.channelmanager.measurements.IntegerValue;
+import org.ogema.core.channelmanager.measurements.LongValue;
+import org.ogema.core.channelmanager.measurements.StringValue;
+import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider.ValueMode;
@@ -26,6 +34,13 @@ public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
 
+	public enum ReturnStructure {
+		/**In this case a list is returned with each element having an element named "key". Additional
+		standard elements may be defined in the future when elements are generated from
+		widgets*/
+		LIST,
+		DICTIONARY
+	}
 	public interface ServletPageProvider<T extends Object> {
 		Map<String, ServletValueProvider> getProviders(T object, String user);
 		
@@ -39,10 +54,19 @@ public class UserServlet extends HttpServlet {
 		
 		/** Page may provide object based on ID. In this case data for a single object can be read via the servlet*/
 		default T getObject(String objectId) {return null;}
+		
+		default ReturnStructure getGETStructure() {return ReturnStructure.DICTIONARY;}
+		
+		default String getObjectId(T obj) {
+			if(obj instanceof Resource)
+				return ResourceUtils.getHumanReadableShortName((Resource)obj);
+			else
+				return obj.toString();			
+		}
 	}
 	public interface ServletValueProvider {
 		/** Called on GET*/
-		String getValue(String user, String key);
+		Value getValue(String user, String key);
 		default JSONObject getJSON(String user, String key) {throw new UnsupportedOperationException("Not implemented for VALUEMODE STRING");}
 		/** Called on POST*/
 		default void setValue(String user, String key, String value) {};
@@ -91,22 +115,31 @@ public class UserServlet extends HttpServlet {
 		String pageId = req.getParameter("page");
 		String object = req.getParameter("object");
 		String timeStr = req.getParameter("time");
+		String returnStruct = req.getParameter("structure");
 		if(user == null) return;
 		if(pageId == null) pageId = stdPageId ;
 		ServletPageProvider<?> pageMap = pages.get(pageId);
 		if(pageMap == null) return;
 		String pollStr = req.getParameter("poll");
 		
-		JSONObject result = getJSON(object, user, pollStr, timeStr, pageMap);
+		JSONObject result = getJSON(object, user, pollStr, timeStr, pageMap, returnStruct);
 		
 		resp.getWriter().write(result.toString());
 		resp.setStatus(200);
 	}
 	
 	protected <T> JSONObject getJSON(String objectId, String user, String pollStr, String timeString,
-			ServletPageProvider<T> pageprov) {
+			ServletPageProvider<T> pageprov, String returnStruct) {
 		JSONObject result = new JSONObject();
-
+		final ReturnStructure retStruct;
+		if(returnStruct == null)
+			retStruct = pageprov.getGETStructure();
+		else {
+			if(returnStruct.toLowerCase().equals("list"))
+				retStruct = ReturnStructure.LIST;
+			else
+				retStruct = ReturnStructure.DICTIONARY;
+		}
 		Collection<T> objects = getObjects(objectId, user, pageprov);
 		if(objects == null) return result;
 		
@@ -125,14 +158,29 @@ public class UserServlet extends HttpServlet {
 		for(T obj: objects) {
 			if(obj == null) continue;
 			Map<String, ServletValueProvider> data = pageprov.getProviders(obj, user);
-			final String objStr;
-			final JSONObject subJson = new JSONObject();
-			if(obj instanceof Resource)
-				objStr = ResourceUtils.getHumanReadableShortName((Resource)obj);
-			else
-				objStr = obj.toString();
+			final String objStr = pageprov.getObjectId(obj);
+			JSONObject subJson;
+			final JSONArray subJsonArr;
+			if(retStruct == ReturnStructure.LIST) {
+				subJson = null;
+				subJsonArr = new JSONArray();
+			} else {
+				subJson = new JSONObject();
+				subJsonArr = null;
+			}
+			//if(obj instanceof Resource)
+			//	objStr = ResourceUtils.getHumanReadableShortName((Resource)obj);
+			//else
+			//	objStr = obj.toString();
 			for(Entry<String, ServletValueProvider> prov: data.entrySet()) {
 				ServletValueProvider valprov = prov.getValue();
+				final String jsonkey;
+				if(retStruct == ReturnStructure.LIST) {
+					subJson = new JSONObject();
+					subJson.put("key", prov.getKey());
+					jsonkey = "value";
+				} else
+					jsonkey = prov.getKey();
 				if(doPoll) {
 					if(valprov == null)
 						continue;
@@ -141,7 +189,7 @@ public class UserServlet extends HttpServlet {
 				}
 				try {
 				if(valprov == null) {
-					subJson.put(prov.getKey(), "n/a");
+					subJson.put(jsonkey, "n/a");
 					continue;
 				}
 				String key;
@@ -150,21 +198,39 @@ public class UserServlet extends HttpServlet {
 				else
 					key = prov.getKey();
 				if(valprov.getValueMode() == ValueMode.STRING) {
-					String value = valprov.getValue(user, key);
-					subJson.put(prov.getKey(), value);
+					Value value = valprov.getValue(user, key);
+					if(value == null)
+						subJson.put(jsonkey, "");
+					if(value instanceof FloatValue)
+						subJson.put(jsonkey, value.getFloatValue());
+					else if(value instanceof IntegerValue)
+						subJson.put(jsonkey, value.getIntegerValue());
+					else if(value instanceof DoubleValue)
+						subJson.put(jsonkey, value.getDoubleValue());
+					else if(value instanceof BooleanValue)
+						subJson.put(jsonkey, value.getBooleanValue());
+					else if(value instanceof LongValue)
+						subJson.put(jsonkey, value.getLongValue());
+					else if(value instanceof StringValue)
+						subJson.put(jsonkey, value.getStringValue());
+					else
+						subJson.put(jsonkey, value);
 				} else {
 					JSONObject value = valprov.getJSON(user, key);
-					subJson.put(prov.getKey(), value);
+					subJson.put(jsonkey, value);
 				}
 				} catch(Exception e) {
-					subJson.put(prov.getKey(), e.toString());
+					subJson.put(jsonkey, e.toString());
 					if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 						e.printStackTrace();
 				}
+				if(retStruct == ReturnStructure.LIST)
+					subJsonArr.put(subJson);
 			}
-			if(!Boolean.getBoolean("org.smartrplace.util.frontend.servlet.initialstructure")) {
+			if(retStruct == ReturnStructure.LIST) {
+				result.put(objStr, subJsonArr);
+			} else
 				result.put(objStr, subJson);
-			}
 		}
 		
 		return result;

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
@@ -74,7 +75,7 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 	}
 	
 	@Override
-	public String getValue(String user, String key) {
+	public Value getValue(String user, String key) {
 		throw new IllegalStateException("Returns JSON");
 	}
 

@@ -1,5 +1,7 @@
 package org.smartrplace.util.frontend.servlet;
 
+import org.ogema.core.channelmanager.measurements.FloatValue;
+import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.simple.FloatResource;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
@@ -11,8 +13,8 @@ public class ServletFloatResourceProvider implements ServletValueProvider {
 	}
 	
 	@Override
-	public String getValue(String user, String key) {
-		return String.valueOf(res.getValue());
+	public Value getValue(String user, String key) {
+		return new FloatValue(res.getValue());
 	}
 
 	@Override
