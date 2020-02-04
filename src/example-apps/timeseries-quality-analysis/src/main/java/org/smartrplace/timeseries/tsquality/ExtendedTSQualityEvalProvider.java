@@ -90,6 +90,7 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
 	        	redoxValueType,
 	        	oxygenValueType,
 	        	waterTempValueType,
+	        	co2concentrationType,
 	        	chargeVoltageType
 		};
 	}
@@ -125,6 +126,7 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
        	case REDOX_IDX: return redoxValueType;
        	case OXYGEN_IDX: return oxygenValueType;
        	case WATERTEMP_IDX: return waterTempValueType;
+      	case CO2CONC_IDX: return co2concentrationType;
        	case CHARGE_VOLT_IDX: return chargeVoltageType;
    	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}

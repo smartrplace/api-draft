@@ -101,6 +101,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final GaRoDataTypeParam redoxValueType = new GaRoDataTypeParam(GaRoDataType.WaterRedoxValue, false);
     public static final GaRoDataTypeParam oxygenValueType = new GaRoDataTypeParam(GaRoDataType.WaterOxygenConcentrationValue, false);
     public static final GaRoDataTypeParam waterTempValueType = new GaRoDataTypeParam(GaRoDataType.WaterTemperatureValue, false);
+    public static final GaRoDataTypeParam co2concentrationType = new GaRoDataTypeParam(GaRoDataType.CO2Concentration, false);
     
 	@Override
 	/** Provide your data types here*/
@@ -132,7 +133,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	        	conductivityValueType,
 	        	redoxValueType,
 	        	oxygenValueType,
-	        	waterTempValueType
+	        	waterTempValueType,
+	        	co2concentrationType
 		};
 	}
 	
@@ -165,12 +167,14 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //waterTempValueType
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //waterTempValueType
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //co2concentrationtype
 			}; //Charge
 	
 	@Override
 	protected long[] getMaximumGapTimes() {
 		return new long[] {2*HOUR_MILLIS, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
@@ -214,7 +218,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final int REDOX_IDX = 24;
 	public static final int OXYGEN_IDX = 25;
 	public static final int WATERTEMP_IDX = 26;
-    public static final int TYPE_NUM = 27;
+	public static final int CO2CONC_IDX = 27;
+    public static final int TYPE_NUM = 28;
     
     protected GaRoDataTypeParam getParamType(int idxOfReqInput) {
     	switch(idxOfReqInput) {
@@ -245,6 +250,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
        	case REDOX_IDX: return redoxValueType;
        	case OXYGEN_IDX: return oxygenValueType;
        	case WATERTEMP_IDX: return waterTempValueType;
+       	case CO2CONC_IDX: return co2concentrationType;
     	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
     }
