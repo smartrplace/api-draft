@@ -35,7 +35,7 @@ public abstract class UserServletTest extends HttpServlet {
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
     	getUserServlet().doGet(req, resp);
-    	resp.addHeader("Access-Control-Allow-Origin", "*");
+    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
         /*else {
     		resp.getWriter().write("Servlet not accessible!");
@@ -50,7 +50,7 @@ public abstract class UserServletTest extends HttpServlet {
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
     	getUserServlet().doPost(req, resp);
-    	resp.addHeader("Access-Control-Allow-Origin", "*");
+    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
     }
     
