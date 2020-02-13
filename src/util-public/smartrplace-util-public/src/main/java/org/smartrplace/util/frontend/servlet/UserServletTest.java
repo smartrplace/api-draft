@@ -29,6 +29,18 @@ public abstract class UserServletTest extends HttpServlet {
 	//private static final String SERVLET_ADDRESS = "org/smartrplace/apps/smartrplaceheatcontrolv2/userdatatest";
 
     @Override
+    protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    	if(!isTestInstance(resp)) return;
+    	resp.setCharacterEncoding("UTF-8");
+    	resp.setContentType("application/json");
+     	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
+        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+        resp.addHeader("Access-Control-Allow-Headers", "*");
+        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
+        resp.addHeader("Access-Control-Allow-Credentials", "true");
+    }
+    
+    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     	//if(!req.getRequestURI().endsWith(SERVLET_ADDRESS)) return;
     	if(!isTestInstance(resp)) return;
@@ -37,6 +49,9 @@ public abstract class UserServletTest extends HttpServlet {
     	getUserServlet().doGet(req, resp);
     	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+        resp.addHeader("Access-Control-Allow-Headers", "*");
+        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
+        resp.addHeader("Access-Control-Allow-Credentials", "true");
         /*else {
     		resp.getWriter().write("Servlet not accessible!");
         	resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -52,6 +67,8 @@ public abstract class UserServletTest extends HttpServlet {
     	getUserServlet().doPost(req, resp);
     	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+        resp.addHeader("Access-Control-Allow-Headers", "*");
+        resp.addHeader("Access-Control-Allow-Credentials", "true");
     }
     
     @Override
