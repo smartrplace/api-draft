@@ -1,4 +1,4 @@
-package org.sp.smarteff.fimon.capability;
+package org.sp.smarteff.monbase.capability;
 
 import java.util.ArrayList;
 import java.util.Arrays;
