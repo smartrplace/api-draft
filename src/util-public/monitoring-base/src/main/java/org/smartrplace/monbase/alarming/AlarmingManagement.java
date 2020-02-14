@@ -180,7 +180,8 @@ public class AlarmingManagement {
 					vl.isNoValueAlarmActive = true;
 					if(vl.res != null) {
 						IntegerResource alarmStatus = getAlarmStatus(vl.res);
-						executeNoValueAlarm(vl.listener.getAc(), vl.res.getValue(), vl.lastTimeOfNewData,
+						float val = getHumanValue(vl.res);
+						executeNoValueAlarm(vl.listener.getAc(), val, vl.lastTimeOfNewData,
 								vl.maxIntervalBetweenNewValues, alarmStatus);
 						//reset value
 						vl.res.setValue(Float.NaN);
@@ -248,11 +249,11 @@ public class AlarmingManagement {
 		@Override
 		public void resourceChanged(FloatResource resource) {
 			IntegerResource alarmStatus = getAlarmStatus(resource);
-			float val;
-			if(resource instanceof TemperatureResource)
-				val = ((TemperatureResource)resource).getCelsius();
-			else
-				val = resource.getValue();
+			float val = getHumanValue(resource);
+			//if(resource instanceof TemperatureResource)
+			//	val = ((TemperatureResource)resource).getCelsius();
+			//else
+			//	val = resource.getValue();
 			if(Float.isNaN(val)) {
 				//we just got the callback after writing NaN
 				if(vl.isNoValueAlarmActive)
@@ -466,5 +467,15 @@ public class AlarmingManagement {
 			System.out.println("         SENT MESSAGE "+title+":\r\n"+message);		
 		}
 		
+	}
+	
+	//TODO: Provide this as general util method
+	public static float getHumanValue(FloatResource resource) {
+		float val;
+		if(resource instanceof TemperatureResource)
+			val = ((TemperatureResource)resource).getCelsius();
+		else
+			val = resource.getValue();
+		return val;
 	}
 }

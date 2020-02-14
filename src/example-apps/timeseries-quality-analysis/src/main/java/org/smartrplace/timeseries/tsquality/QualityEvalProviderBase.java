@@ -102,6 +102,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final GaRoDataTypeParam oxygenValueType = new GaRoDataTypeParam(GaRoDataType.WaterOxygenConcentrationValue, false);
     public static final GaRoDataTypeParam waterTempValueType = new GaRoDataTypeParam(GaRoDataType.WaterTemperatureValue, false);
     public static final GaRoDataTypeParam co2concentrationType = new GaRoDataTypeParam(GaRoDataType.CO2Concentration, false);
+    public static final GaRoDataTypeParam internetType = new GaRoDataTypeParam(GaRoDataType.InternetConnection, false);
     
 	@Override
 	/** Provide your data types here*/
@@ -134,7 +135,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	        	redoxValueType,
 	        	oxygenValueType,
 	        	waterTempValueType,
-	        	co2concentrationType
+	        	co2concentrationType,
+	        	internetType
 		};
 	}
 	
@@ -168,7 +170,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //waterTempValueType
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //co2concentrationtype
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //co2concentrationtype
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //internettype
 			}; //Charge
 	
 	@Override
@@ -219,7 +222,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final int OXYGEN_IDX = 25;
 	public static final int WATERTEMP_IDX = 26;
 	public static final int CO2CONC_IDX = 27;
-    public static final int TYPE_NUM = 28;
+	public static final int INTERNET_IDX = 28;
+    public static final int TYPE_NUM = 29;
     
     protected GaRoDataTypeParam getParamType(int idxOfReqInput) {
     	switch(idxOfReqInput) {
@@ -251,6 +255,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
        	case OXYGEN_IDX: return oxygenValueType;
        	case WATERTEMP_IDX: return waterTempValueType;
        	case CO2CONC_IDX: return co2concentrationType;
+       	case INTERNET_IDX: return internetType;
     	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
     }

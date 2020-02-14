@@ -68,7 +68,7 @@ public abstract class ScheduleViewerOpenButtonDataProviderImpl implements Schedu
 			cleanListByRooms(input, roomIDs);
 		}
 		String dataType = getDataType(req);
-		if(dataType.equals("Alle Messwerte"))
+		if(dataType.equals(controller.getAllDataLabel()))
 			return input;
 		Set<String> inputsToUse = new HashSet<>(); //ArrayList<>();
 		

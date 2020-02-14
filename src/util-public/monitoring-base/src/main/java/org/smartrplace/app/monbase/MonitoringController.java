@@ -119,6 +119,10 @@ public abstract class MonitoringController extends OfflineEvaluationControlContr
     public static final String THREE_WEEKS = "Three Weeks";
     public static final String[] OPTIONS = {ALL_DATA, ONE_DAY, ONE_WEEK, THREE_WEEKS};
 	/** Overwrite if necesary*/
+    public String getAllDataLabel() {
+    	return ALL_DATA;
+    }
+	/** Overwrite if necesary*/
 	public String[] getIntervalOptions( ) {
 		return OPTIONS;
 	}
