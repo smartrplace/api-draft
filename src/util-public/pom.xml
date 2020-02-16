@@ -17,6 +17,7 @@
     <!-- Sub-projects: OGEMA Applications (in alphabetical order) -->
     <modules>
 		<module>smartrplace-util-public</module>
+		<module>monitoring-base</module>
     </modules>
 
     <build>

@@ -85,7 +85,11 @@ public abstract class ScheduleViewerOpenButtonDataProviderImpl implements Schedu
 		
 		for(String baselabel: baselabels) {
 			List<String> newInp = controller.getDatatypesBase().get(baselabel);
+			try {
 			inputsToUse.addAll(newInp);
+			} catch(NullPointerException e) {
+				e.printStackTrace();
+			}
 			for(String locpart: newInp) {
 				if(locpart.startsWith("#")) {
 					for(String room: roomIDsForManual) {

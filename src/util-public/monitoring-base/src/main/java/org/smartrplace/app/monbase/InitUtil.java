@@ -93,7 +93,8 @@ public class InitUtil {
 		@SuppressWarnings("unchecked")
 		ResourceList<AlarmConfigBase> alarms = bu.getSubResource("alarmConfig", ResourceList.class);
 		alarms.create();
-		alarms.setElementType(AlarmConfigBase.class);
+		if(alarms.getElementType() == null)
+			alarms.setElementType(AlarmConfigBase.class);
 
 		AlarmConfigBase ac = AlarmingUtil.getAlarmConfig(alarms, dev);
 		if(ac == null) {

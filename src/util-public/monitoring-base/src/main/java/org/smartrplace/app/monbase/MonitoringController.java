@@ -188,6 +188,7 @@ public abstract class MonitoringController extends OfflineEvaluationControlContr
     
 	public String getScheduleLabel(String resName, Resource fullResource) {
 		String name = null;
+		//first test for manual resources
 		String entryName = "#"+resName;
 		for(Entry<String, List<String>> e: getDatatypesBase().entrySet()) {
 			for(String locPart: e.getValue()) {

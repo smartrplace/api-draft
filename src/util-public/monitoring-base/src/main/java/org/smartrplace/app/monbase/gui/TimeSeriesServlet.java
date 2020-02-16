@@ -35,7 +35,10 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	@Override
 	public Map<String, ServletValueProvider> getProviders(TimeSeriesDataImpl object, String user) {
 		Map<String, ServletValueProvider> result = new LinkedHashMap<>();
-		if(object.label(null).equals("L24")) {
+		float val = specialEvaluation(object.label(null), object.getTimeSeries(), appMan);
+		ServletValueProvider last24h = new ServletNumProvider(val);
+		result.put("last24h", last24h);
+		/*if(object.label(null).equals("L24")) {
 			float val = getDiffOfLast24h(object.getTimeSeries(), appMan);
 			ServletValueProvider last24h = new ServletNumProvider(val);
 			result.put("last24h", last24h);
@@ -43,7 +46,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			float val = getIntegralOfLast24h(object.getTimeSeries(), appMan);
 			ServletValueProvider last24h = new ServletNumProvider(val);
 			result.put("last24h", last24h);
-		}
+		}*/
 
 		return result;
 	}
@@ -84,7 +87,10 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			return new TimeSeriesDataImpl(ValueResourceHelper.getRecordedData(svr), label, label, null);
 		} else if(objectId.startsWith("X:"))
 			return new TimeSeriesDataImpl(knownSpecialTs.get(objectId), label, label, null);
-		throw new IllegalArgumentException("ObjectId must declare a known type (S:,R: or X:), is:"+objectId);
+		//use L24_R: as default
+		SingleValueResource svr = appMan.getResourceAccess().getResource(objectIdin);
+		return new TimeSeriesDataImpl(ValueResourceHelper.getRecordedData(svr), "L24", "L24", null);		
+		//hrow new IllegalArgumentException("ObjectId must declare a known type (S:,R: or X:), is:"+objectId);
 	}
 	
 	public static float getIntegralOfLast24h(ReadOnlyTimeSeries ts, ApplicationManager appMan) {
@@ -95,6 +101,23 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		long now = appMan.getFrameworkTime();
 		SampledValue startval = ts.getPreviousValue(now-AlarmingManagement.DAY_MILLIS);
 		SampledValue endval = ts.getPreviousValue(now);
+		if(startval == null)
+			return -1;
+			//return Float.NaN;
+		try {
 		return endval.getValue().getFloatValue() - startval.getValue().getFloatValue();
+		} catch(NullPointerException e) {
+			e.printStackTrace();
+			return -2;
+		}
+	}
+	
+	public static float specialEvaluation(String label, ReadOnlyTimeSeries timeSeries, ApplicationManager appMan) {
+		if(label.equals("L24")) {
+			return getDiffOfLast24h(timeSeries, appMan);
+		} else if(label.equals("I24")) {
+			return getIntegralOfLast24h(timeSeries, appMan);
+		}
+		return Float.NaN;
 	}
 }
