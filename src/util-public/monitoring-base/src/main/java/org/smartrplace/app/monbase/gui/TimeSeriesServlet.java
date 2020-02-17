@@ -101,7 +101,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		long now = appMan.getFrameworkTime();
 		SampledValue startval = ts.getPreviousValue(now-AlarmingManagement.DAY_MILLIS);
 		SampledValue endval = ts.getPreviousValue(now);
-		if(startval == null)
+		if(startval == null || endval == null)
 			return -1;
 			//return Float.NaN;
 		try {
