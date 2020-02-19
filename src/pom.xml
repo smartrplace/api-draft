@@ -16,15 +16,24 @@
 	<version>0.9.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<!-- <repositories>
-		<repository>
-			<id>ogema-release</id>
-			<name>ogema-release</name>
-			<url>https://www.ogema-source.net/artifactory/libs-release</url>
-		</repository>
-	</repositories>
-	 -->
-
+        <repositories>
+        <repository>
+            <id>sp-central</id>
+            <name>sp-central</name>
+            <url>https://repository.smartrplace.de/artifactory/libs-release</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>sp-snapshot</id>
+            <name>sp-snapshots</name>
+            <url>https://repository.smartrplace.de/artifactory/libs-snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        </repositories>
 	<!-- Sub-projects -->
 	<modules>
 		<module>apps</module>
