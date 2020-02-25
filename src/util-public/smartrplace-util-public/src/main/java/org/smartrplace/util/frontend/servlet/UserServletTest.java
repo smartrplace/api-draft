@@ -40,13 +40,18 @@ public abstract class UserServletTest extends HttpServlet {
         resp.addHeader("Access-Control-Allow-Credentials", "true");
     }
     
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     	//if(!req.getRequestURI().endsWith(SERVLET_ADDRESS)) return;
     	if(!isTestInstance(resp)) return;
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
-    	getUserServlet().doGet(req, resp);
+    	try{
+    		getUserServlet().doGet(req, resp);
+    	} catch(NullPointerException e) {
+    		throw new IllegalStateException("Error for req:"+javax.servlet.http.HttpUtils.getRequestURL(req), e);
+    	}
     	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
         resp.addHeader("Access-Control-Allow-Headers", "*");
