@@ -16,7 +16,7 @@
 	<version>0.9.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-        <repositories>
+    <repositories>
         <repository>
             <id>sp-central</id>
             <name>sp-central</name>
@@ -33,7 +33,25 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        </repositories>
+    </repositories>
+    
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>sp-central</id>
+            <name>Smartrplace Repository</name>
+            <url>https://repository.smartrplace.de/artifactory/libs-release</url>
+            <layout>default</layout>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>sp-snapshots</id>
+            <name>Smartrplace Snapshots</name>
+            <url>https://repository.smartrplace.de/artifactory/libs-snapshot</url>
+            <layout>default</layout>
+        </snapshotRepository>
+    </distributionManagement>
+    
 	<!-- Sub-projects -->
 	<modules>
 		<module>apps</module>
@@ -104,18 +122,9 @@
 		</license>
 	</licenses>
 	
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
 
-	<profiles>
+    
+    <profiles>
 		<!-- Sign and deploy locally, for testing. Usage: mvn -Psign install -DskipTests 
 			-o -->
 		<profile>
