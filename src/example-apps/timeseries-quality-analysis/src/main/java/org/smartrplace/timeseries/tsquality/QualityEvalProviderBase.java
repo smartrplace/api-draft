@@ -103,6 +103,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final GaRoDataTypeParam waterTempValueType = new GaRoDataTypeParam(GaRoDataType.WaterTemperatureValue, false);
     public static final GaRoDataTypeParam co2concentrationType = new GaRoDataTypeParam(GaRoDataType.CO2Concentration, false);
     public static final GaRoDataTypeParam internetType = new GaRoDataTypeParam(GaRoDataType.InternetConnection, false);
+    public static final GaRoDataTypeParam rssiDeviceType = new GaRoDataTypeParam(GaRoDataType.RSSIDevice, false);
+    public static final GaRoDataTypeParam rssiPeerType = new GaRoDataTypeParam(GaRoDataType.RSSIPeer, false);
     
 	@Override
 	/** Provide your data types here*/
@@ -136,7 +138,9 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	        	oxygenValueType,
 	        	waterTempValueType,
 	        	co2concentrationType,
-	        	internetType
+	        	internetType,
+	        	rssiDeviceType,
+	        	rssiPeerType
 		};
 	}
 	
@@ -171,12 +175,15 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //waterTempValueType
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //co2concentrationtype
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //internettype
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //internettype
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, 
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //rssiPeerType
 			}; //Charge
 	
 	@Override
 	protected long[] getMaximumGapTimes() {
 		return new long[] {2*HOUR_MILLIS, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
@@ -223,7 +230,9 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final int WATERTEMP_IDX = 26;
 	public static final int CO2CONC_IDX = 27;
 	public static final int INTERNET_IDX = 28;
-    public static final int TYPE_NUM = 29;
+	public static final int RSSIDEV_IDX = 29;
+	public static final int RSSIPEER_IDX = 30;
+    public static final int TYPE_NUM = 31;
     
     protected GaRoDataTypeParam getParamType(int idxOfReqInput) {
     	switch(idxOfReqInput) {
@@ -256,6 +265,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
        	case WATERTEMP_IDX: return waterTempValueType;
        	case CO2CONC_IDX: return co2concentrationType;
        	case INTERNET_IDX: return internetType;
+       	case RSSIDEV_IDX: return rssiDeviceType;
+       	case RSSIPEER_IDX: return rssiPeerType;
     	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
     }

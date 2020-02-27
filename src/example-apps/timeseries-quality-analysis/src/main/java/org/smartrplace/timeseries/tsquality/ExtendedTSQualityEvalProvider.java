@@ -92,6 +92,8 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
 	        	waterTempValueType,
 	        	co2concentrationType,
 	        	internetType,
+	        	rssiDeviceType,
+	        	rssiPeerType,
 	        	chargeVoltageType
 		};
 	}
@@ -129,6 +131,8 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
        	case WATERTEMP_IDX: return waterTempValueType;
       	case CO2CONC_IDX: return co2concentrationType;
       	case INTERNET_IDX: return internetType;
+       	case RSSIDEV_IDX: return rssiDeviceType;
+       	case RSSIPEER_IDX: return rssiPeerType;
       	case CHARGE_VOLT_IDX: return chargeVoltageType;
    	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}

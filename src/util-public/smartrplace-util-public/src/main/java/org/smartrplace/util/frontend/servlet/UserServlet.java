@@ -42,7 +42,7 @@ public class UserServlet extends HttpServlet {
 		DICTIONARY
 	}
 	public interface ServletPageProvider<T extends Object> {
-		Map<String, ServletValueProvider> getProviders(T object, String user);
+		Map<String, ServletValueProvider> getProviders(T object, String user, Map<String, String[]> parameters);
 		
 		/** Usually this should be implemented.
 		 *  
@@ -110,7 +110,8 @@ public class UserServlet extends HttpServlet {
 		pages.put(pageId, prov);
 	}
 	
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
 		String user = req.getParameter("user");
 		String pageId = req.getParameter("page");
 		String object = req.getParameter("object");
@@ -121,15 +122,28 @@ public class UserServlet extends HttpServlet {
 		ServletPageProvider<?> pageMap = pages.get(pageId);
 		if(pageMap == null) return;
 		String pollStr = req.getParameter("poll");
+		Map<String, String[]> paramMap = getParamMap(req);
 		
-		JSONObject result = getJSON(object, user, pollStr, timeStr, pageMap, returnStruct);
+		JSONObject result = getJSON(object, user, pollStr, timeStr, pageMap, returnStruct, paramMap);
 		
 		resp.getWriter().write(result.toString());
 		resp.setStatus(200);
 	}
 	
+	protected Map<String, String[]> getParamMap(HttpServletRequest req) {
+		@SuppressWarnings("unchecked")
+		Map<String, String[]> paramMap = new HashMap<>(req.getParameterMap());
+		paramMap.remove("user");
+		paramMap.remove("page");
+		paramMap.remove("object");
+		//paramMap.remove("time");
+		paramMap.remove("structure");
+		paramMap.remove("poll");
+		return paramMap;
+	}
+	
 	protected <T> JSONObject getJSON(String objectId, String user, String pollStr, String timeString,
-			ServletPageProvider<T> pageprov, String returnStruct) {
+			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap) {
 		JSONObject result = new JSONObject();
 		final ReturnStructure retStruct;
 		if(returnStruct == null)
@@ -157,7 +171,7 @@ public class UserServlet extends HttpServlet {
 		
 		for(T obj: objects) {
 			if(obj == null) continue;
-			Map<String, ServletValueProvider> data = pageprov.getProviders(obj, user);
+			Map<String, ServletValueProvider> data = pageprov.getProviders(obj, user, paramMap);
 			final String objStr = pageprov.getObjectId(obj);
 			JSONObject subJson;
 			final JSONArray subJsonArr;
@@ -256,6 +270,7 @@ public class UserServlet extends HttpServlet {
 		ServletPageProvider<?> pageMap = pages.get(pageId);
 		if(pageMap == null) return;
 		String timeStr = req.getParameter("time");
+		Map<String, String[]> paramMap = getParamMap(req);
 		
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = req.getReader();
@@ -274,7 +289,7 @@ public class UserServlet extends HttpServlet {
 
 		try {
 			JSONObject result = new JSONObject(request);
-			postJSON(object, user, result, pageMap, response, timeStr);
+			postJSON(object, user, result, pageMap, response, timeStr, paramMap);
 			//Map<String, ServletValueProvider> userMap = postData.get(user);
 			//for(String key: result.keySet()) {
 			//	ServletValueProvider prov = userMap.get(key);
@@ -296,12 +311,13 @@ public class UserServlet extends HttpServlet {
 	}
 	
 	protected <T> String postJSON(String objectId, String user, JSONObject result,
-			ServletPageProvider<T> pageprov, String response, String timeString) {
+			ServletPageProvider<T> pageprov, String response, String timeString,
+			Map<String, String[]> paramMap) {
 		Collection<T> objects = getObjects(objectId, user, pageprov);
 		if(objects == null) return response;
 		
 		for(T obj: objects) {
-			Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user);
+			Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user, paramMap);
 			for(String key: result.keySet()) {
 				ServletValueProvider prov = userMap.get(key);
 				if(prov == null)
