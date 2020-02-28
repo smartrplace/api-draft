@@ -215,9 +215,13 @@ public class UserServlet extends HttpServlet {
 					Value value = valprov.getValue(user, key);
 					if(value == null)
 						subJson.put(jsonkey, "");
-					if(value instanceof FloatValue)
-						subJson.put(jsonkey, value.getFloatValue());
-					else if(value instanceof IntegerValue)
+					if(value instanceof FloatValue) {
+						float val = value.getFloatValue();
+						if(Float.isNaN(val))
+							subJson.put(jsonkey, "NaN");
+						else
+							subJson.put(jsonkey, val);
+					} else if(value instanceof IntegerValue)
 						subJson.put(jsonkey, value.getIntegerValue());
 					else if(value instanceof DoubleValue)
 						subJson.put(jsonkey, value.getDoubleValue());
