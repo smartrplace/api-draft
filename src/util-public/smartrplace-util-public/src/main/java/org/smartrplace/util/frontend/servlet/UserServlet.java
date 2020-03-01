@@ -351,4 +351,12 @@ public class UserServlet extends HttpServlet {
 		return response;
 	}
 
+	public static String getParameter(String name, Map<String, String[]> paramMap) {
+		String[] arr = paramMap.get(name);
+		if(arr==null)
+			return null;
+		if(arr.length == 0)
+			return null;
+		return arr[0];
+	}
 }
