@@ -85,6 +85,28 @@
             <groupId>org.ogema.core</groupId>
             <artifactId>models</artifactId>
         </dependency>
+        <dependency>
+			<groupId>org.ogema.widgets</groupId>
+			<artifactId>ogema-gui-api</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.ogema.widgets</groupId>
+			<artifactId>widget-collection</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.ogema.widgets</groupId>
+			<artifactId>util-extended</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.smartrplace.logging</groupId>
+	        <artifactId>fendodb-api</artifactId>
+	        <version>0.1.1-SNAPSHOT</version>
+        </dependency>
+	    <!--   <dependency>
+	        <groupId>org.smartrplace.analysis</groupId>
+	        <artifactId>ogema-backup-parser</artifactId>
+	        <version>0.0.3-SNAPSHOT</version>
+        </dependency> -->
     </dependencies>
 
 </project>

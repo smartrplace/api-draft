@@ -113,6 +113,7 @@ public class ResourceHelperSP {
 					if(cr == null) return null;
 				} else
 					return null;
+				continue;
 			}
 			if(i == (els.length-1)) {
 				if(type == null)
