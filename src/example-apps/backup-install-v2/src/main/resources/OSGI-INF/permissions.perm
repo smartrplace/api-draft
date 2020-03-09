@@ -1,0 +1,55 @@
+(org.osgi.framework.ServicePermission "org.ogema.core.application.Application" "register")
+(org.osgi.framework.ServicePermission "de.iwes.widgets.api.OgemaGuiService" "get")
+(org.osgi.framework.ServicePermission "org.ogema.tools.simulation.service.api.SimulationService" "get")
+(org.osgi.framework.ServicePermission "org.ogema.tools.remote.ogema.auth.RemoteOgemaAuth" "get")
+(org.osgi.framework.PackagePermission "org.ogema.tools.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.util.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.core.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.model.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.pattern.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.widgets.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.tools.*" "import")
+(org.osgi.framework.PackagePermission "de.iwes.util.*" "import")
+(org.osgi.framework.PackagePermission "org.slf4j" "import")
+(org.osgi.framework.PackagePermission "org.osgi.framework" "import")
+(org.osgi.framework.PackagePermission "javax.net.ssl" "import")
+
+# Widget utils
+(org.osgi.framework.PackagePermission "org.ogema.util.collectionother" "import")
+(org.osgi.framework.PackagePermission "org.ogema.util.collectionother.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.util.resourcelist" "import")
+(org.osgi.framework.PackagePermission "org.ogema.util.resourcelist.*" "import")
+(org.osgi.framework.PackagePermission "org.ogema.tools.reswidget" "import")
+(org.osgi.framework.PackagePermission "org.ogema.tools.reswidget.*" "import")
+(org.ogema.accesscontrol.WebAccessPermission "name=name=org.ogema.widgets.ogema-js-bundle")
+(org.osgi.framework.PackagePermission "org.apache.commons.*" "import")
+(org.osgi.framework.PackagePermission "org.apache.http" "import")
+(org.osgi.framework.PackagePermission "org.apache.http.*" "import")
+
+#TODO: Rename packages to org.smartrplace.util.* and import accordingly
+(org.osgi.framework.PackagePermission "org.smartrplace.*" "import")
+
+(org.osgi.framework.PackagePermission "org.json" "import")
+
+# export custom resource types
+#(org.osgi.framework.PackagePermission "org.smartrplace.intern.backup.config" "exportonly")
+
+(org.osgi.framework.AdminPermission "*" "context")
+
+# TODO less generous resource permissions
+(org.ogema.accesscontrol.ResourcePermission "type=*" "read,write,addsub,create,activity,delete")
+
+(java.util.PropertyPermission "org.smartrplace.remotesupervision.gateway.id" "read")
+(java.util.PropertyPermission "org.ogema.sim.setRemoteSupervisionId" "read")
+(java.util.PropertyPermission "org.smartrplace.backup-install.retardation" "read")
+
+# TODO less generous file permissions
+(org.ogema.permissions.OgemaFilePermission "./data" "read,write,delete")
+(org.ogema.permissions.OgemaFilePermission "./data/-" "read,write,delete")
+(org.ogema.permissions.OgemaFilePermission "./data/logs/sourceInfo.txt" "write")
+
+(java.net.SocketPermission "*" "connect,resolve")
+
+# required for Apache HttpClient XXX 
+(java.lang.RuntimePermission "getClassLoader")
+(java.util.PropertyPermission "java.version" "read")

@@ -20,6 +20,7 @@
 		<module>action-admin</module>
  		<module>file-upload-servlet</module>
  		<module>timeseries-quality-analysis</module>
+ 		<module>backup-install-v2</module>
     </modules>
 
     <build>
