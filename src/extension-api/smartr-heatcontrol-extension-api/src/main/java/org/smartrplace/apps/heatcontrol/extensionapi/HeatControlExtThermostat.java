@@ -6,6 +6,10 @@ package org.smartrplace.apps.heatcontrol.extensionapi;
  */
 public interface HeatControlExtThermostat {
 	public static class CheckManualResult {
+		public CheckManualResult(float newSetpoint, long endTime) {
+			this.newSetpoint = newSetpoint;
+			this.endTime = endTime;
+		}
 		/** New manual setpoint detected*/
 		public float newSetpoint;
 		/** time until new manual setpoint shall be valid*/
