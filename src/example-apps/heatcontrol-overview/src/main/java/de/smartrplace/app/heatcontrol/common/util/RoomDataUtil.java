@@ -18,19 +18,19 @@ package de.smartrplace.app.heatcontrol.common.util;
 import java.util.List;
 
 import org.ogema.core.model.units.TemperatureResource;
-import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.ogema.model.sensors.HumiditySensor;
 import org.ogema.model.sensors.TemperatureSensor;
+import org.smartrplace.apps.heatcontrol.extensionapi.ThermostatPattern;
 
 public class RoomDataUtil {
-	public static float getRoomTemperatureMeasurement(List<TemperatureSensor> sensorList, List<Thermostat> tlist) {
+	public static float getRoomTemperatureMeasurement(List<TemperatureSensor> sensorList, List<ThermostatPattern> tlist) {
 		float val = getAverageRoomSensorMeasurement(sensorList);
 		if(val >= 0) {
 			return val;
 		} else {
 			if((tlist == null) || tlist.isEmpty()) return -1;
-			TemperatureResource tempSens = tlist.get(0).temperatureSensor().reading();
+			TemperatureResource tempSens = tlist.get(0).model.temperatureSensor().reading();
 			if(tempSens.isActive()) return tempSens.getValue();
 		}
 		return -1;
@@ -62,10 +62,10 @@ public class RoomDataUtil {
 		return (sum / count);
 	}
 
-	public static float getTotalValveOpening(List<Thermostat> tlist) {
+	public static float getTotalValveOpening(List<ThermostatPattern> tlist) {
 		float sum = 0;
-		for( Thermostat th: tlist) {
-			sum += th.valve().setting().stateFeedback().getValue();
+		for( ThermostatPattern th: tlist) {
+			sum += th.model.valve().setting().stateFeedback().getValue();
 		}
 		return sum;		
 	}

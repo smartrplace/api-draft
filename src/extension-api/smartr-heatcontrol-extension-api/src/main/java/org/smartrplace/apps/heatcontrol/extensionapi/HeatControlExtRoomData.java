@@ -18,7 +18,6 @@ package org.smartrplace.apps.heatcontrol.extensionapi;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
-import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.ogema.model.sensors.HumiditySensor;
@@ -42,7 +41,7 @@ public abstract class HeatControlExtRoomData {
 	public abstract float getCurrentTemperatureSetpoint();
 	/**
 	 * 
-	 * @param setpoint manuel setpoint temperature in K
+	 * @param setpoint manual setpoint temperature in K
 	 * @param duration duration in ms for which the setting shall be active. If manual mode shall
 	 * be switched of set to negative value
 	 */
@@ -64,13 +63,15 @@ public abstract class HeatControlExtRoomData {
 	public abstract <R extends Resource> R getRoomExtensionData(boolean forceCreation,
 			Class<R> resourceType);
 
+	//public abstract List<HeatControlExtThermostat> getThermostatControls();
+	
 	final private Room room;
-	final private List<Thermostat> thermostats;
+	final private List<ThermostatPattern> thermostats;
 	/** Only temperature sensors that are not part of thermostats*/
 	final private List<TemperatureSensor> roomTemperatureSensors;
 	final private List<HumiditySensor> roomHumiditySensors;
 	final private List<DoorWindowSensor> windowSensors;
-	public HeatControlExtRoomData(Room room, List<Thermostat> thermostats,
+	public HeatControlExtRoomData(Room room, List<ThermostatPattern> thermostats,
 			List<TemperatureSensor> roomTemperatureSensors, List<HumiditySensor> roomHumiditySensors,
 			List<DoorWindowSensor> windowSensors) {
 		this.room = room;
@@ -84,7 +85,7 @@ public abstract class HeatControlExtRoomData {
 		return room;
 	}
 
-	public List<Thermostat> getThermostats() {
+	public List<ThermostatPattern> getThermostats() {
 		return thermostats;
 	}
 

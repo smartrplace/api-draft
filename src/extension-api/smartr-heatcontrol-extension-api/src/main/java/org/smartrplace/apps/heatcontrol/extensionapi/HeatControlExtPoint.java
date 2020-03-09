@@ -20,7 +20,8 @@ import java.util.List;
 import org.ogema.core.model.Resource;
 
 /** Service offered by the app org.smartrplace.apps.smartrplace-heatcontrol-v2
- * 
+ * The service can be used to interact with the heat control implementation. The service does not
+ * allow for any replacements of parts of the core heat control implementation currently, though.
  */
 public interface HeatControlExtPoint {
 	boolean getEcoModeState();

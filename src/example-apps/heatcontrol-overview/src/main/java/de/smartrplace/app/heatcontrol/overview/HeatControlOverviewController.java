@@ -32,6 +32,7 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint.HeatControlExtRoomListener;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
+import org.smartrplace.apps.heatcontrol.extensionapi.ThermostatPattern;
 
 import de.smartrplace.app.heatcontrol.overview.config.HeatcontrolOverviewData;
 import de.smartrplace.app.heatcontrol.overview.gui.MainPage;
@@ -111,14 +112,14 @@ public class HeatControlOverviewController {
 		private void initThermostats() {
 			System.out.println("HeatControlOverview: initThermostats in "+
 					ResourceUtils.getHumanReadableName(data.getRoom()));
-			for(Thermostat th: data.getThermostats()) {
-				System.out.println("HeatControlOverview: initThermostat mode:"+myData.controlManualMode().getValue()+" loc: "+th.getLocation());
+			for(ThermostatPattern th: data.getThermostats()) {
+				System.out.println("HeatControlOverview: initThermostat mode:"+myData.controlManualMode().getValue()+" loc: "+th.model.getLocation());
 				if(myData.controlManualMode().getValue() < 1) continue;
-				TemperatureResource manualControl = MainPage.getActiveManualModeControl(th);
+				TemperatureResource manualControl = MainPage.getActiveManualModeControl(th.model);
 				if(manualControl != null) {
 					manualControl.setValue(data.getCurrentTemperatureSetpoint());
 				}
-				IntegerResource modeFB = MainPage.getActiveModeFeedback(th);
+				IntegerResource modeFB = MainPage.getActiveModeFeedback(th.model);
 				if(modeFB != null) {
 					ResourceValueListener<IntegerResource> l = new ResourceValueListener<IntegerResource>() {
 
@@ -139,8 +140,8 @@ public class HeatControlOverviewController {
 			}
 		}
 		private void closeThermostats() {
-			for(Thermostat th: data.getThermostats()) {
-				IntegerResource modeFB = MainPage.getActiveModeFeedback(th);
+			for(ThermostatPattern th: data.getThermostats()) {
+				IntegerResource modeFB = MainPage.getActiveModeFeedback(th.model);
 				if(modeFB != null) {
 					for(ResourceValueListener<IntegerResource> ml: hmModeListeners) modeFB.removeValueListener(ml);
 				} 
@@ -167,8 +168,8 @@ public class HeatControlOverviewController {
 			final boolean lastBoostStartLongAgo = (appMan.getFrameworkTime()-lastBoostStarted > MIN_BOOST_INTERVAL);
 			System.out.println("HeatControlOverview: Detected manual event for "+
 					ResourceUtils.getHumanReadableName(data.getRoom())+" mode:"+myData.controlManualMode().getValue());
-			for(Thermostat th: data.getThermostats()) {
-				TemperatureResource manualControl = MainPage.getActiveManualModeControl(th);
+			for(ThermostatPattern th: data.getThermostats()) {
+				TemperatureResource manualControl = MainPage.getActiveManualModeControl(th.model);
 				if(manualControl == null) continue;
 				if(myData.controlManualMode().getValue() < 2) {
 					manualControl.setValue(data.getCurrentTemperatureSetpoint());
@@ -180,7 +181,7 @@ public class HeatControlOverviewController {
 					//Note: Errors occured when starting boost, but unclear if this was really the problem
 					//Suspect that homematic cannot handle to set manual mode and boost mode almost at the same time
 					
-					if(startBoost(th)) {
+					if(startBoost(th.model)) {
 						continue;
 					}
 				}
@@ -208,8 +209,8 @@ public class HeatControlOverviewController {
 					((MIN_BOOST_BLOCKER- (appMan.getFrameworkTime() - lastBoostStarted))/1000)+" seconds.");
 				return;
 			}
-			for(Thermostat th: data.getThermostats()) {
-				startBoost(th);
+			for(ThermostatPattern th: data.getThermostats()) {
+				startBoost(th.model);
 			}
 		}
 		private boolean startBoost(Thermostat th) {

@@ -31,6 +31,7 @@ import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
+import org.smartrplace.apps.heatcontrol.extensionapi.ThermostatPattern;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.ValueFormat;
@@ -181,18 +182,18 @@ public class MainPage extends ObjectGUITablePage<HeatControlExtRoomData, Room>{
 			boolean allModeFeedback = true;
 			boolean hasBoostMode = false;
 			boolean allBoostMode = true;
-				for(Thermostat th: object.getThermostats()) {
-				if(getActiveManualModeControl(th) != null) {
+				for(ThermostatPattern th: object.getThermostats()) {
+				if(getActiveManualModeControl(th.model) != null) {
 					hasManualModeControl = true;
 				} else {
 					allManualModeControl = false;
 				}
-				if(getActiveModeFeedback(th) != null) {
+				if(getActiveModeFeedback(th.model) != null) {
 					hasModeFeedback = true;
 				} else {
 					allModeFeedback = false;
 				}
-				if(getBoostControl(th) != null) {
+				if(getBoostControl(th.model) != null) {
 					hasBoostMode = true;
 				} else {
 					allBoostMode = false;
