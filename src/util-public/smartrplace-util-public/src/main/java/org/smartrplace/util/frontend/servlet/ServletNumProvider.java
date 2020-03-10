@@ -16,6 +16,11 @@ public class ServletNumProvider implements ServletValueProvider {
 		intVal = null;
 		booleanVal = null;
 	}
+	public ServletNumProvider(boolean val) {
+		floatVal = null;
+		intVal = null;
+		booleanVal = val;
+	}
 		
 	@Override
 	public Value getValue(String user, String key) {
