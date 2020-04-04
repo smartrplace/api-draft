@@ -27,7 +27,7 @@ import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeParam;
 import de.iwes.timeseries.eval.garo.multibase.generic.GenericGaRoResultType;
 
 /**
- * Note: This variant of {@link PrimaryLuthMonQualityEvalProvider} is only used for
+ * Note: This variant of {@link DefaultQualityEvalProvider} is only used for
  * ScheduleViewerExpert configuration, no updates are done here
  */
 @Service(EvaluationProvider.class)
