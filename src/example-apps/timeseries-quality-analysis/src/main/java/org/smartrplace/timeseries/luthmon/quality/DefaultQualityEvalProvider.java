@@ -46,7 +46,18 @@ public class DefaultQualityEvalProvider extends QualityEvalProviderBase {
     public final static String ID = "adefault-quality_eval_provider";
     public final static String LABEL = "Default Quality: Gap evaluation provider";
     public final static String DESCRIPTION = "Default Quality: Provides gap evaluation, additional information in log file";
+	public static final String TS_TOTAL_PROP = "%TS_TOTAL";
+	public static final String SENSORS_TO_FILTEROUT_PROP = "%SENS_FILTER";
     
+	@SuppressWarnings("unchecked")
+	@Override
+	protected List<String> getSensorsToFilerOut(String currentGwId) {
+		Object dataTouse = OGEMAConfigurations.getObject(DefaultQualityEvalProvider.class.getName(), SENSORS_TO_FILTEROUT_PROP, currentGwId);
+		if(dataTouse != null && dataTouse instanceof List)
+			return (List<String>)dataTouse;
+		return super.getSensorsToFilerOut(currentGwId);
+	}
+	
     public DefaultQualityEvalProvider() {
         super(ID, LABEL, DESCRIPTION);
     }
@@ -62,7 +73,7 @@ public class DefaultQualityEvalProvider extends QualityEvalProviderBase {
 				List<TimeSeriesData> inputData) {
 			EvalCore cec = ((EvalCore)ec);
 			int num;
-			Object dataTouse = OGEMAConfigurations.getObject(DefaultQualityEvalProvider.class.getName(), "%TS_TOTAL", cec.currentGwId);
+			Object dataTouse = OGEMAConfigurations.getObject(DefaultQualityEvalProvider.class.getName(), TS_TOTAL_PROP, cec.currentGwId);
 			if(dataTouse != null && dataTouse instanceof Integer) {
 				num = (Integer)dataTouse;
 			} else {

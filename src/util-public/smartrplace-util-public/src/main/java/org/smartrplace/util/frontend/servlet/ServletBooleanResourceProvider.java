@@ -5,10 +5,10 @@ import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.simple.BooleanResource;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
-public class ServletBooelanResourceProvider implements ServletValueProvider {
+public class ServletBooleanResourceProvider implements ServletValueProvider {
 	protected BooleanResource res;
 	
-	public ServletBooelanResourceProvider(BooleanResource res) {
+	public ServletBooleanResourceProvider(BooleanResource res) {
 		this.res = res;
 	}
 	

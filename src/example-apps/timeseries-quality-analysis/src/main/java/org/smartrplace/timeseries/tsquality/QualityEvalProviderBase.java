@@ -62,7 +62,16 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final float MAX_GAP_FOR_GOLD_SERIES_SHARE = 0.1f;
 	public static final long MAX_OVERALL_NONGAP_TIME_STD = 45* MINUTE_MILLIS;
 		
-    protected static final Logger logger = LoggerFactory.getLogger(QualityEvalProviderBase.class);
+	protected List<String> getSensorsToFilerOut(String currentGwId2) {
+		String prop = System.getProperty("org.ogema.evaluationofflinecontrol.scheduleviewer.expert.sensorsToFilterOut."+currentGwId);
+		if(prop != null) {
+			List<String> sensorsToFilterOut = Arrays.asList(prop.split(","));
+			return sensorsToFilterOut;
+		}
+		return null;
+	}
+
+	protected static final Logger logger = LoggerFactory.getLogger(QualityEvalProviderBase.class);
     
     /*public QualityEvalProviderBase() {
        super(ID, LABEL, DESCRIPTION);
@@ -464,9 +473,8 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 					}
 				});
 				for(GapData g: sortGaps) {
-					String prop = System.getProperty("org.ogema.evaluationofflinecontrol.scheduleviewer.expert.sensorsToFilterOut."+currentGwId);
-					if(prop != null) {
-						List<String> sensorsToFilterOut = Arrays.asList(prop.split(","));
+					List<String> sensorsToFilterOut = getSensorsToFilerOut(currentGwId);
+					if(sensorsToFilterOut != null) {
 						if(sensorsToFilterOut.contains(g.devId))
 							continue;
 					}
