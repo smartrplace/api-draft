@@ -26,6 +26,8 @@ import org.ogema.core.channelmanager.measurements.StringValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
 import org.ogema.tools.resource.util.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider.ValueMode;
 
 /** Core class to provide servlets based on widgets pages
@@ -34,6 +36,7 @@ public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
 
+	final Logger logger = LoggerFactory.getLogger(UserServlet.class);
 	public enum ReturnStructure {
 		/**In this case a list is returned with each element having an element named "key". Additional
 		standard elements may be defined in the future when elements are generated from
@@ -117,10 +120,10 @@ public class UserServlet extends HttpServlet {
 		String object = req.getParameter("object");
 		String timeStr = req.getParameter("time");
 		String returnStruct = req.getParameter("structure");
-		if(user == null) return;
+		//if(user == null) return;
 		if(pageId == null) pageId = stdPageId ;
 		ServletPageProvider<?> pageMap = pages.get(pageId);
-		if(pageMap == null) return;
+		//if(pageMap == null) return;
 		String pollStr = req.getParameter("poll");
 		Map<String, String[]> paramMap = getParamMap(req);
 		
@@ -133,8 +136,8 @@ public class UserServlet extends HttpServlet {
 	protected Map<String, String[]> getParamMap(HttpServletRequest req) {
 		@SuppressWarnings("unchecked")
 		Map<String, String[]> paramMap = new HashMap<>(req.getParameterMap());
-		paramMap.remove("user");
-		paramMap.remove("page");
+		//paramMap.remove("user");
+		//paramMap.remove("page");
 		paramMap.remove("object");
 		//paramMap.remove("time");
 		paramMap.remove("structure");
@@ -145,6 +148,16 @@ public class UserServlet extends HttpServlet {
 	protected <T> JSONObject getJSON(String objectId, String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap) {
 		JSONObject result = new JSONObject();
+		if(pageprov == null) {
+			String message = "In Userservlet page not found: "+getParameter("page", paramMap);
+			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+				System.out.println(message);
+			else
+				logger.info("Servlet provider exception: {}", message);
+			result.put("exception", message);
+			return result;
+		}
+
 		final ReturnStructure retStruct;
 		if(returnStruct == null)
 			retStruct = pageprov.getGETStructure();
@@ -155,7 +168,15 @@ public class UserServlet extends HttpServlet {
 				retStruct = ReturnStructure.DICTIONARY;
 		}
 		Collection<T> objects = getObjects(objectId, user, pageprov);
-		if(objects == null) return result;
+		if(objects == null || objects.contains(null)) {
+			String message = "In Userservlet object not found:"+objectId+" Pageprov:"+pageprov.getClass().getName();
+			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+				System.out.println(message);
+			else
+				logger.info("Servlet provider exception: {}", message);
+			result.put("exception", message);
+			return result;
+		}
 		
 		boolean doPoll;
 		long pollInterval = -1;
@@ -170,9 +191,20 @@ public class UserServlet extends HttpServlet {
 		}
 		
 		for(T obj: objects) {
-			if(obj == null) continue;
-			Map<String, ServletValueProvider> data = pageprov.getProviders(obj, user, paramMap);
-			final String objStr = pageprov.getObjectId(obj);
+			//if(obj == null) continue;
+			Map<String, ServletValueProvider> data = null;
+			String objStr = null;
+			try {
+				data = pageprov.getProviders(obj, user, paramMap);
+				objStr = pageprov.getObjectId(obj);
+			} catch(Exception e) {
+				if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+					e.printStackTrace();
+				else
+					logger.info("Servlet provider exception: ", e);
+				result.put("exception", e.toString());
+				return result;
+			}
 			JSONObject subJson;
 			final JSONArray subJsonArr;
 			if(retStruct == ReturnStructure.LIST) {
@@ -241,6 +273,8 @@ public class UserServlet extends HttpServlet {
 					subJson.put(jsonkey, e.toString());
 					if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 						e.printStackTrace();
+					else
+						logger.info("Servlet exception: ", e);
 				}
 				if(retStruct == ReturnStructure.LIST)
 					subJsonArr.put(subJson);
