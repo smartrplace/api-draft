@@ -25,6 +25,12 @@ import org.ogema.core.channelmanager.measurements.LongValue;
 import org.ogema.core.channelmanager.measurements.StringValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.ValueResource;
+import org.ogema.core.model.simple.BooleanResource;
+import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.core.model.simple.StringResource;
+import org.ogema.core.model.simple.TimeResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -392,5 +398,32 @@ public class UserServlet extends HttpServlet {
 		if(arr.length == 0)
 			return null;
 		return arr[0];
+	}
+	
+	public static void addValueEntry(ValueResource res, JSONObject result) {
+		addValueEntry(res, "value", result);
+	}
+	public static void addValueEntry(ValueResource res, String valueKey, JSONObject result) {
+		if(res instanceof FloatResource) {
+			float val = ((FloatResource)res).getValue();
+			addValueEntry(val, valueKey, result);
+		} else if(res instanceof StringResource)
+			result.put(valueKey, ((StringResource)res).getValue());
+		else if(res instanceof IntegerResource)
+			result.put(valueKey, ((IntegerResource)res).getValue());
+		else if(res instanceof BooleanResource)
+			result.put(valueKey, ((BooleanResource)res).getValue());
+		else if(res instanceof TimeResource)
+			result.put(valueKey, ((TimeResource)res).getValue());	
+	}
+	public static void addValueEntry(float value, String valueKey, JSONObject result) {
+		if(Float.isNaN(value))
+			result.put(valueKey, "NaN");
+		else if(value == Float.POSITIVE_INFINITY)
+			result.put(valueKey, Float.MAX_VALUE);				
+		else if(value == Float.NEGATIVE_INFINITY)
+			result.put(valueKey, -Float.MAX_VALUE);				
+		else
+			result.put(valueKey, value);		
 	}
 }

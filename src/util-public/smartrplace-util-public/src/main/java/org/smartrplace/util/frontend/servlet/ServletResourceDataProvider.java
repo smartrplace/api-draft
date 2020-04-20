@@ -3,11 +3,7 @@ package org.smartrplace.util.frontend.servlet;
 import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
-import org.ogema.core.model.simple.BooleanResource;
-import org.ogema.core.model.simple.FloatResource;
-import org.ogema.core.model.simple.IntegerResource;
-import org.ogema.core.model.simple.StringResource;
-import org.ogema.core.model.simple.TimeResource;
+import org.ogema.core.model.ValueResource;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 /** Provides basic information for any resource. Currently implementation is only relevant for
@@ -34,16 +30,8 @@ public class ServletResourceDataProvider implements ServletValueProvider {
 	public JSONObject getJSON(String user, String key) {
 		JSONObject result = new JSONObject();
 		result.put("type", res.getResourceType().getName());
-		if(res instanceof FloatResource)
-			result.put("value", ((FloatResource)res).getValue());
-		else if(res instanceof StringResource)
-			result.put("value", ((StringResource)res).getValue());
-		else if(res instanceof IntegerResource)
-			result.put("value", ((IntegerResource)res).getValue());
-		else if(res instanceof BooleanResource)
-			result.put("value", ((BooleanResource)res).getValue());
-		else if(res instanceof TimeResource)
-			result.put("value", ((TimeResource)res).getValue());
+		if(res instanceof ValueResource)
+			UserServlet.addValueEntry((ValueResource) res, result);
 		if(!suppressLocation)
 			result.put("location", res.getLocation());
 		addAdditionalInformation(result);
@@ -54,5 +42,4 @@ public class ServletResourceDataProvider implements ServletValueProvider {
 	public Value getValue(String user, String key) {
 		throw new IllegalStateException("Returns JSON");
 	}
-
 }
