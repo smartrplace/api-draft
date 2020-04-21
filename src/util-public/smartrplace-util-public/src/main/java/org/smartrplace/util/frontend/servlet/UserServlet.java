@@ -22,15 +22,10 @@ import org.ogema.core.channelmanager.measurements.DoubleValue;
 import org.ogema.core.channelmanager.measurements.FloatValue;
 import org.ogema.core.channelmanager.measurements.IntegerValue;
 import org.ogema.core.channelmanager.measurements.LongValue;
+import org.ogema.core.channelmanager.measurements.ObjectValue;
 import org.ogema.core.channelmanager.measurements.StringValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
-import org.ogema.core.model.ValueResource;
-import org.ogema.core.model.simple.BooleanResource;
-import org.ogema.core.model.simple.FloatResource;
-import org.ogema.core.model.simple.IntegerResource;
-import org.ogema.core.model.simple.StringResource;
-import org.ogema.core.model.simple.TimeResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,14 +76,14 @@ public class UserServlet extends HttpServlet {
 		default void setValue(String user, String key, String value) {};
 		default long getPollInterval() {return 30000l;}
 		public enum ValueMode {
-			STRING,
+			VALUE,
 			JSON
 		}
 		/** Define how the values shall be obtained
 		 * 
 		 * @return if JSON is returned then {@link #getJSON(String, String)} is used instead of {@link #getValue(String, String)}
 		 */
-		default ValueMode getValueMode() {return ValueMode.STRING;} 
+		default ValueMode getValueMode() {return ValueMode.VALUE;} 
 	}
 	/*public enum UseMode {
 		GET,
@@ -154,6 +149,8 @@ public class UserServlet extends HttpServlet {
 	protected <T> JSONObject getJSON(String objectId, String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap) {
 		JSONObject result = new JSONObject();
+		boolean suppressNan = UserServletUtil.suppressNan(paramMap);
+		
 		if(pageprov == null) {
 			String message = "In Userservlet page not found: "+getParameter("page", paramMap);
 			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
@@ -249,16 +246,39 @@ public class UserServlet extends HttpServlet {
 					key = prov.getKey()+TIMEPREFIX+timeString;
 				else
 					key = prov.getKey();
-				if(valprov.getValueMode() == ValueMode.STRING) {
+				if(valprov.getValueMode() == ValueMode.VALUE) {
 					Value value = valprov.getValue(user, key);
-					if(value == null)
+					if(value instanceof ObjectValue) {
+						Object multiValObj = value.getObjectValue();
+						if(!(multiValObj instanceof MultiValue))
+							throw new IllegalArgumentException("Found ObjectValue with object of type:"+
+									multiValObj.getClass().getName());
+						 MultiValue multiVal = (MultiValue) multiValObj;
+						 if(retStruct == ReturnStructure.LIST) {
+							 if(multiVal.additionalValues != null) for(Entry<String, Value> add: multiVal.additionalValues.entrySet()) {
+								 addValue(add.getValue(), add.getKey(), subJson, suppressNan);
+							 }
+							 if(multiVal.additionalJSON != null) for(Entry<String, JSONObject> add: multiVal.additionalJSON.entrySet()) {
+								 subJson.put(add.getKey(), add.getValue());
+							 }
+							 if(multiVal.permissions != null) for(Entry<String, Boolean> add: multiVal.permissions.entrySet()) {
+								 subJson.put(add.getKey(), add.getValue());
+							 }
+							 if(multiVal.isWritable != null)
+								 subJson.put("POSTsupported", multiVal.isWritable);
+						 }
+						 value = multiVal.mainValue;
+					}
+					addValue(value, jsonkey, subJson, suppressNan);
+					/*if(value == null)
 						subJson.put(jsonkey, "");
 					if(value instanceof FloatValue) {
 						float val = value.getFloatValue();
-						if(Float.isNaN(val))
-							subJson.put(jsonkey, "NaN");
-						else
-							subJson.put(jsonkey, val);
+						UserServletUtil.addValueEntry(val, jsonkey, suppressNan, result);
+						//if(Float.isNaN(val))
+						//	subJson.put(jsonkey, "NaN");
+						//else
+						//	subJson.put(jsonkey, val);
 					} else if(value instanceof IntegerValue)
 						subJson.put(jsonkey, value.getIntegerValue());
 					else if(value instanceof DoubleValue)
@@ -270,7 +290,7 @@ public class UserServlet extends HttpServlet {
 					else if(value instanceof StringValue)
 						subJson.put(jsonkey, value.getStringValue());
 					else
-						subJson.put(jsonkey, value);
+						subJson.put(jsonkey, value);*/
 				} else {
 					JSONObject value = valprov.getJSON(user, key);
 					subJson.put(jsonkey, value);
@@ -354,6 +374,27 @@ public class UserServlet extends HttpServlet {
 		resp.setStatus(status);
 	}
 	
+	protected void addValue(Value value, String jsonkey, JSONObject subJson,
+			boolean suppressNan) {
+		if(value == null)
+			subJson.put(jsonkey, "");
+		if(value instanceof FloatValue) {
+			float val = value.getFloatValue();
+			UserServletUtil.addValueEntry(val, jsonkey, suppressNan, subJson);
+		} else if(value instanceof IntegerValue)
+			subJson.put(jsonkey, value.getIntegerValue());
+		else if(value instanceof DoubleValue)
+			subJson.put(jsonkey, value.getDoubleValue());
+		else if(value instanceof BooleanValue)
+			subJson.put(jsonkey, value.getBooleanValue());
+		else if(value instanceof LongValue)
+			subJson.put(jsonkey, value.getLongValue());
+		else if(value instanceof StringValue)
+			subJson.put(jsonkey, value.getStringValue());
+		else
+			subJson.put(jsonkey, value);
+	}
+	
 	protected <T> String postJSON(String objectId, String user, JSONObject result,
 			ServletPageProvider<T> pageprov, String response, String timeString,
 			Map<String, String[]> paramMap) {
@@ -399,31 +440,28 @@ public class UserServlet extends HttpServlet {
 			return null;
 		return arr[0];
 	}
-	
-	public static void addValueEntry(ValueResource res, JSONObject result) {
-		addValueEntry(res, "value", result);
+	public static Integer getInteger(String name, Map<String, String[]> paramMap) {
+		String val = getParameter(name, paramMap);
+		if(val == null)
+			return null;
+		try  {
+			return Integer.parseInt(val);
+		} catch(NumberFormatException e) {
+			return null;
+		}
 	}
-	public static void addValueEntry(ValueResource res, String valueKey, JSONObject result) {
-		if(res instanceof FloatResource) {
-			float val = ((FloatResource)res).getValue();
-			addValueEntry(val, valueKey, result);
-		} else if(res instanceof StringResource)
-			result.put(valueKey, ((StringResource)res).getValue());
-		else if(res instanceof IntegerResource)
-			result.put(valueKey, ((IntegerResource)res).getValue());
-		else if(res instanceof BooleanResource)
-			result.put(valueKey, ((BooleanResource)res).getValue());
-		else if(res instanceof TimeResource)
-			result.put(valueKey, ((TimeResource)res).getValue());	
+	public static Float getFloat(String name, Map<String, String[]> paramMap) {
+		String val = getParameter(name, paramMap);
+		if(val == null)
+			return null;
+		try  {
+			return Float.parseFloat(val);
+		} catch(NumberFormatException e) {
+			return null;
+		}
 	}
-	public static void addValueEntry(float value, String valueKey, JSONObject result) {
-		if(Float.isNaN(value))
-			result.put(valueKey, "NaN");
-		else if(value == Float.POSITIVE_INFINITY)
-			result.put(valueKey, Float.MAX_VALUE);				
-		else if(value == Float.NEGATIVE_INFINITY)
-			result.put(valueKey, -Float.MAX_VALUE);				
-		else
-			result.put(valueKey, value);		
+	public static boolean getBoolean(String name, Map<String, String[]> paramMap) {
+		String val = getParameter(name, paramMap);
+		return Boolean.parseBoolean(val);
 	}
 }

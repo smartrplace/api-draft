@@ -16,9 +16,11 @@ public class ServletResourceDataProvider implements ServletValueProvider {
 	protected void addAdditionalInformation(JSONObject result) {};
 	
 	protected boolean suppressLocation = false;
+	protected final boolean suppressNan;
 			
-	public ServletResourceDataProvider(Resource res) {
+	public ServletResourceDataProvider(Resource res, boolean suppressNan) {
 		this.res = res;
+		this.suppressNan = suppressNan;
 	}
 	
 	@Override
@@ -31,7 +33,7 @@ public class ServletResourceDataProvider implements ServletValueProvider {
 		JSONObject result = new JSONObject();
 		result.put("type", res.getResourceType().getName());
 		if(res instanceof ValueResource)
-			UserServlet.addValueEntry((ValueResource) res, result);
+			UserServletUtil.addValueEntry((ValueResource) res, suppressNan, result);
 		if(!suppressLocation)
 			result.put("location", res.getLocation());
 		addAdditionalInformation(result);

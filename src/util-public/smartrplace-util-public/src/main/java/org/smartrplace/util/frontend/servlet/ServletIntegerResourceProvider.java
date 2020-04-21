@@ -1,19 +1,40 @@
 package org.smartrplace.util.frontend.servlet;
 
+import java.util.Map;
+
 import org.ogema.core.channelmanager.measurements.IntegerValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.simple.IntegerResource;
-import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
+import org.ogema.tools.resource.util.LoggingUtils;
 
-public class ServletIntegerResourceProvider implements ServletValueProvider {
+import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
+
+public class ServletIntegerResourceProvider extends ServletNumProviderBase {
 	protected IntegerResource res;
 	
 	public ServletIntegerResourceProvider(IntegerResource res) {
 		this.res = res;
 	}
+	public ServletIntegerResourceProvider(IntegerResource res, Map<String, String[]> paramMap,
+			Map<String, TimeSeriesDataImpl> tsMap) {
+		this(res, new UserServletParamData(paramMap, null, tsMap));
+	}
+	public ServletIntegerResourceProvider(IntegerResource res, Map<String, String[]> paramMap,
+			Boolean hasWritePermission, Map<String, TimeSeriesDataImpl> tsMap) {
+		this(res, new UserServletParamData(paramMap, hasWritePermission, tsMap));
+	}
+	public ServletIntegerResourceProvider(IntegerResource res, UserServletParamData pdata) {
+		this(res);
+		this.pdata = pdata;
+		if(pdata != null && pdata.provideExtended && LoggingUtils.isLoggingEnabled(res)) {
+			pdata.tsDataRaw = res.getHistoricalData();
+			pdata.tsLocationOrBaseId = res.getLocation();
+		}		
+	}
+
 	
 	@Override
-	public Value getValue(String user, String key) {
+	public Value getValueInternal(String user, String key) {
 		return new IntegerValue(res.getValue());
 	}
 
@@ -25,5 +46,10 @@ public class ServletIntegerResourceProvider implements ServletValueProvider {
 		} catch(NumberFormatException e) {
 			//do nothing
 		}
+	}
+
+	@Override
+	protected boolean isWritable() {
+		return true;
 	}
 }

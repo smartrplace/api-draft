@@ -1,6 +1,5 @@
 package org.smartrplace.util.frontend.servlet;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,12 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	protected final Map<String, String[]> paramMap;
 	protected final Long startTime;
 	protected final long endTime;
+	
+	public static enum DownSamplingMode {
+		AVERAGE,
+		/** If more than one value is used to calculate a downsampled value the minimum and the maximum are both included*/
+		MINMAX,
+	}
 	
 	public enum WriteMode {
 		ANY,
@@ -105,7 +110,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	@Override
 	public JSONObject getJSON(String user, String key) {
 		JSONObject json = new JSONObject();
-		json.put("name", name); //res.name().getValue());
+		Integer valueDist = UserServlet.getInteger("valueDist", paramMap);
+		//json.put("name", name); //res.name().getValue());
 		long[] startEnd;
 		if(startTime != null) {
 			startEnd = new long[]{startTime, endTime};
@@ -119,27 +125,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			return json;
 		} else
 			vals = bareTimeSeries.getValues(startEnd[0], startEnd[1]);
-		json.put("todaysValues", smapledValuesToJson(vals));
-		if(previousDayMode != null && previousDayMode != PreviousDayMode.NONE) {
-			long ydayStart = AbsoluteTimeHelper.addIntervalsFromAlignedTime(startEnd[0], -1, AbsoluteTiming.DAY);
-			final List<SampledValue> yvals = bareTimeSeries.getValues(ydayStart, startEnd[0]-1); //sched.getValues(ydayStart, startEnd[0]-1);
-			if(previousDayMode == PreviousDayMode.ONE_PER_DAY && yvals.size() > 1) {
-				final List<SampledValue> singleValList = new ArrayList<>();
-				singleValList.add(yvals.get(yvals.size()-1));
-				json.put("yesterdayValues", singleValList);
-			} else
-				json.put("yesterdayValues", yvals);
-			if(!vals.isEmpty()) {
-				final List<SampledValue> singleValList = new ArrayList<>();
-				singleValList.add(vals.get(vals.size()-1));
-				json.put("preSetValue", singleValList);
-			} else if(!yvals.isEmpty()) {
-				final List<SampledValue> singleValList = new ArrayList<>();
-				singleValList.add(yvals.get(yvals.size()-1));
-				json.put("preSetValue", singleValList);
-			} else
-				json.put("preSetValue", yvals);
-		}
+		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX));
 		return json;
 	}
 
@@ -193,14 +179,72 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		}
 	}
 	
-	protected JSONArray smapledValuesToJson(List<SampledValue> vals) {
+	class DownSamplingData {
+		long lastTs = -1;
+		Long lastTsCollected = null;
+		float maxVal = -Float.MAX_VALUE;
+		float minVal = -Float.MAX_VALUE;
+	}
+
+	/** Provides timeseries as JSON.
+	 * Performs downsampling with different modes if desired 
+	 * @param vals
+	 * @param valueDist expected time in milliseconds between values returned
+	 * @return
+	 */
+	protected JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode) {
+		if(mode == DownSamplingMode.AVERAGE)
+			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
 		JSONArray result = new JSONArray();
+		//long lastTs = -1;
+		//Long lastTsCollected = null;
+		//float maxVal = -Float.MAX_VALUE;
+		//float minVal = Float.MAX_VALUE;
+		DownSamplingData data = new DownSamplingData();
 		for(SampledValue sv: vals) {
 			//JSONObject svObj = new JSONObject();
 			Map<Long, Float> svMap = new HashMap<>();
-			svMap.put(sv.getTimestamp(), sv.getValue().getFloatValue());
+			Float fval = UserServletUtil.getJSONValue(sv.getValue().getFloatValue());
+			if(fval != null) {
+				if(valueDist != null) {
+					long tsNow = sv.getTimestamp();
+					processMinMaxDownSampling(data , tsNow, valueDist, fval, svMap);
+				} else //if valueDist != null
+					svMap.put(sv.getTimestamp(), fval);
+			}
 			result.put(svMap);
 		}
 		return result;
+	}
+	
+	protected void processMinMaxDownSampling(DownSamplingData data, long tsNow, int valueDist, float fval, Map<Long, Float> svMap) {
+		if(data.lastTsCollected == null) {
+			if((tsNow - data.lastTs) < valueDist) {
+				data.maxVal = fval;
+				data.minVal = fval;
+				data.lastTsCollected = tsNow;
+			} else {
+				data.lastTs = putDownSampledTs(tsNow, data.minVal, svMap);
+			}
+		} else {
+			if((tsNow - data.lastTs) < valueDist) {
+				if(fval > data.maxVal)
+					data.maxVal = fval;
+				else if(fval < data.minVal)
+					data.minVal = fval;
+				data.lastTsCollected = tsNow;
+			} else {
+				data.lastTs = putDownSampledTs(data.lastTsCollected,data.minVal, svMap);
+				if(data.maxVal != data.minVal)
+					data.lastTs = putDownSampledTs(data.lastTsCollected, data.maxVal, svMap);
+				data.lastTsCollected = null;
+				processMinMaxDownSampling(data, tsNow, valueDist, fval, svMap);
+			}
+		}		
+	}
+	
+	protected long putDownSampledTs(long timeStamp, float fval, Map<Long, Float> svMap) {
+		svMap.put(timeStamp, fval);
+		return timeStamp;		
 	}
 }
