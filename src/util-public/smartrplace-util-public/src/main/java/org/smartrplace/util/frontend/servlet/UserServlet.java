@@ -130,6 +130,7 @@ public class UserServlet extends HttpServlet {
 		
 		JSONObject result = getJSON(object, user, pollStr, timeStr, pageMap, returnStruct, paramMap);
 		
+		resp.addHeader("content-type", "application/json;charset=utf-8");
 		resp.getWriter().write(result.toString());
 		resp.setStatus(200);
 	}
