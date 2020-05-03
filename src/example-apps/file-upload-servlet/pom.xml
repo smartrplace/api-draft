@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>org.smartrplace.logging</groupId>
 			<artifactId>fendodb-api</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
         <!-- need a newer version than specified by OGEMA -->
  <!--        <dependency>
