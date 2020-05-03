@@ -45,9 +45,6 @@ public class DeleteButton<T extends Resource> extends ButtonConfirm {
 		setCancelBtnMsg("Cancel", req);
 		setConfirmPopupTitle("Delete element", req);
 		setConfirmMsg("Really delete item "+object.getLocation()+" ?", req);
-		//if(row != null) row.addCell("delete", this);
-		//else vh.popTableData.add(new WidgetEntryData("delete", this));
-		//TODO
 		registerDependentWidget(mainTable);
 		if(alert != null) registerDependentWidget(alert);
 	}
