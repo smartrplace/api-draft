@@ -130,6 +130,9 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	}
 
 	protected long[] getDayStartEnd(String key) {
+		return getDayStartEnd(key, appMan);
+	}
+	public static long[] getDayStartEnd(String key, ApplicationManager appMan) {
 		long now;
 		if(key == null || (!key.contains(UserServlet.TIMEPREFIX)))
 			now = appMan.getFrameworkTime();
@@ -138,6 +141,15 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		long start = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
 		long end = AbsoluteTimeHelper.addIntervalsFromAlignedTime(start, 1, AbsoluteTiming.DAY);
 		return new long[] {start, end};
+	}
+	public static long[] getDayStartEnd(Map<String, String[]> paramMap, ApplicationManager appMan) {
+		try {
+			long start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
+			long end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
+			return new long[] {start, end};
+		} catch(NumberFormatException | NullPointerException e) {
+			return getDayStartEnd((String)null, appMan);
+		}		
 	}
 	
 	protected long lastTimestamp = -1;

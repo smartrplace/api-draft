@@ -15,6 +15,9 @@
  */
 package org.smartrplace.apps.hw.install;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.resourcemanager.AccessPriority;
@@ -50,6 +53,7 @@ public class HardwareInstallController {
 		this.advAcc = appMan.getResourcePatternAccess();
 		
 		initConfigurationResource();
+		cleanupOnStart();
         initDemands();
 		mainPage = getMainPage(page);
 	}
@@ -134,5 +138,16 @@ public class HardwareInstallController {
 	public InstallAppDevice removeDevice(PhysicalElement device) {
 		//TODO
 		return null;
+	}
+	
+	public void cleanupOnStart() {
+		List<String> knownDevLocs = new ArrayList<>();
+		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
+			if(knownDevLocs.contains(install.device().getLocation())) {
+				install.delete();
+			} else
+				knownDevLocs.add(install.device().getLocation());
+		}
+		
 	}
 }
