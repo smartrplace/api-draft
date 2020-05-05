@@ -1,4 +1,4 @@
-package org.smartrplace.apps.hw.install.config;
+package org.smartrplace.apps.hw.install.gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;

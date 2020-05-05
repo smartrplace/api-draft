@@ -139,6 +139,11 @@
             <artifactId>widget-experimental</artifactId>
             <version>2.2.2-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.ogema.model</groupId>
+            <artifactId>widget-models-experimental</artifactId>
+            <version>2.2.2-SNAPSHOT</version>
+        </dependency>
  		<dependency>
 			<groupId>org.ogema.eval</groupId>
 			<artifactId>timeseries-multieval-garo-base</artifactId>

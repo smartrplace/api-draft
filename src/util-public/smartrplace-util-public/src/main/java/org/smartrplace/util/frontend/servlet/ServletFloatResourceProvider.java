@@ -8,6 +8,7 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.tools.resource.util.LoggingUtils;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
+import de.iwes.util.resource.ValueResourceHelper;
 
 public class ServletFloatResourceProvider extends ServletNumProviderBase {
 	protected FloatResource res;
@@ -41,7 +42,7 @@ public class ServletFloatResourceProvider extends ServletNumProviderBase {
 	public void setValue(String user, String key, String value) {
 		try  {
 			float val = Float.parseFloat(value);
-			res.setValue(val);
+			ValueResourceHelper.setCreate(res, val);
 		} catch(NumberFormatException e) {
 			//do nothing
 		}

@@ -2,12 +2,12 @@ package org.smartrplace.apps.hw.install.gui;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 

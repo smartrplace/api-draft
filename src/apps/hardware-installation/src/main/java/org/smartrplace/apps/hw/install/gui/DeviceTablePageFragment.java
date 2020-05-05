@@ -12,7 +12,6 @@ import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 

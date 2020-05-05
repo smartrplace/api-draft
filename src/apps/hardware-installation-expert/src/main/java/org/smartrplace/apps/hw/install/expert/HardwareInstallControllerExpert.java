@@ -31,7 +31,7 @@ public class HardwareInstallControllerExpert extends HardwareInstallController {
 	protected final WidgetApp widgetApp;
 	
 	public HardwareInstallControllerExpert(ApplicationManager appMan, WidgetPage<?> page, WidgetApp widgetApp) {
-		super(appMan, page);
+		super(appMan, page, null);
 		this.widgetApp = widgetApp;
 		
 		WidgetPage<LocaleDictionary> rssiPageBase = widgetApp.createWidgetPage("rssipage.hmtl");

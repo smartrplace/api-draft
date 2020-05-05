@@ -1,16 +1,13 @@
 package org.smartrplace.apps.hw.install.gui.expert;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
 import org.smartrplace.apps.hw.install.expert.HardwareInstallControllerExpert;
-import org.smartrplace.apps.hw.install.gui.LastContactLabel;
+import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 

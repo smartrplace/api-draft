@@ -1,7 +1,14 @@
 package org.smartrplace.apps.hw.install.gui;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.devicefinder.util.DeviceTableBase.InstalledAppsSelector;
+import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -19,7 +26,7 @@ import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.html.form.textfield.TextField;
 
-public class MainPage extends DeviceTablePageFragment {
+public class MainPage extends DeviceTablePageFragment implements InstalledAppsSelector {
 
 	public MainPage(WidgetPage<?> page, HardwareInstallController controller) {
 		super(page, controller, null, null);
@@ -28,9 +35,23 @@ public class MainPage extends DeviceTablePageFragment {
 	}
 	
 	protected void finishConstructor() {
+		updateTables();
 		DoorWindowSensorTable winSensTable = new DoorWindowSensorTable(page, controller, roomsDrop, alert);
 		winSensTable.triggerPageBuild();
 		triggerPageBuild();		
+	}
+	
+	Set<String> tableProvidersDone = new HashSet<>();
+	public void updateTables() {
+		synchronized(tableProvidersDone) {
+		if(controller.hwInstApp != null) for(DeviceHandlerProvider<?> pe: controller.hwInstApp.getTableProviders().values()) {
+			String id = pe.id();
+			if(tableProvidersDone.contains(id))
+				continue;
+			tableProvidersDone.add(id);
+			pe.getDeviceTable(page, appMan, alert, this).triggerPageBuild();
+		}
+		}
 	}
 	
 	@Override
@@ -109,6 +130,21 @@ public class MainPage extends DeviceTablePageFragment {
 		Header headerThermostat = new Header(page, "headerThermostat", "Thermostats");
 		headerThermostat.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
 		page.append(headerThermostat);
+	}
+
+	@Override
+	public List<InstallAppDevice> getDevicesSelected() {
+		return roomsDrop.getDevicesSelected();
+	}
+
+	@Override
+	public <T extends Resource> InstallAppDevice addDeviceIfNew(T model) {
+		return controller.addDeviceIfNew(model);
+	}
+
+	@Override
+	public <T extends Resource> InstallAppDevice removeDevice(T model) {
+		return controller.removeDevice(model);
 	}
 }
 

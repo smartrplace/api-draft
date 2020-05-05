@@ -1,4 +1,4 @@
-package org.smartrplace.apps.hw.install.gui;
+package org.ogema.devicefinder.util;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.simple.SingleValueResource;

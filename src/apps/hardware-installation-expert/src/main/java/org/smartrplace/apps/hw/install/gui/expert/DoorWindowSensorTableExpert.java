@@ -4,9 +4,9 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-import org.smartrplace.apps.hw.install.config.RoomSelectorDropdown;
 import org.smartrplace.apps.hw.install.expert.HardwareInstallControllerExpert;
 import org.smartrplace.apps.hw.install.gui.DoorWindowSensorTable;
+import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
