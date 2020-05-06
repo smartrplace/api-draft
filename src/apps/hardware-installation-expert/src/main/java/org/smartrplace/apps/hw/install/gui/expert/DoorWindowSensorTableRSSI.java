@@ -1,6 +1,7 @@
 package org.smartrplace.apps.hw.install.gui.expert;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.model.locations.Room;
@@ -11,6 +12,7 @@ import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
@@ -37,6 +39,9 @@ public class DoorWindowSensorTableRSSI extends DoorWindowSensorTableExpert {
 			lastRSSI.setPollingInterval(DEFAULT_POLL_RATE, req);
 		} else
 			vh.registerHeaderEntry("Last RSSI");
+
+		Resource hmRes = ResourceHelper.getFirstParentOfType(object.device(), "org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice");
+		addDeleteButton(object, vh, id, req, row, appMan, device.location().room(), hmRes);
 
 	}
 	

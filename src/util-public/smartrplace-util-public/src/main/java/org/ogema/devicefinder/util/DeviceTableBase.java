@@ -22,6 +22,7 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
@@ -37,7 +38,11 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 	}
 	
 	protected abstract Class<? extends Resource> getResourceType();
+	
+	/** Unique ID for the table e.g. name of providing class*/
 	protected abstract String id();
+	
+	/** Heading to be shown over the table*/
 	protected abstract String getTableTitle();
 
 	//protected abstract String getHeader(); // {return "Smartrplace Hardware InstallationApp";}
@@ -89,7 +94,7 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet, 3);
 	}
 	
-	protected void addLocation(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+	protected void addSubLocation(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
 		vh.stringEdit("Location", id, object.installationLocation(), row, alert);
@@ -139,6 +144,25 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 			name = ResourceUtils.getHumanReadableShortName(device);
 		vh.stringLabel("Name", id, name, row);
 		return device;
+	}
+	
+	public Button addDeleteButton(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan,
+			Room deviceRoom,
+			Resource resourceToDelete) {
+		if(req != null) {
+			Button result = new Button(mainTable, "delete"+id, "Delete", req) {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public void onPOSTComplete(String data, OgemaHttpRequest req) {
+					resourceToDelete.delete();
+				}
+			};
+			row.addCell(WidgetHelper.getValidWidgetId("Delete"), result);
+			return result;
+		} else
+			vh.registerHeaderEntry("Delete");
+		return null;
 	}
 
 	@Override

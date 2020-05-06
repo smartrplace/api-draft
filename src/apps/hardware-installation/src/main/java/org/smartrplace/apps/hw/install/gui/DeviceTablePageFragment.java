@@ -8,11 +8,11 @@ import java.util.Map;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -25,7 +25,7 @@ import de.iwes.widgets.html.form.button.RedirectButton;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 
-public abstract class DeviceTablePageFragment extends ObjectGUITablePage<InstallAppDevice,InstallAppDevice> {
+public abstract class DeviceTablePageFragment extends DeviceTableBase { //extends ObjectGUITablePage<InstallAppDevice,InstallAppDevice> {
 	public static final long DEFAULT_POLL_RATE = 5000;
 	
 	protected abstract Class<? extends Resource> getResourceType();
@@ -38,7 +38,8 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 	
 	public DeviceTablePageFragment(WidgetPage<?> page, HardwareInstallController controller,
 			RoomSelectorDropdown roomsDrop, Alert alert) {
-		super(page, controller.appMan, null, null, InstallAppDevice.class, false, true, alert);
+		//super(page, controller.appMan, null, null, InstallAppDevice.class, false, true, alert);
+		super(page, controller.appMan, null, null);
 		this.controller = controller;
 		this.roomsDrop = roomsDrop;
 		//retardationOnGET = 2000;
@@ -50,6 +51,7 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
 		addRoomWidget(object, vh, id, req, row, appMan, deviceRoom);
+		addSubLocation(object, vh, id, req, row, appMan, deviceRoom);
 		
 		Map<String, String> valuesToSet = new HashMap<>();
 		valuesToSet.put("0", "unknown");
@@ -65,7 +67,7 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 			String text = getHomematicCCUId(object.device().getLocation());
 			vh.stringLabel("RT", id, text, row);
 		} else
-			vh.registerHeaderEntry("RT");
+			vh.registerHeaderEntry("RT");		
 	}
 	
 	protected void addRoomWidget(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
@@ -82,7 +84,7 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 	protected IntegerResource addWidgetsCommonExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
-		vh.stringEdit("Location", id, object.installationLocation(), row, alert);
+		//vh.stringEdit("Location", id, object.installationLocation(), row, alert);
 		IntegerResource source = ResourceHelper.getSubResourceOfSibbling(object.device().getLocationResource(),
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
 		vh.intLabel("RSSI", id, source, row, 0);
@@ -149,4 +151,16 @@ public abstract class DeviceTablePageFragment extends ObjectGUITablePage<Install
 		else return tail;
 	}
 
+
+	@Override
+	protected String id() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected String getTableTitle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

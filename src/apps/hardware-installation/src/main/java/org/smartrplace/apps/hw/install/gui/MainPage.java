@@ -146,6 +146,7 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 	public <T extends Resource> InstallAppDevice removeDevice(T model) {
 		return controller.removeDevice(model);
 	}
+
 }
 
 
