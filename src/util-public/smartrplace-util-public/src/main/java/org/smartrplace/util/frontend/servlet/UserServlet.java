@@ -85,25 +85,9 @@ public class UserServlet extends HttpServlet {
 		 */
 		default ValueMode getValueMode() {return ValueMode.VALUE;} 
 	}
-	/*public enum UseMode {
-		GET,
-		POST,
-		BOTH
-	}*/
-	
-	//final protected Map<String, Map<String, ServletValueProvider>> data = new HashMap<>();
-	//final protected Map<String, ServletValueProvider> dataAllUsers = new HashMap<>();
-	////final protected Map<String, Map<String, ServletValueProvider>> postData = new HashMap<>();
-	////final protected Map<String, ServletValueProvider> postDataAllUsers = new HashMap<>();
+
 	final protected Map<String, ServletPageProvider<?>> pages = new HashMap<>();
 	protected String stdPageId = null;
-	
-	//private final SmartrplaceHeatcontrolController controller;
-	/*private static UserServlet instance = null;
-	public static UserServlet getInstance() {
-		if(instance == null) instance = new UserServlet();
-		return instance;
-	}*/
 	
 	public UserServlet() {
 	}

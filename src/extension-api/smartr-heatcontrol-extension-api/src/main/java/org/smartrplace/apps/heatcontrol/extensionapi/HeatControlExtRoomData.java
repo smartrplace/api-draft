@@ -22,7 +22,9 @@ import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.ogema.model.sensors.HumiditySensor;
 import org.ogema.model.sensors.TemperatureSensor;
+import org.smartrplace.apps.heatcontrol.extensionapi.heatandcool.TemperatureControlDev;
 
+/** TODO: This class should use RoomHeatControl instead of ThermostatPattern*/
 public abstract class HeatControlExtRoomData {
 	/** Get information whether manual control of setpoint temperature
 	 * is active and if yes for how long
@@ -66,12 +68,12 @@ public abstract class HeatControlExtRoomData {
 	//public abstract List<HeatControlExtThermostat> getThermostatControls();
 	
 	final private Room room;
-	final private List<ThermostatPattern> thermostats;
+	final private List<TemperatureControlDev> thermostats;
 	/** Only temperature sensors that are not part of thermostats*/
 	final private List<TemperatureSensor> roomTemperatureSensors;
 	final private List<HumiditySensor> roomHumiditySensors;
 	final private List<DoorWindowSensor> windowSensors;
-	public HeatControlExtRoomData(Room room, List<ThermostatPattern> thermostats,
+	public HeatControlExtRoomData(Room room, List<TemperatureControlDev> thermostats,
 			List<TemperatureSensor> roomTemperatureSensors, List<HumiditySensor> roomHumiditySensors,
 			List<DoorWindowSensor> windowSensors) {
 		this.room = room;
@@ -85,7 +87,7 @@ public abstract class HeatControlExtRoomData {
 		return room;
 	}
 
-	public List<ThermostatPattern> getThermostats() {
+	public List<TemperatureControlDev> getThermostats() {
 		return thermostats;
 	}
 

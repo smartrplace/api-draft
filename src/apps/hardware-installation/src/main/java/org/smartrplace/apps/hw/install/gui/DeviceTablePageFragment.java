@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.apps.roomlink.localisation.mainpage.RoomLinkDictionary;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
@@ -91,6 +92,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 		return source;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void addWidgetsAboveTable() {
 		if(roomsDrop != null) return;
@@ -98,7 +100,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 		header.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
 		page.append(header).linebreak();
 		
-		StaticTable topTable = new StaticTable(1, 5, new int[] {1, 3, 3, 3, 2});
+		StaticTable topTable = new StaticTable(1, 6, new int[] {2, 2, 2, 2, 2, 2});
 		BooleanResourceButton installMode = new BooleanResourceButton(page, "installMode", "Installation Mode",
 				controller.appConfigData.isInstallationActive()) {
 			private static final long serialVersionUID = 1L;
@@ -111,9 +113,15 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 		};
 		roomsDrop = new RoomSelectorDropdown(page, "roomsDrop", controller);
 		
-		RedirectButton roomLinkButton = new RedirectButton(page, "roomLinkButton", "Room Administration", "/de/iwes/apps/roomlink/gui/index.html");
+		//RedirectButton roomLinkButton = new RedirectButton(page, "roomLinkButton", "Room Administration", "/de/iwes/apps/roomlink/gui/index.html");
 		
-		topTable.setContent(0, 0, roomsDrop).setContent(0, 1, installMode).setContent(0, 2, roomLinkButton);
+		RedirectButton calendarConfigButton = new RedirectButton(page, "calendarConfigButton",
+				"Calendar Configuration", "/org/smartrplace/apps/smartrplaceheatcontrolv2/extensionpage.html");
+		
+		topTable.setContent(0, 0, roomsDrop).setContent(0, 1, installMode).//setContent(0, 2, roomLinkButton).
+				setContent(0, 4, calendarConfigButton);
+		RoomEditHelper.addButtonsToStaticTable(topTable, (WidgetPage<RoomLinkDictionary>) page,
+				alert, appMan, 0, 2);
 		page.append(topTable);
 	}
 	

@@ -1,5 +1,7 @@
 package org.smartrplace.apps.heatcontrol.extensionapi;
 
+import org.smartrplace.apps.heatcontrol.extensionapi.heatandcool.TemperatureControlDev;
+
 /** Currently this interface is not accessible for apps that have not direct dependency to the heat control logic. The interface
  * may be made accessible for real extension points in the future. Currently it is mainly used as internal interface of
  * the heat control logic.
@@ -21,5 +23,5 @@ public interface HeatControlExtThermostat {
 	 * @param tp
 	 * @return null if no manual setting is detected or the manual setpoint temperature
 	 */
-	CheckManualResult checkForManualSetting(final ThermostatPattern tp);
+	CheckManualResult checkForManualSetting(final TemperatureControlDev tp);
 }
