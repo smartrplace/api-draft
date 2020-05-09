@@ -33,6 +33,7 @@ import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtPoint.HeatControlExtRoomListener;
 import org.smartrplace.apps.heatcontrol.extensionapi.HeatControlExtRoomData;
 import org.smartrplace.apps.heatcontrol.extensionapi.ThermostatPattern;
+import org.smartrplace.apps.heatcontrol.extensionapi.heatandcool.TemperatureControlDev;
 
 import de.smartrplace.app.heatcontrol.overview.config.HeatcontrolOverviewData;
 import de.smartrplace.app.heatcontrol.overview.gui.MainPage;
@@ -112,7 +113,10 @@ public class HeatControlOverviewController {
 		private void initThermostats() {
 			System.out.println("HeatControlOverview: initThermostats in "+
 					ResourceUtils.getHumanReadableName(data.getRoom()));
-			for(ThermostatPattern th: data.getThermostats()) {
+			for(TemperatureControlDev dev: data.getThermostats()) {
+				if(!(dev.getPattern() instanceof ThermostatPattern))
+					continue;
+				ThermostatPattern th = (ThermostatPattern) dev.getPattern();
 				System.out.println("HeatControlOverview: initThermostat mode:"+myData.controlManualMode().getValue()+" loc: "+th.model.getLocation());
 				if(myData.controlManualMode().getValue() < 1) continue;
 				TemperatureResource manualControl = MainPage.getActiveManualModeControl(th.model);
@@ -140,7 +144,10 @@ public class HeatControlOverviewController {
 			}
 		}
 		private void closeThermostats() {
-			for(ThermostatPattern th: data.getThermostats()) {
+			for(TemperatureControlDev dev: data.getThermostats()) {
+				if(!(dev.getPattern() instanceof ThermostatPattern))
+					continue;
+				ThermostatPattern th = (ThermostatPattern) dev.getPattern();
 				IntegerResource modeFB = MainPage.getActiveModeFeedback(th.model);
 				if(modeFB != null) {
 					for(ResourceValueListener<IntegerResource> ml: hmModeListeners) modeFB.removeValueListener(ml);
@@ -168,7 +175,10 @@ public class HeatControlOverviewController {
 			final boolean lastBoostStartLongAgo = (appMan.getFrameworkTime()-lastBoostStarted > MIN_BOOST_INTERVAL);
 			System.out.println("HeatControlOverview: Detected manual event for "+
 					ResourceUtils.getHumanReadableName(data.getRoom())+" mode:"+myData.controlManualMode().getValue());
-			for(ThermostatPattern th: data.getThermostats()) {
+			for(TemperatureControlDev dev: data.getThermostats()) {
+				if(!(dev.getPattern() instanceof ThermostatPattern))
+					continue;
+				ThermostatPattern th = (ThermostatPattern) dev.getPattern();
 				TemperatureResource manualControl = MainPage.getActiveManualModeControl(th.model);
 				if(manualControl == null) continue;
 				if(myData.controlManualMode().getValue() < 2) {
@@ -209,7 +219,10 @@ public class HeatControlOverviewController {
 					((MIN_BOOST_BLOCKER- (appMan.getFrameworkTime() - lastBoostStarted))/1000)+" seconds.");
 				return;
 			}
-			for(ThermostatPattern th: data.getThermostats()) {
+			for(TemperatureControlDev dev: data.getThermostats()) {
+				if(!(dev.getPattern() instanceof ThermostatPattern))
+					continue;
+				ThermostatPattern th = (ThermostatPattern) dev.getPattern();
 				startBoost(th.model);
 			}
 		}
