@@ -15,7 +15,6 @@
  */
 package org.smartrplace.apps.hw.install;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,8 +30,6 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 
-import de.iwes.timeseries.eval.api.DataProvider;
-import de.iwes.util.format.StringFormatHelper;
 import de.iwes.widgets.api.OgemaGuiService;
 import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -89,6 +86,9 @@ public class HardwareInstallApp implements Application {
 		final WidgetPage<?> page = widgetApp.createStartPage();
 
 		controller = new HardwareInstallController(appMan, page, this);
+		for(DeviceHandlerProvider<?> tableP: tableProviders.values()) {
+    		controller.startSimulations(tableP);			
+		}
      }
 
      /*
@@ -106,6 +106,9 @@ public class HardwareInstallApp implements Application {
     	tableProviders.put(provider.id(), provider);
     	if(controller != null && controller.demandsActivated) {
     		provider.addPatternDemand(appMan.getResourcePatternAccess(), controller.mainPage);
+    	}
+    	if(controller != null) {
+    		controller.startSimulations(provider);
     	}
     	if(controller != null && controller.mainPage != null) {
     		controller.mainPage.updateTables();

@@ -25,7 +25,7 @@ public class DoorWindowSensorListener implements PatternListener<DoorWindowSenso
 	public void patternAvailable(DoorWindowSensorPattern pattern) {
 		availablePatterns.add(pattern);
 		
-		app.addDeviceIfNew(pattern.model);
+		app.addDeviceIfNew(pattern.model, null);
 	}
 	@Override
 	public void patternUnavailable(DoorWindowSensorPattern pattern) {

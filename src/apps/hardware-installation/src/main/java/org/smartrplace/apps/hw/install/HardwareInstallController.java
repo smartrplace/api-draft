@@ -16,29 +16,29 @@
 package org.smartrplace.apps.hw.install;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.AccessPriority;
-import org.ogema.core.resourcemanager.pattern.PatternListener;
-import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
-import org.ogema.devicefinder.api.PatternListenerExtended;
-import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.gui.MainPage;
 import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
+import org.smartrplace.apps.hw.install.pattern.DoorWindowSensorPattern;
 import org.smartrplace.apps.hw.install.pattern.ThermostatPattern;
+import org.smartrplace.apps.hw.install.patternlistener.DoorWindowSensorListener;
 import org.smartrplace.apps.hw.install.patternlistener.ThermostatListener;
 
 import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.WidgetPage;
-import org.smartrplace.apps.hw.install.patternlistener.DoorWindowSensorListener;
-import org.smartrplace.apps.hw.install.pattern.DoorWindowSensorPattern;
 
 // here the controller logic is implemented
 public class HardwareInstallController {
@@ -137,7 +137,7 @@ public class HardwareInstallController {
 	 * if the app needs to consider dependencies between different pattern types,
 	 * they can be processed here.
 	 */
-	public InstallAppDevice addDeviceIfNew(Resource device) {
+	public <T extends Resource> InstallAppDevice addDeviceIfNew(T device, DeviceHandlerProvider<T> tableProvider) {
 		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
 			if(install.device().equalsLocation(device)) return install;
 		}
@@ -146,11 +146,37 @@ public class HardwareInstallController {
 		install.device().setAsReference(device);
 		install.installationStatus().create();
 		install.activate(true);
+		if(tableProvider != null)
+			startSimulation(tableProvider, device);
 		return install;
 	}
 	public InstallAppDevice removeDevice(Resource device) {
 		//TODO
 		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends Resource> void startSimulations(DeviceHandlerProvider<T> tableProvider) {
+		Class<?> tableType = tableProvider.getResourceType();
+		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
+			if(install.device().getResourceType().equals(tableType)) {
+				startSimulation(tableProvider, (T)install.device());
+			}
+		}
+	}
+	protected Map<String, Set<String>> simulationsStarted = new HashMap<>();
+	@SuppressWarnings("unchecked")
+	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device) {
+		Set<String> deviceSimsStarted = simulationsStarted.get(tableProvider.id());
+		if(deviceSimsStarted == null) {
+			deviceSimsStarted = new HashSet<>();
+			simulationsStarted.put(tableProvider.id(), deviceSimsStarted);
+		}
+		if(deviceSimsStarted.contains(device.getLocation()))
+			return;
+		deviceSimsStarted.add(device.getLocation());
+		tableProvider.startSimulationForDevice((T) device.getLocationResource(),
+				mainPage.getRoomSimulation(device), appMan);
 	}
 	
 	public void cleanupOnStart() {

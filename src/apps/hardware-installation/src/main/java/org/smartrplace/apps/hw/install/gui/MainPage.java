@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.ogema.apps.roomsim.service.api.util.SingleRoomSimulationBase;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
@@ -138,8 +139,8 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 	}
 
 	@Override
-	public <T extends Resource> InstallAppDevice addDeviceIfNew(T model) {
-		return controller.addDeviceIfNew(model);
+	public <T extends Resource> InstallAppDevice addDeviceIfNew(T model, DeviceHandlerProvider<T> tableProvider) {
+		return controller.addDeviceIfNew(model, tableProvider);
 	}
 
 	@Override
@@ -147,6 +148,15 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 		return controller.removeDevice(model);
 	}
 
+	@Override
+	public ApplicationManager getAppManForSimulationStart() {
+		return appMan;
+	}
+	
+	@Override
+	public <T extends Resource> SingleRoomSimulationBase getRoomSimulation(T model) {
+		return null;
+	}
 }
 
 

@@ -11,17 +11,22 @@ import org.ogema.devicefinder.util.DeviceTableBase.InstalledAppsSelector;
 public class PatternListenerExtendedImpl<P extends ResourcePattern<R>, R extends Resource> implements PatternListenerExtended<P, R>{
 
 	private final InstalledAppsSelector app;
+	private final DeviceHandlerBase<R> devHandler;
 	public final List<P> availablePatterns = new ArrayList<>();
 	
- 	public PatternListenerExtendedImpl(InstalledAppsSelector app) {
+ 	public PatternListenerExtendedImpl(InstalledAppsSelector app, DeviceHandlerBase<R> devHandler) {
 		this.app = app;
+		this.devHandler = devHandler;
 	}
 	
 	@Override
 	public void patternAvailable(P pattern) {
 		availablePatterns.add(pattern);
 		
-		app.addDeviceIfNew(pattern.model);
+		app.addDeviceIfNew(pattern.model, devHandler);
+		
+		devHandler.startSimulationForDevice(pattern.model.getLocationResource(), app.getRoomSimulation(pattern.model),
+				app.getAppManForSimulationStart());
 	}
 	@Override
 	public void patternUnavailable(P pattern) {

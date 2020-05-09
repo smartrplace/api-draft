@@ -31,7 +31,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	public PatternListenerExtended<ResourcePattern<T>, T> addPatternDemand(
 			ResourcePatternAccess advAcc, InstalledAppsSelector app) {
 		if(listener == null) {
-			listener = new PatternListenerExtendedImpl<ResourcePattern<T>, T>(app);
+			listener = new PatternListenerExtendedImpl<ResourcePattern<T>, T>(app, this);
 		}
 		advAcc.addPatternDemand(getPatternClass(), listener, AccessPriority.PRIO_LOWEST);
 		return listener;

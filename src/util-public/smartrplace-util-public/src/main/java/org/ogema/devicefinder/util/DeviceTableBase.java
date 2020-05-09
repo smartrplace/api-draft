@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.apps.roomsim.service.api.util.SingleRoomSimulationBase;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -33,8 +35,14 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 	public static interface InstalledAppsSelector {
 		List<InstallAppDevice> getDevicesSelected();
 
-		<T extends Resource> InstallAppDevice addDeviceIfNew(T model);
-		<T extends Resource> InstallAppDevice removeDevice(T model);	
+		<T extends Resource> InstallAppDevice addDeviceIfNew(T model, DeviceHandlerProvider<T> tableProvider);
+		<T extends Resource> InstallAppDevice removeDevice(T model);
+		
+		default  <T extends Resource> SingleRoomSimulationBase getRoomSimulation(T model) {
+			return null;
+		}
+		
+		ApplicationManager getAppManForSimulationStart();
 	}
 	
 	protected abstract Class<? extends Resource> getResourceType();
