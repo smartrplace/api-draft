@@ -1,17 +1,25 @@
 package org.smartrplace.apps.hw.install.gui;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.ogema.apps.roomsim.service.api.util.SingleRoomSimulationBase;
+import org.ogema.apps.roomsim.service.api.util.RoomSimConfigPatternI;
+import org.ogema.apps.roomsim.service.api.util.SingleRoomSimulationBaseImpl;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.util.DeviceTableBase.InstalledAppsSelector;
 import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
+import org.ogema.model.locations.Room;
+import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -153,9 +161,45 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 		return appMan;
 	}
 	
+	Map<String, SingleRoomSimulationBaseImpl> roomSimulations = new HashMap<>();
 	@Override
 	public <T extends Resource> SingleRoomSimulationBase getRoomSimulation(T model) {
-		return null;
+		Room room = ResourceUtils.getDeviceLocationRoom(model);
+		SingleRoomSimulationBaseImpl roomSim = roomSimulations.get(room.getLocation());
+		if(roomSim != null)
+			return roomSim;
+
+		//TODO: Provide real implementation
+		RoomSimConfigPatternI configPattern = new RoomSimConfigPatternI() {
+			
+			@Override
+			public TemperatureResource simulatedTemperature() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public FloatResource simulatedHumidity() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public IntegerResource personInRoomNonPersistent() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+		roomSim =  new SingleRoomSimulationBaseImpl(room, configPattern , appMan.getLogger()) {
+
+			@Override
+			public float getVolume() {
+				return 0;
+			}
+			
+		};
+		roomSimulations.put(room.getLocation(), roomSim);
+		return roomSim;
 	}
 }
 

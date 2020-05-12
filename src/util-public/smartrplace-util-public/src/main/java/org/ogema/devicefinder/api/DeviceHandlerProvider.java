@@ -1,15 +1,13 @@
 package org.ogema.devicefinder.api;
 
-import org.ogema.apps.roomsim.service.api.SingleRoomSimulation;
-import org.ogema.apps.roomsim.service.api.util.RoomInsideSimulationBase;
-import org.ogema.apps.roomsim.service.api.util.SingleRoomSimulationBase;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.devicefinder.util.DeviceTableBase.InstalledAppsSelector;
-import org.ogema.model.devices.buildingtechnology.AirConditioner;
+import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
+import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.html.alert.Alert;
