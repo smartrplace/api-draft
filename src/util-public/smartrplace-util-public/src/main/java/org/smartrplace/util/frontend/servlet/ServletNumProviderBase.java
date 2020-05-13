@@ -19,7 +19,7 @@ public abstract class ServletNumProviderBase implements ServletValueProvider {
 			MultiValue mval = new MultiValue();
 			mval.mainValue = getValueInternal(user, key);
 			mval.permissions = new HashMap<>();
-			mval.permissions.put("userWritePermission", pdata.hasWritePermission);
+			mval.permissions.put("UserWritePermission", pdata.hasWritePermission);
 			UserServletUtil.addTimeSeriesData(pdata, mval);
 
 			//This provider does not offer POST
