@@ -85,9 +85,11 @@ public class HardwareInstallApp implements Application {
 		widgetApp = guiService.createWidgetApp(urlPath, appManager);
 		final WidgetPage<?> page = widgetApp.createStartPage();
 
-		controller = new HardwareInstallController(appMan, page, this);
-		for(DeviceHandlerProvider<?> tableP: tableProviders.values()) {
-    		controller.startSimulations(tableP);			
+		synchronized (this) {
+			controller = new HardwareInstallController(appMan, page, this);
+			for(DeviceHandlerProvider<?> tableP: tableProviders.values()) {
+	    		controller.startSimulations(tableP);			
+			}
 		}
      }
 
@@ -104,14 +106,16 @@ public class HardwareInstallApp implements Application {
     
     protected void addTableProvider(DeviceHandlerProvider<?> provider) {
     	tableProviders.put(provider.id(), provider);
-    	if(controller != null && controller.demandsActivated) {
-    		provider.addPatternDemand(appMan.getResourcePatternAccess(), controller.mainPage);
-    	}
-    	if(controller != null) {
-    		controller.startSimulations(provider);
-    	}
-    	if(controller != null && controller.mainPage != null) {
-    		controller.mainPage.updateTables();
+    	synchronized (this) {
+	    	if(controller != null && controller.demandsActivated) {
+	    		provider.addPatternDemand(appMan.getResourcePatternAccess(), controller.mainPage);
+	    	}
+	    	if(controller != null) {
+	    		controller.startSimulations(provider);
+	    	}
+	    	if(controller != null && controller.mainPage != null) {
+	    		controller.mainPage.updateTables();
+	    	}
     	}
     }
     protected void removeTableProvider(DeviceHandlerProvider<?> provider) {

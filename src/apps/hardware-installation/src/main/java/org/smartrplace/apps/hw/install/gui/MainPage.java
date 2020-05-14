@@ -190,7 +190,7 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 				return null;
 			}
 		};
-		roomSim =  new SingleRoomSimulationBaseImpl(room, configPattern , appMan.getLogger()) {
+		/*roomSim =  new SingleRoomSimulationBaseImpl(room, configPattern , appMan.getLogger()) {
 
 			@Override
 			public float getVolume() {
@@ -199,7 +199,8 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 			
 		};
 		roomSimulations.put(room.getLocation(), roomSim);
-		return roomSim;
+		return roomSim;*/
+		return null;
 	}
 }
 
