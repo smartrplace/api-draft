@@ -148,8 +148,10 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 		final String name;
 		if(device.getLocation().toLowerCase().contains("homematic")) {
 			name = "WindowSens HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
-		} else
-			name = ResourceUtils.getHumanReadableShortName(device);
+		} else {
+			// resolve reference here, otherwise we'd just get "device"
+			name = device.getLocation().replaceAll(".*/([^/])", "");
+		}
 		vh.stringLabel("Name", id, name, row);
 		return device;
 	}
