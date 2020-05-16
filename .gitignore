@@ -34,3 +34,5 @@ ION7550-console/
 ION7550-hldriver/
 *.swp
 jssc/
+*.iml
+.idea
