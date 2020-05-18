@@ -3,7 +3,6 @@ package org.smartrplace.util.frontend.servlet;
 import java.util.HashMap;
 
 import org.ogema.core.channelmanager.measurements.ObjectValue;
-import org.ogema.core.channelmanager.measurements.StringValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
@@ -22,7 +21,6 @@ public abstract class ServletNumProviderBase implements ServletValueProvider {
 			mval.permissions.put("UserWritePermission", pdata.hasWritePermission);
 			UserServletUtil.addTimeSeriesData(pdata, mval);
 
-			//This provider does not offer POST
 			mval.isWritable = isWritable();
 			
 			ObjectValue result = new ObjectValue(mval);

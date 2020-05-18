@@ -1,13 +1,10 @@
 package org.smartrplace.util.frontend.servlet;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.ogema.widgets.configuration.service.OGEMAConfigurationProvider;
 
-import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 
@@ -15,12 +12,11 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
  * TODO: This should not be inherited more than once without switching to an own knownTS.
  *
  */
+@Deprecated // Implementatoins should not be required anymore
 public class TimeseriesConfigProviderBase implements OGEMAConfigurationProvider {
-	public static final Map<String, TimeSeriesDataImpl> knownTS = new HashMap<>();
-	
 	@Override
 	public String className() {
-		return "org.smartrplace.app.monbase.gui.TimeSeriesServlet";
+		return UserServlet.TimeSeriesServletImplClassName;
 	}
 
 	@Override
@@ -45,6 +41,6 @@ public class TimeseriesConfigProviderBase implements OGEMAConfigurationProvider 
 
 	@Override
 	public Object getObject(String property, OgemaLocale locale, OgemaHttpRequest req, Object context) {
-		return knownTS.get(property);
+		return UserServlet.knownTS.get(property);
 	}
 }

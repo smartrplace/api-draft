@@ -31,12 +31,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider.ValueMode;
 
+import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
+
 /** Core class to provide servlets based on widgets pages
  * TODO: Entire package to be moved to smartrplace-util-proposed or similar location for Utils*/
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
 
+	/** Management of timeseriesIDs*/
+	public static final Map<String, TimeSeriesDataImpl> knownTS = new HashMap<>();
+	public static final String TimeSeriesServletImplClassName = "org.smartrplace.app.monbase.servlet.TimeseriesBaseServlet";
+	
 	final Logger logger = LoggerFactory.getLogger(UserServlet.class);
 	public enum ReturnStructure {
 		/**In this case a list is returned with each element having an element named "key". Additional

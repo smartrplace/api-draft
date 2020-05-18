@@ -7,21 +7,18 @@ import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.tools.resource.util.LoggingUtils;
 
-import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
-
 public class ServletIntegerResourceProvider extends ServletNumProviderBase {
 	protected IntegerResource res;
 	
 	public ServletIntegerResourceProvider(IntegerResource res) {
 		this.res = res;
 	}
-	public ServletIntegerResourceProvider(IntegerResource res, Map<String, String[]> paramMap,
-			Map<String, TimeSeriesDataImpl> tsMap) {
-		this(res, new UserServletParamData(paramMap, null, tsMap));
+	public ServletIntegerResourceProvider(IntegerResource res, Map<String, String[]> paramMap) {
+		this(res, new UserServletParamData(paramMap, null));
 	}
 	public ServletIntegerResourceProvider(IntegerResource res, Map<String, String[]> paramMap,
-			Boolean hasWritePermission, Map<String, TimeSeriesDataImpl> tsMap) {
-		this(res, new UserServletParamData(paramMap, hasWritePermission, tsMap));
+			Boolean hasWritePermission) {
+		this(res, new UserServletParamData(paramMap, hasWritePermission));
 	}
 	public ServletIntegerResourceProvider(IntegerResource res, UserServletParamData pdata) {
 		this(res);

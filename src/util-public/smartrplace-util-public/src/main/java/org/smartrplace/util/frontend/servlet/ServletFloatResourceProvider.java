@@ -7,7 +7,6 @@ import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.tools.resource.util.LoggingUtils;
 
-import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public class ServletFloatResourceProvider extends ServletNumProviderBase {
@@ -16,13 +15,12 @@ public class ServletFloatResourceProvider extends ServletNumProviderBase {
 	public ServletFloatResourceProvider(FloatResource res) {
 		this.res = res;
 	}
-	public ServletFloatResourceProvider(FloatResource res, Map<String, String[]> paramMap,
-			Map<String, TimeSeriesDataImpl> tsMap) {
-		this(res, new UserServletParamData(paramMap, null, tsMap));
+	public ServletFloatResourceProvider(FloatResource res, Map<String, String[]> paramMap) {
+		this(res, new UserServletParamData(paramMap, null));
 	}
 	public ServletFloatResourceProvider(FloatResource res, Map<String, String[]> paramMap,
-			Boolean hasWritePermission, Map<String, TimeSeriesDataImpl> tsMap) {
-		this(res, new UserServletParamData(paramMap, hasWritePermission, tsMap));
+			Boolean hasWritePermission) {
+		this(res, new UserServletParamData(paramMap, hasWritePermission));
 	}
 	public ServletFloatResourceProvider(FloatResource res, UserServletParamData pdata) {
 		this(res);

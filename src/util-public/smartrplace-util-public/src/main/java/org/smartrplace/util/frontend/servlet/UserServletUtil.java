@@ -12,10 +12,13 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.timeseries.InterpolationMode;
+import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 
 public class UserServletUtil {
+	public static final Map<String, TimeSeriesDataImpl> knownTS = new HashMap<>();
+	
 	public static void addValueEntry(ValueResource res, boolean suppressNan,
 			JSONObject result) {
 		addValueEntry(res, "value", suppressNan, result);
@@ -64,6 +67,20 @@ public class UserServletUtil {
 	}
 	
 	public static void addTimeSeriesData(UserServletParamData pdata, MultiValue mval) {
+		String tsID = getOrAddTimeSeriesData(pdata);
+		if(tsID != null) {
+			if(mval.additionalValues == null)
+				mval.additionalValues = new HashMap<>();
+			mval.additionalValues.put("timeseries", new StringValue(tsID));
+		}		
+	}
+	
+	/** Make sure time series data is registered with TimeSeriesServletBase
+	 * 
+	 * @param pdata
+	 * @return timeseriesID
+	 */
+	public static String getOrAddTimeSeriesData(UserServletParamData pdata) {
 		TimeSeriesDataImpl tsd = null;
 		if(pdata.tsData != null) {
 			tsd = pdata.tsData;
@@ -71,12 +88,20 @@ public class UserServletUtil {
 			String hash = ""+pdata.tsLocationOrBaseId.hashCode();
 			tsd = new TimeSeriesDataImpl(pdata.tsDataRaw, hash, hash, InterpolationMode.NONE);
 		}
+		return getOrAddTimeSeriesData(tsd);
+	}
+	
+	public static String getOrAddTimeSeriesData(TimeSeriesDataImpl tsd) {
 		if(tsd != null) {
-			if(mval.additionalValues == null)
-				mval.additionalValues = new HashMap<>();
-			mval.additionalValues.put("timeseries", new StringValue(tsd.label(null)));
-			if(pdata.tsMap != null)
-				pdata.tsMap.put(tsd.label(null), tsd);
+			UserServlet.knownTS.put(tsd.label(null), tsd);
+			return tsd.label(null);
 		}
+		return null;		
+	}
+
+	public static String getOrAddTimeSeriesData(ReadOnlyTimeSeries tsDataRaw, String tsLocationOrBaseId) {
+		String hash = ""+tsLocationOrBaseId.hashCode();
+		TimeSeriesDataImpl tsd = new TimeSeriesDataImpl(tsDataRaw, hash, hash, InterpolationMode.NONE);
+		return getOrAddTimeSeriesData(tsd);
 	}
 }
