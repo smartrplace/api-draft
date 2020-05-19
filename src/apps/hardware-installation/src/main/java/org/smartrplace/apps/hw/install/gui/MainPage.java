@@ -156,15 +156,22 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 		return controller.removeDevice(model);
 	}
 
+	//@Override
+	//public ApplicationManager getAppManForSimulationStart() {
+	//	return appMan;
+	//}
+
 	@Override
-	public ApplicationManager getAppManForSimulationStart() {
-		return appMan;
+	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device) {
+		controller.startSimulation(tableProvider, device);
 	}
 	
 	Map<String, SingleRoomSimulationBaseImpl> roomSimulations = new HashMap<>();
 	@Override
 	public <T extends Resource> SingleRoomSimulationBase getRoomSimulation(T model) {
 		Room room = ResourceUtils.getDeviceLocationRoom(model);
+		if(room == null)
+			return null;
 		SingleRoomSimulationBaseImpl roomSim = roomSimulations.get(room.getLocation());
 		if(roomSim != null)
 			return roomSim;

@@ -167,6 +167,8 @@ public class HardwareInstallController {
 	protected Map<String, Set<String>> simulationsStarted = new HashMap<>();
 	@SuppressWarnings("unchecked")
 	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device) {
+		if(!Boolean.getBoolean("org.ogema.sim.simulateRemoteGateway"))
+			return;
 		Set<String> deviceSimsStarted = simulationsStarted.get(tableProvider.id());
 		if(deviceSimsStarted == null) {
 			deviceSimsStarted = new HashSet<>();

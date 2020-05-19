@@ -42,7 +42,14 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 			return null;
 		}
 		
-		ApplicationManager getAppManForSimulationStart();
+		/** Called whenever new device connections are detected, may be called even when the device is
+		 * already known, so the implementation shall be make sure that simulations are only started once
+		 * @param <T>
+		 * @param tableProvider
+		 * @param device
+		 */
+		public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device);
+		//ApplicationManager getAppManForSimulationStart();
 	}
 	
 	protected abstract Class<? extends Resource> getResourceType();
@@ -150,7 +157,13 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 			name = "WindowSens HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
 		} else {
 			// resolve reference here, otherwise we'd just get "device"
-			name = device.getLocation().replaceAll(".*/([^/])", "");
+			int idx = device.getLocation().lastIndexOf('/');
+			if(idx < 0)
+				idx = 0;
+			else
+				idx++;
+			name = device.getLocation().substring(idx);
+			//name = device.getLocation().replaceAll(".*/([^/])", "");
 		}
 		vh.stringLabel("Name", id, name, row);
 		return device;

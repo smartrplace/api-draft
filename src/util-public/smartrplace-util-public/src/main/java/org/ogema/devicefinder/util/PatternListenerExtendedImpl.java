@@ -25,8 +25,11 @@ public class PatternListenerExtendedImpl<P extends ResourcePattern<R>, R extends
 		
 		app.addDeviceIfNew(pattern.model, devHandler);
 		
+		app.startSimulation(devHandler, pattern.model.getLocationResource());
+		/*if(!Boolean.getBoolean("org.ogema.sim.simulateRemoteGateway"))
+			return;
 		devHandler.startSimulationForDevice(pattern.model.getLocationResource(), app.getRoomSimulation(pattern.model),
-				app.getAppManForSimulationStart());
+				app.getAppManForSimulationStart());*/
 	}
 	@Override
 	public void patternUnavailable(P pattern) {
