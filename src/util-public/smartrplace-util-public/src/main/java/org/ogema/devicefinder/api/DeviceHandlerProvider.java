@@ -17,7 +17,24 @@ import de.iwes.widgets.template.LabelledItem;
  * everything to provide device information for device and application configuration
  *
  * It is also recommended to use an existing implementation as template such as
- * {@link https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-base/src/main/java/org/smartrplace/mqtt/devicetable}
+ * {@link https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-base/src/main/java/org/smartrplace/mqtt/devicetable},
+ * especially [DeviceHandlerMQTT_Aircond](https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-base/src/main/java/org/smartrplace/mqtt/devicetable/DeviceHandlerMQTT_Aircond.class)
+ * 
+ * General implementation and testing recommendations:<br>
+ *  - If the device has a setpoint and a feedback a simulation must be implemented that listens for the
+ *    setpoint and sets the feedback, usually with a little time delay. See the example implementation for
+ *    a template. Test that the feedback resource is set to the setpoint resource with a time delay.<br>
+ *  - All measurement and feedback values should implement polling to show value updates without having
+ *    to reload the page. See the example implementation for using the method setPollingInterval on the
+ *    respective widgets. Use the DEFAULT_POLL_RATE defined by DeviceTableBase.<br>
+ *  - If the device has at least one measurement or feedback value then the "Last Contact" column should
+ *    be added. The value receiving the most updates usually should be used here, usually this is a
+ *    measurement value.<br>
+ *  - The following fields / methods should be part of almost all device types:<br>
+ *  	 - addRoomWidget(object, vh, id, req, row, appMan, deviceRoom);<br>
+ *		 - addInstallationStatus(object, vh, id, req, row, appMan, deviceRoom);<br>
+ *		 - addComment(object, vh, id, req, row, appMan, deviceRoom);<br>
+ *		 - addSubLocation(object, vh, id, req, row, appMan, deviceRoom);<br>
  * 
  * @param <T> resource type of the device for which data is provided by the implementation
  */
