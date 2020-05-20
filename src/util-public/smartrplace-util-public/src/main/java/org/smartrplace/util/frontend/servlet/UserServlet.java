@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -184,7 +186,10 @@ public class UserServlet extends HttpServlet {
 			}
 		}
 		
-		for(T obj: objects) {
+		int orgSize = objects.size();
+		int count = 0;
+		try { for(T obj: objects) {
+			count++;
 			//if(obj == null) continue;
 			Map<String, ServletValueProvider> data = null;
 			String objStr = null;
@@ -301,7 +306,10 @@ public class UserServlet extends HttpServlet {
 			} else
 				result.put(objStr, subJson);
 		}
-		
+		} catch(ConcurrentModificationException e) {
+			System.out.println("Count:"+count+"  Org size:"+orgSize+" now:"+objects.size());
+			e.printStackTrace();
+		}
 		return result;
 	}
 	
@@ -312,7 +320,7 @@ public class UserServlet extends HttpServlet {
 			result.add(obj);
 			return result;
 		}
-		return prov.getAllObjects(user);
+		return Collections.unmodifiableList(new ArrayList<T>(prov.getAllObjects(user)));
 	}
 	
 	@Override
