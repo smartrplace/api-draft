@@ -36,6 +36,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 	private Header header;
 	//private Alert alert;
 	protected RoomSelectorDropdown roomsDrop;
+	protected InstallationStatusFilterDropdown installFilterDrop;
 	
 	public DeviceTablePageFragment(WidgetPage<?> page, HardwareInstallController controller,
 			RoomSelectorDropdown roomsDrop, Alert alert) {
@@ -112,13 +113,16 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 			}
 		};
 		roomsDrop = new RoomSelectorDropdown(page, "roomsDrop", controller);
+		installFilterDrop = new InstallationStatusFilterDropdown(page, "installFilterDrop", controller);
 		
 		//RedirectButton roomLinkButton = new RedirectButton(page, "roomLinkButton", "Room Administration", "/de/iwes/apps/roomlink/gui/index.html");
 		
 		RedirectButton calendarConfigButton = new RedirectButton(page, "calendarConfigButton",
 				"Calendar Configuration", "/org/smartrplace/apps/smartrplaceheatcontrolv2/extensionpage.html");
 		
-		topTable.setContent(0, 0, roomsDrop).setContent(0, 1, installMode).//setContent(0, 2, roomLinkButton).
+		topTable.setContent(0, 0, roomsDrop)
+				.setContent(0, 1, installFilterDrop)
+				.setContent(0, 2, installMode).//setContent(0, 2, roomLinkButton).
 				setContent(0, 4, calendarConfigButton);
 		RoomEditHelper.addButtonsToStaticTable(topTable, (WidgetPage<RoomLinkDictionary>) page,
 				alert, appMan, 0, 2);
@@ -128,6 +132,8 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 	@Override
 	public List<InstallAppDevice> getObjectsInTable(OgemaHttpRequest req) {
 		List<InstallAppDevice> all = roomsDrop.getDevicesSelected();
+		if (installFilterDrop != null)  // FIXME seems to always be null here
+			all = installFilterDrop.getDevicesSelected(all);
 		List<InstallAppDevice> result = new ArrayList<InstallAppDevice>();
 		for(InstallAppDevice dev: all) {
 			if(getResourceType().isAssignableFrom(dev.device().getResourceType())) {

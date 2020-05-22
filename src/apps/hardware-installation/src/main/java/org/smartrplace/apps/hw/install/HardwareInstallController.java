@@ -30,6 +30,7 @@ import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.apps.hw.install.gui.InstallationStatusFilterDropdown;
 import org.smartrplace.apps.hw.install.gui.MainPage;
 import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
 import org.smartrplace.apps.hw.install.pattern.DoorWindowSensorPattern;
@@ -87,6 +88,8 @@ public class HardwareInstallController {
 			appConfigData.knownDevices().create();
 			appConfigData.room().create();
 			appConfigData.room().setValue(RoomSelectorDropdown.ALL_DEVICES_ID);
+			appConfigData.installationStatusFilter().create();
+			appConfigData.installationStatusFilter().setValue(InstallationStatusFilterDropdown.FILTERS.ALL.name);
 			appConfigData.activate(true);
 			appMan.getLogger().debug("{} started with new config resource", getClass().getName());
 		}
