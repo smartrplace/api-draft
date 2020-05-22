@@ -1,12 +1,11 @@
 package org.smartrplace.apps.hw.install.gui.expert;
 
 import org.ogema.core.application.ApplicationManager;
-import org.ogema.model.devices.buildingtechnology.Thermostat;
+import org.ogema.devicefinder.util.InstalledAppsSelector;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.expert.HardwareInstallControllerExpert;
 import org.smartrplace.apps.hw.install.gui.DoorWindowSensorTable;
-import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -17,8 +16,9 @@ import de.iwes.widgets.html.complextable.RowTemplate.Row;
 public class DoorWindowSensorTableExpert extends DoorWindowSensorTable {
 
 	public DoorWindowSensorTableExpert(WidgetPage<?> page, HardwareInstallControllerExpert controller,
-			RoomSelectorDropdown roomsDrop, Alert alert) {
-		super(page, controller, roomsDrop, alert);
+			InstalledAppsSelector instAppSelector, Alert alert) {
+			//RoomSelectorDropdown roomsDrop, Alert alert) {
+		super(page, controller, instAppSelector, alert);
 	}
 	
 	@Override

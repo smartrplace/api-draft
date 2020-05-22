@@ -1,7 +1,11 @@
 package org.smartrplace.apps.hw.install.gui;
 
+import java.util.List;
+
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.devicefinder.util.InstalledAppsSelector;
 import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.sensors.DoorWindowSensor;
@@ -23,8 +27,9 @@ import de.iwes.widgets.html.form.label.Label;
 public class DoorWindowSensorTable extends DeviceTablePageFragment {
 
 	public DoorWindowSensorTable(WidgetPage<?> page, HardwareInstallController controller,
-			RoomSelectorDropdown roomsDrop, Alert alert) {
-		super(page, controller, roomsDrop, alert);
+			InstalledAppsSelector instAppsSelector, Alert alert) {
+			//RoomSelectorDropdown roomsDrop, Alert alert) {
+		super(page, controller, instAppsSelector, alert);
 	}
 	
 	@Override
@@ -77,5 +82,25 @@ public class DoorWindowSensorTable extends DeviceTablePageFragment {
 		Header headerWinSens = new Header(page, "headerWinSens", "Window and Door Opening Sensors");
 		headerWinSens.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
 		page.append(headerWinSens);
+	}
+
+	@Override
+	public List<InstallAppDevice> getDevicesSelected() {
+		return instAppsSelector.getDevicesSelected();
+	}
+
+	@Override
+	public <T extends Resource> InstallAppDevice addDeviceIfNew(T model, DeviceHandlerProvider<T> tableProvider) {
+		return instAppsSelector.addDeviceIfNew(model, tableProvider);
+	}
+
+	@Override
+	public <T extends Resource> InstallAppDevice removeDevice(T model) {
+		return instAppsSelector.removeDevice(model);
+	}
+
+	@Override
+	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device) {
+		instAppsSelector.startSimulation(tableProvider, device);
 	}
 }

@@ -4,7 +4,6 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
-import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.expert.HardwareInstallControllerExpert;
@@ -29,7 +28,7 @@ public class RSSIPage extends MainPage {
 	@Override
 	protected void finishConstructor() {
 		DoorWindowSensorTableRSSI winSensTable = new DoorWindowSensorTableRSSI(page,
-				(HardwareInstallControllerExpert) controller, roomsDrop, alert);
+				(HardwareInstallControllerExpert) controller, this, alert);
 		winSensTable.triggerPageBuild();
 		triggerPageBuild();		
 	}

@@ -26,7 +26,7 @@ public class MainPageExpert extends MainPage {
 	@Override
 	protected void finishConstructor() {
 		DoorWindowSensorTableExpert winSensTable = new DoorWindowSensorTableExpert(page,
-				(HardwareInstallControllerExpert) controller, roomsDrop, alert);
+				(HardwareInstallControllerExpert) controller, this, alert);
 		winSensTable.triggerPageBuild();
 		triggerPageBuild();		
 	}

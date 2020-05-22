@@ -5,7 +5,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.util.DeviceTableBase;
-import org.ogema.devicefinder.util.DeviceTableBase.InstalledAppsSelector;
+import org.ogema.devicefinder.util.InstalledAppsSelector;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 

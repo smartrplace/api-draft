@@ -3,12 +3,12 @@ package org.smartrplace.apps.hw.install.gui.expert;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.devicefinder.util.InstalledAppsSelector;
 import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.expert.HardwareInstallControllerExpert;
-import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
@@ -22,8 +22,9 @@ import de.iwes.widgets.html.form.label.Label;
 public class DoorWindowSensorTableRSSI extends DoorWindowSensorTableExpert {
 
 	public DoorWindowSensorTableRSSI(WidgetPage<?> page, HardwareInstallControllerExpert controller,
-			RoomSelectorDropdown roomsDrop, Alert alert) {
-		super(page, controller, roomsDrop, alert);
+			InstalledAppsSelector instAppsSelector, Alert alert) {
+			//RoomSelectorDropdown roomsDrop, Alert alert) {
+		super(page, controller, instAppsSelector, alert);
 	}
 	
 	@Override

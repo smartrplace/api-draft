@@ -88,8 +88,8 @@ public class HardwareInstallController {
 			appConfigData.knownDevices().create();
 			appConfigData.room().create();
 			appConfigData.room().setValue(RoomSelectorDropdown.ALL_DEVICES_ID);
-			appConfigData.installationStatusFilter().create();
-			appConfigData.installationStatusFilter().setValue(InstallationStatusFilterDropdown.FILTERS.ALL.name);
+			//appConfigData.installationStatusFilter().create();
+			//appConfigData.installationStatusFilter().setValue(InstallationStatusFilterDropdown.FILTERS.ALL.name);
 			appConfigData.activate(true);
 			appMan.getLogger().debug("{} started with new config resource", getClass().getName());
 		}

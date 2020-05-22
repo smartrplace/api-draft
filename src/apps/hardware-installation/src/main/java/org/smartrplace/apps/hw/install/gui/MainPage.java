@@ -14,7 +14,7 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
-import org.ogema.devicefinder.util.DeviceTableBase.InstalledAppsSelector;
+import org.ogema.devicefinder.util.InstalledAppsSelector;
 import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
@@ -45,7 +45,7 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 	
 	protected void finishConstructor() {
 		updateTables();
-		DoorWindowSensorTable winSensTable = new DoorWindowSensorTable(page, controller, roomsDrop, alert);
+		DoorWindowSensorTable winSensTable = new DoorWindowSensorTable(page, controller, this, alert);
 		winSensTable.triggerPageBuild();
 		triggerPageBuild();		
 	}
@@ -143,7 +143,10 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 
 	@Override
 	public List<InstallAppDevice> getDevicesSelected() {
-		return roomsDrop.getDevicesSelected();
+		List<InstallAppDevice> all = roomsDrop.getDevicesSelected();
+		if (installFilterDrop != null)  // FIXME seems to always be null here
+			all = installFilterDrop.getDevicesSelected(all);
+		return all;
 	}
 
 	@Override

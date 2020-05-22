@@ -1,6 +1,5 @@
 package org.smartrplace.apps.hw.install.gui;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +9,7 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.devicefinder.util.DeviceTableBase;
+import org.ogema.devicefinder.util.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
@@ -26,7 +26,7 @@ import de.iwes.widgets.html.form.button.RedirectButton;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 
-public abstract class DeviceTablePageFragment extends DeviceTableBase { //extends ObjectGUITablePage<InstallAppDevice,InstallAppDevice> {
+public abstract class DeviceTablePageFragment extends DeviceTableBase implements InstalledAppsSelector { //extends ObjectGUITablePage<InstallAppDevice,InstallAppDevice> {
 	public static final long DEFAULT_POLL_RATE = 5000;
 	
 	protected abstract Class<? extends Resource> getResourceType();
@@ -37,13 +37,23 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 	//private Alert alert;
 	protected RoomSelectorDropdown roomsDrop;
 	protected InstallationStatusFilterDropdown installFilterDrop;
+	protected final InstalledAppsSelector instAppsSelector;
+	protected final boolean isParentTable;
 	
 	public DeviceTablePageFragment(WidgetPage<?> page, HardwareInstallController controller,
-			RoomSelectorDropdown roomsDrop, Alert alert) {
+			InstalledAppsSelector instAppsSelector, Alert alert) {
+			//RoomSelectorDropdown roomsDrop, Alert alert) {
 		//super(page, controller.appMan, null, null, InstallAppDevice.class, false, true, alert);
-		super(page, controller.appMan, null, null);
+		super(page, controller.appMan, null, instAppsSelector);
 		this.controller = controller;
-		this.roomsDrop = roomsDrop;
+		if(instAppsSelector != null) {
+			this.instAppsSelector = instAppsSelector;
+			isParentTable = false;
+		} else {
+			this.instAppsSelector = this;
+			isParentTable = true;
+		}
+		//this.roomsDrop = roomsDrop;
 		//retardationOnGET = 2000;
 		
 		//triggerPageBuild();
@@ -96,7 +106,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 	@SuppressWarnings("unchecked")
 	@Override
 	public void addWidgetsAboveTable() {
-		if(roomsDrop != null) return;
+		if(!isParentTable) return;
 		header = new Header(page, "header", getHeader());
 		header.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
 		page.append(header).linebreak();
@@ -122,14 +132,14 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 		
 		topTable.setContent(0, 0, roomsDrop)
 				.setContent(0, 1, installFilterDrop)
-				.setContent(0, 2, installMode).//setContent(0, 2, roomLinkButton).
-				setContent(0, 4, calendarConfigButton);
+				.setContent(0, 2, installMode);//setContent(0, 2, roomLinkButton).
 		RoomEditHelper.addButtonsToStaticTable(topTable, (WidgetPage<RoomLinkDictionary>) page,
-				alert, appMan, 0, 2);
+				alert, appMan, 0, 3);
+		topTable.setContent(0, 5, calendarConfigButton);
 		page.append(topTable);
 	}
 	
-	@Override
+	/*@Override
 	public List<InstallAppDevice> getObjectsInTable(OgemaHttpRequest req) {
 		List<InstallAppDevice> all = roomsDrop.getDevicesSelected();
 		if (installFilterDrop != null)  // FIXME seems to always be null here
@@ -141,7 +151,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase { //extend
 			}
 		}
 		return result;
-	}
+	}*/
 	
 	@Override
 	protected void addWidgetsBelowTable() {

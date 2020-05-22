@@ -9,10 +9,8 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
-import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.locations.Room;
-import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
@@ -29,28 +27,9 @@ import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
 
-public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevice,InstallAppDevice> {
+public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevice,InstallAppDevice>  {
 	public static final long DEFAULT_POLL_RATE = 5000;
 	
-	public static interface InstalledAppsSelector {
-		List<InstallAppDevice> getDevicesSelected();
-
-		<T extends Resource> InstallAppDevice addDeviceIfNew(T model, DeviceHandlerProvider<T> tableProvider);
-		<T extends Resource> InstallAppDevice removeDevice(T model);
-		
-		default  <T extends Resource> SingleRoomSimulationBase getRoomSimulation(T model) {
-			return null;
-		}
-		
-		/** Called whenever new device connections are detected, may be called even when the device is
-		 * already known, so the implementation shall be make sure that simulations are only started once
-		 * @param <T>
-		 * @param tableProvider
-		 * @param device
-		 */
-		public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device);
-		//ApplicationManager getAppManForSimulationStart();
-	}
 	
 	protected abstract Class<? extends Resource> getResourceType();
 	
@@ -66,7 +45,12 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 	public DeviceTableBase(WidgetPage<?> page, ApplicationManager appMan, Alert alert,
 			InstalledAppsSelector appSelector) {
 		super(page, appMan, null, null, InstallAppDevice.class, false, true, alert);
-		this.appSelector = appSelector;
+		if(appSelector != null)
+			this.appSelector = appSelector;
+		else if(this instanceof InstalledAppsSelector)
+			this.appSelector = (InstalledAppsSelector) this;
+		else
+			throw new IllegalStateException("InstalledAppsSelector must be provided or implemented!");
 	}
 
 	protected void addInstallationStatus(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
@@ -228,5 +212,4 @@ public abstract class DeviceTableBase extends ObjectGUITablePage<InstallAppDevic
 		if(tail.isEmpty()) return "102";
 		else return tail;
 	}
-
 }
