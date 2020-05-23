@@ -87,7 +87,7 @@ public class HardwareInstallApp implements Application {
 		final WidgetPage<?> page = widgetApp.createStartPage();
 
 		synchronized (this) {
-			controller = new HardwareInstallController(appMan, page, this);
+			controller = new HardwareInstallController(appMan, page, this, dpService);
 			for(DeviceHandlerProvider<?> tableP: tableProviders.values()) {
 	    		controller.startSimulations(tableP);			
 			}
@@ -109,7 +109,7 @@ public class HardwareInstallApp implements Application {
     	tableProviders.put(provider.id(), provider);
     	synchronized (this) {
 	    	if(controller != null && controller.demandsActivated) {
-	    		provider.addPatternDemand(appMan.getResourcePatternAccess(), controller.mainPage);
+	    		provider.addPatternDemand(controller.mainPage);
 	    	}
 	    	if(controller != null) {
 	    		controller.startSimulations(provider);

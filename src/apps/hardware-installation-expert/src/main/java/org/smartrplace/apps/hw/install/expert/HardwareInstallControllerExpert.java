@@ -16,6 +16,7 @@
 package org.smartrplace.apps.hw.install.expert;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.devicefinder.api.DatapointService;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.gui.MainPage;
 import org.smartrplace.apps.hw.install.gui.expert.MainPageExpert;
@@ -30,8 +31,9 @@ import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 public class HardwareInstallControllerExpert extends HardwareInstallController {
 	protected final WidgetApp widgetApp;
 	
-	public HardwareInstallControllerExpert(ApplicationManager appMan, WidgetPage<?> page, WidgetApp widgetApp) {
-		super(appMan, page, null);
+	public HardwareInstallControllerExpert(ApplicationManager appMan, WidgetPage<?> page, WidgetApp widgetApp,
+			DatapointService dpService) {
+		super(appMan, page, null, dpService);
 		this.widgetApp = widgetApp;
 		
 		WidgetPage<LocaleDictionary> rssiPageBase = widgetApp.createWidgetPage("rssipage.hmtl");

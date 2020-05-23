@@ -55,12 +55,13 @@ public class HardwareInstallController {
 	public MainPage mainPage;
 	WidgetApp widgetApp;
 
-	public HardwareInstallController(ApplicationManager appMan, WidgetPage<?> page, HardwareInstallApp hardwareInstallApp) {
+	public HardwareInstallController(ApplicationManager appMan, WidgetPage<?> page, HardwareInstallApp hardwareInstallApp,
+			DatapointService dpService) {
 		this.appMan = appMan;
 		this.log = appMan.getLogger();
 		this.advAcc = appMan.getResourcePatternAccess();
-		this.hwInstApp = hardwareInstallApp;
-		this.dpService = hardwareInstallApp.dpService;
+		this.hwInstApp = hardwareInstallApp;		
+		this.dpService = dpService;
 		
 		initConfigurationResource();
 		cleanupOnStart();
@@ -121,7 +122,7 @@ public class HardwareInstallController {
     	advAcc.addPatternDemand(ThermostatPattern.class, actionListener, AccessPriority.PRIO_LOWEST);
 		advAcc.addPatternDemand(DoorWindowSensorPattern.class, doorWindowSensorListener, AccessPriority.PRIO_LOWEST);
 		if(hwInstApp != null) for(DeviceHandlerProvider<?> devhand: hwInstApp.getTableProviders().values()) {
-			devhand.addPatternDemand(advAcc, mainPage);
+			devhand.addPatternDemand(mainPage);
 		}
     }
 
@@ -131,7 +132,7 @@ public class HardwareInstallController {
 		advAcc.removePatternDemand(ThermostatPattern.class, actionListener);
 		advAcc.removePatternDemand(DoorWindowSensorPattern.class, doorWindowSensorListener);
 		if(hwInstApp != null) for(DeviceHandlerProvider<?> devhand: hwInstApp.getTableProviders().values()) {
-			devhand.removePatternDemand(advAcc);
+			devhand.removePatternDemand();
 		}
     }
 	public void close() {
@@ -183,7 +184,7 @@ public class HardwareInstallController {
 			return;
 		deviceSimsStarted.add(device.getLocation());
 		tableProvider.startSimulationForDevice((T) device.getLocationResource(),
-				mainPage.getRoomSimulation(device), appMan, dpService);
+				mainPage.getRoomSimulation(device), dpService);
 	}
 	
 	public void cleanupOnStart() {

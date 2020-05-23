@@ -1,9 +1,7 @@
 package org.ogema.devicefinder.api;
 
-import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
-import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.devicefinder.util.InstalledAppsSelector;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
@@ -18,8 +16,8 @@ import de.iwes.widgets.template.LabelledItem;
  * everything to provide device information for device and application configuration
  *
  * It is also recommended to use an existing implementation as template such as
- * {@link https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-base/src/main/java/org/smartrplace/mqtt/devicetable},
- * especially [DeviceHandlerMQTT_Aircond](https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-base/src/main/java/org/smartrplace/mqtt/devicetable/DeviceHandlerMQTT_Aircond.class)
+ * {@link https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-service-base/src/main/java/org/smartrplace/mqtt/devicetable},
+ * especially [DeviceHandlerMQTT_Aircond](https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-service-base/src/main/java/org/smartrplace/mqtt/devicetable/DeviceHandlerMQTT_Aircond.class)
  * 
  * General implementation and testing recommendations:<br>
  *  - If the device has a setpoint and a feedback a simulation must be implemented that listens for the
@@ -58,15 +56,14 @@ public interface DeviceHandlerProvider<T extends Resource> extends LabelledItem 
 	 * @param app 
 	 * @return
 	 */
-	PatternListenerExtended<ResourcePattern<T>, T> addPatternDemand(ResourcePatternAccess advAcc,
-			InstalledAppsSelector app);
+	PatternListenerExtended<ResourcePattern<T>, T> addPatternDemand(InstalledAppsSelector app);
 	
 	/** The method is called then installation mode is deactivated. In this case the pattern demand
 	 * shall be removed by the application in order to avoid unnecessary load on resource checking in
 	 * the system
 	 * @param advAcc
 	 */
-	void removePatternDemand(ResourcePatternAccess advAcc);
+	void removePatternDemand();
 	
 	/** Provide table to be included into the hardware-installation app. It is recommended to use the
 	 * pre-implemented methods for common table elements such as
@@ -79,7 +76,7 @@ public interface DeviceHandlerProvider<T extends Resource> extends LabelledItem 
 	 * @param appSelector same object also provided with {@link #addPatternDemand(ResourcePatternAccess, InstalledAppsSelector)}
 	 * @return object of class extending DeviceTableBase
 	 */
-	DeviceTableBase getDeviceTable(WidgetPage<?> page, ApplicationManager appMan, Alert alert,
+	DeviceTableBase getDeviceTable(WidgetPage<?> page, Alert alert,
 			InstalledAppsSelector appSelector);
 	
 	/** Provide simulation for a device. The primary goal of the simulation is provide a realistic feedback on
@@ -95,7 +92,7 @@ public interface DeviceHandlerProvider<T extends Resource> extends LabelledItem 
 	 * @return null if no simulation is available for the device
 	 */
 	default RoomInsideSimulationBase startSimulationForDevice(T resource,
-			SingleRoomSimulationBase roomSimulation, ApplicationManager appMan,
+			SingleRoomSimulationBase roomSimulation,
 			DatapointService dpService) {
 		return null;
 	}

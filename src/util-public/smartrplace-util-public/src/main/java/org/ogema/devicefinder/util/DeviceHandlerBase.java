@@ -16,6 +16,8 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 
 	protected PatternListenerExtended<ResourcePattern<T>, T> listener = null;
 	
+	protected abstract ResourcePatternAccess advAcc();
+	
 	@Override
 	public String id() {
 		return this.getClass().getName();
@@ -28,19 +30,19 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 
 	@Override
 	public PatternListenerExtended<ResourcePattern<T>, T> addPatternDemand(
-			ResourcePatternAccess advAcc, InstalledAppsSelector app) {
+			InstalledAppsSelector app) {
 		if(listener == null) {
 			listener = new PatternListenerExtendedImpl<ResourcePattern<T>, T>(app, this);
 		}
-		advAcc.addPatternDemand(getPatternClass(), listener, AccessPriority.PRIO_LOWEST);
+		advAcc().addPatternDemand(getPatternClass(), listener, AccessPriority.PRIO_LOWEST);
 		return listener;
 	}
 
 	@Override
-	public void removePatternDemand(ResourcePatternAccess advAcc) {
+	public void removePatternDemand() {
 		if(listener == null)
 			return;
-		advAcc.removePatternDemand(getPatternClass(), listener);	
+		advAcc().removePatternDemand(getPatternClass(), listener);	
 	}
 	
 	public List<ResourcePattern<T>> getAppPatterns() {

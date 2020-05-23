@@ -21,6 +21,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
+import org.ogema.devicefinder.api.DatapointService;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 
 import de.iwes.widgets.api.OgemaGuiService;
@@ -43,6 +44,9 @@ public class HardwareInstallAppExpert implements Application {
 	@Reference
 	private OgemaGuiService guiService;
 
+	@Reference
+	DatapointService dpService;
+	
     /*
      * This is the entry point to the application.
      */
@@ -57,7 +61,7 @@ public class HardwareInstallAppExpert implements Application {
 		widgetApp = guiService.createWidgetApp(urlPath, appManager);
 		final WidgetPage<?> page = widgetApp.createStartPage();
 		
-		controller = new HardwareInstallControllerExpert(appMan, page, widgetApp);
+		controller = new HardwareInstallControllerExpert(appMan, page, widgetApp, dpService);
      }
 
      /*

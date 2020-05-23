@@ -2,6 +2,7 @@ package org.ogema.devicefinder.api;
 
 import org.ogema.core.model.Resource;
 import org.ogema.widgets.configuration.service.OGEMAConfigurationProvider;
+import org.smartrplace.util.frontend.servlet.UserServlet;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
@@ -37,6 +38,11 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	 */
 	String getTimeSeriesID();
 	
+	/** Note that the timeseries itself has to be put into the Map {@link UserServlet#knownTS}
+	 * separatly in order to be accessible via the timeseriesID
+	 * @param id
+	 * @return true if set ID was set succesfully (returns never false)
+	 */
 	boolean setTimeSeriesID(String id);
 	
 	Resource getSensorActorResource();

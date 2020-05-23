@@ -58,7 +58,7 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 			if(tableProvidersDone.contains(id))
 				continue;
 			tableProvidersDone.add(id);
-			pe.getDeviceTable(page, appMan, alert, this).triggerPageBuild();
+			pe.getDeviceTable(page, alert, this).triggerPageBuild();
 		}
 		}
 	}

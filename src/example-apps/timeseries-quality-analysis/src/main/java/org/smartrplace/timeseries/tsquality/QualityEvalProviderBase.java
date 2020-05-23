@@ -89,7 +89,11 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final long[] MAX_GAPTIMES_INTERNAL;
     private static final long[] MAX_GAPTIMES_EXTERNAL;
 	public static final int SETP_IDX; // = 6;
-       
+	public static final int HUMIDITY_IDX; // = 1;
+	public static final int WINDOW_IDX; // = 8;
+	public static final int POWER_IDX; // = 9;
+	public static final GaRoDataTypeParam powerType;
+     
 	private static final long[] MAX_GAPTIMES_INTERNAL_BASE = new long[] {24*HOUR_MILLIS,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
@@ -113,17 +117,34 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 		}
     	int idx = 0;
     	int setpIdx = -1;
+    	int humIdx = -1;
+    	int windowIdx = -1;
+    	int powerIdx = -1;
+    	GaRoDataTypeParam powerTypeLoc = null;
     	MAX_GAPTIMES_INTERNAL = new long[dataTypesArr.length];
     	MAX_GAPTIMES_EXTERNAL = new long[dataTypesArr.length];
     	for(GaRoDataType type: dataTypesArr) {
-    		evalTypes.add(new GaRoDataTypeParam(type, false));
+    		GaRoDataTypeParam paramType = new GaRoDataTypeParam(type, false);
+    		evalTypes.add(paramType);
     		//dataTypes.add(type);
     		if(type.equals(GaRoDataType.TemperatureSetpointSet))
     			setpIdx = idx;
+    		else if(type.equals(GaRoDataType.HumidityMeasurement))
+    			humIdx = idx;
+    		else if(type.equals(GaRoDataType.WindowOpen))
+    			windowIdx = idx;
+    		else if(type.equals(GaRoDataType.PowerMeter)) {
+    			setpIdx = idx;
+    			powerTypeLoc = paramType;
+    		}
     	}
     	if(setpIdx == -1)
     		throw new IllegalStateException("Thermostat setpoint currently required as input!");
 		SETP_IDX = setpIdx;
+		HUMIDITY_IDX = humIdx;
+		WINDOW_IDX = windowIdx;
+		POWER_IDX = powerIdx;
+		powerType = powerTypeLoc;
     	//dataTypesArr = dataTypes.toArray(new GaRoDataType[0]);
     	if(idx < MAX_GAPTIMES_INTERNAL_BASE.length)
     		MAX_GAPTIMES_INTERNAL[idx] = MAX_GAPTIMES_INTERNAL_BASE[idx];
