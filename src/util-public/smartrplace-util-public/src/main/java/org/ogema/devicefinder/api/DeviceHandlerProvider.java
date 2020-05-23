@@ -9,6 +9,7 @@ import org.ogema.devicefinder.util.InstalledAppsSelector;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 
+import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.template.LabelledItem;
@@ -85,13 +86,17 @@ public interface DeviceHandlerProvider<T extends Resource> extends LabelledItem 
 	 * setpoint actions on the device as many applications expect a feedback from the hardware device when
 	 * a setpoint operation is made on an actor. For pure sensor devices a simulation usually is not necessary.
 	 * 
+	 * Note: It is recommended to set the {@link GaRoDataType}s provided by the driver that are not
+	 * 		part of the standard typesin this method also
+	 * 
 	 * @param resource device resource
 	 * @param roomSimulation roomSimulation if applicable. Note that this is not implemented yet. Note that
 	 * 		this also means that the step method in the object returned is not called
 	 * @return null if no simulation is available for the device
 	 */
 	default RoomInsideSimulationBase startSimulationForDevice(T resource,
-			SingleRoomSimulationBase roomSimulation, ApplicationManager appMan) {
+			SingleRoomSimulationBase roomSimulation, ApplicationManager appMan,
+			DatapointService dpService) {
 		return null;
 	}
 }

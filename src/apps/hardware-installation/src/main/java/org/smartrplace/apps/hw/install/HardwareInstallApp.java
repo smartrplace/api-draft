@@ -28,6 +28,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.ogema.core.application.Application;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 
 import de.iwes.widgets.api.OgemaGuiService;
@@ -68,8 +69,8 @@ public class HardwareInstallApp implements Application {
 	@Reference
 	private OgemaGuiService guiService;
 
-	//@Reference
-	//private DatapointService dpService;
+	@Reference
+	DatapointService dpService;
 	
     /*
      * This is the entry point to the application.

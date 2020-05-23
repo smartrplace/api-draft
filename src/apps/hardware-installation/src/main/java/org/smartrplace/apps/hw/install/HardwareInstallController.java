@@ -27,10 +27,10 @@ import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-import org.smartrplace.apps.hw.install.gui.InstallationStatusFilterDropdown;
 import org.smartrplace.apps.hw.install.gui.MainPage;
 import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
 import org.smartrplace.apps.hw.install.pattern.DoorWindowSensorPattern;
@@ -44,12 +44,13 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 // here the controller logic is implemented
 public class HardwareInstallController {
 
-	public OgemaLogger log;
-    public ApplicationManager appMan;
-    private ResourcePatternAccess advAcc;
+	public final OgemaLogger log;
+    public final ApplicationManager appMan;
+    private final ResourcePatternAccess advAcc;
+    public final DatapointService dpService;
 
 	public HardwareInstallConfig appConfigData;
-	public HardwareInstallApp hwInstApp;
+	public final HardwareInstallApp hwInstApp;
 	
 	public MainPage mainPage;
 	WidgetApp widgetApp;
@@ -59,6 +60,7 @@ public class HardwareInstallController {
 		this.log = appMan.getLogger();
 		this.advAcc = appMan.getResourcePatternAccess();
 		this.hwInstApp = hardwareInstallApp;
+		this.dpService = hardwareInstallApp.dpService;
 		
 		initConfigurationResource();
 		cleanupOnStart();
@@ -181,7 +183,7 @@ public class HardwareInstallController {
 			return;
 		deviceSimsStarted.add(device.getLocation());
 		tableProvider.startSimulationForDevice((T) device.getLocationResource(),
-				mainPage.getRoomSimulation(device), appMan);
+				mainPage.getRoomSimulation(device), appMan, dpService);
 	}
 	
 	public void cleanupOnStart() {

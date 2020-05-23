@@ -1,8 +1,14 @@
 package org.ogema.devicefinder.api;
 
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.core.model.ValueResource;
+
+import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
+import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
+import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.TypeChecker;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 /** Service for interchanging extended Datapoint information between applications
  * TODO: Shall be moved to ogema-widgets repository when more stable
@@ -34,7 +40,7 @@ public interface DatapointService {
 	Datapoint getDataPointAsIs(String resourceLocation);
 
 	/** Like {@link #getDataPointStandard(String, String)}, but for local gateway
-	 * @param resourceLocation
+	 * @param valRes
 	 * @return
 	 */
 	Datapoint getDataPointStandard(ValueResource valRes);
@@ -42,4 +48,55 @@ public interface DatapointService {
 	
 	/** We need some kind of filtering, but initially this is up to the application*/
 	List<Datapoint> getAllDatapoints();
+	
+	public static enum DataTypeRegistrationStatus {
+		/** means all known data types even if no datapoint is registered*/
+		ALL,
+		/** default evaluation types. This usually is a set of standard types plus types registered*/
+		EVAL_DEFAULT,
+		/** types are returned for which at least one datapoint is registered*/
+		REGISTERED,
+		/** types are returned that are explicitly registered for evaluation and plotting*/		
+		FOR_EVAL
+	}
+	
+	/** Get GaRoDataTypes for which data points have been registered
+	 * 
+	 * @param filter filter to be applied to known types
+	 * @return list of types
+	 */
+	List<GaRoDataType> getRegisteredDataTypes(DataTypeRegistrationStatus filter);
+	
+	/** Works like {@link #getRegisteredDataTypes(DataTypeRegistrationStatus)}, but also returns
+	 * additional description information.
+	 * 
+	 * @param filter filter to be applied to known types
+	 * @param includeEmptyDescriptions if true the list returned has the same length as {@link #getRegisteredDataTypes(DataTypeRegistrationStatus)}
+	 * 		for the same filter. If false types without description available are omitted.
+	 * @return map including type descriptions. The key usually is the {@link GaRoDataTypeI#label(null)}
+	 */
+	Map<String, RecIdVal> getDataTypeDescriptions(DataTypeRegistrationStatus filter,
+			boolean includeEmptyDescriptions);
+	
+	/** Add description for a data type. If the type already has a description registered then the information shall be
+	 * merged into the existing description with additional priority for the new information. Note that additions
+	 * to the default data types defined in {@link GaRoEvalHelper} may not work in the same way.
+	 * 
+	 * @param type
+	 * @param snippets
+	 * @param labelEnglish
+	 * @return RecIdVal generated
+	 */
+	RecIdVal addDataTypeDescription(GaRoDataType type, List<String> snippets, String labelEnglish, boolean registerForEvalution);
+	RecIdVal addDataTypeDescription(GaRoDataType type, List<String> snippets, Map<OgemaLocale, String> labels);
+	RecIdVal addDataTypeDescription(GaRoDataType type, TypeChecker typeChecker, String labelEnglish, boolean registerForEvalution);
+	RecIdVal addDataTypeDescription(GaRoDataType type, TypeChecker typeChecker, Map<OgemaLocale, String> labels);
+	RecIdVal addDataTypeDescription(RecIdVal recIdVal);
+	
+	/**
+	 * 
+	 * @param type
+	 * @return null if no description is available for the type
+	 */
+	RecIdVal registerTypeForEvaluation(GaRoDataType type);
 }

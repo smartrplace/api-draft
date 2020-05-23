@@ -20,10 +20,9 @@ import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.smartrplace.timeseries.luthmon.quality.DefaultQualityEvalProvider;
 
 import de.iwes.timeseries.eval.api.EvaluationProvider;
-import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
-import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeParam;
 import de.iwes.timeseries.eval.garo.multibase.generic.GenericGaRoResultType;
 
 /**
@@ -57,10 +56,9 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
     public static final GaRoDataTypeParam winType = new GaRoDataTypeParam(GaRoDataType.WindowOpen, false);
     public static final GaRoDataTypeParam chargeType = new GaRoDataTypeParam(GaRoDataType.ChargeSensor, false);
     */
-    public static final GaRoDataTypeParam chargeVoltageType = new GaRoDataTypeParam(GaRoDataType.ChargeVoltage, false);
+    //public static final GaRoDataTypeParam chargeVoltageType = new GaRoDataTypeParam(GaRoDataType.ChargeVoltage, false);
        
-	@Override
-	/** Provide your data types here*/
+	/*@Override
 	public GaRoDataType[] getGaRoInputTypes() {
 		return new GaRoDataType[] {
 	        	motionType,
@@ -103,7 +101,7 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
 
 	@Override
 	public GaRoDataTypeParam getParamType(int idxOfReqInput) {
-    	switch(idxOfReqInput) {
+		switch(idxOfReqInput) {
     	case MOTION_IDX: return motionType;
     	case HUMIDITY_IDX: return humidityType;
     	case TEMPSENS_IDX: return tempMesRoomType;
@@ -134,9 +132,9 @@ public class ExtendedTSQualityEvalProvider extends QualityEvalProviderBase {
        	case RSSIDEV_IDX: return rssiDeviceType;
        	case RSSIPEER_IDX: return rssiPeerType;
       	case CHARGE_VOLT_IDX: return chargeVoltageType;
-   	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
+      	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
     	}
-    }
+    }*/
 	
     private static final List<GenericGaRoResultType> RESULTS = Arrays.asList(TS_TOTAL, TS_WITH_DATA, TS_GOOD,
 		   OVERALL_GAP_REL,
