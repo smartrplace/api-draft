@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 
@@ -55,13 +56,34 @@ public class ConsumptionInfo {
 		mixedlist.addAll(typeByUtility.get(UtilityType.HEAT_ENERGY));
 		typeByUtility.put(UtilityType.ENERGY_MIXED, mixedlist);
 		typeByUtility.put(UtilityType.WATER, Arrays.asList(new GaRoDataType[] {
-				GaRoDataType.FreshWater
+				GaRoDataType.FreshWater, GaRoDataType.FreshWaterVolume
 		}));
 		typeByUtility.put(UtilityType.FOOD, Arrays.asList(new GaRoDataType[] {
 				GaRoDataType.FoodAmount
 		}));
 	}
 	
+	public static UtilityType getUtilityType(GaRoDataType garoType) {
+		for(Entry<UtilityType, List<GaRoDataType>> tlist: ConsumptionInfo.typeByUtility.entrySet()) {
+			if(tlist.getValue().contains(garoType))
+				return tlist.getKey();
+		}
+		return null;
+	}
+		
+	public static AggregationMode getConsumptionMode(GaRoDataType type) {
+		if(GaRoDataType.volumeTypes.contains(type))
+			return AggregationMode.Meter2Meter;
+		if(GaRoDataType.volumeStepTypes.contains(type))
+			return AggregationMode.Consumption2Meter;
+		if(GaRoDataType.powerTypes.contains(type))
+			return AggregationMode.Power2Meter;
+		return null;
+	}
+
+	
+	@Deprecated //Should be linked to GaRoDataType directly, not to Datapoint
 	public final AggregationMode aggregationMode;
+	@Deprecated //Should be linked to GaRoDataType directly, not to Datapoint
 	public final UtilityType utilityType;
 }

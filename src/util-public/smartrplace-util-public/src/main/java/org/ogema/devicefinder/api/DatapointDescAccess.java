@@ -1,5 +1,6 @@
 package org.ogema.devicefinder.api;
 
+import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
@@ -10,11 +11,14 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 public interface DatapointDescAccess extends DatapointDesc {
 	/** Set GaroDataType
 	 * @return true if successful*/
-	boolean setGaroDataType(GaRoDataTypeI type);
+	boolean setGaroDataType(GaRoDataType type);
+	
+	boolean setLabel(String label);
 	
 	boolean setRoom(DPRoom room);
 	
 	boolean setSubRoomLocation(OgemaLocale locale, Object context, String value);
 	
+	@Deprecated
 	boolean setConsumptionInfo(ConsumptionInfo info);
 }

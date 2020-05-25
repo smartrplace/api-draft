@@ -4,20 +4,21 @@ import org.ogema.devicefinder.api.ConsumptionInfo;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointDesc;
 
-import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
+import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 /** To generate datapoint description objects this implementation can be inherited or
  * own implementations can be made
  */
 public class DatapointDescImpl implements DatapointDesc {
-	protected GaRoDataTypeI garoDataType = null;
+	protected GaRoDataType garoDataType = null;
+	protected String label;
 	protected DPRoom dpRoom = null;
 	protected ConsumptionInfo consumptionInfo = null;
 	protected String subRoomLocation = null;
 	protected Boolean isLocal = null;
 
-	public DatapointDescImpl(GaRoDataTypeI garoDataType, DPRoom dpRoom, ConsumptionInfo consumptionInfo,
+	public DatapointDescImpl(GaRoDataType garoDataType, DPRoom dpRoom, ConsumptionInfo consumptionInfo,
 			String subRoomLocation, Boolean isLocal) {
 		this.garoDataType = garoDataType;
 		this.dpRoom = dpRoom;
@@ -27,10 +28,15 @@ public class DatapointDescImpl implements DatapointDesc {
 	}
 	
 	@Override
-	public GaRoDataTypeI getGaroDataType() {
+	public GaRoDataType getGaroDataType() {
 		return garoDataType;
 	}
 
+	@Override
+	public String getLabel() {
+		return label;
+	}
+	
 	@Override
 	public DPRoom getRoom() {
 		return dpRoom;

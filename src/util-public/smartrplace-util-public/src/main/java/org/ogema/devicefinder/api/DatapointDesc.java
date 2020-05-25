@@ -1,6 +1,6 @@
 package org.ogema.devicefinder.api;
 
-import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
+import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -8,13 +8,15 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 /** Description of data point like {@link GaRoDataTypeI}, type of consumption representation etc.
  */
 public interface DatapointDesc {
-	GaRoDataTypeI getGaroDataType();
+	GaRoDataType getGaroDataType();
 	
+	String getLabel();
+
 	/** The method getTypeName shall always return a non-null String even if no type 
 	 * information is available;
 	 */
 	default String getTypeName(OgemaLocale locale) {
-		GaRoDataTypeI type = getGaroDataType();
+		GaRoDataType type = getGaroDataType();
 		if(type != null)
 			return getTypeLabel(type.label(null), locale);
 		return "noTypeInfo";
@@ -30,6 +32,7 @@ public interface DatapointDesc {
 	 */
 	String getSubRoomLocation(OgemaLocale locale, Object context);
 	
+	@Deprecated //Maybe not required at all
 	ConsumptionInfo getConsumptionInfo();
 	
 	/** If true the timeseries belongs to the local gateway*/
@@ -49,5 +52,4 @@ public interface DatapointDesc {
 			return ger;
 		return entry.label.get(OgemaLocale.ENGLISH);
 	}
-
 }

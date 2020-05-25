@@ -9,7 +9,7 @@ import org.ogema.devicefinder.api.DatapointInfoProvider;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 
-import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
+import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.base.GaRoMultiEvalDataProvider;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
@@ -27,7 +27,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	
 	public DatapointImpl(String location, String gatewayId, Resource resource,
 			OGEMADriverPropertyService<Resource> driverService,
-			GaRoDataTypeI garoDataType, DPRoom dpRoom, ConsumptionInfo consumptionInfo,
+			GaRoDataType garoDataType, DPRoom dpRoom, ConsumptionInfo consumptionInfo,
 			String subRoomLocation) {
 		super(garoDataType, dpRoom, consumptionInfo, subRoomLocation);
 		this.location = location;
@@ -80,7 +80,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 
 	@Override
 	public String label(OgemaLocale locale) {
-		return null;
+		return label;
 	}
 
 	@Override
@@ -121,9 +121,9 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	}
 	
 	@Override
-	public GaRoDataTypeI getGaroDataType() {
+	public GaRoDataType getGaroDataType() {
 		if(infoProvider != null) {
-			GaRoDataTypeI result = infoProvider.getGaroDataType();
+			GaRoDataType result = infoProvider.getGaroDataType();
 			if(result != null)
 				return result;
 		}
