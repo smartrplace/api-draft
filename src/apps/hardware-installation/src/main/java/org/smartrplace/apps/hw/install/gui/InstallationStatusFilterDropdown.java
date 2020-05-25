@@ -18,9 +18,10 @@ public class InstallationStatusFilterDropdown extends TemplateDropdown<String> {
     private static final long serialVersionUID = 1L;
 
     public enum FILTERS {
+        /** See {@link InstallAppDevice} for all status codes */
         ALL(null, "All", "Show all devices"),
-        SN_RECORDED(null, "Serial number recorded"),
-        SN_NOT_RECORDED(null, "Serial number not recorded"),
+        SN_RECORDED(1, "Serial number recorded"),
+        SN_NOT_RECORDED(1, "Serial number not recorded"),
         PACKAGED(3, "Packaged for shipping"),
         NOT_PACKAGED(3, "Not packaged for shipping"),
         INSTALLED(10, "Installed"),
@@ -121,14 +122,12 @@ public class InstallationStatusFilterDropdown extends TemplateDropdown<String> {
     private static boolean matches(InstallAppDevice dev, FILTERS filter) {
         switch(filter) {
             case SN_RECORDED:
-            case SN_NOT_RECORDED:
-                // TODO
-                return false;
             case PACKAGED:
             case INSTALLED:
                 return dev.installationStatus().getValue() >= filter.statusCode;
             case NOT_PACKAGED:
             case NOT_INSTALLED:
+            case SN_NOT_RECORDED:
                 return dev.installationStatus().getValue() < filter.statusCode;
         }
         return false;
