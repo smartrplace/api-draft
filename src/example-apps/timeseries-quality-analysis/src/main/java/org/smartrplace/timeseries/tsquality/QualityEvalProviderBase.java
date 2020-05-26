@@ -30,7 +30,6 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.tools.resource.util.TimeUtils;
 import org.ogema.tools.timeseries.iterator.api.SampledValueDataPoint;
-import org.ogema.widgets.configuration.service.OGEMAConfigurations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.tissue.util.format.StringFormatHelperSP;
@@ -84,80 +83,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 		ID = id2;
 	}
 
-    public static final List<GaRoDataTypeParam> evalTypes = new ArrayList<>();
-    private static GaRoDataType[] dataTypesArr = GaRoDataType.standardEvalTypes; 
-    public static final long[] MAX_GAPTIMES_INTERNAL;
-    private static final long[] MAX_GAPTIMES_EXTERNAL;
-	public static final int SETP_IDX; // = 6;
-	public static final int HUMIDITY_IDX; // = 1;
-	public static final int WINDOW_IDX; // = 8;
-	public static final int POWER_IDX; // = 9;
-	public static final GaRoDataTypeParam powerType;
-     
-	private static final long[] MAX_GAPTIMES_INTERNAL_BASE = new long[] {24*HOUR_MILLIS,
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
-			24*HOUR_MILLIS,
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //Valve
-			3*HOUR_MILLIS, //Window
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //Power
-			6*HOUR_MILLIS};
-	private static final long[] MAX_GAPTIMES_EXTERNAL_BASE = new long[] {2*HOUR_MILLIS, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL};
-    
-    /** TODO: When all bundles are started together on normal startup the update of dataTypesArr will
-     * not be ensured as this is only performed once on static startup. We need another update mechanism
-     * here, maybe not everything static or update static variables sometimes.
-     */
-	static {
-    	//List<GaRoDataType> dataTypes = new ArrayList<GaRoDataType>();
-		Object evalTypesTouse = OGEMAConfigurations.getObject(GaRoDataType.class.getName(), "%evalTypes");
-		if(evalTypesTouse != null && evalTypesTouse instanceof List) {
-			dataTypesArr = ((List<GaRoDataType>)evalTypesTouse).toArray(new GaRoDataType[0]);
-		}
-    	int idx = 0;
-    	int setpIdx = -1;
-    	int humIdx = -1;
-    	int windowIdx = -1;
-    	int powerIdx = -1;
-    	GaRoDataTypeParam powerTypeLoc = null;
-    	MAX_GAPTIMES_INTERNAL = new long[dataTypesArr.length];
-    	MAX_GAPTIMES_EXTERNAL = new long[dataTypesArr.length];
-    	for(GaRoDataType type: dataTypesArr) {
-    		GaRoDataTypeParam paramType = new GaRoDataTypeParam(type, false);
-    		evalTypes.add(paramType);
-    		//dataTypes.add(type);
-    		if(type.equals(GaRoDataType.TemperatureSetpointSet))
-    			setpIdx = idx;
-    		else if(type.equals(GaRoDataType.HumidityMeasurement))
-    			humIdx = idx;
-    		else if(type.equals(GaRoDataType.WindowOpen))
-    			windowIdx = idx;
-    		else if(type.equals(GaRoDataType.PowerMeter)) {
-    			setpIdx = idx;
-    			powerTypeLoc = paramType;
-    		}
-    	}
-    	if(setpIdx == -1)
-    		throw new IllegalStateException("Thermostat setpoint currently required as input!");
-		SETP_IDX = setpIdx;
-		HUMIDITY_IDX = humIdx;
-		WINDOW_IDX = windowIdx;
-		POWER_IDX = powerIdx;
-		powerType = powerTypeLoc;
-    	//dataTypesArr = dataTypes.toArray(new GaRoDataType[0]);
-    	if(idx < MAX_GAPTIMES_INTERNAL_BASE.length)
-    		MAX_GAPTIMES_INTERNAL[idx] = MAX_GAPTIMES_INTERNAL_BASE[idx];
-    	else
-    		MAX_GAPTIMES_INTERNAL[idx] = GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL;
-    	if(idx < MAX_GAPTIMES_EXTERNAL_BASE.length)
-    		MAX_GAPTIMES_EXTERNAL[idx] = MAX_GAPTIMES_EXTERNAL_BASE[idx];
-    	else
-    		MAX_GAPTIMES_EXTERNAL[idx] = GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL;
-    	idx++;
-    }
-    
-	/*public static final GaRoDataTypeParam motionType = new GaRoDataTypeParam(GaRoDataType.MotionDetection, false);
+	public static final GaRoDataTypeParam motionType = new GaRoDataTypeParam(GaRoDataType.MotionDetection, false);
     public static final GaRoDataTypeParam humidityType = new GaRoDataTypeParam(GaRoDataType.HumidityMeasurement, false);
     public static final GaRoDataTypeParam tempMesRoomType = new GaRoDataTypeParam(GaRoDataType.TemperatureMeasurementRoomSensor, false);
     public static final GaRoDataTypeParam tempMesThermostatType = new GaRoDataTypeParam(GaRoDataType.TemperatureMeasurementThermostat, false);
@@ -187,13 +113,14 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
     public static final GaRoDataTypeParam co2concentrationType = new GaRoDataTypeParam(GaRoDataType.CO2Concentration, false);
     public static final GaRoDataTypeParam internetType = new GaRoDataTypeParam(GaRoDataType.InternetConnection, false);
     public static final GaRoDataTypeParam rssiDeviceType = new GaRoDataTypeParam(GaRoDataType.RSSIDevice, false);
-    public static final GaRoDataTypeParam rssiPeerType = new GaRoDataTypeParam(GaRoDataType.RSSIPeer, false);*/
+    public static final GaRoDataTypeParam rssiPeerType = new GaRoDataTypeParam(GaRoDataType.RSSIPeer, false);
+    public static final GaRoDataTypeParam waterVolumeType = new GaRoDataTypeParam(GaRoDataType.FreshWaterVolume, false);
+    public static final GaRoDataTypeParam waterFlowType = new GaRoDataTypeParam(GaRoDataType.FreshWaterFlow, false);
     
 	@Override
 	/** Provide your data types here*/
 	public GaRoDataType[] getGaRoInputTypes() {
-		return dataTypesArr;
-		/*return new GaRoDataType[] {
+		return new GaRoDataType[] {
 	        	motionType,
 	        	humidityType,
 	        	tempMesRoomType,
@@ -224,8 +151,10 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	        	co2concentrationType,
 	        	internetType,
 	        	rssiDeviceType,
-	        	rssiPeerType
-		};*/
+	        	rssiPeerType,
+	        	waterVolumeType,
+	        	waterFlowType
+		};
 	}
 	
 	@Override
@@ -233,7 +162,7 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 		return new int[] {-1};
 	}
 	
-	/*public static final long[] MAX_GAPTIMES_INTERNAL = new long[] {24*HOUR_MILLIS,
+	public static final long[] MAX_GAPTIMES_INTERNAL = new long[] {24*HOUR_MILLIS,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
@@ -261,14 +190,15 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //co2concentrationtype
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //internettype
 			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, 
-			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //rssiPeerType
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, //rssiPeerType
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, 
+			GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL //waterFlowType 
 			}; //Charge
-			*/
 	
 	@Override
 	protected long[] getMaximumGapTimes() {
-		return MAX_GAPTIMES_EXTERNAL;
-		/*return new long[] {2*HOUR_MILLIS, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+		return new long[] {2*HOUR_MILLIS, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
+				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
@@ -284,10 +214,10 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL,
 				GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL, GenericGaRoSingleEvaluation.MAX_DATA_INTERVAL
-				};*/
+				};
 	}
 	/** It is recommended to define the indices of your input here.*/
-	/*public static final int MOTION_IDX = 0;
+	public static final int MOTION_IDX = 0;
 	public static final int HUMIDITY_IDX = 1;
 	public static final int TEMPSENS_IDX = 2;
 	public static final int TEMPSENS_THERM_IDX = 3;
@@ -318,14 +248,12 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
 	public static final int INTERNET_IDX = 28;
 	public static final int RSSIDEV_IDX = 29;
 	public static final int RSSIPEER_IDX = 30;
-    public static final int TYPE_NUM = 31;*/
+	public static final int WATERVOL_IDX = 31;
+	public static final int WATERFLOW_IDX = 32;
+    public static final int TYPE_NUM = 33;
     
     protected GaRoDataTypeParam getParamType(int idxOfReqInput) {
-    	GaRoDataTypeParam type = evalTypes.get(idxOfReqInput);
-    	if(type == null)
-    		throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
-    	return type;	
-    	/*switch(idxOfReqInput) {
+    	switch(idxOfReqInput) {
     	case MOTION_IDX: return motionType;
     	case HUMIDITY_IDX: return humidityType;
     	case TEMPSENS_IDX: return tempMesRoomType;
@@ -357,8 +285,10 @@ public class QualityEvalProviderBase extends GenericGaRoSingleEvalProviderPreEva
        	case INTERNET_IDX: return internetType;
        	case RSSIDEV_IDX: return rssiDeviceType;
        	case RSSIPEER_IDX: return rssiPeerType;
+       	case WATERVOL_IDX: return waterVolumeType;
+       	case WATERFLOW_IDX: return waterFlowType;
     	default: throw new IllegalStateException("unsupported IDX:"+idxOfReqInput);
-    	}*/
+    	}
     }
 	
  	public class EvalCore extends GenericGaRoEvaluationCore {
