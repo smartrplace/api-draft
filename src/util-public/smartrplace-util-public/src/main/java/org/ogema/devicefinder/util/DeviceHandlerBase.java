@@ -7,6 +7,7 @@ import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.PatternListenerExtended;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;

@@ -1,7 +1,7 @@
 package org.smartrplace.apps.hw.install.gui.expert;
 
 import org.ogema.core.application.ApplicationManager;
-import org.ogema.devicefinder.util.InstalledAppsSelector;
+import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.expert.HardwareInstallControllerExpert;

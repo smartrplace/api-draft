@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
+import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.PatternListenerExtended;
 
 public class PatternListenerExtendedImpl<P extends ResourcePattern<R>, R extends Resource> implements PatternListenerExtended<P, R>{

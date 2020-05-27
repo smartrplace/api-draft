@@ -1,9 +1,8 @@
-package org.ogema.devicefinder.util;
+package org.ogema.devicefinder.api;
 
 import java.util.List;
 
 import org.ogema.core.model.Resource;
-import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 

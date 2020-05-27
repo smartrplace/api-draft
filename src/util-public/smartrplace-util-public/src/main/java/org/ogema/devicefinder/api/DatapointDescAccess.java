@@ -20,5 +20,5 @@ public interface DatapointDescAccess extends DatapointDesc {
 	boolean setSubRoomLocation(OgemaLocale locale, Object context, String value);
 	
 	@Deprecated
-	boolean setConsumptionInfo(ConsumptionInfo info);
+	boolean setConsumptionInfo(DatapointInfo info);
 }

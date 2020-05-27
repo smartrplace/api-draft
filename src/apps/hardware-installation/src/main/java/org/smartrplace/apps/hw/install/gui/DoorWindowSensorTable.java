@@ -5,7 +5,7 @@ import java.util.List;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
-import org.ogema.devicefinder.util.InstalledAppsSelector;
+import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.sensors.DoorWindowSensor;

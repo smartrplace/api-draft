@@ -1,31 +1,51 @@
 package org.ogema.devicefinder.api;
 
 import org.ogema.core.model.Resource;
+import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.widgets.configuration.service.OGEMAConfigurationProvider;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 
+import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
-	/** The method label shall always return a non-null String. The label usually is a combination of
+	/** The method label shall always return a non-null String. The label shall be used by evaluation tables,
+	 * charts etc. by default as human readable label. The label usually is a combination of
 	 * the type, the room and the sub-room information. Also the gateway information should be included if
 	 * not on the local gateway.<br>
-	 * TODO: Currently this is also implemented in TimeSeriesNameProviderImpl
+	 * TODO: Currently there is a different implementation for a similar task in
+	 * 		TimeSeriesNameProviderImpl#getShortNameForTypeI
 	 */
 	@Override
-	default String label(OgemaLocale locale) {
-		String stdLabel = getRoomName(locale);
-		String subRoom = getSubRoomLocation(locale, null);
-		if(subRoom != null)
-			stdLabel += "-"+subRoom;
-		stdLabel += "-"+getTypeName(locale);
-		if(isLocal()) {
-			String gwId = getGatewayId();
-			return gwId +"::"+stdLabel;
-		}
-		return stdLabel;
-	};
+	String label(OgemaLocale locale);
+	
+	/** Alternative method from {@link DatapointDesc}. Usually {@link #label(OgemaLocale)} should
+	 * be overwritten instead of this method.*/
+	@Override
+	default String label() {
+		return label(null);
+	}
+	
+	/** Unique id for the datapoint source. For datapoints stored in an instance of
+	 * {@link DatapointService} uniqueness shall be guaranteed within the gateway scope of the
+	 * DatapointService providing the data point. So gatewayId plus location shall be sufficient to
+	 * identify a datapoint.<br>
+	 * In some cases a location String may be requird that contains also gateway information. In this
+	 *   case the gateway information shall be added as a String prefix in the form of <GatewayID>::
+	 *   like for the default label implementation.
+	 * For resources usually the resource location shall be returned. For other timeseries the
+	 * timeseriesID shall be returned. For timeseries with an evaluation/calculation history the history
+	 * shall be returned as JSON String (details tbd).*/
+	@Override
+	String getLocation();
+	
+	/** id and location shall always be the same*/
+	@Override
+	default String id() {
+		return getLocation();
+	}
+	
 	/** The method getRoomName shall always return a non-null String even if no room 
 	 * information is available;
 	 */
@@ -65,4 +85,13 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	boolean registerInfoProvider(DatapointInfoProvider provider, int priority);
 	
 	boolean unregisterInfoProvider(DatapointInfoProvider provider);
+	
+	/** Get time series representation for evalution API V1
+	 * @return null if not timeseries information is availble. If {@link #getTimeSeries()} is non-null 
+	 * 		then also a non-null value shall be returned here.*/
+	TimeSeriesDataImpl getTimeSeriesDataImpl();
+	
+	ReadOnlyTimeSeries getTimeSeries();
+	void setTimeSeries(ReadOnlyTimeSeries tseries);
+	void setTimeSeries(ReadOnlyTimeSeries tseries, boolean publishViaServlet);
 }

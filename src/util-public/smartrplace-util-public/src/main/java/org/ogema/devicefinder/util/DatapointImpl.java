@@ -2,15 +2,22 @@ package org.ogema.devicefinder.util;
 
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
-import org.ogema.devicefinder.api.ConsumptionInfo;
+import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.devicefinder.api.DatapointInfo;
 import org.ogema.devicefinder.api.DatapointInfoProvider;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
+import org.smartrplace.util.frontend.servlet.UserServlet;
+import org.smartrplace.util.frontend.servlet.UserServletUtil;
 
+import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.base.GaRoMultiEvalDataProvider;
+import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint {
@@ -25,9 +32,11 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	protected Resource sensorActorResource = null;
 	protected Resource deviceResource = null;
 	
+	protected ReadOnlyTimeSeries tseries = null;
+	
 	public DatapointImpl(String location, String gatewayId, Resource resource,
 			OGEMADriverPropertyService<Resource> driverService,
-			GaRoDataType garoDataType, DPRoom dpRoom, ConsumptionInfo consumptionInfo,
+			GaRoDataType garoDataType, DPRoom dpRoom, DatapointInfo consumptionInfo,
 			String subRoomLocation) {
 		super(garoDataType, dpRoom, consumptionInfo, subRoomLocation);
 		this.location = location;
@@ -39,6 +48,38 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			OGEMADriverPropertyService<Resource> driverService) {
 		this(location, gatewayId, resource, driverService, null, null, null, null);
 	}
+	public DatapointImpl(TimeSeriesDataImpl tsdi) {
+		this(tsdi.id(), null, (tsdi.getTimeSeries() instanceof Resource)?(Resource)tsdi.getTimeSeries():null,
+				null, null, null, null, null);
+		tseries = tsdi.getTimeSeries();
+		label = tsdi.label(null);
+	}
+	public DatapointImpl(ReadOnlyTimeSeries ts, String tsLocationOrBaseId) {
+		this(ts, tsLocationOrBaseId, null);
+	}
+	public DatapointImpl(ReadOnlyTimeSeries ts, String tsLocationOrBaseId, String label) {
+		this(ts, tsLocationOrBaseId, label, false);
+	}
+	public DatapointImpl(ReadOnlyTimeSeries ts, String tsLocationOrBaseId, String label,
+			boolean publishViaServlet) {
+		this(ts, tsLocationOrBaseId, label, false, true);
+	}
+	public DatapointImpl(ReadOnlyTimeSeries ts, String tsLocationOrBaseId, String label,
+			boolean publishViaServlet, boolean addDefaultData) {
+		this(tsLocationOrBaseId, null, (ts instanceof Resource)?(Resource)ts:null,
+				null, null, null, null, null);
+		if(label != null)
+			this.label = label;
+		setTimeSeries(ts, publishViaServlet);
+		if(addDefaultData)
+			addStandardData(this);
+	}
+
+	public static void addStandardData(Datapoint result) {
+		if(result.getGaroDataType() == null) {
+			result.setGaroDataType(GaRoEvalHelper.getDataType(result.getLocation()));
+		}
+	}		
 
 	@Override
 	public boolean setDriverService(OGEMADriverPropertyService<Resource> driverService) {
@@ -74,15 +115,21 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	}
 
 	@Override
-	public String id() {
-		return location;
-	}
-
-	@Override
 	public String label(OgemaLocale locale) {
-		return label;
+		if(label() != null)
+			return label();
+		String stdLabel = getRoomName(locale);
+		String subRoom = getSubRoomLocation(locale, null);
+		if(subRoom != null)
+			stdLabel += "-"+subRoom;
+		stdLabel += "-"+getTypeName(locale);
+		if(!isLocal()) {
+			String gwId = getGatewayId();
+			return gwId +"::"+stdLabel;
+		}
+		return stdLabel;
 	}
-
+	
 	@Override
 	public String getTimeSeriesID() {
 		return timeSeriesID;
@@ -159,13 +206,17 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	}
 	
 	@Override
-	public ConsumptionInfo getConsumptionInfo() {
+	public DatapointInfo info() {
 		if(infoProvider != null) {
-			ConsumptionInfo result = infoProvider.getConsumptionInfo();
+			DatapointInfo result = infoProvider.info();
 			if(result != null)
 				return result;
 		}
-		return super.getConsumptionInfo();
+		DatapointInfo result = super.info();
+		if(result != null)
+			return result;
+		super.setConsumptionInfo(new DatapointInfoImpl(this));
+		return super.info();
 	}
 	@Override
 	public Resource getSensorActorResource() {
@@ -185,5 +236,38 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	public boolean setDeviceResource(Resource resource) {
 		this.deviceResource = resource;
 		return true;
+	}
+	@Override
+	public TimeSeriesDataImpl getTimeSeriesDataImpl() {
+		if(timeSeriesID != null)
+			return UserServlet.knownTS.get(timeSeriesID);
+		ReadOnlyTimeSeries ts = getTimeSeries();
+		if(ts != null)
+			return new TimeSeriesDataImpl(ts, label, label, info().getInterpolationMode());
+		return null;
+	}
+	@Override
+	public ReadOnlyTimeSeries getTimeSeries() {
+		if(tseries != null)
+			return tseries;
+		if(timeSeriesID != null)
+			return UserServlet.knownTS.get(timeSeriesID).getTimeSeries();
+		if(resource instanceof ReadOnlyTimeSeries)
+			return (ReadOnlyTimeSeries) resource;
+		if(resource instanceof SingleValueResource)
+			return ValueResourceHelper.getRecordedData((SingleValueResource) resource);
+		return null;
+	}
+	@Override
+	public void setTimeSeries(ReadOnlyTimeSeries tseries) {
+		this.tseries = tseries;
+	}
+	
+	@Override
+	public void setTimeSeries(ReadOnlyTimeSeries tseries, boolean publishViaServlet) {
+		setTimeSeries(tseries);
+		if(publishViaServlet) {
+			setTimeSeriesID(UserServletUtil.getOrAddTimeSeriesData(tseries, id()));
+		}
 	}
 }

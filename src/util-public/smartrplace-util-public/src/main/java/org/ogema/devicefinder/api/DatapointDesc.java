@@ -10,7 +10,7 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 public interface DatapointDesc {
 	GaRoDataType getGaroDataType();
 	
-	String getLabel();
+	String label();
 
 	/** The method getTypeName shall always return a non-null String even if no type 
 	 * information is available;
@@ -32,13 +32,16 @@ public interface DatapointDesc {
 	 */
 	String getSubRoomLocation(OgemaLocale locale, Object context);
 	
-	@Deprecated //Maybe not required at all
-	ConsumptionInfo getConsumptionInfo();
+	/** See {@link DatapointInfo} for more information. This method shall NOT return null,
+	 * but shall always return an object that provides information based on all datapoint information available.
+	 * @return
+	 */
+	DatapointInfo info();
 	
 	/** If true the timeseries belongs to the local gateway*/
 	Boolean isLocal();
 	
-	/** Get label for a a GaRoDataType.
+	/** Get label for a GaRoDataType.
 	 * 
 	 * @param id usally GaRoDataTypeI.label(null)
 	 * @param locale

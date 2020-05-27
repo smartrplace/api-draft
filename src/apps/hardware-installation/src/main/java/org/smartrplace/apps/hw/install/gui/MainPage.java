@@ -14,7 +14,7 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
-import org.ogema.devicefinder.util.InstalledAppsSelector;
+import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.Thermostat;

@@ -1,6 +1,6 @@
 package org.ogema.devicefinder.util;
 
-import org.ogema.devicefinder.api.ConsumptionInfo;
+import org.ogema.devicefinder.api.DatapointInfo;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointDesc;
 
@@ -14,11 +14,11 @@ public class DatapointDescImpl implements DatapointDesc {
 	protected GaRoDataType garoDataType = null;
 	protected String label;
 	protected DPRoom dpRoom = null;
-	protected ConsumptionInfo consumptionInfo = null;
+	protected DatapointInfo consumptionInfo = null;
 	protected String subRoomLocation = null;
 	protected Boolean isLocal = null;
 
-	public DatapointDescImpl(GaRoDataType garoDataType, DPRoom dpRoom, ConsumptionInfo consumptionInfo,
+	public DatapointDescImpl(GaRoDataType garoDataType, DPRoom dpRoom, DatapointInfo consumptionInfo,
 			String subRoomLocation, Boolean isLocal) {
 		this.garoDataType = garoDataType;
 		this.dpRoom = dpRoom;
@@ -33,7 +33,7 @@ public class DatapointDescImpl implements DatapointDesc {
 	}
 
 	@Override
-	public String getLabel() {
+	public String label() {
 		return label;
 	}
 	
@@ -49,7 +49,7 @@ public class DatapointDescImpl implements DatapointDesc {
 	}
 
 	@Override
-	public ConsumptionInfo getConsumptionInfo() {
+	public DatapointInfo info() {
 		return consumptionInfo;
 	}
 
