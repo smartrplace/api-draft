@@ -132,10 +132,10 @@ public class UserServlet extends HttpServlet {
 		Map<String, String[]> paramMap = new HashMap<>(req.getParameterMap());
 		//paramMap.remove("user");
 		//paramMap.remove("page");
-		paramMap.remove("object");
+		//paramMap.remove("object");
 		//paramMap.remove("time");
-		paramMap.remove("structure");
-		paramMap.remove("poll");
+		//paramMap.remove("structure");
+		//paramMap.remove("poll");
 		return paramMap;
 	}
 	

@@ -3,6 +3,7 @@ package org.smartrplace.util.frontend.servlet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,6 +29,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	
 	protected final ApplicationManager appMan;
 	protected final Map<String, String[]> paramMap;
+	protected final UserServletParamData pData;
 	protected final Long startTime;
 	protected final long endTime;
 	
@@ -79,6 +81,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		this.bareTimeSeries = bareTimeseries;
 		this.evaluationMode = evaluationMode;
 		this.paramMap = paramMap;
+		this.pData = new UserServletParamData(paramMap);
 		this.deleteValue = deleteValue;
 		this.minValue = minValue;
 		Long start;
@@ -125,7 +128,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			return json;
 		} else
 			vals = bareTimeSeries.getValues(startEnd[0], startEnd[1]);
-		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX));
+		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
+				pData.structureList));
 		return json;
 	}
 
@@ -204,7 +208,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 * @param valueDist expected time in milliseconds between values returned
 	 * @return
 	 */
-	protected JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode) {
+	protected JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
+			boolean structureList) {
 		if(mode == DownSamplingMode.AVERAGE)
 			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
 		JSONArray result = new JSONArray();
@@ -224,7 +229,15 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				} else //if valueDist != null
 					svMap.put(sv.getTimestamp(), fval);
 			}
-			result.put(svMap);
+			if(structureList) {
+				for(Entry<Long, Float> ts: svMap.entrySet()) {
+					JSONObject sub = new JSONObject();
+					sub.put("time", ts.getKey());
+					sub.put("value", ts.getValue());
+					result.put(sub);
+				}
+			} else
+				result.put(svMap);
 		}
 		return result;
 	}

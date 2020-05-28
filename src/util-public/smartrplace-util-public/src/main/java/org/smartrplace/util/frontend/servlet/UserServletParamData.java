@@ -14,6 +14,9 @@ public class UserServletParamData {
 	public UserServletParamData(Map<String, String[]> paramMap) {
 		this.paramMap = paramMap;
 		suppressNan = UserServletUtil.suppressNan(paramMap);
+		String structureStr = UserServlet.getParameter("structure", paramMap);
+		if(structureStr != null && structureStr.equals("list"))
+			structureList = true;
 		provideExtended = UserServlet.getBoolean("extendedData", paramMap);
 		// supported values: de=de, en=en, fr=fr, zh=zh
 		String localStr = UserServlet.getParameter("locale", paramMap);
@@ -36,6 +39,7 @@ public class UserServletParamData {
 	 * if supported by the ServletValueProvider
 	 */
 	public boolean provideExtended;
+	public boolean structureList;
 	public OgemaLocale locale = OgemaLocale.ENGLISH;
 	
 	/** Either a TimeSeriesDataImpl can be provided or a ReadOnlyTimeSeries*/
