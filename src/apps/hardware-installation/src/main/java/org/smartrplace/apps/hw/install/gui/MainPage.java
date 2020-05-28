@@ -150,6 +150,15 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 	}
 
 	@Override
+	public InstallAppDevice getInstallResource(Resource device) {
+		for(InstallAppDevice dev: controller.appConfigData.knownDevices().getAllElements()) {
+			if(dev.device().equalsLocation(device))
+				return dev;
+		}
+		return null;
+	}
+	
+	@Override
 	public <T extends Resource> InstallAppDevice addDeviceIfNew(T model, DeviceHandlerProvider<T> tableProvider) {
 		return controller.addDeviceIfNew(model, tableProvider);
 	}

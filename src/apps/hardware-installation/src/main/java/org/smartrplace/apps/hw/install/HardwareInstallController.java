@@ -25,10 +25,13 @@ import java.util.Set;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.tools.resource.util.LoggingUtils;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.gui.MainPage;
@@ -185,8 +188,41 @@ public class HardwareInstallController {
 		deviceSimsStarted.add(device.getLocation());
 		tableProvider.startSimulationForDevice((T) device.getLocationResource(),
 				mainPage.getRoomSimulation(device), dpService);
+		if(Boolean.getBoolean("org.smartrplace.apps.hw.install.autologging")) {
+			for(Datapoint dp: tableProvider.getDatapoints(device, dpService)) {
+				if(!(dp instanceof SingleValueResource))
+					continue;
+				if(tableProvider.relevantForDefaultLogging(dp)) {
+					//TODO: activate logging
+					if(Boolean.getBoolean("org.smartrplace.app.srcmon.isgateway")) {
+						//TODO: Activate also log transfer
+						//startTransmitLogData(dp.getDeviceResource());
+						LoggingUtils.activateLogging((SingleValueResource) dp.getDeviceResource(), -2);
+					} else
+						LoggingUtils.activateLogging((SingleValueResource) dp.getDeviceResource(), -2);
+				}
+			}
+		}
 	}
 	
+	/*private void startTransmitLogData(SingleValueResource resource) {
+		DataLogTransferInfo log = null;
+		for(DataLogTransferInfo dl : dataLogs.getAllElements()) {
+			if(dl.clientLocation().getValue().equals(resource.getPath()))
+				log = dl;
+		}
+
+		if(log == null) log = dataLogs.add();
+		
+		StringResource clientLocation = log.clientLocation().create();
+		clientLocation.setValue(resource.getPath());
+	
+		TimeIntervalLength tLength = log.transferInterval().timeIntervalLength().create();
+		IntegerResource type = tLength.type().create();
+		type.setValue(10);
+		log.activate(true);
+	}*/
+
 	public void cleanupOnStart() {
 		List<String> knownDevLocs = new ArrayList<>();
 		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {

@@ -1,9 +1,12 @@
 package org.ogema.devicefinder.api;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
@@ -99,4 +102,8 @@ public interface DatapointService {
 	 * @return null if no description is available for the type
 	 */
 	RecIdVal registerTypeForEvaluation(GaRoDataType type);
+	
+	Collection<Class<? extends Resource>> getManagedDeviceResoureceTypes();
+	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
+	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
 }

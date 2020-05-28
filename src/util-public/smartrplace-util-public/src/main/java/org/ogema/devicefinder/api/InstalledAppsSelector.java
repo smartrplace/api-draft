@@ -8,6 +8,8 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 public interface InstalledAppsSelector {
 	List<InstallAppDevice> getDevicesSelected();
+	
+	InstallAppDevice getInstallResource(Resource device);
 
 	<T extends Resource> InstallAppDevice addDeviceIfNew(T model, DeviceHandlerProvider<T> tableProvider);
 	<T extends Resource> InstallAppDevice removeDevice(T model);

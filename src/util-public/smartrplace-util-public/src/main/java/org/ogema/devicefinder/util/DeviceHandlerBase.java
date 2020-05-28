@@ -3,9 +3,12 @@ package org.ogema.devicefinder.util;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.PatternListenerExtended;
@@ -51,4 +54,11 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 			return null;
 		return listener.getAllPatterns();
 	}
+	
+	protected void addDatapoint(SingleValueResource res, List<Datapoint> result, DatapointService dpService) {
+		if(res.isActive())
+			result.add(dpService.getDataPointStandard(res));
+	}
 }
+
+

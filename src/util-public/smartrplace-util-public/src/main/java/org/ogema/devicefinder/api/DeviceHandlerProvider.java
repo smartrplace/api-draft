@@ -1,7 +1,9 @@
 package org.ogema.devicefinder.api;
 
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
+import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
@@ -9,7 +11,6 @@ import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.html.alert.Alert;
-import de.iwes.widgets.template.LabelledItem;
 
 /** Implement this service to add another device table to the hardware installation app and to provide
  * everything to provide device information for device and application configuration
@@ -36,15 +37,7 @@ import de.iwes.widgets.template.LabelledItem;
  * 
  * @param <T> resource type of the device for which data is provided by the implementation
  */
-public interface DeviceHandlerProvider<T extends Resource> extends LabelledItem {
-	Class<T> getResourceType();
-	
-	/** TODO: Check if this makes sense. This method shall be implemented if the driver provides additional
-	 * information for each data point that shall not be modeled / provided via OGEMA resources e.g. because
-	 * the content would cause too much overhead in the OGEMA database or because the information is only
-	 * relevant in rare cases.*/
-	default OGEMADriverPropertyService<?> getDriverPropertyService() {return null;}
-	
+public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandlerProviderDP<T> {
 	/** Provide implementation of {@link PatternListenerExtended} that adds exactly those devices that
 	 * shall be part of the table. If the same resource type is also provided by other drivers that require
 	 * a different table in the hardware installation app or a different simulation then separate 
@@ -83,14 +76,14 @@ public interface DeviceHandlerProvider<T extends Resource> extends LabelledItem 
 	 * a setpoint operation is made on an actor. For pure sensor devices a simulation usually is not necessary.
 	 * 
 	 * Note: It is recommended to set the {@link GaRoDataType}s provided by the driver that are not
-	 * 		part of the standard typesin this method also
+	 * 		part of the standard types in this method also
 	 * 
 	 * @param resource device resource
 	 * @param roomSimulation roomSimulation if applicable. Note that this is not implemented yet. Note that
 	 * 		this also means that the step method in the object returned is not called
 	 * @return null if no simulation is available for the device
 	 */
-	default RoomInsideSimulationBase startSimulationForDevice(T resource,
+	default RoomInsideSimulationBase startSimulationForDevice(T deviceResource,
 			SingleRoomSimulationBase roomSimulation,
 			DatapointService dpService) {
 		return null;

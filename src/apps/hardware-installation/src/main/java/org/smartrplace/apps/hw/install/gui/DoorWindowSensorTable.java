@@ -90,6 +90,11 @@ public class DoorWindowSensorTable extends DeviceTablePageFragment {
 	}
 
 	@Override
+	public InstallAppDevice getInstallResource(Resource device) {
+		return instAppsSelector.getInstallResource(device);
+	}
+	
+	@Override
 	public <T extends Resource> InstallAppDevice addDeviceIfNew(T model, DeviceHandlerProvider<T> tableProvider) {
 		return instAppsSelector.addDeviceIfNew(model, tableProvider);
 	}
