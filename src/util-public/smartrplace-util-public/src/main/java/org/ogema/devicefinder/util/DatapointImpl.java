@@ -21,7 +21,7 @@ import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint {
-	protected String location;
+	protected final String location;
 	protected String gatewayId = null;
 	protected Resource resource = null;
 	protected String timeSeriesID = null;

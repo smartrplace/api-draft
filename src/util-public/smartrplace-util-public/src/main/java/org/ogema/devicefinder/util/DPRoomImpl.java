@@ -34,6 +34,7 @@ public class DPRoomImpl implements DPRoom {
 		this.gatewayId = gatewayId;
 	}
 
+	@Override
 	public void setRoomType(Integer roomType) {
 		this.roomType = roomType;
 	}

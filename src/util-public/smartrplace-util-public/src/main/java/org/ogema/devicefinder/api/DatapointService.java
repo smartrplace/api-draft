@@ -106,4 +106,14 @@ public interface DatapointService {
 	Collection<Class<? extends Resource>> getManagedDeviceResoureceTypes();
 	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
 	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
+	
+	/** Provide framework time where ApplicationManager is not available*/
+	long getFrameworkTime();
+	
+	GatewayResource getStructure(String id, String gatewayId);
+	
+	/** Note: For now the room id shall always be the same as the label(English)*/
+	DPRoom getRoom(String id, String gatewayId);
+	DPRoom getRoom(String id);
+	//TODO: Devices have to be modeled as GatewayResource also when the concept has been proven for rooms
 }

@@ -8,6 +8,7 @@ import org.ogema.model.locations.Room;
  * then the fields not relevant shall just be null.
  * The room name can be accessed with getLabel(null)*/
 public interface DPRoom extends GatewayResource {
+	public static final String BUILDING_OVERALL_ROOM_LABEL = "Building";
 	
 	@Override
 	Room getResource();
@@ -16,4 +17,6 @@ public interface DPRoom extends GatewayResource {
 	
 	/**TODO: To be discussed if this would make sense, not implemented yet*/
 	ElectricityConnectionBox getBuildingElectricityData();
+
+	void setRoomType(Integer roomType);
 }

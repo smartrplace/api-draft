@@ -3,8 +3,11 @@ package org.ogema.devicefinder.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ogema.core.model.Resource;
+import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 
 import de.iwes.timeseries.eval.api.TimeSeriesData;
@@ -29,7 +32,11 @@ public class DPUtil {
 			AggregationModeProvider aggModeProv) {
 		List<Datapoint> result = new ArrayList<>();
 		for(TimeSeriesData tsd: dpList) {
-			Datapoint dp = getDP(tsd);
+			boolean useDpService = false;
+			if(aggModeProv != null && aggModeProv.getDpService() != null) {
+				useDpService = aggModeProv.obtainFromStandardService(tsd.id());
+			}
+			Datapoint dp = getDP(tsd, useDpService?aggModeProv.getDpService():null);
 			if(dp != null) {
 				if(nameProvider != null && (tsd instanceof TimeSeriesDataExtendedImpl) &&
 						dp.getGaroDataType() != null) {
@@ -39,7 +46,13 @@ public class DPUtil {
 				if(aggModeProv != null) {
 					AggregationMode mode = aggModeProv.getMode(tsd.id());
 					if(mode != null)
-						dp.info().setAggregationMode(mode);					
+						dp.info().setAggregationMode(mode);	
+					DPRoom room = aggModeProv.getRoom(tsd.id());
+					if(room != null)
+						dp.setRoom(room);
+					Resource deviceRes = aggModeProv.getDeviceResource(tsd.id());
+					if(deviceRes != null)
+						dp.setDeviceResource(deviceRes);
 				}
 				result.add(dp);
 			}
@@ -48,9 +61,25 @@ public class DPUtil {
 	}
 	
 	public static Datapoint getDP(TimeSeriesData tsd) {
+		return getDP(tsd, null);
+	}
+	public static Datapoint getDP(TimeSeriesData tsd, DatapointService dpService) {
 		if(!(tsd instanceof TimeSeriesDataImpl))
 			return null;
-		DatapointImpl dp = new DatapointImpl((TimeSeriesDataImpl)tsd);
+		Datapoint dp;
+		if(dpService == null)
+			dp = new DatapointImpl((TimeSeriesDataImpl)tsd);
+		else {
+			dp = dpService.getDataPointStandard(tsd.label(null));
+			dp.setTimeSeries(((TimeSeriesDataImpl)tsd).getTimeSeries(), false);
+		}
 		return dp;
+	}
+	
+	public static void copyExistingDataRoomDevice(Datapoint source, Datapoint dest) {
+		if(source.getDeviceResource() != null)
+			dest.setDeviceResource(source.getDeviceResource());
+		if(source.getRoom() != null)
+			dest.setRoom(source.getRoom());
 	}
 }

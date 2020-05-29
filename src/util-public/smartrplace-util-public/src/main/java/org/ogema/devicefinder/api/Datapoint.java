@@ -10,6 +10,8 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
+	public static final String UNKNOWN_ROOM_ID = "noRoomInfo";
+
 	/** The method label shall always return a non-null String. The label shall be used by evaluation tables,
 	 * charts etc. by default as human readable label. The label usually is a combination of
 	 * the type, the room and the sub-room information. Also the gateway information should be included if
