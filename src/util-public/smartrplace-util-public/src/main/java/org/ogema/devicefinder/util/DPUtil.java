@@ -13,6 +13,8 @@ import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeri
 import de.iwes.timeseries.eval.api.TimeSeriesData;
 import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
+import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
+import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
 
 public class DPUtil {
 	public static List<TimeSeriesData> getTSList(List<Datapoint> dpList) {
@@ -81,5 +83,15 @@ public class DPUtil {
 			dest.setDeviceResource(source.getDeviceResource());
 		if(source.getRoom() != null)
 			dest.setRoom(source.getRoom());
+	}
+	
+	public static void printDatapointsOfType(GaRoDataTypeI type, DatapointService dpService) {
+		List<Datapoint> all = dpService.getAllDatapoints();
+		for(Datapoint dp: all) {
+			if(type == null || dp.getGaroDataType().equals(type)) {
+				String message = "  "+dp.label()+" : "+dp.getGaroDataType().label(null)+" : "+dp.getLocation();
+				System.out.println(message);
+			}
+		}
 	}
 }
