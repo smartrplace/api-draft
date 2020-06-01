@@ -128,8 +128,15 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			return json;
 		} else
 			vals = bareTimeSeries.getValues(startEnd[0], startEnd[1]);
+		boolean shortXY = UserServlet.getBoolean("shortXY", paramMap);
+		boolean structList = pData.structureList;
+		if(!structList) {
+			String structureStr = UserServlet.getParameter("structure", paramMap);
+			if(structureStr != null && structureStr.equals("tslist"))
+				structList = true;
+		}
 		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
-				pData.structureList));
+				structList, shortXY));
 		return json;
 	}
 
@@ -209,7 +216,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 * @return
 	 */
 	protected JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
-			boolean structureList) {
+			boolean structureList, boolean shortXY) {
 		if(mode == DownSamplingMode.AVERAGE)
 			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
 		JSONArray result = new JSONArray();
@@ -232,8 +239,13 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			if(structureList) {
 				for(Entry<Long, Float> ts: svMap.entrySet()) {
 					JSONObject sub = new JSONObject();
-					sub.put("time", ts.getKey());
-					sub.put("value", ts.getValue());
+					if(shortXY) {
+						sub.put("x", ts.getKey());
+						sub.put("y", ts.getValue());						
+					} else {
+						sub.put("time", ts.getKey());
+						sub.put("value", ts.getValue());
+					}
 					result.put(sub);
 				}
 			} else

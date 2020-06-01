@@ -52,16 +52,19 @@ public abstract class UserServletTest extends HttpServlet {
        	if(!checkAccessAllowedAndSendError(req, resp)) return;
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
+    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
+        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+System.out.println("Adding CORS Header...");
+        resp.addHeader("Access-Control-Allow-Headers", "*");
+        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
+        resp.addHeader("Access-Control-Allow-Credentials", "true");
+System.out.println("Before doGET...");
     	try{
     		getUserServlet().doGet(req, resp);
     	} catch(NullPointerException e) {
     		throw new IllegalStateException("Error for req:"+javax.servlet.http.HttpUtils.getRequestURL(req), e);
     	}
-    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
-        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
-        resp.addHeader("Access-Control-Allow-Headers", "*");
-        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
-        resp.addHeader("Access-Control-Allow-Credentials", "true");
+System.out.println("After doGET...");
         /*else {
     		resp.getWriter().write("Servlet not accessible!");
         	resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
