@@ -136,7 +136,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				structList = true;
 		}
 		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
-				structList, shortXY));
+				structList, shortXY, pData.suppressNan));
 		return json;
 	}
 
@@ -207,6 +207,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		Long lastTsCollected = null;
 		float maxVal = -Float.MAX_VALUE;
 		float minVal = -Float.MAX_VALUE;
+		boolean suppressNaN;
 	}
 
 	/** Provides timeseries as JSON.
@@ -216,7 +217,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 * @return
 	 */
 	protected JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
-			boolean structureList, boolean shortXY) {
+			boolean structureList, boolean shortXY, boolean suppressNaN) {
 		if(mode == DownSamplingMode.AVERAGE)
 			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
 		JSONArray result = new JSONArray();
@@ -225,6 +226,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		//float maxVal = -Float.MAX_VALUE;
 		//float minVal = Float.MAX_VALUE;
 		DownSamplingData data = new DownSamplingData();
+		data.suppressNaN = suppressNaN;
 		for(SampledValue sv: vals) {
 			//JSONObject svObj = new JSONObject();
 			Map<Long, Float> svMap = new HashMap<>();
@@ -261,7 +263,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				data.minVal = fval;
 				data.lastTsCollected = tsNow;
 			} else {
-				data.lastTs = putDownSampledTs(tsNow, data.minVal, svMap);
+				data.lastTs = putDownSampledTs(tsNow, fval, svMap, data.suppressNaN);
 			}
 		} else {
 			if((tsNow - data.lastTs) < valueDist) {
@@ -271,16 +273,18 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					data.minVal = fval;
 				data.lastTsCollected = tsNow;
 			} else {
-				data.lastTs = putDownSampledTs(data.lastTsCollected,data.minVal, svMap);
+				data.lastTs = putDownSampledTs(data.lastTsCollected,data.minVal, svMap, data.suppressNaN);
 				if(data.maxVal != data.minVal)
-					data.lastTs = putDownSampledTs(data.lastTsCollected, data.maxVal, svMap);
+					data.lastTs = putDownSampledTs(data.lastTsCollected, data.maxVal, svMap, data.suppressNaN);
 				data.lastTsCollected = null;
 				processMinMaxDownSampling(data, tsNow, valueDist, fval, svMap);
 			}
 		}		
 	}
 	
-	protected long putDownSampledTs(long timeStamp, float fval, Map<Long, Float> svMap) {
+	protected long putDownSampledTs(long timeStamp, float fval, Map<Long, Float> svMap, boolean suppressNaN) {
+		if(suppressNaN && (Float.isNaN(fval) || Float.isInfinite(fval) || (fval == Float.MAX_VALUE) || (fval == -Float.MAX_VALUE)))
+			return timeStamp;
 		svMap.put(timeStamp, fval);
 		return timeStamp;		
 	}

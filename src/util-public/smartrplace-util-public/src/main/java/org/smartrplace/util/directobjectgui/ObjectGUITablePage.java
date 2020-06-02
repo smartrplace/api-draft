@@ -66,7 +66,11 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	 */
 	public abstract Collection<T> getObjectsInTable(OgemaHttpRequest req);
 	
-	/**Overwrite this if you want to adapt the lineIds*/
+	/**Overwrite this if you want to adapt the lineIds
+	 * FIXME: Calling ResourceUtils.getValidResourceName should not be done here, but only in 
+	 * ObjectGUITableTemplate when this method is called as the validation should be done also on results of methods
+	 * overwriting this. For now we do it twice to ensure backwards compatibility in case this called also from other
+	 * places.*/
 	public String getLineId(T object) {
 		if (object instanceof Resource) {
 			Resource r = (Resource) object;
@@ -209,7 +213,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 				if((headerObject != null) && object.toString().equals(headerObject.toString())) {
 					return DynamicTable.HEADER_ROW_ID;
 				}
-				String li = ObjectGUITablePage.this.getLineId(object);
+				String li = ResourceUtils.getValidResourceName(ObjectGUITablePage.this.getLineId(object));
 				if(li != null) return li;
 				return super.getLineId(object);
 			}
