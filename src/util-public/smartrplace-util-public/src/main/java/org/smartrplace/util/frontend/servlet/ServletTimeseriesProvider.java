@@ -1,6 +1,7 @@
 package org.smartrplace.util.frontend.servlet;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -202,6 +203,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		}
 	}
 	
+	/** Structure for passing on downsampling information from one input sample to the next one*/
 	class DownSamplingData {
 		long lastTs = -1;
 		Long lastTsCollected = null;
@@ -212,24 +214,29 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 
 	/** Provides timeseries as JSON.
 	 * Performs downsampling with different modes if desired 
-	 * @param vals
-	 * @param valueDist expected time in milliseconds between values returned
-	 * @return
+	 * @param vals all values in the time series in the selected time range before downsampling
+	 * @param valueDist expected time in milliseconds between values returned. If null then then no
+	 * 		downsampling is performed, in this case mode is not relevant
+	 * @param mode if valueDist is not null then this must be DownSamplingMode.MINMAX. For more modes
+	 * 		to be foreseen for the future see {@link DownSamplingMode}.
+	 * @param structureList if true then the result will be in the form of "time":_timeStamp_, "value":_value_,
+	 * 		otherwise _timestamp_:_value_
+	 * @param shortXY only relevant if structureList is true. If this is true then "time" is replaced by "x",
+	 * 		"value" is replaced by "y".
+	 * @param suppressNaN if true then any NaN and infinity values are removed from the result
+	 * @return JSON to be returned as value of the object result
 	 */
 	protected JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
 			boolean structureList, boolean shortXY, boolean suppressNaN) {
-		if(mode == DownSamplingMode.AVERAGE)
+		if(valueDist != null && mode != DownSamplingMode.MINMAX)
 			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
 		JSONArray result = new JSONArray();
-		//long lastTs = -1;
-		//Long lastTsCollected = null;
-		//float maxVal = -Float.MAX_VALUE;
-		//float minVal = Float.MAX_VALUE;
+		
 		DownSamplingData data = new DownSamplingData();
 		data.suppressNaN = suppressNaN;
+		
 		for(SampledValue sv: vals) {
-			//JSONObject svObj = new JSONObject();
-			Map<Long, Float> svMap = new HashMap<>();
+			LinkedHashMap<Long, Float> svMap = new LinkedHashMap<>();
 			Float fval = UserServletUtil.getJSONValue(sv.getValue().getFloatValue());
 			if(fval != null) {
 				if(valueDist != null) {
@@ -256,7 +263,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		return result;
 	}
 	
-	protected void processMinMaxDownSampling(DownSamplingData data, long tsNow, int valueDist, float fval, Map<Long, Float> svMap) {
+	protected void processMinMaxDownSampling(DownSamplingData data, long tsNow, int valueDist, float fval,
+			LinkedHashMap<Long, Float> svMap) {
 		if(data.lastTsCollected == null) {
 			if((tsNow - data.lastTs) < valueDist) {
 				data.maxVal = fval;
@@ -275,14 +283,15 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			} else {
 				data.lastTs = putDownSampledTs(data.lastTsCollected,data.minVal, svMap, data.suppressNaN);
 				if(data.maxVal != data.minVal)
-					data.lastTs = putDownSampledTs(data.lastTsCollected, data.maxVal, svMap, data.suppressNaN);
+					putDownSampledTs(data.lastTsCollected, data.maxVal, svMap, data.suppressNaN);
 				data.lastTsCollected = null;
 				processMinMaxDownSampling(data, tsNow, valueDist, fval, svMap);
 			}
 		}		
 	}
 	
-	protected long putDownSampledTs(long timeStamp, float fval, Map<Long, Float> svMap, boolean suppressNaN) {
+	protected long putDownSampledTs(long timeStamp, float fval,
+			LinkedHashMap<Long, Float> svMap, boolean suppressNaN) {
 		if(suppressNaN && (Float.isNaN(fval) || Float.isInfinite(fval) || (fval == Float.MAX_VALUE) || (fval == -Float.MAX_VALUE)))
 			return timeStamp;
 		svMap.put(timeStamp, fval);
