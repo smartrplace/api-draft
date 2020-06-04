@@ -1,7 +1,6 @@
 package org.smartrplace.apps.hw.install.gui;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.ogema.apps.roomlink.localisation.mainpage.RoomLinkDictionary;
@@ -11,7 +10,6 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.model.locations.Room;
-import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -82,7 +80,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase implements
 			vh.registerHeaderEntry("RT");		
 	}
 	
-	protected void addRoomWidget(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+	/*protected void addRoomWidget(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
 		Map<Room, String> roomsToSet = new HashMap<>();
@@ -91,7 +89,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase implements
 			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
 		}
 		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet, 3);
-	}
+	}*/
 	
 	protected IntegerResource addWidgetsCommonExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,

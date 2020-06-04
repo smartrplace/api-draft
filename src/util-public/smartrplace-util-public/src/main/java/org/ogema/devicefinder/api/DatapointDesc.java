@@ -1,17 +1,32 @@
 package org.ogema.devicefinder.api;
 
+import java.util.Map;
+
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+import de.iwes.widgets.template.LabelledItem;
 
 /** Description of data point like {@link GaRoDataTypeI}, type of consumption representation etc.
  */
-public interface DatapointDesc {
+public interface DatapointDesc extends LabelledItem {
 	GaRoDataType getGaroDataType();
 	
-	String label();
-
+	/** See {@link DatapointDescAccess#setLabelDefault(String))}. If no label is specified at all then this method may
+	 * return null whereas the method {@link #label(OgemaLocale)} shall always return a readable String. So
+	 * getDefaultLabel() and label(null) will return the same result exactly when a label is defined.
+	 * 
+	 * @return
+	 */
+	String labelDefault();
+	
+	/** If labels if all languages shall be used e.g. for the generation of labels of a dependent
+	 * Datapoint then all labels are needed
+	 * @return
+	 */
+	Map<OgemaLocale, String> getAllLabels();
+	
 	/** The method getTypeName shall always return a non-null String even if no type 
 	 * information is available;
 	 */

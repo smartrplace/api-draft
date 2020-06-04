@@ -27,8 +27,8 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 	}
 	
 	@Override
-	public boolean setLabel(String label) {
-		this.label = label;	
+	public boolean setLabelDefault(String label) {
+		this.labelDefault = label;	
 		return true;
 	}
 
@@ -47,6 +47,21 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 	@Override
 	public boolean setConsumptionInfo(DatapointInfo info) {
 		this.consumptionInfo = info;
+		return true;
+	}
+	@Override
+	public String labelDefault() {
+		return labelDefault;
+	}
+	@Override
+	public boolean setLabel(String label, OgemaLocale locale) {
+		if(locale == null)
+			locale = OgemaLocale.ENGLISH;
+		labels.put(locale,  label);
+		if(labelDefault == null)
+			labelDefault = label;
+		else if(locale == OgemaLocale.ENGLISH)
+			labelDefault = label;
 		return true;
 	}
 

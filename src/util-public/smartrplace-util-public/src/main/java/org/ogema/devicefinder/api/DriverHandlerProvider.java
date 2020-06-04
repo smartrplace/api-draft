@@ -60,7 +60,7 @@ public interface DriverHandlerProvider extends LabelledItem {
 	/** This table usually only has a single line
 	 * @return null if no init configurations for the driver that are independent of single devices
 	 * 		can be made for the driver*/
-	DeviceTableRaw<DriverHandlerProvider, Resource> getDriverInitTable();
+	DeviceTableRaw<DriverHandlerProvider, Resource> getDriverInitTable(WidgetPage<?> page, Alert alert);
 	
 	/** This table contains an entry per device configured. The devices obtained may have different
 	 * resourece types and this may required several {@link DeviceTableBase}s.

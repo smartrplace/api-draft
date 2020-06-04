@@ -42,13 +42,13 @@ public class UserServletUtil {
 		if(Float.isNaN(value)) {
 			if(!suppressNan)
 				result.put(valueKey, "NaN");
-		} else if(value == Float.POSITIVE_INFINITY || value == Float.MAX_VALUE)
+		} else if(value == Float.POSITIVE_INFINITY || value == Float.MAX_VALUE) {
 			if(!suppressNan)
 				result.put(valueKey, Float.MAX_VALUE);				
-		else if(value == Float.NEGATIVE_INFINITY || value == -Float.MAX_VALUE)
+		} else if(value == Float.NEGATIVE_INFINITY || value == -Float.MAX_VALUE) {
 			if(!suppressNan)
 				result.put(valueKey, -Float.MAX_VALUE);				
-		else
+		} else
 			result.put(valueKey, value);		
 	}
 	

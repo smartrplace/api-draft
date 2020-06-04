@@ -34,6 +34,7 @@ import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.tools.resource.util.LoggingUtils;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.apps.hw.install.gui.DeviceConfigPage;
 import org.smartrplace.apps.hw.install.gui.MainPage;
 import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
 import org.smartrplace.apps.hw.install.pattern.DoorWindowSensorPattern;
@@ -43,6 +44,7 @@ import org.smartrplace.apps.hw.install.patternlistener.ThermostatListener;
 
 import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.localisation.LocaleDictionary;
 
 // here the controller logic is implemented
 public class HardwareInstallController {
@@ -56,7 +58,8 @@ public class HardwareInstallController {
 	public final HardwareInstallApp hwInstApp;
 	
 	public MainPage mainPage;
-	WidgetApp widgetApp;
+	public DeviceConfigPage deviceConfigPage;
+	//WidgetApp widgetApp;
 
 	public HardwareInstallController(ApplicationManager appMan, WidgetPage<?> page, HardwareInstallApp hardwareInstallApp,
 			DatapointService dpService) {
@@ -70,6 +73,15 @@ public class HardwareInstallController {
 		cleanupOnStart();
         initDemands();
 		mainPage = getMainPage(page);
+		if(hardwareInstallApp == null)
+			return;
+		hardwareInstallApp.menu.addEntry("Hardware Installation Configuration", page);
+		hardwareInstallApp.configMenuConfig(page.getMenuConfiguration());
+		
+		WidgetPage<LocaleDictionary> page2 = hardwareInstallApp.widgetApp.createWidgetPage("deviceConfig.html");
+		deviceConfigPage = new DeviceConfigPage(page2, this);
+		hardwareInstallApp.menu.addEntry("Device Access Configuration", page2);
+		hardwareInstallApp.configMenuConfig(page2.getMenuConfiguration());
 	}
 
 	protected MainPage getMainPage(WidgetPage<?> page) {

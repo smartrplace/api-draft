@@ -30,10 +30,13 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.devicefinder.api.DriverHandlerProvider;
 
 import de.iwes.widgets.api.OgemaGuiService;
 import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.navigation.MenuConfiguration;
+import de.iwes.widgets.api.widgets.navigation.NavigationMenu;
 
 /**
  * Template OGEMA application class
@@ -46,6 +49,13 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 		policy=ReferencePolicy.DYNAMIC,
 		bind="addTableProvider",
 		unbind="removeTableProvider"),
+	@Reference(
+		name="driverProviders",
+		referenceInterface=DriverHandlerProvider.class,
+		cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
+		policy=ReferencePolicy.DYNAMIC,
+		bind="addDriverProvider",
+		unbind="removeDriverProvider"),
 })
 
 @Component(specVersion = "1.2", immediate = true)
@@ -58,11 +68,18 @@ public class HardwareInstallApp implements Application {
     protected HardwareInstallController controller;
 
     protected WidgetApp widgetApp;
+	public NavigationMenu menu;
 
 	private final Map<String, DeviceHandlerProvider<?>> tableProviders = Collections.synchronizedMap(new LinkedHashMap<String,DeviceHandlerProvider<?>>());
 	public Map<String, DeviceHandlerProvider<?>> getTableProviders() {
 		synchronized (tableProviders) {
 			return new LinkedHashMap<>(tableProviders);
+		}
+	}
+	private final Map<String,DriverHandlerProvider> driverProviders = Collections.synchronizedMap(new LinkedHashMap<String,DriverHandlerProvider>());
+	public Map<String,DriverHandlerProvider> getDriverProviders() {
+		synchronized (driverProviders) {
+			return new LinkedHashMap<>(driverProviders);
 		}
 	}
 
@@ -84,6 +101,7 @@ public class HardwareInstallApp implements Application {
 
 		//register a web page with dynamically generated HTML
 		widgetApp = guiService.createWidgetApp(urlPath, appManager);
+		menu = new NavigationMenu("Select Page");
 		final WidgetPage<?> page = widgetApp.createStartPage();
 
 		synchronized (this) {
@@ -122,4 +140,22 @@ public class HardwareInstallApp implements Application {
     protected void removeTableProvider(DeviceHandlerProvider<?> provider) {
     	tableProviders.remove(provider.id());
     }
-}
+    
+    protected void addDriverProvider(DriverHandlerProvider provider) {
+    	driverProviders.put(provider.id(), provider);
+    	synchronized (this) {
+	    	if(controller != null && controller.deviceConfigPage != null) {
+	    		controller.deviceConfigPage.updateTables();
+	    	}
+    	}
+    }
+    protected void removeDriverProvider(DriverHandlerProvider provider) {
+    	driverProviders.remove(provider.id());
+    }
+
+ 	void configMenuConfig(MenuConfiguration mc) {
+		mc.setCustomNavigation(menu);
+		mc.setLanguageSelectionVisible(false);
+		mc.setNavigationVisible(false); 		
+ 	}
+ }

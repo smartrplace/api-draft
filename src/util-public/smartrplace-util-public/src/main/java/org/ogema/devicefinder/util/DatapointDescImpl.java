@@ -1,6 +1,12 @@
 package org.ogema.devicefinder.util;
 
 import org.ogema.devicefinder.api.DatapointInfo;
+import org.smartrplace.util.format.WidgetHelper;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointDesc;
 
@@ -12,7 +18,8 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
  */
 public class DatapointDescImpl implements DatapointDesc {
 	protected GaRoDataType garoDataType = null;
-	protected String label;
+	protected String labelDefault;
+	protected Map<OgemaLocale, String> labels = new HashMap<>();
 	protected DPRoom dpRoom = null;
 	protected DatapointInfo consumptionInfo = null;
 	protected String subRoomLocation = null;
@@ -33,11 +40,6 @@ public class DatapointDescImpl implements DatapointDesc {
 	}
 
 	@Override
-	public String label() {
-		return label;
-	}
-	
-	@Override
 	public DPRoom getRoom() {
 		return dpRoom;
 	}
@@ -56,6 +58,37 @@ public class DatapointDescImpl implements DatapointDesc {
 	@Override
 	public Boolean isLocal() {
 		return isLocal;
+	}
+
+	@Override
+	public String id() {
+		return WidgetHelper.getValidWidgetId(label(null));
+	}
+
+	@Override
+	public String label(OgemaLocale locale) {
+		String result;
+		if(locale == null)
+			result = labelDefault;
+		else {
+			result = labels.get(locale);
+			if(result == null)
+				result = labelDefault;
+		}
+		if(result == null) {
+			return this.toString();
+		}
+		return result;
+	}
+
+	@Override
+	public String labelDefault() {
+		return labelDefault;
+	}
+
+	@Override
+	public Map<OgemaLocale, String> getAllLabels() {
+		return Collections.unmodifiableMap(labels);
 	}
 
 }

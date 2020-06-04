@@ -13,7 +13,6 @@ import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeri
 import de.iwes.timeseries.eval.api.TimeSeriesData;
 import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
-import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
 
 public class DPUtil {
@@ -43,7 +42,7 @@ public class DPUtil {
 				if(nameProvider != null && (tsd instanceof TimeSeriesDataExtendedImpl) &&
 						dp.getGaroDataType() != null) {
 					dp.setLabel(nameProvider.getShortNameForTypeI(dp.getGaroDataType(),
-							(TimeSeriesDataExtendedImpl) tsd));
+							(TimeSeriesDataExtendedImpl) tsd), null);
 				}
 				if(aggModeProv != null) {
 					AggregationMode mode = aggModeProv.getMode(tsd.id());
@@ -89,7 +88,7 @@ public class DPUtil {
 		List<Datapoint> all = dpService.getAllDatapoints();
 		for(Datapoint dp: all) {
 			if(type == null || dp.getGaroDataType().equals(type)) {
-				String message = "  "+dp.label()+" : "+dp.getGaroDataType().label(null)+" : "+dp.getLocation();
+				String message = "  "+dp.label(null)+" : "+dp.getGaroDataType().label(null)+" : "+dp.getLocation();
 				System.out.println(message);
 			}
 		}

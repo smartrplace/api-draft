@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.ogema.core.model.Resource;
 import org.ogema.devicefinder.util.DatapointImpl;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.widgets.template.LabelledItem;
 
@@ -26,6 +27,10 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * The service shall add all information to the Datapoints it can provide that are not added
 	 * automatically by the DatapointService.*/
 	Collection<Datapoint> getDatapoints(T deviceResource, DatapointService dpService);
+	
+	/** Get device name. Usually this should be the same name as the name shown in the table provided if {@link DriverHandlerProvider}
+	 * is also implemented.*/
+	String getDeviceName(InstallAppDevice installDeviceRes);
 	
 	/** Provide information whether a sensor/actor resource inside a device is relevant for
 	 * default logging.

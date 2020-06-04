@@ -41,6 +41,6 @@ public class RSSIPage extends MainPage {
 		//vh.booleanEdit("Bang", id, device.getSubResource("bangBangControlActive", BooleanResource.class), row);
 		addWidgetsCommonExpert(object, vh, id, req, row, appMan, deviceRoom);
 		Resource hmRes = ResourceHelper.getFirstParentOfType(device, "org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice");
-		addDeleteButton(object, vh, id, req, row, appMan, deviceRoom, hmRes);
+		addDeleteButton(vh, id, req, row, appMan, deviceRoom, hmRes);
 	}
 }

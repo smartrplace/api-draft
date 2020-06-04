@@ -42,7 +42,7 @@ public class DoorWindowSensorTableRSSI extends DoorWindowSensorTableExpert {
 			vh.registerHeaderEntry("Last RSSI");
 
 		Resource hmRes = ResourceHelper.getFirstParentOfType(object.device(), "org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice");
-		addDeleteButton(object, vh, id, req, row, appMan, device.location().room(), hmRes);
+		addDeleteButton(vh, id, req, row, appMan, device.location().room(), hmRes);
 
 	}
 	

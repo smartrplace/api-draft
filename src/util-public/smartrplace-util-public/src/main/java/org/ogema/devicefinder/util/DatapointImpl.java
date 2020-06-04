@@ -52,7 +52,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		this(tsdi.id(), null, (tsdi.getTimeSeries() instanceof Resource)?(Resource)tsdi.getTimeSeries():null,
 				null, null, null, null, null);
 		tseries = tsdi.getTimeSeries();
-		label = tsdi.label(null);
+		labelDefault = tsdi.label(null);
 	}
 	public DatapointImpl(ReadOnlyTimeSeries ts, String tsLocationOrBaseId) {
 		this(ts, tsLocationOrBaseId, null);
@@ -69,7 +69,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		this(tsLocationOrBaseId, null, (ts instanceof Resource)?(Resource)ts:null,
 				null, null, null, null, null);
 		if(label != null)
-			this.label = label;
+			this.labelDefault = label;
 		setTimeSeries(ts, publishViaServlet);
 		if(addDefaultData)
 			addStandardData(this);
@@ -116,8 +116,16 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 
 	@Override
 	public String label(OgemaLocale locale) {
-		if(label() != null)
-			return label();
+		String result;
+		if(locale == null)
+			result = labelDefault;
+		else {
+			result = labels.get(locale);
+			if(result == null)
+				result = labelDefault;
+		}
+		if(result != null)
+			return result;
 		String stdLabel = getRoomName(locale);
 		String subRoom = getSubRoomLocation(locale, null);
 		if(subRoom != null)
@@ -243,7 +251,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			return UserServlet.knownTS.get(timeSeriesID);
 		ReadOnlyTimeSeries ts = getTimeSeries();
 		if(ts != null)
-			return new TimeSeriesDataImpl(ts, label, label, info().getInterpolationMode());
+			return new TimeSeriesDataImpl(ts, labelDefault, labelDefault, info().getInterpolationMode());
 		return null;
 	}
 	@Override

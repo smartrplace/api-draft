@@ -13,7 +13,21 @@ public interface DatapointDescAccess extends DatapointDesc {
 	 * @return true if successful*/
 	boolean setGaroDataType(GaRoDataType type);
 	
-	boolean setLabel(String label);
+	/** The default label can be set explicitly or is determined by the locale labels. The default label shall be used
+	 * if no fitting language label is available. If no other setting is made then the ENGLISH label shall be used
+	 * as default.
+	 * @param label
+	 * @return
+	 */
+	boolean setLabelDefault(String label);
+	
+	/** See {@link #setDefaultLabel(String)}
+	 * 
+	 * @param label
+	 * @param locale
+	 * @return
+	 */
+	boolean setLabel(String label, OgemaLocale locale);
 	
 	boolean setRoom(DPRoom room);
 	

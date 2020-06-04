@@ -22,13 +22,6 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	@Override
 	String label(OgemaLocale locale);
 	
-	/** Alternative method from {@link DatapointDesc}. Usually {@link #label(OgemaLocale)} should
-	 * be overwritten instead of this method.*/
-	@Override
-	default String label() {
-		return label(null);
-	}
-	
 	/** Unique id for the datapoint source. For datapoints stored in an instance of
 	 * {@link DatapointService} uniqueness shall be guaranteed within the gateway scope of the
 	 * DatapointService providing the data point. So gatewayId plus location shall be sufficient to

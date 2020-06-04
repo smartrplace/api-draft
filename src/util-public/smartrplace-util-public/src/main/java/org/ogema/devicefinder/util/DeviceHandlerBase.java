@@ -12,10 +12,12 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.PatternListenerExtended;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHandlerProvider<T> {
+
 	protected abstract Class<? extends ResourcePattern<T>> getPatternClass();
 
 	protected PatternListenerExtended<ResourcePattern<T>, T> listener = null;
@@ -58,6 +60,11 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	protected void addDatapoint(SingleValueResource res, List<Datapoint> result, DatapointService dpService) {
 		if(res.isActive())
 			result.add(dpService.getDataPointStandard(res));
+	}
+	
+	@Override
+	public String getDeviceName(InstallAppDevice installDeviceRes) {
+		return getDeviceName(installDeviceRes);
 	}
 }
 
