@@ -23,7 +23,7 @@ import de.iwes.widgets.template.LabelledItem;
  * 
  * @param <T> resource type of the device for which data is provided by the implementation
  */
-public interface DriverHandlerProvider extends LabelledItem {
+public interface DriverHandlerProvider extends LabelledItem, DocumentationLinkProvider {
 
 	public static interface DriverDeviceConfig {
 		
@@ -52,7 +52,10 @@ public interface DriverHandlerProvider extends LabelledItem {
 	 * somewhere else, in this case relevant entries may be missing or null may be returned.
 	 * @param registerByFramework if true the entries in the list will be registered as service
 	 * 		each by the framework so that they can be found by the HardwareInstallation App.
-	 * 		Otherwise the service registration must be done by the driver.
+	 * 		Otherwise the service registration must be done by the driver. Note that the framework
+	 * 		shall call this method twice with both options. The implementation does not need to implement
+	 *      service registration for the elements returned on registerbyFramework=true. Note also that the
+	 *      framework may not perform registration as OSGi service but may just use the service directly.
 	 * @return
 	 */
 	List<DeviceHandlerProvider<?>> getDeviceHandlerProviders(boolean registerByFramework);
@@ -78,7 +81,7 @@ public interface DriverHandlerProvider extends LabelledItem {
 	 * @return null if no per-device configurations can be made for the driver. In this case the
 	 * 		{@link #getDriverInitTable()} should return an object as at least one of the tables shall
 	 * 		be provided. */
-	DeviceTableRaw<DriverDeviceConfig, Resource> getDriverPerDeviceConfigurationTable(WidgetPage<?> page,
+	DeviceTableRaw<DriverDeviceConfig, InstallAppDevice> getDriverPerDeviceConfigurationTable(WidgetPage<?> page,
 			Alert alert, InstalledAppsSelector selector, boolean addUnfoundDevices);
 	
 	/** TODO: Check whether this shall be part of this interface or in {@link DeviceHandlerProvider}.
@@ -87,14 +90,6 @@ public interface DriverHandlerProvider extends LabelledItem {
 	 * the content would cause too much overhead in the OGEMA database or because the information is only
 	 * relevant in rare cases.*/
 	default OGEMADriverPropertyService<?> getDriverPropertyService() {return null;}
-	
-	/** Get link to driver documentation page. Usually this is an absolute URL
-	 * 
-	 * @param publicVersion if true a page accessible publicly for all users shall be returned. Note that some
-	 * 		more granularity in the access level will be introduced soon
-	 * @return null if no fitting documentation page is available
-	 */
-	String getDriverDocumentationPageURL(boolean publicVersion);
 	
 	/** Get a link to the driver configuration page. For drivers like ModBus typically profiles definied registers
 	 * to be used have to be defined for device types, which cannot be done via the DriverHandlerProvider tables.

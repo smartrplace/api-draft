@@ -8,6 +8,7 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -15,13 +16,16 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
+import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.button.Button;
+import de.iwes.widgets.html.form.button.RedirectButton;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
@@ -34,6 +38,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	/** Heading to be shown over the table*/
 	protected abstract String getTableTitle();
+	
+	protected DocumentationLinkProvider getDocLinkProvider() {
+		return null;
+	}
 
 	//protected abstract String getHeader(); // {return "Smartrplace Hardware InstallationApp";}
 	//protected final InstalledAppsSelector appSelector;
@@ -66,7 +74,47 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public void addWidgetsAboveTable() {
 		Header headerWinSens = new Header(page, WidgetHelper.getValidWidgetId("header_"+id()), getTableTitle());
 		headerWinSens.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
-		page.append(headerWinSens);
+
+		DocumentationLinkProvider docLinkProv = getDocLinkProvider();
+		if(docLinkProv != null) {
+			StaticTable topTable = new StaticTable(1, 3, new int[] {8, 2, 2});
+			RedirectButton docButtonPub = new RedirectButton(page, WidgetHelper.getValidWidgetId("docButtonPub_"+id()), "Driver Guide") {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public void onGET(OgemaHttpRequest req) {
+					if(docLinkProv.getDriverDocumentationPageURL(true) != null)
+						setWidgetVisibility(true, req);
+					else
+						setWidgetVisibility(false, req);
+				}
+				
+				@Override
+				public void onPrePOST(String data, OgemaHttpRequest req) {
+					setUrl(docLinkProv.getDriverDocumentationPageURL(true), req);
+				}
+			};
+			RedirectButton docButtonInternal = new RedirectButton(page, WidgetHelper.getValidWidgetId("docButtonInternal_"+id()), "Documentation Internal") {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public void onGET(OgemaHttpRequest req) {
+					String user = GUIUtilHelper.getUserLoggedIn(req);
+					//TODO: Check for Super-Admin level or similar
+					if(user.equals("master") && docLinkProv.getDriverDocumentationPageURL(false) != null) {
+						setWidgetVisibility(true, req);
+					} else
+						setWidgetVisibility(false, req);
+				}
+				
+				@Override
+				public void onPrePOST(String data, OgemaHttpRequest req) {
+					setUrl(docLinkProv.getDriverDocumentationPageURL(false), req);
+				}
+			};
+			topTable.setContent(0, 0, headerWinSens).setContent(0, 1, "<br>").setContent(0, 1, docButtonPub).
+					setContent(0, 2, "<br>").setContent(0, 2, docButtonInternal);
+			page.append(topTable);
+		} else
+			page.append(headerWinSens);
 	}
 
 	@Override

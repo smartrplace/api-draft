@@ -17,6 +17,7 @@ package org.smartrplace.apps.hw.install;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -144,6 +145,11 @@ public class HardwareInstallApp implements Application {
     protected void addDriverProvider(DriverHandlerProvider provider) {
     	driverProviders.put(provider.id(), provider);
     	synchronized (this) {
+    		//No relevance for providers not to be registered by us
+    		List<DeviceHandlerProvider<?>> tableProvsLoc = provider.getDeviceHandlerProviders(true);
+    		for(DeviceHandlerProvider<?> tableP: tableProvsLoc) {
+    			addTableProvider(tableP);
+    		}
 	    	if(controller != null && controller.deviceConfigPage != null) {
 	    		controller.deviceConfigPage.updateTables();
 	    	}
