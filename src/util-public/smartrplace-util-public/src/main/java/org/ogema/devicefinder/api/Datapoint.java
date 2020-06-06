@@ -2,7 +2,10 @@ package org.ogema.devicefinder.api;
 
 import org.ogema.core.model.Resource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.model.sensors.GenericFloatSensor;
+import org.ogema.model.sensors.Sensor;
 import org.ogema.widgets.configuration.service.OGEMAConfigurationProvider;
+import org.smartrplace.apps.hw.install.dpres.SensorDeviceDpRes;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
@@ -89,4 +92,26 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	ReadOnlyTimeSeries getTimeSeries();
 	void setTimeSeries(ReadOnlyTimeSeries tseries);
 	void setTimeSeries(ReadOnlyTimeSeries tseries, boolean publishViaServlet);
+	
+	/** Datapoints that are not based on a resource can be registered as virtual sensors. New
+	 * values shall be written to the Sensor.reading() resource. This functionality is intended for
+	 * debugging only and the sensor resource may be deleted at any time. The sensor will be added to
+	 * a default {@link SensorDeviceDpRes} sensor device automatically generated for this purpose.<br>
+	 * Note also that this usually only works for datapoints obtained via the default {@link DatapointService}
+	 * implementation.<br>
+	 * The method can be called several times for the same datapoint just to get the Sensor resource.<br>
+	 * Data logging is activated automatically for the Sensor.reading() resource by the
+	 * default {@link DatapointService} implementation based on the default
+	 * {@link DeviceHandlerProvider#relevantForDefaultLogging(Datapoint)} implementation.
+	 * @return sensor resource used for the datapoint. 
+	 */
+	GenericFloatSensor registerAsVirtualSensor();
+	
+	/** Like {@link #registerAsVirtualSensor()}, but a {@link SensorDeviceDpRes} will be used that is
+	 * identified based on the sensorDeviceName
+	 * 
+	 * @param sensorDeviceName
+	 * @return
+	 */
+	GenericFloatSensor registerAsVirtualSensor(String sensorDeviceName);
 }

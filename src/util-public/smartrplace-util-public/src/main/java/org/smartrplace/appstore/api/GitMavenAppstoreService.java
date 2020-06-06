@@ -2,6 +2,9 @@ package org.smartrplace.appstore.api;
 
 import java.util.List;
 
+/** 
+ * 
+ */
 public interface GitMavenAppstoreService {
 	/** To discuss: The service does not need to store the source bundles persistently, they shall all be
 	 * added via addSourceBundles by the application connecting to the service after each system restart
@@ -114,7 +117,10 @@ public interface GitMavenAppstoreService {
 	 * 
 	 * @param rundirPath
 	 * @param gatewayID if null then the general setting shall be updated. When one of the {@link SingleGatewayUpdateMode}s
-	 * 		starting with FULL is selected, then any downgrades in any gateway shall be prevented
+	 * 		starting with FULL is selected, then any downgrades in any gateway shall be prevented. Note that only those
+	 * 		gateways shall trigger a software update for which a change in effective special or general bundles is detected.
+	 *      This can be implemented by only triggering an update an a gateway if an update on the respective config_NNNNN directory
+	 *      is made, e.g. in a file containing just a number that is counted upwards with each update.
 	 * @param mavenCoordinates of the bundle. May be null if only standard bundles shall be updated
 	 * @param version
 	 * @param updateMode

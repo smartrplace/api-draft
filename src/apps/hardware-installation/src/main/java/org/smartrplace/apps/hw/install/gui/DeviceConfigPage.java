@@ -52,6 +52,10 @@ public class DeviceConfigPage extends DeviceTablePageFragmentRaw<InstallAppDevic
 	}
 	
 	@Override
+		protected String getHeader() {
+			return "Driver Device Configuration";
+		}
+	@Override
 	public List<InstallAppDevice> getDevicesSelected() {
 		List<InstallAppDevice> all = roomsDrop.getDevicesSelected();
 		if (installFilterDrop != null)  // FIXME seems to always be null here

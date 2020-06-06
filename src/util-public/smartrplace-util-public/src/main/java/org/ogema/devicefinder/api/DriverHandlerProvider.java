@@ -11,12 +11,12 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.template.LabelledItem;
 
-/** Implement this service to add another device table to the hardware installation app and to provide
- * everything to provide driver information for device and application configuration
+/** Implement this service to add another Driver Device Configuration table to the hardware installation app and to provide
+ * everything to provide configure drivers to access devices, especially for drivers and devices that are not fully detected automatically
  *
  * It is also recommended to use an existing implementation as template such as
- * {@link https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-service-base/src/main/java/org/smartrplace/mqtt/devicetable},
- * especially [DeviceHandlerMQTT_Aircond](https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-service-base/src/main/java/org/smartrplace/mqtt/devicetable/DeviceHandlerMQTT_Aircond.class)
+ * {@link https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-service-base/src/main/java/org/smartrplace/driverhandler/devices},
+ * especially [DriverHandlerJMBus](https://github.com/smartrplace/smartr-efficiency/blob/master/monitoring-service-base/src/main/java/org/smartrplace/driverhandler/devices/DriverHandlerJMBus.java)
  * 
  * General implementation and testing recommendations:<br>
  * ...

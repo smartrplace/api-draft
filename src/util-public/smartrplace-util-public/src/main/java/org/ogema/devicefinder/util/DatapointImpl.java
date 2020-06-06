@@ -10,6 +10,7 @@ import org.ogema.devicefinder.api.DatapointInfo;
 import org.ogema.devicefinder.api.DatapointInfoProvider;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
+import org.ogema.model.sensors.GenericFloatSensor;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.frontend.servlet.UserServletUtil;
 
@@ -277,5 +278,13 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		if(publishViaServlet) {
 			setTimeSeriesID(UserServletUtil.getOrAddTimeSeriesData(tseries, id()));
 		}
+	}
+	@Override
+	public GenericFloatSensor registerAsVirtualSensor() {
+		return null;
+	}
+	@Override
+	public GenericFloatSensor registerAsVirtualSensor(String sensorDeviceName) {
+		return null;
 	}
 }
