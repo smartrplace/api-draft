@@ -169,6 +169,8 @@ public class HardwareInstallController {
 		install.create();
 		install.device().setAsReference(device);
 		install.installationStatus().create();
+		install.deviceId().create();
+		install.deviceId().setValue(LocalDeviceId.generateDeviceId(install, appConfigData));
 		install.activate(true);
 		if(tableProvider != null)
 			startSimulation(tableProvider, device);
