@@ -192,7 +192,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return null;
 	}
 
-	public String getName(InstallAppDevice object) {
+	public static String getName(InstallAppDevice object) {
 		final Resource device;
 		device = object.device();
 		final String name;

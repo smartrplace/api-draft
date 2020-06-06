@@ -27,6 +27,12 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 	}
 	
 	@Override
+	public boolean setDataTypeName(String typeName, OgemaLocale locale) {
+		this.typeName.put((locale!=null)?locale:OgemaLocale.ENGLISH, typeName);
+		return true;
+	}
+	
+	@Override
 	public boolean setLabelDefault(String label) {
 		this.labelDefault = label;	
 		return true;

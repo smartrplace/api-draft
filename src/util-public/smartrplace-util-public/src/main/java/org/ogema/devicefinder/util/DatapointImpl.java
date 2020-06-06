@@ -251,8 +251,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		if(timeSeriesID != null)
 			return UserServlet.knownTS.get(timeSeriesID);
 		ReadOnlyTimeSeries ts = getTimeSeries();
-		if(ts != null)
-			return new TimeSeriesDataImpl(ts, labelDefault, labelDefault, info().getInterpolationMode());
+		if(ts != null) {
+			String label = label(null);
+			return new TimeSeriesDataImpl(ts, label, label, info().getInterpolationMode());
+		}
 		return null;
 	}
 	@Override

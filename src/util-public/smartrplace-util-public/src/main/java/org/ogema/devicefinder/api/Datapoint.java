@@ -86,7 +86,8 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
 	/** Get time series representation for evalution API V1
 	 * @return null if not timeseries information is availble. If {@link #getTimeSeries()} is non-null 
-	 * 		then also a non-null value shall be returned here.*/
+	 * 		then also a non-null value shall be returned here. Note that label and description
+	 * 		of the timeseries are equal to label(null) of the timeseries.*/
 	TimeSeriesDataImpl getTimeSeriesDataImpl();
 	
 	ReadOnlyTimeSeries getTimeSeries();

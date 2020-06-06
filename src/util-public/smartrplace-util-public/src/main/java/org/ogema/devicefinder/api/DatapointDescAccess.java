@@ -13,6 +13,15 @@ public interface DatapointDescAccess extends DatapointDesc {
 	 * @return true if successful*/
 	boolean setGaroDataType(GaRoDataType type);
 	
+	/** The type name is only relevant if {@link #getGaroDataType()} equals null or 
+	 * GaRoDataType.Unknown. Then this
+	 * type name will be returned on {@link #getTypeName(OgemaLocale)}.
+	 * @param typeName
+	 * @param locale see {@link #setLabel(String, OgemaLocale)}
+	 * @return true if successful
+	 */
+	boolean setDataTypeName(String typeName, OgemaLocale locale);
+	
 	/** The default label can be set explicitly or is determined by the locale labels. The default label shall be used
 	 * if no fitting language label is available. If no other setting is made then the ENGLISH label shall be used
 	 * as default.

@@ -26,8 +26,12 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.recordeddata.RecordedData;
+import org.ogema.core.recordeddata.RecordedDataConfiguration;
+import org.ogema.core.recordeddata.RecordedDataConfiguration.StorageType;
 import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
@@ -42,7 +46,6 @@ import org.smartrplace.apps.hw.install.pattern.ThermostatPattern;
 import org.smartrplace.apps.hw.install.patternlistener.DoorWindowSensorListener;
 import org.smartrplace.apps.hw.install.patternlistener.ThermostatListener;
 
-import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.localisation.LocaleDictionary;
 
@@ -188,6 +191,9 @@ public class HardwareInstallController {
 	protected Map<String, Set<String>> simulationsStarted = new HashMap<>();
 	@SuppressWarnings("unchecked")
 	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device) {
+		if(Boolean.getBoolean("org.smartrplace.apps.hw.install.autologging")) {
+			activateLogging(tableProvider, device);
+		}
 		if(!Boolean.getBoolean("org.ogema.sim.simulateRemoteGateway"))
 			return;
 		Set<String> deviceSimsStarted = simulationsStarted.get(tableProvider.id());
@@ -200,22 +206,55 @@ public class HardwareInstallController {
 		deviceSimsStarted.add(device.getLocation());
 		tableProvider.startSimulationForDevice((T) device.getLocationResource(),
 				mainPage.getRoomSimulation(device), dpService);
-		if(Boolean.getBoolean("org.smartrplace.apps.hw.install.autologging")) {
-			for(Datapoint dp: tableProvider.getDatapoints(device, dpService)) {
-				if(!(dp instanceof SingleValueResource))
-					continue;
-				if(tableProvider.relevantForDefaultLogging(dp)) {
-					//TODO: activate logging
-					if(Boolean.getBoolean("org.smartrplace.app.srcmon.isgateway")) {
-						//TODO: Activate also log transfer
-						//startTransmitLogData(dp.getDeviceResource());
-						LoggingUtils.activateLogging((SingleValueResource) dp.getDeviceResource(), -2);
-					} else
-						LoggingUtils.activateLogging((SingleValueResource) dp.getDeviceResource(), -2);
-				}
-			}
-		}
 	}
+	
+	protected  <T extends Resource> void activateLogging(DeviceHandlerProvider<T> tableProvider, T device) {
+		for(Datapoint dp: tableProvider.getDatapoints(device, dpService)) {
+			if(!tableProvider.relevantForDefaultLogging(dp))
+				continue;
+			ReadOnlyTimeSeries ts = dp.getTimeSeries();
+			if(ts == null || (!(ts instanceof RecordedData)))
+				continue;
+			//TODO: activate logging
+			if(Boolean.getBoolean("org.smartrplace.app.srcmon.isgateway")) {
+				//TODO: Activate also log transfer
+				//startTransmitLogData(dp.getDeviceResource());
+				activateLogging((RecordedData)ts, -2);
+			} else
+				activateLogging((RecordedData)ts, -2);
+		}		
+	}
+	
+	/**TODO: Move this into LoggingUtils and use in
+	 * {@link LoggingUtils#activateLogging(SingleValueResource, long)}
+	 * @param rd
+	 * @param updateInterval
+	 * @throws IllegalArgumentException
+	 */
+	public static void activateLogging(RecordedData rd, long updateInterval)
+			throws IllegalArgumentException {
+		RecordedDataConfiguration rcd = new RecordedDataConfiguration();
+		switch ((int) updateInterval) {
+		case -1:
+			rcd.setStorageType(StorageType.ON_VALUE_CHANGED);
+			break;
+		case -2:
+			rcd.setStorageType(StorageType.ON_VALUE_UPDATE);
+			break;
+		default:
+			if (updateInterval <= 0)
+				throw new IllegalArgumentException("Logging interval must be positive");
+			rcd.setStorageType(StorageType.FIXED_INTERVAL);
+			rcd.setFixedInterval(updateInterval);
+			break;
+		}
+		rd.setConfiguration(rcd);
+		//write initial value
+		//		if(updateInterval == -2) {
+		//			res.setValue(res.getValue());
+		//		}
+	}
+
 	
 	/*private void startTransmitLogData(SingleValueResource resource) {
 		DataLogTransferInfo log = null;

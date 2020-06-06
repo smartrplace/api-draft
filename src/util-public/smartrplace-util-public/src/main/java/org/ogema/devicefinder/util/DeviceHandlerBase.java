@@ -31,7 +31,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 
 	@Override
 	public String label(OgemaLocale locale) {
-		return id();
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	
 	@Override
 	public String getDeviceName(InstallAppDevice installDeviceRes) {
-		return getDeviceName(installDeviceRes);
+		return DeviceTableRaw.getName(installDeviceRes);
 	}
 }
 

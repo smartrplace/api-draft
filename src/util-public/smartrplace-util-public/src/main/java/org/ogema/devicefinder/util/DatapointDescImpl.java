@@ -18,6 +18,10 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
  */
 public class DatapointDescImpl implements DatapointDesc {
 	protected GaRoDataType garoDataType = null;
+	
+	/** Type name is only relevant if garoDataType == null. Then a special type name may
+	 * be given*/
+	protected Map<OgemaLocale, String> typeName = new HashMap<>();
 	protected String labelDefault;
 	protected Map<OgemaLocale, String> labels = new HashMap<>();
 	protected DPRoom dpRoom = null;
@@ -39,6 +43,19 @@ public class DatapointDescImpl implements DatapointDesc {
 		return garoDataType;
 	}
 
+	@Override
+	public String getTypeName(OgemaLocale locale) {
+		if(garoDataType == null || garoDataType == GaRoDataType.Unknown) {
+			String result = typeName.get(locale);
+			if(result != null)
+				return result;
+			result = typeName.get(OgemaLocale.ENGLISH);
+			if(result != null)
+				return result;
+		}
+		return DatapointDesc.super.getTypeName(locale);
+	}
+	
 	@Override
 	public DPRoom getRoom() {
 		return dpRoom;
