@@ -7,6 +7,7 @@ import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -87,5 +88,14 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 			SingleRoomSimulationBase roomSimulation,
 			DatapointService dpService) {
 		return null;
+	}
+	
+	/**
+	 * @return A 3-4 letter abbreviation indicating the type of device.
+	 */
+	default String getDeviceTypeShortId(InstallAppDevice device) {
+		if (device.device().exists())
+			return device.device().getClass().getSimpleName().replaceAll("[^A-Z]", "");
+		return "UNK"; // unknown
 	}
 }

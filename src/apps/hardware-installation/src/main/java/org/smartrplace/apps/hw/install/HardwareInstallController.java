@@ -164,12 +164,12 @@ public class HardwareInstallController {
 	public <T extends Resource> InstallAppDevice addDeviceIfNew(T device, DeviceHandlerProvider<T> tableProvider) {
 		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
 			if(install.device().equalsLocation(device)) {
-				initializeDevice(install, device); // only initialize missing resources
+				initializeDevice(install, device, tableProvider); // only initialize missing resources
 				return install;
 			}
 		}
 		InstallAppDevice install = appConfigData.knownDevices().add();
-		initializeDevice(install, device);
+		initializeDevice(install, device, tableProvider);
 		if(tableProvider != null)
 			startSimulation(tableProvider, device);
 		return install;
@@ -179,13 +179,15 @@ public class HardwareInstallController {
 		return null;
 	}
 	
-	private <T extends Resource> void initializeDevice(InstallAppDevice install, T device) {
+	private <T extends Resource> void initializeDevice(InstallAppDevice install, T device,
+			DeviceHandlerProvider<T> tableProvider) {
+
 		if (!install.exists()) install.create();
 		if (device != null && !install.device().exists()) install.device().setAsReference(device);
 		if (!install.installationStatus().exists()) install.installationStatus().create();
 		if (!install.deviceId().exists()) install.deviceId().create();
 		if (install.deviceId().getValue().isEmpty())
-			install.deviceId().setValue(LocalDeviceId.generateDeviceId(install, appConfigData));
+			install.deviceId().setValue(LocalDeviceId.generateDeviceId(install, appConfigData, tableProvider));
 		install.activate(true);
 	}
 	

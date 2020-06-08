@@ -1,5 +1,7 @@
 package org.smartrplace.apps.hw.install;
 
+import org.ogema.core.model.Resource;
+import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
@@ -25,8 +27,19 @@ public abstract class LocalDeviceId {
 
     private static final Pattern ID_PATTERN = Pattern.compile("\\w+-(\\d+)");
 
-    public static String generateDeviceId(InstallAppDevice dev, HardwareInstallConfig cfg) {
-        String typeId = getTypeShortId(dev.device().getClass().getName());
+	public static <T extends Resource> String generateDeviceId(InstallAppDevice dev, HardwareInstallConfig cfg,
+			DeviceHandlerProvider<T> tableProvider) {
+
+		final String typeId;
+		if (tableProvider != null) {
+			typeId = tableProvider.getDeviceTypeShortId(dev);
+		} else {
+			// Fall back to default id generation.
+			// Improvement:  Always provide a non-null tableProvider so we can
+			// use overridden getDeviceTypeShortId for custom ids.
+			typeId = "*" + dev.device().getClass().getSimpleName().replaceAll("[^A-Z]", "");
+		}
+
         int maxSerial = 1;
         for(InstallAppDevice d : cfg.knownDevices().getAllElements()) {
             if (d.device().getClass() == dev.device().getClass()) {
