@@ -163,15 +163,13 @@ public class HardwareInstallController {
 	 */
 	public <T extends Resource> InstallAppDevice addDeviceIfNew(T device, DeviceHandlerProvider<T> tableProvider) {
 		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
-			if(install.device().equalsLocation(device)) return install;
+			if(install.device().equalsLocation(device)) {
+				initializeDevice(install, device); // only initialize missing resources
+				return install;
+			}
 		}
 		InstallAppDevice install = appConfigData.knownDevices().add();
-		install.create();
-		install.device().setAsReference(device);
-		install.installationStatus().create();
-		install.deviceId().create();
-		install.deviceId().setValue(LocalDeviceId.generateDeviceId(install, appConfigData));
-		install.activate(true);
+		initializeDevice(install, device);
 		if(tableProvider != null)
 			startSimulation(tableProvider, device);
 		return install;
@@ -180,6 +178,17 @@ public class HardwareInstallController {
 		//TODO
 		return null;
 	}
+	
+	private <T extends Resource> void initializeDevice(InstallAppDevice install, T device) {
+		if (!install.exists()) install.create();
+		if (device != null && !install.device().exists()) install.device().setAsReference(device);
+		if (!install.installationStatus().exists()) install.installationStatus().create();
+		if (!install.deviceId().exists()) install.deviceId().create();
+		if (install.deviceId().getValue().isEmpty())
+			install.deviceId().setValue(LocalDeviceId.generateDeviceId(install, appConfigData));
+		install.activate(true);
+	}
+	
 	
 	@SuppressWarnings("unchecked")
 	public <T extends Resource> void startSimulations(DeviceHandlerProvider<T> tableProvider) {
