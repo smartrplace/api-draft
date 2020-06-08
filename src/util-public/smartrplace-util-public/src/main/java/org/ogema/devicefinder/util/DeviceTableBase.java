@@ -47,11 +47,20 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 		
 		final String name;
-		if(req == null)
+        final String deviceId;
+		if(req == null) {
 			name = "initResName"; //ResourceHelper.getSampleResource(getResourceType());
-		else
+            deviceId = "initId";
+        }
+		else {
 			name = getName(object);
+            if (object.deviceId().exists())
+                deviceId = object.deviceId().getValue();
+            else
+                deviceId = "n/a";
+        }
 		vh.stringLabel("Name", id, name, row);
+		vh.stringLabel("ID", id, deviceId, row);
 		
 		final Resource device;
 		if(req == null)

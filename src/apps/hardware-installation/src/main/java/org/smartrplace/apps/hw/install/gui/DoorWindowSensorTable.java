@@ -75,6 +75,7 @@ public class DoorWindowSensorTable extends DeviceTablePageFragment {
 		} else
 			name = ResourceUtils.getHumanReadableShortName(device);
 		vh.stringLabel("Name", id, name, row);
+		vh.stringLabel("ID", id, object.deviceId().getValue(), row);
 		return device;
 	}
 	@Override

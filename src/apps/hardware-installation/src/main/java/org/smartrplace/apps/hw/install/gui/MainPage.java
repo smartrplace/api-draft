@@ -88,6 +88,7 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 		} else
 			name = ResourceUtils.getHumanReadableShortName(device);
 		vh.stringLabel("Name", id, name, row);
+		vh.stringLabel("ID", id, object.deviceId().getValue(), row);
 		Label setpointFB = vh.floatLabel("Setpoint", id, device.temperatureSensor().deviceFeedback().setpoint(), row, "%.1f");
 		if(req != null) {
 			TextField setpointSet = new TextField(mainTable, "setpointSet"+id, req) {
