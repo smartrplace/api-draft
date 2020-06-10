@@ -1,20 +1,18 @@
 package org.smartrplace.appstore.api;
 
+/** Representation of a bundle built available in the Appstore Maven Artifactory*/
 public interface ArtifactoryBundle {
-	/** Maven coordinates including groupId and artifactId of the bundles specified in the Rundir for
-	 * 		the gateway */
-	String mavenCoordinates();
+	MavenBundleVersioned mavenCoordinates();
 	
-	/** Full version String*/
-	String version();
+	/** Source bundle used to build the artifact. May be null if the source is not available / known
+	 * anymore
+	 * @return
+	 */
+	SourceCodeBundle sourceBundle();
 	
-	/** Perform version comparison.
-	 * @return see {@link String#compareTo(String)} for general comparison definition*/
-	int compareToVersion(String version);
-	
-	/** Git commit ID of the source code used to build the artifact. For SourceCodeBundles this is the latest
+	/** Git commit information of the source code used to build the artifact. For SourceCodeBundles this is the latest
 	 * commit ID changing the bundle
 	 * @return
 	 */
-	String gitCommit();
+	GitCommit gitCommit();
 }	

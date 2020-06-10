@@ -1,78 +1,38 @@
-package org.smartrplace.appstore.api;
+package org.smartrplace.appstore.api.versionmanagement;
 
 import java.util.List;
 
-/** 
- * 
+import org.smartrplace.appstore.api.AppstoreBundle;
+import org.smartrplace.appstore.api.GitRepository;
+import org.smartrplace.appstore.api.MavenBundleVersioned;
+
+/** This service provides a higher level management access to bundles versions It shall be fully designed and implemented
+ * at a later stage
+ * TODO: The definition below assumes that all gateways of a project share a common Git configuration repository
+ * defining the xml configuration files actually used on a Gateway. It further assumes that the definition of the
+ * specific gateway configuration is NOT made via separate branches for each gateway, but via a separate directory for
+ * each gateway in the master branch holding the xml files that need to be overwritten or added to the general project
+ * settings. This requires an adaptation of the update script that copies the content of this directory to the config
+ * directory after each git pull that brought changes. The advantage of this approach is that handling the gateway-specific
+ * information is probably much easier on the Appstore server side then managing hundreds of branches and their synchronization.
  */
-public interface GitMavenAppstoreService {
-	/** To discuss: The service does not need to store the source bundles persistently, they shall all be
-	 * added via addSourceBundles by the application connecting to the service after each system restart
-	 * @return
-	 */
-	List<SourceCodeBundle> getSourceBundles();
-	
-	/** TODO: Add parameters to be able to provide full Git repository access based on the file path to the local
-	 * clone of the repository
-	 * @param filePath
-	 * @return
-	 */
-	GitRepository getRepository(String filePath);
-	
-	/** Register a bundle with its source code for appstore management.
-	 * To discuss: If the Git repository is not yet configured for Jenkins already, add a configuration for
-	 * CI and deployment to the artifactory. Maybe this is not required initially? Exception when repository is
-	 * not configured? Check if app is in Maven build path of the artifactory?
-	 * 
-	 * @param repo
-	 * @param pathInRepo
-	 * @return null if no fitting SourceBundle could be found
-	 */
-	SourceCodeBundle addSourceBundle(GitRepository repo, String pathInRepo);
-	List<SourceCodeBundle> addSourceBundles(GitRepository repo, List<String> pathsInRepo);
-	
-	/** Get bundle versions available in the local artifactory. The list of all bundles may be requested via HTTPS?
-	 * 
-	 * @param mavenCoordinates if null then all bundles in the .m2/repositories structure shall be returned,
-	 * 		otherwise only those for the mavenCoordinates specified
-	 * @param update if true the the artifactories specified in the .m2/settings.xml shall be checked for new
-	 * 		artifactories
-	 * @return List of relevant bundles. Only bundles included into {@link #getSourceBundles()} shall be listed here
-	 * 		with all versions available
-	 */
-	List<ArtifactoryBundle> getBundlesInArtifactory(String mavenCoordinates, boolean update);
-	
-	/** Deploy a build of the current source code to the Appstore artifactory. The result shall look like the result
-	 * of the following procedure:<br>
-	 * - Change the version of the bundle to the version specified<br>
-	 * - Build the bundle and deploy<br>
-	 * - Change back the version of the bundle to the previous version. There should be no commit with the version
-	 * specified here.<br>
-	 * - Details shall be discussed, for examle: How can the git commit used be included into the artifact so that
-	 * this information can be used by the appstore so that {@link ArtifactoryBundle#gitCommit()} can be provided?
-	 * 
-	 * @param mavenCoordinates
-	 * @param version
-	 * @return
-	 */
-	ArtifactoryBundle deployToArtifactory(SourceCodeBundle sourceBundle, String version);
-	
+public interface GatewayVersionManagement {
 	
 	/** Get effective bundles specified for a gateway in a Rundir. The effective setting for a rundir is determined
 	 * by:<br>
 	 * - The base configuration of bundles specified in the config/MM_*.xml files with MM being increasing numbers indicating
-	 * the ordert in which the files shall be processed<br>
+	 * the order in which the files shall be processed<br>
 	 * - files provided in config_NNNNN/config/MM_*.xml with NNNNN being the gatewayID and MM_*.xml files that are
 	 * used to overwrite the default files in the main config directory.
 	 * Development note: This is described in [Mirror Rundirs, internally](https://gitlab.com/smartrplace/smartrplace-main/-/wikis/Development/MirrorRundirs#setting-up-and-management-of-instances) 
 	 * 
-	 * @param rundirPath path to local rundir directory to be used
+	 * @param rundirPath repository of the local rundir directory to be used
 	 * @param gatewayID usually in the form of a 5-digit number. If null then only the general xml files in the main
 	 * 		config directory shall be taken into account
 	 * @return Maven coordinates including groupId and artifactId of the bundles specified in the Rundir for
 	 * 		the gateway
 	 */
-	List<AppstoreBundle> getRundirBundles(String rundirPath, String gatewayID);
+	List<AppstoreBundle> getRundirBundles(GitRepository rundirPath, String gatewayID);
 	
 	/** The skeleton rundir defines the standard xml files and further standard files. These are used for several
 	 * update procedures
@@ -85,7 +45,7 @@ public interface GitMavenAppstoreService {
 	 * @param rundirPath
 	 */
 	void setDefaultSSRCRundir(String rundirPath);
-	
+
 	public enum SingleGatewayUpdateMode {
 		/** This option means that just version of the {@link AppstoreBundle} specified shall be changed
 		 * without any side effects. Upgrade and downdgrade shall be supported here.
@@ -111,22 +71,24 @@ public interface GitMavenAppstoreService {
 	}
 	
 	/** Update the version of a single bundle with potential side effects on other bundles based on the updateMode
-	 * specified.
+	 * specified. This method shall just affect the local instance of the configuration Git repository. Committing the
+	 * changes and thus triggering the actual updates shall be performed via {@link GitRepository#performCommitPush(boolean)}.
+	 * 
 	 * It is not required to perform a check whether the new version is available in the artifactory. This shall be
 	 * done by the using application.
 	 * 
-	 * @param rundirPath
+	 * @param rundirPath repository of the local clone of the project rundir holding the xml configuration files
 	 * @param gatewayID if null then the general setting shall be updated. When one of the {@link SingleGatewayUpdateMode}s
 	 * 		starting with FULL is selected, then any downgrades in any gateway shall be prevented. Note that only those
 	 * 		gateways shall trigger a software update for which a change in effective special or general bundles is detected.
 	 *      This can be implemented by only triggering an update an a gateway if an update on the respective config_NNNNN directory
 	 *      is made, e.g. in a file containing just a number that is counted upwards with each update.
-	 * @param mavenCoordinates of the bundle. May be null if only standard bundles shall be updated
-	 * @param version
+	 * @param mavenBundle coordinates and version of the bundle. May be null if only standard bundles shall be updated
 	 * @param updateMode
+	 * 
 	 * @return list of bundle entries changed
 	 */
-	List<AppstoreBundle> updateVersion(String rundirPath, String gatewayID, String mavenCoordinates, String version,
+	List<AppstoreBundle> updateVersion(GitRepository rundirPath, String gatewayID, MavenBundleVersioned mavenBundle,
 			SingleGatewayUpdateMode updateMode);
 	
 	public enum MultiGatewayUpdateMode {
@@ -155,16 +117,12 @@ public interface GitMavenAppstoreService {
 	 * 
 	 * 
 	 * @param rundirPath
-	 * @param mavenCoordinates
-	 * @param version
+	 * @param mavenBundle
 	 * @param updateMode
 	 * @param multiGatewayModeSpec
 	 * @return list of bundle entries changed
 	 */
-	List<AppstoreBundle> updateVersion(String rundirPath, String mavenCoordinates, String version,
+	List<AppstoreBundle> updateVersion(GitRepository rundirPath, String gatewayID, MavenBundleVersioned mavenBundle,
 			SingleGatewayUpdateMode updateMode,
 			MultiGatewayUpdateMode multiGatewayModeSpec);
-	
-	GitRepository getRundirRepository(String rundirPath);
-
 }

@@ -1,6 +1,9 @@
 package org.smartrplace.appstore.api;
 
-public interface AppstoreBundle extends ArtifactoryBundle {
+/** Representation of an entry in an xml configuration file for a gateway rundir*/
+public interface AppstoreBundle {
+	MavenBundleVersioned mavenCoordinates();
+	
 	/** Location for installation inside the bin directory*/
 	String installationLocation();
 	
@@ -8,7 +11,8 @@ public interface AppstoreBundle extends ArtifactoryBundle {
 	int startLevel();
 	
 	/** If the version is not specified explicitly for the bundle, but via a version placeholder for which the
-	 * version is specified on top of the xml file then this placeholder String is returned here.
+	 * version is specified on top of the xml file then this placeholder String is returned here. The version
+	 * specified by the placehoder shall still be included in {@link #mavenCoordinates()}.
 	 * @return null if the version is specified directly for the bundle entry
 	 */
 	String versionGroupID();
