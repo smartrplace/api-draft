@@ -47,8 +47,8 @@ public interface GatewayUpdateService {
 	 * 		shall be deleted if it exists.
 	 * @param updateMode
 	 * 
-	 * @return list of bundle entries changed
+	 * @return new bundle entry
 	 */
-	List<AppstoreBundle> updateOrSetVersion(GitRepository rundirPath, String fileName, String gatewayID, MavenBundleVersioned mavenBundle);
+	AppstoreBundle updateOrSetVersion(GitRepository rundirPath, String fileName, String gatewayID, MavenBundleVersioned mavenBundle);
 
 }

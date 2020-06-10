@@ -23,11 +23,12 @@ public interface GitRepository {
 	/** Commit all changes in the repository, pull any outside chanes and push the the new commit 
 	 *  Note that this shall only be done on the rundir configuration repositories by the appstore,
 	 *  not on the source code repositories.
+	 * @param commitMessage if null a default message representing the updates shall be used
 	 * @param forcePush if true then merging and pushing shall be enforced even if the standard merge
 	 * 		of Git fails. In this case the local content may be reset to the head so that merging 
 	 * 		works for sure.
 	 * @return true if content was obtained via pull meaning the content of the repository was changed
 	 * 		from outside the repository, which may require an update of the GUI content.
 	 */
-	boolean performCommitPush(boolean forcePush);
+	boolean performCommitPush(String commitMessage, boolean forcePush);
 }
