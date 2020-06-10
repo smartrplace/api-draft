@@ -22,7 +22,7 @@ public interface GatewayVersionManagement {
 	 * by:<br>
 	 * - The base configuration of bundles specified in the config/MM_*.xml files with MM being increasing numbers indicating
 	 * the order in which the files shall be processed<br>
-	 * - files provided in config_NNNNN/config/MM_*.xml with NNNNN being the gatewayID and MM_*.xml files that are
+	 * - files provided in config_<gatewayID>/config/MM_*.xml with NNNNN being the gatewayID and MM_*.xml files that are
 	 * used to overwrite the default files in the main config directory.
 	 * Development note: This is described in [Mirror Rundirs, internally](https://gitlab.com/smartrplace/smartrplace-main/-/wikis/Development/MirrorRundirs#setting-up-and-management-of-instances) 
 	 * 
@@ -52,7 +52,7 @@ public interface GatewayVersionManagement {
 		 */
 		SPECIFIED_ENTRY_ONLY,
 		/** In this mode the standard xml files for the gateway are updated to the skeleton and SRC default. If this
-		 * is an update of just a single gateway then the files are provided in the config_NNNNN directory as the
+		 * is an update of just a single gateway then the files are provided in the config_<gatewayID> directory as the
 		 * update shall not change the configuration of other gateways. Alle updates also of other bundles caused by
 		 * this are just accepted. If this would cause a downgrade of any bundle (e.g. because an edited version of
 		 * a standard xml file is set for the gateway before) then the downgrade shall be prevented by adding a
@@ -81,7 +81,7 @@ public interface GatewayVersionManagement {
 	 * @param gatewayID if null then the general setting shall be updated. When one of the {@link SingleGatewayUpdateMode}s
 	 * 		starting with FULL is selected, then any downgrades in any gateway shall be prevented. Note that only those
 	 * 		gateways shall trigger a software update for which a change in effective special or general bundles is detected.
-	 *      This can be implemented by only triggering an update an a gateway if an update on the respective config_NNNNN directory
+	 *      This can be implemented by only triggering an update an a gateway if an update on the respective config_<gatewayID> directory
 	 *      is made, e.g. in a file containing just a number that is counted upwards with each update.
 	 * @param mavenBundle coordinates and version of the bundle. May be null if only standard bundles shall be updated
 	 * @param updateMode

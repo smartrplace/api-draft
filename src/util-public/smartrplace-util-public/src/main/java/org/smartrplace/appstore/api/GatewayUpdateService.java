@@ -27,7 +27,7 @@ public interface GatewayUpdateService {
 	 * @param rundirPath repository of the local rundir directory to be used this can also be the skeleton or the default SRC rundir,
 	 * 		which are not managed via Git by the Appstore.
 	 * @param gatewayID usually in the form of a 5-digit number. If null then only the general xml files in the main
-	 * 		config directory shall be taken into account, otherwise only the gateway-specific files in the directory config_NNNNN
+	 * 		config directory shall be taken into account, otherwise only the gateway-specific files in the directory config_<gatewayID>
 	 * @return Map xml file name (without path) -> list of all appstore bundle representations in the file
 	 */
 	Map<String, List<AppstoreBundle>> getRundirBundles(String rundirPath, String gatewayID);
@@ -41,7 +41,7 @@ public interface GatewayUpdateService {
 	 * @param rundirPath repository of the local clone of the project rundir holding the xml configuration files. This method only
 	 * 		writes into directories managed via Git, so a {@link GitRepository} has to be given as argument here.
 	 * @param fileName name of the xml file to be adapted. The name is given without path as the path shall be determined by the gatewayID
-	 * @param gatewayID if null then the general setting shall be updated, otherwise only the version in the gateway directory config_NNNNN
+	 * @param gatewayID if null then the general setting shall be updated, otherwise only the version in the gateway directory config_<gatewayID>
 	 * @param mavenBundle coordinates and version of the bundle. If the same group and artifact ID already exists in the
 	 * 		file then the version shall be overriden, otherwise a new entry shall be created. If the version is null then the entry
 	 * 		shall be deleted if it exists.
