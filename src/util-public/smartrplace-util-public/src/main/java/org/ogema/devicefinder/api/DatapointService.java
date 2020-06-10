@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
+import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
@@ -116,4 +117,19 @@ public interface DatapointService {
 	DPRoom getRoom(String id, String gatewayId);
 	DPRoom getRoom(String id);
 	//TODO: Devices have to be modeled as GatewayResource also when the concept has been proven for rooms
+	
+	/** Get all connections registered so far
+	 * 
+	 * @param type if null connections for all types are returnde
+	 * @param gatewayId
+	 * @return
+	 */
+	List<DpConnection> getConnections(UtilityType type, String gatewayId);
+	
+	/** Like {@link #getConnections(UtilityType, String)} but just for the local gateway
+	 * 
+	 * @param type
+	 * @return
+	 */
+	List<DpConnection> getConnections(UtilityType type);
 }

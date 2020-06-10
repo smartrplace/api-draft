@@ -14,12 +14,13 @@ import de.iwes.timeseries.eval.api.TimeSeriesData;
 import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public class DPUtil {
-	public static List<TimeSeriesData> getTSList(List<Datapoint> dpList) {
+	public static List<TimeSeriesData> getTSList(List<Datapoint> dpList, OgemaLocale locale) {
 		List<TimeSeriesData> result = new ArrayList<>();
 		for(Datapoint dp: dpList) {
-			TimeSeriesDataImpl ts = dp.getTimeSeriesDataImpl();
+			TimeSeriesDataImpl ts = dp.getTimeSeriesDataImpl(locale);
 			if(ts != null)
 				result.add(ts);
 		}

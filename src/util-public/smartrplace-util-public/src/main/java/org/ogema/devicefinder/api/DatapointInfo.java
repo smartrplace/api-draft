@@ -23,7 +23,13 @@ public interface DatapointInfo {
 		/** In this mode the input contains consumption values that reflect the consumption since the 
 		 * last value provided. So these values have to be added up to generate a real meter or have to
 		 * be divided by the respective time step to get power estimation values*/
-		Consumption2Meter
+		Consumption2Meter,
+		/** Average power or other value. The average shall apply to the entire time series until the
+		 * next value. The last two values of the time series shall be equal an indicate the duration of
+		 * the last interval. This can be applied to almost all evaluated measurement values and other
+		 * evaluation results.
+		 */
+		AVERAGE_VALUE_PER_STEP
 	}
 	
 	public static enum UtilityType {
@@ -37,10 +43,27 @@ public interface DatapointInfo {
 		WATER,
 		/** Default unit is kg*/
 		FOOD,
+		/** Heating degree days for a room or for the entire building*/
+		HEATING_DEGREE_DAYS,
+		COOLING_DEGREE_DAYS,
 		/** For generic processing also an unknown utility type be processed*/
 		UNKNOWN
 	}
 
+	public static String getDefaultUnit(UtilityType type) {
+		switch(type) {
+		case ELECTRICITY: return "kWh";
+		case HEAT_ENERGY: return "kWh";
+		case ENERGY_MIXED: return "kWh";
+		case WATER: return "m3";
+		case HEATING_DEGREE_DAYS: return "Kd";
+		case COOLING_DEGREE_DAYS: return "Kd";
+		case FOOD: return "kg";
+		case UNKNOWN: return "-";
+		default: throw new IllegalStateException("Unknown type: "+type);
+		}
+	}
+	
 	/** Definition of the conversion of datapoint values into OGEMA standard conformant values*/
 	public static interface ValueConversion {
 		/** Convert into standard conformant value
@@ -69,4 +92,25 @@ public interface DatapointInfo {
 
 	public InterpolationMode getInterpolationMode();
 	public void setInterpolationMode(InterpolationMode mode);
+	
+	/** Check if the datapoint has a connection
+	 * 
+	 * @return null if no connection available, otherwise the connection of the datapoint is returned
+	 */
+	public DpConnection getExistingConnection();
+	
+	/** Get or create connection for the location requested
+	 * 
+	 * @param connectionLocation
+	 * @param type
+	 * @return suitable DpConnection for the UtilityType. The connection is unique for the gateway
+	 */
+	public DpConnection getConnection(String connectionLocation, UtilityType type);
+	
+	/** The sum up level defines which meters can be aggregated. Standard sum up level are defined in
+	 * {@link SumUpLevel}
+	 * @return
+	 */
+	public int getSumUpLevel();
+	public boolean setSumUpLevel(int level);
 }

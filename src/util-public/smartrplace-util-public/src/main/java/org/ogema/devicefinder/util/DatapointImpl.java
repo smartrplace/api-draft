@@ -8,8 +8,10 @@ import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo;
 import org.ogema.devicefinder.api.DatapointInfoProvider;
+import org.ogema.devicefinder.api.DpConnection;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
+import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.frontend.servlet.UserServletUtil;
@@ -34,6 +36,11 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	protected Resource deviceResource = null;
 	
 	protected ReadOnlyTimeSeries tseries = null;
+	
+	//overwrite
+	protected DpConnection getConnection(String connectionLocation, UtilityType type) {
+		return null;
+	};
 	
 	public DatapointImpl(String location, String gatewayId, Resource resource,
 			OGEMADriverPropertyService<Resource> driverService,
@@ -247,12 +254,12 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		return true;
 	}
 	@Override
-	public TimeSeriesDataImpl getTimeSeriesDataImpl() {
+	public TimeSeriesDataImpl getTimeSeriesDataImpl(OgemaLocale locale) {
 		if(timeSeriesID != null)
 			return UserServlet.knownTS.get(timeSeriesID);
 		ReadOnlyTimeSeries ts = getTimeSeries();
 		if(ts != null) {
-			String label = label(null);
+			String label = label(locale);
 			return new TimeSeriesDataImpl(ts, label, label, info().getInterpolationMode());
 		}
 		return null;

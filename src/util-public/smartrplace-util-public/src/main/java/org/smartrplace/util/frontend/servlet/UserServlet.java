@@ -266,29 +266,13 @@ public class UserServlet extends HttpServlet {
 						 value = multiVal.mainValue;
 					}
 					addValue(value, jsonkey, subJson, suppressNan);
-					/*if(value == null)
-						subJson.put(jsonkey, "");
-					if(value instanceof FloatValue) {
-						float val = value.getFloatValue();
-						UserServletUtil.addValueEntry(val, jsonkey, suppressNan, result);
-						//if(Float.isNaN(val))
-						//	subJson.put(jsonkey, "NaN");
-						//else
-						//	subJson.put(jsonkey, val);
-					} else if(value instanceof IntegerValue)
-						subJson.put(jsonkey, value.getIntegerValue());
-					else if(value instanceof DoubleValue)
-						subJson.put(jsonkey, value.getDoubleValue());
-					else if(value instanceof BooleanValue)
-						subJson.put(jsonkey, value.getBooleanValue());
-					else if(value instanceof LongValue)
-						subJson.put(jsonkey, value.getLongValue());
-					else if(value instanceof StringValue)
-						subJson.put(jsonkey, value.getStringValue());
-					else
-						subJson.put(jsonkey, value);*/
+
 				} else {
 					JSONObject value = valprov.getJSON(user, key);
+					if(value.toString() == null) {
+						logger.info("JSON toString null for "+valprov.getClass().getName());
+						continue;
+					}
 					subJson.put(jsonkey, value);
 				}
 				} catch(Exception e) {

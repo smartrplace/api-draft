@@ -85,10 +85,10 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	boolean unregisterInfoProvider(DatapointInfoProvider provider);
 	
 	/** Get time series representation for evalution API V1
+	 * @param locale determines label and description of the timeseries, they are equal to {@link #label(OgemaLocale)}(null)
 	 * @return null if not timeseries information is availble. If {@link #getTimeSeries()} is non-null 
-	 * 		then also a non-null value shall be returned here. Note that label and description
-	 * 		of the timeseries are equal to label(null) of the timeseries.*/
-	TimeSeriesDataImpl getTimeSeriesDataImpl();
+	 * 		then also a non-null value shall be returned here.*/
+	TimeSeriesDataImpl getTimeSeriesDataImpl(OgemaLocale locale);
 	
 	ReadOnlyTimeSeries getTimeSeries();
 	void setTimeSeries(ReadOnlyTimeSeries tseries);

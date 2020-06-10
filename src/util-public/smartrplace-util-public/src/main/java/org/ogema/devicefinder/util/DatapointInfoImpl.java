@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.devicefinder.api.DatapointInfo;
-import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.devicefinder.api.DpConnection;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 
@@ -19,13 +19,15 @@ public class DatapointInfoImpl implements DatapointInfo {
 	protected UtilityType utilityType;
 	protected ValueConversion valueConversion;
 	protected InterpolationMode interpolationMode;
+	protected DpConnection connection;
+	protected int sumUpLevel = 0;
 	
-	protected final Datapoint dp;
+	protected final DatapointImpl dp;
 
-	public DatapointInfoImpl(Datapoint dp) {
+	public DatapointInfoImpl(DatapointImpl dp) {
 		this.dp = dp;
 	};
-	public DatapointInfoImpl(Datapoint dp, AggregationMode aggregationMode, UtilityType utilityType) {
+	public DatapointInfoImpl(DatapointImpl dp, AggregationMode aggregationMode, UtilityType utilityType) {
 		this(dp);
 		this.aggregationMode = aggregationMode;
 		this.utilityType = utilityType;
@@ -34,10 +36,12 @@ public class DatapointInfoImpl implements DatapointInfo {
 	private static final Map<UtilityType, List<GaRoDataType>> typeByUtility = new LinkedHashMap<>();
 	static {
 		typeByUtility.put(UtilityType.ELECTRICITY, Arrays.asList(new GaRoDataType[] {
-				GaRoDataType.PowerMeterEnergy, GaRoDataType.PowerMeterOutlet
+				GaRoDataType.PowerMeterEnergy, GaRoDataType.PowerMeterOutlet,
+				GaRoDataType.PowerMeter, GaRoDataType.PowerMeterSubphase,
+				GaRoDataType.EnergyIntegralOutlet, GaRoDataType.PowerMeterEnergySubphase
 		}));
 		typeByUtility.put(UtilityType.HEAT_ENERGY, Arrays.asList(new GaRoDataType[] {
-				GaRoDataType.HeatEnergyIntegral
+				GaRoDataType.HeatEnergyIntegral, GaRoDataType.Heatpower
 		}));
 		List<GaRoDataType> mixedlist = new ArrayList<>(typeByUtility.get(UtilityType.ELECTRICITY));
 		mixedlist.addAll(typeByUtility.get(UtilityType.HEAT_ENERGY));
@@ -99,6 +103,31 @@ public class DatapointInfoImpl implements DatapointInfo {
 	@Override
 	public void setInterpolationMode(InterpolationMode mode) {
 		interpolationMode = mode;
+	}
+	
+	@Override
+	public DpConnection getExistingConnection() {
+		return connection;
+	}
+	
+	@Override
+	public DpConnection getConnection(String connectionLocation, UtilityType type) {
+		if(connection != null) {
+			if(connection.getUtilityType() != type)
+				throw new IllegalStateException("Type for "+connectionLocation+" already set to "+connection.getUtilityType().name()+", requested:"+type.name());
+			return connection;
+		}
+		connection = dp.getConnection(connectionLocation, type);
+		return connection;
+	}
+	@Override
+	public int getSumUpLevel() {
+		return sumUpLevel;
+	}
+	@Override
+	public boolean setSumUpLevel(int level) {
+		this.sumUpLevel = level;
+		return true;
 	}
 
 }
