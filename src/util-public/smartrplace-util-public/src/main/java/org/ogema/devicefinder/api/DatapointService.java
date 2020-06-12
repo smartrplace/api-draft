@@ -132,4 +132,13 @@ public interface DatapointService {
 	 * @return
 	 */
 	List<DpConnection> getConnections(UtilityType type);
+	
+	/** Get all groups for which {@link #getGroup(String)} has been called at least once*/
+	List<DatapointGroup> getAllGroups();
+	
+	/** Get or create group*/
+	DatapointGroup getGroup(String id);
+	
+	/** true if {@link #getGroup(String)} has been called once for the respective id*/
+	boolean hasGroup(String id);
 }

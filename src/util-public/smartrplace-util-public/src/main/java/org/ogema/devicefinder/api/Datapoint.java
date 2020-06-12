@@ -92,6 +92,11 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
 	ReadOnlyTimeSeries getTimeSeries();
 	void setTimeSeries(ReadOnlyTimeSeries tseries);
+	/** Add or set timeseries information for the datapoint
+	 * 
+	 * @param tseries
+	 * @param publishViaServlet default is false
+	 */
 	void setTimeSeries(ReadOnlyTimeSeries tseries, boolean publishViaServlet);
 	
 	/** Datapoints that are not based on a resource can be registered as virtual sensors. New
