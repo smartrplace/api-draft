@@ -45,8 +45,8 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 	
 	protected void finishConstructor() {
 		updateTables();
-		DoorWindowSensorTable winSensTable = new DoorWindowSensorTable(page, controller, this, alert);
-		winSensTable.triggerPageBuild();
+		//DoorWindowSensorTable winSensTable = new DoorWindowSensorTable(page, controller, this, alert);
+		//winSensTable.triggerPageBuild();
 		triggerPageBuild();		
 	}
 	
