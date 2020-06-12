@@ -120,10 +120,13 @@ public class UserServlet extends HttpServlet {
 		String pollStr = req.getParameter("poll");
 		Map<String, String[]> paramMap = getParamMap(req);
 		
-		JSONObject result = getJSON(object, user, pollStr, timeStr, pageMap, returnStruct, paramMap);
+		JSONVarrRes result = getJSON(object, user, pollStr, timeStr, pageMap, returnStruct, paramMap);
 		
 		resp.addHeader("content-type", "application/json;charset=utf-8");
-		resp.getWriter().write(result.toString());
+		if(result.result != null)
+			resp.getWriter().write(result.result.toString());
+		else
+			resp.getWriter().write(result.resultArr.toString());
 		resp.setStatus(200);
 	}
 	
@@ -139,9 +142,18 @@ public class UserServlet extends HttpServlet {
 		return paramMap;
 	}
 	
-	protected <T> JSONObject getJSON(String objectId, String user, String pollStr, String timeString,
+	protected static class JSONVarrRes {
+		JSONObject result = null;
+		JSONArray resultArr = null;		
+	}
+	protected <T> JSONVarrRes getJSON(String objectId, String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap) {
-		JSONObject result = new JSONObject();
+		final boolean topArray = UserServlet.getBoolean("topArray", paramMap);
+		JSONVarrRes res = new JSONVarrRes();
+		if(topArray)
+			res.resultArr = new JSONArray();
+		else
+			res.result = new JSONObject();
 		boolean suppressNan = UserServletUtil.suppressNan(paramMap);
 		
 		if(pageprov == null) {
@@ -150,8 +162,9 @@ public class UserServlet extends HttpServlet {
 				System.out.println(message);
 			else
 				logger.info("Servlet provider exception: {}", message);
-			result.put("exception", message);
-			return result;
+			writeMessage(res, "exception", message);
+			//result.put("exception", message);
+			return res;
 		}
 
 		final ReturnStructure retStruct;
@@ -170,8 +183,9 @@ public class UserServlet extends HttpServlet {
 				System.out.println(message);
 			else
 				logger.info("Servlet provider exception: {}", message);
-			result.put("exception", message);
-			return result;
+			writeMessage(res, "exception", message);
+			//result.put("exception", message);
+			return res;
 		}
 		
 		boolean doPoll;
@@ -201,8 +215,9 @@ public class UserServlet extends HttpServlet {
 					e.printStackTrace();
 				else
 					logger.info("Servlet provider exception: ", e);
-				result.put("exception", e.toString());
-				return result;
+				writeMessage(res, "exception", e.toString());
+				//result.put("exception", e.toString());
+				return res;
 			}
 			JSONObject subJson;
 			final JSONArray subJsonArr;
@@ -286,15 +301,29 @@ public class UserServlet extends HttpServlet {
 					subJsonArr.put(subJson);
 			}
 			if(retStruct == ReturnStructure.LIST) {
-				result.put(objStr, subJsonArr);
+				if(res.result != null)
+					res.result.put(objStr, subJsonArr);
+				else
+					res.resultArr.put(subJsonArr);
 			} else
-				result.put(objStr, subJson);
+				if(res.result != null)
+					res.result.put(objStr, subJson);
+				else
+					res.resultArr.put(subJson);
 		}
 		} catch(ConcurrentModificationException e) {
 			System.out.println("Count:"+count+"  Org size:"+orgSize+" now:"+objects.size());
 			e.printStackTrace();
 		}
-		return result;
+		return res;
+	}
+	
+	
+	protected void writeMessage(JSONVarrRes res, String key, String message) {
+		if(res.result != null)
+			res.result.put(key, message);
+		else
+			res.resultArr.put(key+" : "+message);
 	}
 	
 	protected <T> Collection<T> getObjects(String objectId, String user, ServletPageProvider<T> prov) {
