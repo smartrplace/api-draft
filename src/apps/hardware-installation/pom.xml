@@ -8,8 +8,8 @@
     </parent>
     
     <artifactId>hardware-installation</artifactId>
-    <name>Smartrplace Hardware Installation App</name>
-    <description>Smartrplace hardware installation support app</description>
+    <name>Setup And Installation</name>
+    <description>Hardware and Driver setup and configuration</description>
     
     <packaging>bundle</packaging>
         

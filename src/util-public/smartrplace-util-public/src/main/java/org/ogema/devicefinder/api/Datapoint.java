@@ -14,6 +14,7 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
 	public static final String UNKNOWN_ROOM_ID = "noRoomInfo";
+	public static final String UNKNOWN_ROOM_NAME = "NRI";
 
 	/** The method label shall always return a non-null String. The label shall be used by evaluation tables,
 	 * charts etc. by default as human readable label. The label usually is a combination of
@@ -48,7 +49,7 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	 * information is available;
 	 */
 	default String getRoomName(OgemaLocale locale) {
-		return "noRoomInfo";
+		return UNKNOWN_ROOM_NAME;
 	};
 	
 	/** Get the timeseriesID used by the TimeSeriesServlet
@@ -58,7 +59,9 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
 	/** Note that the timeseries itself has to be put into the Map {@link UserServlet#knownTS}
 	 * separatly in order to be accessible via the timeseriesID
-	 * @param id
+	 * @param id if null the timeseries is registered for the timeseries servlet if this has
+	 * 		not been done before and if a time series is available. This is similar to calling
+	 * 		{@link #setTimeSeries(ReadOnlyTimeSeries, boolean)} with the second parameter being true
 	 * @return true if set ID was set succesfully (returns never false)
 	 */
 	boolean setTimeSeriesID(String id);

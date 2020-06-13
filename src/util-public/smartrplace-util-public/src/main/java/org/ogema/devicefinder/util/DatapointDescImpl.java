@@ -45,14 +45,14 @@ public class DatapointDescImpl implements DatapointDesc {
 
 	@Override
 	public String getTypeName(OgemaLocale locale) {
-		if(garoDataType == null || garoDataType == GaRoDataType.Unknown) {
+		//if(garoDataType == null || garoDataType == GaRoDataType.Unknown) {
 			String result = typeName.get(locale);
 			if(result != null)
 				return result;
 			result = typeName.get(OgemaLocale.ENGLISH);
 			if(result != null)
 				return result;
-		}
+		//}
 		return DatapointDesc.super.getTypeName(locale);
 	}
 	

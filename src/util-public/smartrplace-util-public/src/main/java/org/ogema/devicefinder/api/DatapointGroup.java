@@ -7,6 +7,7 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.template.LabelledItem;
 
 public interface DatapointGroup extends LabelledItem {
+	public static final String DEFAULT_PLOT_CONFIG_PAGE = "DevicePlotPage";
 	/** Set label for the group that is used as label for the chart if a
 	 * chart is configured
 	 * @param locale if null the {@link OgemaLocale#ENGLISH} is used. This will also be used if
@@ -30,7 +31,7 @@ public interface DatapointGroup extends LabelledItem {
 	 * 		appear. For now just the default page is supported.
 	 * @return
 	 */
-	boolean registerAsChart(String cofigurationPage);
+	boolean registerAsChart(String configurationPage);
 	
 	List<String> getChartConfigPagesRegistered();
 }

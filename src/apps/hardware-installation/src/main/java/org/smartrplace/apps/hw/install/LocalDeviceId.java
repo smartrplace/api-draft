@@ -1,15 +1,15 @@
 package org.smartrplace.apps.hw.install;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.ogema.core.model.Resource;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class LocalDeviceId {
     public static Map<String, String> types = new HashMap<>();
@@ -28,11 +28,11 @@ public abstract class LocalDeviceId {
     private static final Pattern ID_PATTERN = Pattern.compile("\\w+-(\\d+)");
 
 	public static <T extends Resource> String generateDeviceId(InstallAppDevice dev, HardwareInstallConfig cfg,
-			DeviceHandlerProvider<T> tableProvider) {
+			DeviceHandlerProvider<T> tableProvider, DatapointService dpService) {
 
 		final String typeId;
 		if (tableProvider != null) {
-			typeId = tableProvider.getDeviceTypeShortId(dev);
+			typeId = tableProvider.getDeviceTypeShortId(dev, dpService);
 		} else {
 			// Fall back to default id generation.
 			// Improvement:  Always provide a non-null tableProvider so we can

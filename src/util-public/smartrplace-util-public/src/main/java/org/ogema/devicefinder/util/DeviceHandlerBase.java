@@ -1,5 +1,6 @@
 package org.ogema.devicefinder.util;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
@@ -14,6 +15,7 @@ import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.PatternListenerExtended;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHandlerProvider<T> {
@@ -65,6 +67,18 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	@Override
 	public String getDeviceName(InstallAppDevice installDeviceRes) {
 		return DeviceTableRaw.getName(installDeviceRes);
+	}
+	
+	protected void setInstallationLocation(InstallAppDevice device, String subLoc, DatapointService dpService) {
+		ValueResourceHelper.setCreate(device.installationLocation(), subLoc);
+		checkDpSubLocations(device, getDatapoints(device, dpService));
+	}
+	
+	protected void checkDpSubLocations(InstallAppDevice device, Collection<Datapoint> dps) {
+		for(Datapoint dp: dps) {
+			if(dp.getSubRoomLocation(null, null) == null)
+				dp.setSubRoomLocation(null, null, device.installationLocation().getValue());
+		}		
 	}
 }
 

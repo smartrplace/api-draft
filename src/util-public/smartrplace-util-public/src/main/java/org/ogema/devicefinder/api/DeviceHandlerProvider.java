@@ -93,7 +93,7 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	/**
 	 * @return A 3-4 letter abbreviation indicating the type of device.
 	 */
-	default String getDeviceTypeShortId(InstallAppDevice device) {
+	default String getDeviceTypeShortId(InstallAppDevice device, DatapointService dpService) {
 		if (device.device().exists())
 			return device.device().getClass().getSimpleName().replaceAll("[^A-Z]", "");
 		return "UNK"; // unknown

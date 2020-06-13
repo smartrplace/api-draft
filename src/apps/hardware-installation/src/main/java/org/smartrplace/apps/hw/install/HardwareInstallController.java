@@ -171,7 +171,7 @@ public class HardwareInstallController {
 		InstallAppDevice install = appConfigData.knownDevices().add();
 		initializeDevice(install, device, tableProvider);
 		if(tableProvider != null)
-			startSimulation(tableProvider, device);
+			startSimulation(tableProvider, install);
 		return install;
 	}
 	public InstallAppDevice removeDevice(Resource device) {
@@ -187,25 +187,39 @@ public class HardwareInstallController {
 		if (!install.installationStatus().exists()) install.installationStatus().create();
 		if (!install.deviceId().exists()) install.deviceId().create();
 		if (install.deviceId().getValue().isEmpty())
-			install.deviceId().setValue(LocalDeviceId.generateDeviceId(install, appConfigData, tableProvider));
+			install.deviceId().setValue(LocalDeviceId.generateDeviceId(install, appConfigData, tableProvider,
+					dpService));
 		install.activate(true);
 	}
 	
-	
-	@SuppressWarnings("unchecked")
 	public <T extends Resource> void startSimulations(DeviceHandlerProvider<T> tableProvider) {
 		Class<?> tableType = tableProvider.getResourceType();
 		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
 			if(install.device().getResourceType().equals(tableType)) {
-				startSimulation(tableProvider, (T)install.device());
+				startSimulation(tableProvider, install);
+			}
+		}
+	}
+	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device) {
+		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
+			if(install.device().equalsLocation(device)) {
+				startSimulation(tableProvider, install, device);
+				break;
 			}
 		}
 	}
 	protected Map<String, Set<String>> simulationsStarted = new HashMap<>();
+	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, InstallAppDevice appDevice) {
+		@SuppressWarnings("unchecked")
+		T device = (T) appDevice.device();
+		startSimulation(tableProvider, appDevice, device);
+	}
+	
 	@SuppressWarnings("unchecked")
-	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device) {
+	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, InstallAppDevice appDevice,
+			T device) {
 		if(Boolean.getBoolean("org.smartrplace.apps.hw.install.autologging")) {
-			activateLogging(tableProvider, device);
+			activateLogging(tableProvider, appDevice);
 		}
 		if(!Boolean.getBoolean("org.ogema.sim.simulateRemoteGateway"))
 			return;
@@ -221,8 +235,8 @@ public class HardwareInstallController {
 				mainPage.getRoomSimulation(device), dpService);
 	}
 	
-	protected  <T extends Resource> void activateLogging(DeviceHandlerProvider<T> tableProvider, T device) {
-		for(Datapoint dp: tableProvider.getDatapoints(device, dpService)) {
+	protected  <T extends Resource> void activateLogging(DeviceHandlerProvider<T> tableProvider, InstallAppDevice appDevice) {
+		for(Datapoint dp: tableProvider.getDatapoints(appDevice, dpService)) {
 			if(!tableProvider.relevantForDefaultLogging(dp))
 				continue;
 			ReadOnlyTimeSeries ts = dp.getTimeSeries();

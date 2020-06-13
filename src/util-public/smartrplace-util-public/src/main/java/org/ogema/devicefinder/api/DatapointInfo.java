@@ -3,6 +3,7 @@ package org.ogema.devicefinder.api;
 import org.ogema.core.timeseries.InterpolationMode;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 /** The interface is intended as general access point for various information that may either be stored
  * explicitly here or may be derived from other Datapoint information
@@ -50,6 +51,35 @@ public interface DatapointInfo {
 		UNKNOWN
 	}
 
+	public static String getDefaultShortLabel(UtilityType type) {
+		switch(type) {
+		case ELECTRICITY: return "Elec";
+		case HEAT_ENERGY: return "Heat";
+		case ENERGY_MIXED: return "Energy";
+		case WATER: return "Water";
+		case HEATING_DEGREE_DAYS: return "HeatDD";
+		case COOLING_DEGREE_DAYS: return "CoolDD";
+		case FOOD: return "Food";
+		case UNKNOWN: return "UNK";
+		default: throw new IllegalStateException("Unknown type: "+type);
+		}
+	}
+	public static String getDefaultShortLabel(UtilityType type, OgemaLocale locale) {
+		if(locale != OgemaLocale.GERMAN)
+			return getDefaultShortLabel(type);
+		switch(type) {
+		case ELECTRICITY: return "Strom";
+		case HEAT_ENERGY: return "Wärme";
+		case ENERGY_MIXED: return "Energie";
+		case WATER: return "Wasser";
+		case HEATING_DEGREE_DAYS: return "HeizGT";
+		case COOLING_DEGREE_DAYS: return "KühlGT";
+		case FOOD: return "Futter";
+		case UNKNOWN: return "UNK";
+		default: throw new IllegalStateException("Unknown type: "+type);
+		}
+	}
+	
 	public static String getDefaultUnit(UtilityType type) {
 		switch(type) {
 		case ELECTRICITY: return "kWh";

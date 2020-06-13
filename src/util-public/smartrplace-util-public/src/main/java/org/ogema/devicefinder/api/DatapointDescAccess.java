@@ -13,8 +13,8 @@ public interface DatapointDescAccess extends DatapointDesc {
 	 * @return true if successful*/
 	boolean setGaroDataType(GaRoDataType type);
 	
-	/** The type name is only relevant if {@link #getGaroDataType()} equals null or 
-	 * GaRoDataType.Unknown. Then this
+	/** If this name is set is will be used in priority to the type name
+	 * based on GaRoDataType. Then this
 	 * type name will be returned on {@link #getTypeName(OgemaLocale)}.
 	 * @param typeName
 	 * @param locale see {@link #setLabel(String, OgemaLocale)}

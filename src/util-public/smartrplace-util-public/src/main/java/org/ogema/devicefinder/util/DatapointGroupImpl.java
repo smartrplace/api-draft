@@ -66,8 +66,11 @@ public class DatapointGroupImpl implements DatapointGroup {
 	}
 
 	@Override
-	public boolean registerAsChart(String cofigurationPage) {
-		charts.add(cofigurationPage);
+	public boolean registerAsChart(String configurationPage) {
+		if(configurationPage == null)
+			charts.add(DEFAULT_PLOT_CONFIG_PAGE);
+		else
+			charts.add(configurationPage);
 		return true;
 	}
 

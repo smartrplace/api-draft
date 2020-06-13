@@ -112,10 +112,12 @@ public interface DatapointService {
 	long getFrameworkTime();
 	
 	GatewayResource getStructure(String id, String gatewayId);
+	List<GatewayResource> getAllStructures();
 	
 	/** Note: For now the room id shall always be the same as the label(English)*/
 	DPRoom getRoom(String id, String gatewayId);
 	DPRoom getRoom(String id);
+	List<DPRoom> getAllRooms();
 	//TODO: Devices have to be modeled as GatewayResource also when the concept has been proven for rooms
 	
 	/** Get all connections registered so far

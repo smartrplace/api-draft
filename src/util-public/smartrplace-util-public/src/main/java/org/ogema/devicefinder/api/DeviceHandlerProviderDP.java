@@ -26,7 +26,7 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * cases also direct instances of {@link DatapointImpl} may be returned.
 	 * The service shall add all information to the Datapoints it can provide that are not added
 	 * automatically by the DatapointService.*/
-	Collection<Datapoint> getDatapoints(T deviceResource, DatapointService dpService);
+	Collection<Datapoint> getDatapoints(InstallAppDevice installDeviceRes, DatapointService dpService);
 	
 	/** Get device name. Usually this should be the same name as the name shown in the table provided if {@link DriverHandlerProvider}
 	 * is also implemented.*/

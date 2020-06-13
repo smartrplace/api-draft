@@ -813,8 +813,9 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				FloatResource source = getResource(sva, req, FloatResource.class);
 				if((source instanceof TemperatureResource)&&(mode == 0))
 					myField.setValue(((TemperatureResource)source).getCelsius()+"",req);
-				else
+				else {
 					myField.setValue(source.getValue()+"",req);
+				}
 			}
 			
 			private void setValue(FloatResource source, float value) {
@@ -1158,8 +1159,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	protected <S extends Resource> S getResource(SingleValueResourceAccess<S> sva,
 			OgemaHttpRequest req, Class<? extends S> typeToCreate) {
 		R gw = getResource(getGatewayInfo(req), req);
-		if(gw == null) return null;
 		if(sva.optSource == null) {
+			if(gw == null) return null;
 			if(sva.altIdUsed == null) return null;
 			S result;
 			if(sva.altIdUsed.equals("")) {
@@ -1177,7 +1178,9 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				throw new IllegalComponentStateException("Invalid location should throw framework exception:"+result.getLocation());
 			}
 			return result;
-		} else return sva.optSource;
+		} else {
+			return sva.optSource;
+		}
 	}
 
 	/*********************************** 

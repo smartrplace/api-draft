@@ -23,8 +23,11 @@ public class PatternListenerExtendedImpl<P extends ResourcePattern<R>, R extends
 	public void patternAvailable(P pattern) {
 		availablePatterns.add(pattern);
 		
-		app.addDeviceIfNew(pattern.model, devHandler);
-		
+		try {
+			app.addDeviceIfNew(pattern.model, devHandler);
+		} catch(NullPointerException e) {
+			throw(e);
+		}
 		app.startSimulation(devHandler, pattern.model.getLocationResource());
 		/*if(!Boolean.getBoolean("org.ogema.sim.simulateRemoteGateway"))
 			return;

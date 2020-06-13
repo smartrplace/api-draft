@@ -153,6 +153,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	
 	@Override
 	public boolean setTimeSeriesID(String id) {
+		if(id == null && timeSeriesID == null && tseries != null) {
+			setTimeSeries(tseries, true);
+			return true;
+		}
 		timeSeriesID = id;
 		return true;
 	}
@@ -255,8 +259,6 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	}
 	@Override
 	public TimeSeriesDataImpl getTimeSeriesDataImpl(OgemaLocale locale) {
-		if(timeSeriesID != null)
-			return UserServlet.knownTS.get(timeSeriesID);
 		ReadOnlyTimeSeries ts = getTimeSeries();
 		if(ts != null) {
 			String label = label(locale);
@@ -285,6 +287,9 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	public void setTimeSeries(ReadOnlyTimeSeries tseries, boolean publishViaServlet) {
 		setTimeSeries(tseries);
 		if(publishViaServlet) {
+			/** The label of the time series given to UserServletUtil/TimeSeriesServlet must be equal to
+			 * the timeseriesID. So we cannot use the label when using the timeseries later on
+			 */
 			setTimeSeriesID(UserServletUtil.getOrAddTimeSeriesData(tseries, id()));
 		}
 	}
