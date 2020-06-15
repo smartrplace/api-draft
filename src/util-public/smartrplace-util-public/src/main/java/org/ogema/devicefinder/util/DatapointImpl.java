@@ -137,7 +137,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		String stdLabel = getRoomName(locale);
 		String subRoom = getSubRoomLocation(locale, null);
 		if(subRoom != null)
-			stdLabel += "-"+subRoom;
+			if(stdLabel.equals(DPRoom.BUILDING_OVERALL_ROOM_LABEL))
+				stdLabel = subRoom;
+			else
+				stdLabel += "-"+subRoom;
 		stdLabel += "-"+getTypeName(locale);
 		if(!isLocal()) {
 			String gwId = getGatewayId();

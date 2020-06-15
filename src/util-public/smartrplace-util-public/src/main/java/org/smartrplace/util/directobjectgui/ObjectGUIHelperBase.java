@@ -28,6 +28,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.extended.html.bricks.PageSnippet;
 import de.iwes.widgets.api.extended.resource.DefaultResourceTemplate;
@@ -445,7 +446,7 @@ public class ObjectGUIHelperBase<T> {
 	}
 	
 	public boolean checkLineId(String widgetId) {
-		String canonicalWidgetId = ResourceUtils.getValidResourceName(widgetId);
+		String canonicalWidgetId = WidgetHelper.getValidWidgetId(widgetId);
 		fullHeaderMap.put(canonicalWidgetId, widgetId);
 		if(detailWidgetsChosenManually) {
 			boolean val = widgetsInOverview.contains(canonicalWidgetId);

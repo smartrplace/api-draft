@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.api;
 
 import org.ogema.core.timeseries.InterpolationMode;
+import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -51,6 +52,9 @@ public interface DatapointInfo {
 		UNKNOWN
 	}
 
+	public static final UtilityType[] defaultSRCTypes = new UtilityType[] {UtilityType.ELECTRICITY, UtilityType.HEAT_ENERGY,
+			UtilityType.WATER};
+	
 	public static String getDefaultShortLabel(UtilityType type) {
 		switch(type) {
 		case ELECTRICITY: return "Elec";

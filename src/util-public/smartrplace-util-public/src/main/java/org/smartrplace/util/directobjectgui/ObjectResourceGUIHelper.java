@@ -39,6 +39,7 @@ import org.smartrplace.util.directresourcegui.SingleValueResourceAccess;
 import org.smartrplace.util.file.ApacheFileAdditions;
 import org.smartrplace.util.format.ValueConverter;
 import org.smartrplace.util.format.ValueFormat;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
@@ -113,14 +114,14 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	
 	public Label stringLabel(String widgetId, String lineId, final StringResource source, Row row) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = stringLabel(widgetId + lineId, source, null, null);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
 	}
 	public Label stringLabel(String widgetId, String lineId, final String text, Row row) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = stringLabel(widgetId + lineId, null, null, text);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -161,7 +162,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label floatLabel(String widgetId, String lineId, final FloatResource source, Row row,
 			 String format) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = floatLabel(widgetId + lineId, source, null, format);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -184,7 +185,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	 * @param fomat: if null "%.1f" is used
 	 * @return
 	 */
-	private Label floatLabel(String widgetId, final FloatResource optSource, String altId, final String formatIn) {
+	private Label floatLabel(final String widgetId, final FloatResource optSource, String altId, final String formatIn) {
 		final SingleValueResourceAccess<FloatResource> sva = new SingleValueResourceAccess<FloatResource>(optSource, altId);
 		Float minValue;
 		String format;
@@ -229,7 +230,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label intLabel(String widgetId, String lineId, final IntegerResource source, Row row,
 			final int mode) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = intLabel(widgetId + lineId, source, null, mode);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -275,7 +276,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label booleanLabel(String widgetId, String lineId, final BooleanResource source, Row row,
 			final int mode) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = booleanLabel(widgetId + lineId, source, null, mode);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -326,7 +327,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label timeLabel(String widgetId, String lineId, final TimeResource source, Row row,
 			final int mode) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = timeLabel(widgetId + lineId, source, null, mode);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -393,7 +394,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label fileSizeLabel(String widgetId, String lineId, final TimeResource source, Row row,
 			final LongProvider provider) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = fileSizeLabel(widgetId + lineId, source, null, provider);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -454,7 +455,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	
 	public Label resourceLabel(String widgetId, String lineId, final Resource source, Row row, int mode) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = resourceLabel(widgetId + lineId, source, null, mode);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -515,7 +516,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public TextField integerEdit(String widgetId, String lineId, final IntegerResource source, Row row,
 			final Alert alert,final int minimumAllowed, final int maximumAllowed, String notAllowedMessage) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		TextField result = integerEdit(widgetId + lineId, source, null,
 				alert, minimumAllowed, maximumAllowed, notAllowedMessage);
 		finishRowSnippet(row, widgetId, result);	
@@ -584,7 +585,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public TextField integerEditExt(String widgetId, String lineId, final IntegerResource source, Row row,
 			ValueConverter checker) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		TextField result = integerEditExt(widgetId + lineId, source, null,
 				checker);
 		finishRowSnippet(row, widgetId, result);	
@@ -628,7 +629,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public TextField timeEdit(String widgetId, String lineId, final TimeResource source, Row row,
 			final Alert alert, final long minimumAllowed, final long maximumAllowed, String notAllowedMessage,  final int mode) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		TextField result = timeEdit(widgetId + lineId, source, null,
 				alert, minimumAllowed, maximumAllowed, notAllowedMessage, mode);
 		finishRowSnippet(row, widgetId, result);	
@@ -770,7 +771,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public TextField floatEdit(String widgetId, String lineId, final FloatResource source, Row row,
 			final Alert alert,final float minimumAllowed, final float maximumAllowed, String notAllowedMessage) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		TextField result = floatEdit(widgetId + lineId, source, null,
 				alert, minimumAllowed, maximumAllowed, notAllowedMessage, 0);
 		finishRowSnippet(row, widgetId, result);	
@@ -863,7 +864,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public TextField stringEdit(String widgetId, String lineId, final StringResource source, Row row,
 			final Alert alert) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		TextField result = stringEdit(widgetId + lineId, source, null, alert);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -922,7 +923,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	
 	public DatepickerTimeResource datepicker(String widgetId, String lineId, final TimeResource source, Row row) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		DatepickerTimeResource result = datepicker(widgetId + lineId, source, null, null, null, null);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -956,7 +957,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public TemplateRedirectButton<T> linkingButton(String widgetId, String lineId, final T source, Row row,
 			String buttonText, String url) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		TemplateRedirectButton<T> result = linkingButton(widgetId + lineId, source, 
 				buttonText, url);
 		finishRowSnippet(row, widgetId, result);	
@@ -1000,7 +1001,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	
 	public BooleanResourceCheckbox booleanEdit(String widgetId, String lineId, final BooleanResource source, Row row) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		BooleanResourceCheckbox result = booleanEdit(widgetId + lineId, source, null);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -1035,7 +1036,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public <S extends SingleValueResource> ValueResourceDropdown<S> dropdown(String widgetId, String lineId, final S source, Row row,
 			Map<String, String> valuesToSet) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		ValueResourceDropdown<S> result = dropdown(widgetId + lineId, source, null, valuesToSet, null);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -1077,7 +1078,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public <S extends Resource> ResourceDropdown<S> referenceDropdownFixedChoice(String widgetId, String lineId, final S source, Row row,
 			Map<S, String> valuesToSet, int columnSize) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		ResourceDropdown<S> result = referenceDropdownFixedChoice(widgetId + lineId, source, null, valuesToSet, null);
 		finishRowSnippet(row, widgetId, result, columnSize);	
 		return result;
@@ -1192,7 +1193,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label floatLabel(String widgetId, String lineId, final float value, Row row,
 			 String format) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = floatLabel(widgetId + lineId, value, format);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -1224,7 +1225,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label intLabel(String widgetId, String lineId, final Integer value, Row row,
 			final int mode) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = intLabel(widgetId + lineId, value, mode);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
@@ -1264,7 +1265,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label timeLabel(String widgetId, String lineId, final Long value, Row row,
 			final int mode) {
 		if(checkLineId(widgetId)) return null;
-		widgetId = ResourceUtils.getValidResourceName(widgetId);
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		Label result = timeLabel(widgetId + lineId, value, mode);
 		finishRowSnippet(row, widgetId, result);	
 		return result;

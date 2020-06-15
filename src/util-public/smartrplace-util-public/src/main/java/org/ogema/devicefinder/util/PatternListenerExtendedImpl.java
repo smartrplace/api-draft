@@ -15,7 +15,11 @@ public class PatternListenerExtendedImpl<P extends ResourcePattern<R>, R extends
 	public final List<P> availablePatterns = new ArrayList<>();
 	
  	public PatternListenerExtendedImpl(InstalledAppsSelector app, DeviceHandlerBase<R> devHandler) {
-		this.app = app;
+if(app == null) {
+	System.out.println("App null!");
+	throw new IllegalStateException("Giving a null app!");
+}
+ 		this.app = app;
 		this.devHandler = devHandler;
 	}
 	

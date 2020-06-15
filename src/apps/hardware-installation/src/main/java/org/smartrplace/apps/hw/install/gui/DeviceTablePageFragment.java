@@ -80,17 +80,6 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase implements
 			vh.registerHeaderEntry("RT");		
 	}
 	
-	/*protected void addRoomWidget(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
-			OgemaHttpRequest req, Row row, ApplicationManager appMan,
-			Room deviceRoom) {
-		Map<Room, String> roomsToSet = new HashMap<>();
-		List<Room> rooms = controller.appMan.getResourceAccess().getResources(Room.class);
-		for(Room room: rooms) {
-			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
-		}
-		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet, 3);
-	}*/
-	
 	protected IntegerResource addWidgetsCommonExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {

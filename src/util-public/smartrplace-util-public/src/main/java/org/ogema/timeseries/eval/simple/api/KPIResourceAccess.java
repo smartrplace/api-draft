@@ -1,12 +1,17 @@
 package org.ogema.timeseries.eval.simple.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.model.gateway.EvalCollection;
+import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 
 import de.iwes.util.logconfig.EvalHelper;
@@ -19,6 +24,17 @@ public class KPIResourceAccess {
 			return (TemperatureResource) resIn;
 		return null;
 		
+	}
+	
+	public static List<Room> getRealRooms(ResourceAccess resAcc) {
+		List<Room> result = resAcc.getResources(Room.class);
+		List<Room> toRemove = new ArrayList<>();
+		for(Room room: result) {
+			if(room.getLocation().equals("OpenWeatherMapData"))
+				toRemove.add(room);
+		}
+		result.removeAll(toRemove);
+		return result;
 	}
 	
 	public static FloatResource getDefaultPriceResource(UtilityType type, ApplicationManager appMan) {
@@ -98,7 +114,7 @@ public class KPIResourceAccess {
 		Resource baseRes;
 		if(roomId == null)
 			baseRes = ResourceHelper.getSubResource(appMan.getResourceAccess().getResource("master"),
-					"editableData/buildingData/E_0/");
+					"editableData/buildingData/E_0/buildingUnit/"+DPRoom.BUILDING_OVERALL_ROOM_LABEL);
 		else {
 			//TODO: In SmartrEfficiency the room resource name is E_0 etc. and the room has to be found via its name
 			//For initial eval we generate the rooms like this

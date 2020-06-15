@@ -20,6 +20,7 @@ public class TimeProcUtil {
 	public static final String PER_DAY_EVAL = "DAY";
 	public static final String PER_HOUR_EVAL = "HOUR";
 	public static final String SUM_PER_DAY_EVAL = "SUM_PER_DAY";
+	public static final String SUM_PER_HOUR_EVAL = "SUM_PER_HOUR";
 	public static final String SUM_PER_DAY_PER_ROOM_EVAL = "DAY_PER_ROOM";
 
 	public static final String METER_EVAL = "METER";

@@ -74,8 +74,8 @@ public class HardwareInstallController {
 		
 		initConfigurationResource();
 		cleanupOnStart();
-        initDemands();
 		mainPage = getMainPage(page);
+        initDemands();
 		if(hardwareInstallApp == null)
 			return;
 		hardwareInstallApp.menu.addEntry("Hardware Installation Configuration", page);

@@ -65,10 +65,13 @@ public class TimeProcPrint {
 			if(listsToPrint.size() < maxTsToPrint)
 				listsToPrint.add(tsd);
 		}
-		GoodData goodAv = new GoodData();
-		goodAv.totalNum = sizeSum/countTs;
-		goodAv.nonNanNum = sizeNNSum/countTs;
-		goodAv.nonZeroNum = sizeNZSum/countTs;
+		GoodData goodAv = null;
+		if(countTs > 0) {
+			goodAv = new GoodData();
+			goodAv.totalNum = sizeSum/countTs;
+			goodAv.nonNanNum = sizeNNSum/countTs;
+			goodAv.nonZeroNum = sizeNZSum/countTs;
+		}
 		String tsNum = getTsNum(tsdlist.size(), countNonNullNaN, countWithRoom);
 		System.out.println("--TSSet:"+setName+"["+((nonImplCount>0)?tsNum+"!!NonImpl:"+nonImplCount:tsNum)+"]::"
 				+ "AvSize"+getGoodString(goodAv)+"  Max:"+getGoodStringInt(maxGood)+"/"+maxName+"  Min:"+minSize+"/"+minName);
@@ -165,9 +168,13 @@ public class TimeProcPrint {
 		System.out.println("  TS:"+name+ getGoodStringInt(good)+ " : "+StringFormatHelper.getListToPrint(values, fhelp , maxEl));
 	}
 	public static String getGoodString(GoodData good) {
+		if(good == null)
+			return "[  (null)  ]";
 		return "["+good.totalNum+"/"+good.nonNanNum+"/"+good.nonZeroNum+"]";
 	}
 	public static String getGoodStringInt(GoodData good) {
+		if(good == null)
+			return "[  (null)  ]";
 		return "["+(int)(good.totalNum)+"/"+(int)(good.nonNanNum)+"/"+(int)(good.nonZeroNum)+"]";
 	}
 	

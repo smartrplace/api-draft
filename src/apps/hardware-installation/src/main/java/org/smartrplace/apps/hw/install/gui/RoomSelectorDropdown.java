@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.locations.Room;
+import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -49,7 +50,7 @@ public class RoomSelectorDropdown extends TemplateDropdown<String> {
 
 	@Override
 	public void onGET(OgemaHttpRequest req) {
-		List<Room> rooms = resAcc.getResources(Room.class);
+		List<Room> rooms = KPIResourceAccess.getRealRooms(resAcc);
 		List<String> items = new ArrayList<>();
 		items.add(ALL_DEVICES_ID);
 		items.add(DEVICES_IN_ROOMS_ID);
