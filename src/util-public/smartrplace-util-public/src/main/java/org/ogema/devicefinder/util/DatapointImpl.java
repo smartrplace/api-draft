@@ -304,4 +304,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	public GenericFloatSensor registerAsVirtualSensor(String sensorDeviceName) {
 		return null;
 	}
+
+	@Override
+	public boolean setScale(ScalingProvider scale) {
+		this.scale = scale;
+		return true;
+	}
 }

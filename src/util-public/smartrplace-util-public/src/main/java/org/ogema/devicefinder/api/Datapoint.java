@@ -3,7 +3,6 @@ package org.ogema.devicefinder.api;
 import org.ogema.core.model.Resource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.model.sensors.GenericFloatSensor;
-import org.ogema.model.sensors.Sensor;
 import org.ogema.widgets.configuration.service.OGEMAConfigurationProvider;
 import org.smartrplace.apps.hw.install.dpres.SensorDeviceDpRes;
 import org.smartrplace.util.frontend.servlet.UserServlet;
@@ -123,4 +122,6 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	 * @return
 	 */
 	GenericFloatSensor registerAsVirtualSensor(String sensorDeviceName);
+	
+	boolean setScale(ScalingProvider scale);
 }

@@ -26,7 +26,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	
 	//final protected MonitoringController controller;
 	final protected TimeSeriesDataImpl tsdi;
-	final protected Datapoint dp;
+	private final Datapoint dp;
 	
 	/** only relevant if dp == null*/
 	final protected TimeSeriesNameProvider nameProvider;
@@ -95,7 +95,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	}
 
 	public String getShortId() {
-		return getShortId(tsdi, nameProvider, dp);
+		return getShortId(tsdi, nameProvider, getDp());
 	}
 	
 	public static String getShortId(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
@@ -125,9 +125,9 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	public DatapointImpl getResultSeriesDP(DatapointService dpService) {
 		String label;
 		String tsLocationOrBaseId;
-		if(dp != null) {
-			label = dp.label(null)+getLabelPostfix();
-			tsLocationOrBaseId = dp.getLocation()+getLocationPostifx();
+		if(getDp() != null) {
+			label = getDp().label(null)+getLabelPostfix();
+			tsLocationOrBaseId = getDp().getLocation()+getLocationPostifx();
 		} else {
 			label = getShortId()+getLabelPostfix();
 			tsLocationOrBaseId = tsdi.id()+getLocationPostifx();
@@ -140,9 +140,12 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 			result.setTimeSeries(this, false);
 			result.setLabel(label, null);
 		}
-		DPUtil.copyExistingDataRoomDevice(dp, result);
+		DPUtil.copyExistingDataRoomDevice(getDp(), result);
 		result.info().setAggregationMode(AggregationMode.Consumption2Meter);
 		result.info().setInterpolationMode(InterpolationMode.NONE);
 		return result ;
+	}
+	public Datapoint getDp() {
+		return dp;
 	}
 }

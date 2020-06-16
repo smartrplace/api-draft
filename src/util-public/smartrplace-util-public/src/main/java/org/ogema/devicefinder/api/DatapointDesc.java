@@ -70,4 +70,21 @@ public interface DatapointDesc extends LabelledItem {
 			return ger;
 		return entry.label.get(OgemaLocale.ENGLISH);
 	}
+	
+	public static interface ScalingProvider {
+		/** Provide scaled value
+		 * 
+		 * @param rawValue
+		 * @param timeStamp the scale may depend on the time. If null is given a default
+		 * 		scale shall be applied
+		 * @return
+		 */
+		float getStdVal(float rawValue, Long timeStamp);
+	}
+	/** Provides a scaling for the values in the datapoint. The scaling must be applied
+	 * by any application using the values.
+	 * @return null if no scaling is defined. In this case the values shall be used
+	 * 		unscaled.
+	 */
+	ScalingProvider getScale();
 }

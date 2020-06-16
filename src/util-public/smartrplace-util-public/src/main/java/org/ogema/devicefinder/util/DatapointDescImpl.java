@@ -28,6 +28,7 @@ public class DatapointDescImpl implements DatapointDesc {
 	protected DatapointInfo consumptionInfo = null;
 	protected String subRoomLocation = null;
 	protected Boolean isLocal = null;
+	protected ScalingProvider scale = null;
 
 	public DatapointDescImpl(GaRoDataType garoDataType, DPRoom dpRoom, DatapointInfo consumptionInfo,
 			String subRoomLocation, Boolean isLocal) {
@@ -106,6 +107,11 @@ public class DatapointDescImpl implements DatapointDesc {
 	@Override
 	public Map<OgemaLocale, String> getAllLabels() {
 		return Collections.unmodifiableMap(labels);
+	}
+
+	@Override
+	public ScalingProvider getScale() {
+		return scale;
 	}
 
 }
