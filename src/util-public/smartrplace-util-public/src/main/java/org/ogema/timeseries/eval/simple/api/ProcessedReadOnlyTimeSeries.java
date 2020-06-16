@@ -13,7 +13,13 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
  * Note that if knownEndUpdateInterval is null the limits of values provided via updateValues and the data within intervals that have been
  * requested before are NOT updated later on. If the interval is set then after the interval is finished the 
  * knownEnd is reset to the time of the last update meaning that it is assumed that everything behing this last
- * update is unknown.*/
+ * update is unknown.<br>
+ * TODO: If the result is aligned and the full input data is available from the beginning the calcuation may be not very efficient. When one
+ * aligend result is calculated taking into account all input data until the next aligned interval then knownEnd may be set to
+ * some time at the result currently calculated or somewhere shortly behind unaligned, but before the next aligned result that may
+ * be requested by the upper level evaluation in the next step. Then the previous aligned interval result is calculated once again
+ * together with the new result. If the base input is flowing in via data logging then this behaviour may make sense as the last
+ * aligned aggregated value is updated all the time until the next aligned interval begins.*/
 public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries {
 	
 	protected abstract List<SampledValue> updateValues(long start, long end);
@@ -21,7 +27,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	/** Only relevant if updateFinalValue is active (default is every two hours)*/
 	protected abstract long getCurrentTime();
 
-	protected List<SampledValue> values = null;
+	private List<SampledValue> values = null;
 	//For Debugging only!
 	public List<SampledValue> getCurrentValues() {
 		return values;
@@ -31,7 +37,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	protected long knownEnd;
 	protected long firstValueInList = Long.MAX_VALUE;
 	protected long lastValueInList = -1;
-	protected boolean isOwnList = false;
+	private boolean isOwnList = false;
 
 	final Long knownEndUpdateInterval;
 	long lastKnownEndUpdate = -1;
@@ -57,11 +63,13 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		}
 		if(knownStart < 0) {
 			values = updateValues(startTime, endTime);
+			isOwnList = false;
 			knownStart = startTime;
 			knownEnd = endTime;
 			updateValueLimits();
 		} else if(startTime < knownStart && endTime > knownEnd) {
 			values = updateValues(startTime, endTime);
+			isOwnList = false;
 			knownStart = startTime;
 			knownEnd = endTime;			
 			updateValueLimits();
@@ -75,9 +83,16 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			updateValueLimits();
 		} else if(endTime > knownEnd) {
 			List<SampledValue> newVals = updateValues(knownEnd, endTime);
-			if(isOwnList)
-				values.addAll(newVals);
-			else {
+			if(isOwnList) {
+				try {
+					values.addAll(newVals);
+				} catch(UnsupportedOperationException e) {
+					//TODO: Should not occur
+					List<SampledValue> concat = new ArrayList<SampledValue>(values);
+					concat.addAll(newVals);
+					values = concat;
+				}
+			} else {
 				List<SampledValue> concat = new ArrayList<SampledValue>(values);
 				concat.addAll(newVals);
 				values = concat;
