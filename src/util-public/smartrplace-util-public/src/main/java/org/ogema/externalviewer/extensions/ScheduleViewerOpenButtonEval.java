@@ -190,7 +190,7 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 				TimeSeriesDataExtendedImpl tse = (TimeSeriesDataExtendedImpl)tsd;
 				if(tse.type instanceof GaRoDataTypeI) {
 					dataType = (GaRoDataTypeI) tse.type;
-					if(tse.getIds().size() > 1) {
+					if(tse.getIds() != null && tse.getIds().size() > 1) {
 						String gwId = tse.getIds().get(0);
 						String prop = System.getProperty("org.ogema.evaluationofflinecontrol.scheduleviewer.expert.sensorsToFilterOut."+gwId);
 						if(prop != null) {
@@ -214,30 +214,23 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 							}
 						}
 					}
-					shortName = nameProvider.getShortNameForTypeI(dataType, tse);
-					longName = nameProvider.getLongNameForTypeI(dataType, tse);
-					/*String location = tsd.label(null);
-					if(tsId == null) tsId = location;
-					dataType = (GaRoDataTypeI)tse.type;
-					String inputLabel = dataType.label(null).replace("Measurement", "");
-					if((tse.getIds().size() > 1) && tse.getIds().get(1).equals(GaRoMultiEvalDataProvider.BUILDING_OVERALL_ROOM_ID))
-						shortName = StringListFormatUtils.getStringFromList(null, tse.getIds().get(0), getDeviceShortId(location), inputLabel);
-					else
-						shortName = StringListFormatUtils.getStringFromList(tse.getIds(), getDeviceShortId(location), inputLabel);
-					longName = StringListFormatUtils.getStringFromList(tse.getIds(), tsd.label(null), inputLabel);
-					*/
+					if(nameProvider != null ) {
+						shortName = nameProvider.getShortNameForTypeI(dataType, tse);
+						longName = nameProvider.getLongNameForTypeI(dataType, tse);
+					} else {
+						shortName = tsd.label(null);
+						longName = tsd.description(null);										
+					}
 				} else {
 					if(tse.type instanceof Class)
 						type = (Class<? extends Resource>)tse.type;
-					shortName = nameProvider.getShortNameBase(tse);
-					longName = nameProvider.getLongNameBase(tse);
-					/*if(tse.getIds() == null) {
-						shortName = tsd.label(null);
-						longName = StringListFormatUtils.getStringFromList(null, "NoGw", tsd.label(null));
+					if(nameProvider != null) {
+						shortName = nameProvider.getShortNameBase(tse);
+						longName = nameProvider.getLongNameBase(tse);
 					} else {
-						shortName = StringListFormatUtils.getStringFromList(tse.getIds());
-						longName = StringListFormatUtils.getStringFromList(tse.getIds(), tsd.label(null));
-					}*/
+						shortName = tsd.label(null);
+						longName = tsd.description(null);										
+					}
 				}
 			} else {
 				shortName = tsd.label(null);
