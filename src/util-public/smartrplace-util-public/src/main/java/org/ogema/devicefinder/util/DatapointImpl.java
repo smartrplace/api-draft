@@ -160,6 +160,8 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			setTimeSeries(tseries, true);
 			return true;
 		}
+		if(id == null)
+			return false;
 		timeSeriesID = id;
 		return true;
 	}

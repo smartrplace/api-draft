@@ -95,7 +95,7 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 				private static final long serialVersionUID = 1L;
 				@Override
 				public void onGET(OgemaHttpRequest req) {
-					setValue(String.format("%.1f", device.temperatureSensor().deviceFeedback().setpoint().getCelsius()), req);
+					setValue(String.format("%.1f", device.temperatureSensor().settings().setpoint().getCelsius()), req);
 				}
 				@Override
 				public void onPOSTComplete(String data, OgemaHttpRequest req) {
