@@ -4,7 +4,7 @@ import java.util.List;
 
 // TODO: Specify all data relevant to define Git repository data for access and management
 public interface GitRepository {
-	String sshUrl();
+	String remoteUrl();
 	
 	/** Path to the local clone of the Git repository*/
 	String localPath();
