@@ -1,5 +1,6 @@
 package org.smartrplace.appstore.api;
 
+import java.io.IOException;
 import java.util.List;
 
 /** This service can be used to generate an artifact in the Appstore Maven Artifactory from a source code version committed to a
@@ -13,8 +14,9 @@ public interface AppstoreVersionGenerationService {
 	 * clone of the repository
 	 * @param filePath path to the local clone of the repository
 	 * @return
+     * @throws IOException if the given path could not be accessed or does not contain a git repository.
 	 */
-	GitRepository getRepository(String filePath);
+	GitRepository getRepository(String filePath) throws IOException;
 
 	/** Register a bundle with its source code for appstore management. The service does not need to store the source
 	 * bundles persistently, they shall all be
