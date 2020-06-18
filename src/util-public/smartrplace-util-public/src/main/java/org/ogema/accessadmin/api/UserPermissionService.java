@@ -1,11 +1,14 @@
 package org.ogema.accessadmin.api;
 
-import org.ogema.devicefinder.api.DatapointDesc;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
 
+/** This service shall be offered to applications for checking whether relevant permissions are available
+ * TODO: Move this to smartrplace-util or ogema-gui-api*/
 public interface UserPermissionService {
-	/** General access permission to the room*/
+	/** General access permission to the room. If this is granted then checking for read or write
+	 * shall return true for both. If read/write are set separately then the integer of the most
+	 * specific permission set shall be returned. */
 	public static final String USER_ROOM_PERM = "UserRoomPermission";
 	
 	/** Permission to read the data point*/
@@ -66,20 +69,25 @@ public interface UserPermissionService {
 	
 	/** Check if the user has a certain permission for a room*/
 	boolean hasUserPermissionForRoom(String userName, Room room, String permissionType);
+	
 	/** Returns the permission value that may be greater than one for a permission granted*/
 	int getUserPermissionForRoom(String userName, Room room, String permissionType);
 
+	/** Returns the permission value that may be greater than one for a permission granted*/
+	int getUserPermissionForUnitApps(String userName, String unitName, String appName, String permissionType);
+
+	/** Returns the permission value that may be greater than one for a permission granted*/
+	int getUserPermissionForApp(String userName, String appName, String permissionType);
+
 	/** True if at least a read permission for the data point is granted*/
-	boolean hasUserPermissionForDatapoint(String userName, DatapointDesc datapoint);
+	//boolean hasUserPermissionForDatapoint(String userName, DatapointDesc datapoint);
 
 	/** Check if the user has a certain permission for a datapoint*/
-	boolean hasUserPermissionForDatapoint(String userName, DatapointDesc datapoint, String permissionType);
-	int getUserPermissionForDatapoint(String userName, DatapointDesc datapoint, String permissionType);
+	//boolean hasUserPermissionForDatapoint(String userName, DatapointDesc datapoint, String permissionType);
+	//int getUserPermissionForDatapoint(String userName, DatapointDesc datapoint, String permissionType);
 	
 	/** Get all permission values for a datapoint to be added to the Datapoint interface*/
-	int[] getPermissionValuesForDatapoint(String userName, DatapointDesc datapoint);
+	//int[] getPermissionValuesForDatapoint(String userName, DatapointDesc datapoint);
 	
 	//TODO: Add methods to check directly for write, read and write
-	
-	//TODO: Add mechanism to also support permissions for Datapoint types ({@link DatapointDesc}).
 }
