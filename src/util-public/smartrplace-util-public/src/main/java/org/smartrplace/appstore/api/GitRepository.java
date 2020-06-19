@@ -17,7 +17,8 @@ public interface GitRepository {
 	/** Get all commits within a certain time range*/
 	List<GitCommit> getCommits(long start, long end);
 	
-	/** Update repository via pull. This is mainly relevant for source code repositories*/
+	/** Update repository via pull. This is mainly relevant for source code repositories
+	 * @return true if new content was obtained, otherwise false*/
 	boolean performPull();
 	
 	/** Commit all changes in the repository, pull any outside chanes and push the the new commit 
