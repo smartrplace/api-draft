@@ -53,7 +53,7 @@ public class DeviceConfigPage extends DeviceTablePageFragmentRaw<InstallAppDevic
 	
 	@Override
 		protected String getHeader() {
-			return "Driver Device Configuration";
+			return "Hardware Driver Configuration";
 		}
 	@Override
 	public List<InstallAppDevice> getDevicesSelected() {

@@ -28,7 +28,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase implements
 	public static final long DEFAULT_POLL_RATE = 5000;
 	
 	protected abstract Class<? extends Resource> getResourceType();
-	protected String getHeader() {return "Smartrplace Hardware InstallationApp";}
+	protected String getHeader() {return "Device Setup and Configuration";}
 	
 	protected HardwareInstallController controller;
 	private Header header;

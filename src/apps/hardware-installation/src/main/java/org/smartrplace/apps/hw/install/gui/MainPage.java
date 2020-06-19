@@ -1,5 +1,6 @@
 package org.smartrplace.apps.hw.install.gui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
+import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.devicefinder.util.LastContactLabel;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
@@ -54,14 +56,38 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 	public void updateTables() {
 		synchronized(tableProvidersDone) {
 		if(controller.hwInstApp != null) for(DeviceHandlerProvider<?> pe: controller.hwInstApp.getTableProviders().values()) {
+			if(isObjectsInTableEmpty(pe))
+				continue;
 			String id = pe.id();
 			if(tableProvidersDone.contains(id))
 				continue;
 			tableProvidersDone.add(id);
-			pe.getDeviceTable(page, alert, this).triggerPageBuild();
+			DeviceTableBase tableLoc = pe.getDeviceTable(page, alert, this);
+			tableLoc.triggerPageBuild();
 		}
 		}
 	}
+	
+	protected boolean isObjectsInTableEmpty(DeviceHandlerProvider<?> pe) {
+		List<InstallAppDevice> all = getDevicesSelected();
+		for(InstallAppDevice dev: all) {
+			if(pe.getResourceType().isAssignableFrom(dev.device().getResourceType())) {
+				return false;
+			}
+		}
+		return true;
+	}
+	protected  List<InstallAppDevice> getObjectsInTable(DeviceHandlerProvider<?> pe) {
+		List<InstallAppDevice> all = getDevicesSelected();
+		List<InstallAppDevice> result = new ArrayList<InstallAppDevice>();
+		for(InstallAppDevice dev: all) {
+			if(pe.getResourceType().isAssignableFrom(dev.device().getResourceType())) {
+				result.add(dev);
+			}
+		}
+		return result;
+	}
+
 	
 	@Override
 	protected Class<? extends Resource> getResourceType() {
