@@ -27,20 +27,22 @@ public class RSSIPage extends MainPage {
 
 	@Override
 	protected void finishConstructor() {
-		DoorWindowSensorTableRSSI winSensTable = new DoorWindowSensorTableRSSI(page,
-				(HardwareInstallControllerExpert) controller, this, alert);
-		winSensTable.triggerPageBuild();
+		//DoorWindowSensorTableRSSI winSensTable = new DoorWindowSensorTableRSSI(page,
+		//		(HardwareInstallControllerExpert) controller, this, alert);
+		//winSensTable.triggerPageBuild();
 		triggerPageBuild();		
 	}
 
 	@Override
 	public void addWidgets(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
+		/*
 		Thermostat device = super.addWidgetsInternal(object, vh, id, req, row, appMan);
 		Room deviceRoom = device.location().room();
 		//vh.booleanEdit("Bang", id, device.getSubResource("bangBangControlActive", BooleanResource.class), row);
 		addWidgetsCommonExpert(object, vh, id, req, row, appMan, deviceRoom);
 		Resource hmRes = ResourceHelper.getFirstParentOfType(device, "org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice");
 		addDeleteButton(vh, id, req, row, appMan, deviceRoom, hmRes);
+		*/
 	}
 }

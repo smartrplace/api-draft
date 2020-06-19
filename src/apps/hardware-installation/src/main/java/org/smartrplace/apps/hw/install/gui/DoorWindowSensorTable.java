@@ -24,6 +24,7 @@ import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
 
+@Deprecated
 public class DoorWindowSensorTable extends DeviceTablePageFragment {
 
 	public DoorWindowSensorTable(WidgetPage<?> page, HardwareInstallController controller,
