@@ -29,7 +29,6 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.recordeddata.RecordedDataConfiguration;
 import org.ogema.core.recordeddata.RecordedDataConfiguration.StorageType;
-import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
@@ -41,10 +40,6 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.gui.DeviceConfigPage;
 import org.smartrplace.apps.hw.install.gui.MainPage;
 import org.smartrplace.apps.hw.install.gui.RoomSelectorDropdown;
-import org.smartrplace.apps.hw.install.pattern.DoorWindowSensorPattern;
-import org.smartrplace.apps.hw.install.pattern.ThermostatPattern;
-import org.smartrplace.apps.hw.install.patternlistener.DoorWindowSensorListener;
-import org.smartrplace.apps.hw.install.patternlistener.ThermostatListener;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.localisation.LocaleDictionary;
@@ -91,9 +86,6 @@ public class HardwareInstallController {
 		return new MainPage(page, this);
 	}
 	
-	public ThermostatListener actionListener;
-	public DoorWindowSensorListener doorWindowSensorListener;
-
     /*
      * This app uses a central configuration resource, which is accessed here
      */
@@ -121,8 +113,6 @@ public class HardwareInstallController {
      * patterns in the OGEMA resource tree
      */
     public void initDemands() {
-		actionListener = new ThermostatListener(this);
-		doorWindowSensorListener = new DoorWindowSensorListener(this);
 		if(appConfigData.isInstallationActive().getValue()) {
 			startDemands();
 		}
@@ -137,20 +127,20 @@ public class HardwareInstallController {
     public boolean demandsActivated = false;
     public void startDemands() {
 		demandsActivated = true;
-    	advAcc.addPatternDemand(ThermostatPattern.class, actionListener, AccessPriority.PRIO_LOWEST);
-		advAcc.addPatternDemand(DoorWindowSensorPattern.class, doorWindowSensorListener, AccessPriority.PRIO_LOWEST);
-		if(hwInstApp != null) for(DeviceHandlerProvider<?> devhand: hwInstApp.getTableProviders().values()) {
-			devhand.addPatternDemand(mainPage);
+		if(hwInstApp != null) {
+			for(DeviceHandlerProvider<?> devhand: hwInstApp.getTableProviders().values()) {
+				devhand.addPatternDemand(mainPage);
+			}
 		}
     }
 
 	public void closeDemands() {
 		if(!demandsActivated) return;
 		demandsActivated = false;
-		advAcc.removePatternDemand(ThermostatPattern.class, actionListener);
-		advAcc.removePatternDemand(DoorWindowSensorPattern.class, doorWindowSensorListener);
-		if(hwInstApp != null) for(DeviceHandlerProvider<?> devhand: hwInstApp.getTableProviders().values()) {
-			devhand.removePatternDemand();
+		if(hwInstApp != null) {
+			for(DeviceHandlerProvider<?> devhand: hwInstApp.getTableProviders().values()) {
+				devhand.removePatternDemand();
+			}
 		}
     }
 	public void close() {
@@ -304,9 +294,9 @@ public class HardwareInstallController {
 	public void cleanupOnStart() {
 		List<String> knownDevLocs = new ArrayList<>();
 		for(InstallAppDevice install: appConfigData.knownDevices().getAllElements()) {
-			if(knownDevLocs.contains(install.device().getLocation())) {
+			if(knownDevLocs.contains(install.device().getLocation()))
 				install.delete();
-			} else
+			else
 				knownDevLocs.add(install.device().getLocation());
 		}
 		

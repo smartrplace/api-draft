@@ -24,7 +24,8 @@ public class DoorWindowSensorTableExpert extends DoorWindowSensorTable {
 	@Override
 	public void addWidgets(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
-		DoorWindowSensor device = super.addWidgetsInternal(object, vh, id, req, row, appMan);
-		addWidgetsCommonExpert(object, vh, id, req, row, appMan, device.location().room());
+		// TODO
+		//DoorWindowSensor device = super.addWidgetsInternal(object, vh, id, req, row, appMan);
+		//addWidgetsCommonExpert(object, vh, id, req, row, appMan, device.location().room());
 	}
 }

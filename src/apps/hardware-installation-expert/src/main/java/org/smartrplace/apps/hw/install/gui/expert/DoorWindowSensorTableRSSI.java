@@ -30,6 +30,8 @@ public class DoorWindowSensorTableRSSI extends DoorWindowSensorTableExpert {
 	@Override
 	public void addWidgets(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
+		/*
+		TODO
 		DoorWindowSensor device = addWidgetsInternal(object, vh, id, req, row, appMan);
 		IntegerResource rssiRes = addWidgetsCommonExpert(object, vh, id, req, row, appMan, device.location().room());
 		
@@ -43,12 +45,15 @@ public class DoorWindowSensorTableRSSI extends DoorWindowSensorTableExpert {
 
 		Resource hmRes = ResourceHelper.getFirstParentOfType(object.device(), "org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice");
 		addDeleteButton(vh, id, req, row, appMan, device.location().room(), hmRes);
+		 */
 
 	}
 	
 	@Override
 	public DoorWindowSensor addWidgetsInternal(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
+		/*
+		TODO
 		final DoorWindowSensor device = addNameWidget(object, vh, id, req, row, appMan);
 		Label state = vh.booleanLabel("Measured State", id, device.reading(), row, 0);
 		Label lastContact = null;
@@ -64,6 +69,8 @@ public class DoorWindowSensorTableRSSI extends DoorWindowSensorTableExpert {
 			lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
 		}
 		return device;
+		*/
+		return null;
 	}
 
 	@Override
