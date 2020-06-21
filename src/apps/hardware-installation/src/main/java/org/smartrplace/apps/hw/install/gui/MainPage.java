@@ -164,7 +164,7 @@ public class MainPage extends DeviceTablePageFragment implements InstalledAppsSe
 	public void addWidgetsAboveTable() {
 		//super.addWidgetsAboveTable();
 		Header headerThermostat = new Header(page, "headerThermostat", "Thermostats");
-		headerThermostat.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
+		headerThermostat.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_LEFT);
 		page.append(headerThermostat);
 	}
 

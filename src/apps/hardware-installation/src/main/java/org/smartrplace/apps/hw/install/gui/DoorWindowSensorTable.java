@@ -82,7 +82,7 @@ public class DoorWindowSensorTable extends DeviceTablePageFragment {
 	@Override
 	public void addWidgetsAboveTable() {
 		Header headerWinSens = new Header(page, "headerWinSens", "Window and Door Opening Sensors");
-		headerWinSens.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
+		headerWinSens.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_LEFT);
 		page.append(headerWinSens);
 	}
 

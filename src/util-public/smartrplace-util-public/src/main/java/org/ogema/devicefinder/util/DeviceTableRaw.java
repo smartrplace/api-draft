@@ -11,6 +11,7 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.locations.Room;
+import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
@@ -73,7 +74,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	@Override
 	public void addWidgetsAboveTable() {
 		Header headerWinSens = new Header(page, WidgetHelper.getValidWidgetId("header_"+id()), getTableTitle());
-		headerWinSens.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
+		headerWinSens.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_LEFT);
 
 		DocumentationLinkProvider docLinkProv = getDocLinkProvider();
 		if(docLinkProv != null) {
@@ -149,7 +150,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
 		Map<Room, String> roomsToSet = new HashMap<>();
-		List<Room> rooms = appMan.getResourceAccess().getResources(Room.class);
+		List<Room> rooms = KPIResourceAccess.getRealRooms(appMan.getResourceAccess()); //.getResources(Room.class);
 		for(Room room: rooms) {
 			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
 		}

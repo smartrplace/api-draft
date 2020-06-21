@@ -52,12 +52,14 @@ public interface UserPermissionService {
 			USER_CREATE_DELETE_PERM, USER_READ_HISTORICALDATA_PERM, USER_ADMIN_PERM };
 	
 	/** Permissions for which the building property units rooms per user shall be chosen via Multiselect*/
-	public static final String[] PROPUNITPERMISSIONS = {APP_RESTORE_SAFE_PERM};
+	public static final String[] PROPUNITPERMISSIONS = {APP_RESTORE_SAFE_PERM, APP_INSTALL_PERM, APP_RESTORE_PERM};
 	
 	/** Permissions for which the building property units rooms per user and per app or app permission type
 	 * shall be chosen via Multiselect. So the table will most likely only show one app or app permission type
-	 * to be edited at once.*/
-	public static final String[] PROPUNIT_PER_APP_PERMISSIONS = {APP_INSTALL_PERM, APP_RESTORE_PERM};
+	 * to be edited at once.
+	 * TODO: For now we give these permissions for all apps per unit. To be discussed if a per-app differentiation
+	 * makes sense*/
+	//public static final String[] PROPUNIT_PER_APP_PERMISSIONS = {APP_INSTALL_PERM, APP_RESTORE_PERM};
 	
 	/** Permission that are given per app permission type per user. So a Multiselect to choose the apps
 	 * instead of choosing the rooms could be used here. It could also be integrated

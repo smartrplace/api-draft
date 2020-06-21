@@ -20,7 +20,14 @@ public interface GatewayUpdateService {
 	 * @param filePath path to the local clone of the repository
 	 * @return
 	 */
-	GitRepository getRepository(String filePath);
+	GitRepository getRepository(String rundirpath);
+	
+	/** Get all gateways configured in a local rundir directory as subdirectories
+	 * 
+	 * @param rundirPath
+	 * @return all gatewayIDs that can be used with {@link #getRundirBundles(String, String)}
+	 */
+	List<String> getGatwayIDs(String rundirPath);
 	
 	/** Get bundles specified for a gateway in a Rundir.
 	 * 

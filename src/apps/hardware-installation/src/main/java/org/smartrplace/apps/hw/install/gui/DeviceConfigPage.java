@@ -9,7 +9,9 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.DriverHandlerProvider;
+import org.ogema.devicefinder.api.DriverHandlerProvider.DriverDeviceConfig;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
+import org.ogema.devicefinder.util.DeviceTableRaw;
 import org.smartrplace.apps.hw.install.HardwareInstallController;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -45,8 +47,12 @@ public class DeviceConfigPage extends DeviceTablePageFragmentRaw<InstallAppDevic
 			if(providersDone.contains(id))
 				continue;
 			providersDone.add(id);
-			pe.getDriverInitTable(page, alert).triggerPageBuild();
-			pe.getDriverPerDeviceConfigurationTable(page, alert, this, true).triggerPageBuild();
+			DeviceTableRaw<DriverHandlerProvider, Resource> initTable = pe.getDriverInitTable(page, alert);
+			if(initTable != null)
+				initTable.triggerPageBuild();
+			DeviceTableRaw<DriverDeviceConfig, InstallAppDevice> perDeviceTable = pe.getDriverPerDeviceConfigurationTable(page, alert, this, true);
+			if(perDeviceTable != null)
+				perDeviceTable.triggerPageBuild();
 		}
 		}
 	}
