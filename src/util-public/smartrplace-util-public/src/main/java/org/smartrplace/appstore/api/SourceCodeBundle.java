@@ -6,7 +6,6 @@ package org.smartrplace.appstore.api;
  * version in the current source code. */
 public interface SourceCodeBundle {
 	MavenBundleVersioned mavenCoordinates();
-	
 	GitRepository repository();
 	String pathInRepository();
 }
