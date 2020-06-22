@@ -32,6 +32,7 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider.ValueMode;
+import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 
@@ -109,6 +110,8 @@ public class UserServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		String user = req.getParameter("user");
+		if(user == null || user.startsWith("["))
+			user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
 		String pageId = req.getParameter("page");
 		String object = req.getParameter("object");
 		String timeStr = req.getParameter("time");

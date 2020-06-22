@@ -1281,7 +1281,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	 * @param source
 	 * @param row
 	 * @param gateway
-	 * @param mode 0: absolute time, 1: time in day, 2: absolute time relative to now
+	 * @param mode 0: absolute time, 1: time in day, 2: absolute time relative to now,
+	 * 		3: duration
 	 * @return
 	 */
 	private Label timeLabel(String widgetId, final Long value, final int mode) {
@@ -1305,6 +1306,11 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					if(value <= 0) time = "not set";
 					else
 						time = StringFormatHelper.getFormattedFutureValue(appMan, value);
+					break;
+				case 4:
+					if(value <= 0) time = "not set";
+					else
+						time = StringFormatHelper.getFormattedValue(value);
 					break;
 				default:
 					if(value <= 0) time = "not set";

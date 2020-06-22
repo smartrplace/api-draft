@@ -32,6 +32,9 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 public class GUIUtilHelper {
 	public static String getUserLoggedIn(OgemaHttpRequest req) {
         HttpSession session = req.getReq().getSession();
+        return getUserLoggedInBase(session);
+	}
+	public static String getUserLoggedInBase(HttpSession session) {
         SessionAuth sauth = (SessionAuth) session.getAttribute(Constants.AUTH_ATTRIBUTE_NAME);
         return sauth.getName();
 	}

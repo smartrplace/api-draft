@@ -1,5 +1,6 @@
 package org.ogema.accessadmin.api;
 
+import org.ogema.accesscontrol.PermissionManager;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.devicefinder.api.DatapointService;
 
@@ -11,7 +12,11 @@ public class ApplicationManagerPlus {
 	private OgemaGuiService guiService;
 	private DatapointService dpService;
 	private UserPermissionService userPermService;
-
+	private PermissionManager permMan;
+	
+	public ApplicationManagerPlus(ApplicationManager appMan) {
+		this.appMan = appMan;		
+	}
 	public ApplicationManagerPlus(ApplicationManager appMan, OgemaGuiService guiService, DatapointService dpService,
 			UserPermissionService userPermService) {
 		this.appMan = appMan;
@@ -50,5 +55,13 @@ public class ApplicationManagerPlus {
 
 	public void setUserPermService(UserPermissionService userPermService) {
 		this.userPermService = userPermService;
+	}
+
+	public PermissionManager permMan() {
+		return permMan;
+	}
+
+	public void setPermMan(PermissionManager permMan) {
+		this.permMan = permMan;
 	}
 }
