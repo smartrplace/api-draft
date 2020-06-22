@@ -28,7 +28,7 @@ public interface GatewayUpdateService {
 	 * @param rundirPath
 	 * @return all gatewayIDs that can be used with {@link #getRundirBundles(String, String)}
 	 */
-	List<String> getGatwayIDs(String rundirPath);
+	List<String> getGatwayIDs(String rundirPath) throws IOException;
 	
 	/** Get bundles specified for a gateway in a Rundir.
 	 * 
@@ -38,7 +38,7 @@ public interface GatewayUpdateService {
 	 * 		config directory shall be taken into account, otherwise only the gateway-specific files in the directory config_<gatewayID>
 	 * @return Map xml file name (without path) -> list of all appstore bundle representations in the file
 	 */
-	Map<String, List<AppstoreBundle>> getRundirBundles(String rundirPath, String gatewayID);
+	Map<String, List<AppstoreBundle>> getRundirBundles(String rundirPath, String gatewayID) throws IOException;
 	
 	/** Update the version of a single bundle entry. If the specified file does not exist it shall be created as valid
 	 * xml configuration file.
@@ -57,6 +57,7 @@ public interface GatewayUpdateService {
 	 * 
 	 * @return new bundle entry
 	 */
-	AppstoreBundle updateOrSetVersion(GitRepository rundirPath, String fileName, String gatewayID, MavenBundleVersioned mavenBundle);
+	AppstoreBundle updateOrSetVersion(GitRepository rundirPath, String fileName,
+            String gatewayID, MavenBundleVersioned mavenBundle) throws IOException;
 
 }
