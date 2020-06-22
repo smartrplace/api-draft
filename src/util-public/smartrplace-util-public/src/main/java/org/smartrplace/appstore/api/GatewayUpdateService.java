@@ -1,5 +1,6 @@
 package org.smartrplace.appstore.api;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public interface GatewayUpdateService {
 	 * @param filePath path to the local clone of the repository
 	 * @return
 	 */
-	GitRepository getRepository(String rundirpath);
+	GitRepository getRepository(String rundirpath) throws IOException;
 	
 	/** Get all gateways configured in a local rundir directory as subdirectories
 	 * 
