@@ -38,7 +38,7 @@ public interface UserPermissionService {
 	
 	/** Permission to generate backups for a BuildingPropertyUnit, to mark a backup as stable
 	 *  and to restore them*/
-	public static final String APP_RESTORE_PERM = "AppInstallPermission";
+	public static final String APP_RESTORE_PERM = "AppRestorePermission";
 	
 	/** Permission to upload new apps with a certain permission level or updates for a certain app
 	 * into the Appstore.  Typically the main restrictions should now be imposed for the installation
