@@ -41,7 +41,7 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 
 	public DualFiltering2Steps(WidgetPage<?> page, String id, OptionSavingMode saveOptionMode, long optionSetUpdateRate,
 			boolean addAllOption) {
-		super(page, id, saveOptionMode, optionSetUpdateRate, addAllOption);
+		super(page, id, saveOptionMode, 1, addAllOption);
 		if(saveOptionMode == OptionSavingMode.PER_USER)
 			throw new UnsupportedOperationException("PER_USER not supported for DualFiltering2Steps");
 		//FIXME: For now we add the all option to the first dropdown always. This should be configurable in the future,
