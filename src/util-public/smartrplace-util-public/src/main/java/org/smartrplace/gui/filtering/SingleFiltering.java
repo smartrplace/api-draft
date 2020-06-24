@@ -90,12 +90,29 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 		
 	}
 	public final AllOption ALL_OPTION = new AllOption();
+	public class NoneOption implements GenericFilterOption<A> {
+
+		@Override
+		public boolean isInSelection(A object, OgemaHttpRequest req) {
+			return false;
+		}
+
+		@Override
+		public Map<OgemaLocale, String> optionLabel() {
+			return LocaleHelper.getLabelMap(noneOptionsForStandardLocales());
+		}
+		
+	}
+	public final NoneOption NONE_OPTION = new NoneOption();
 
 	protected final Map<String, String> preSelectionPerUser;
 	protected String preSelectionGeneralEnglish = null;
 	
 	protected String[] allOptionsForStandardLocales() {
 		return new String[] {"All", "Alle", "Tous", "All"};
+	}
+	protected String[] noneOptionsForStandardLocales() {
+		return new String[] {"None", "---", "---", "----"};
 	}
 	
 	protected List<GenericFilterOption<A>> filteringOptions = new ArrayList<>();
@@ -244,8 +261,15 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 						filteringOptions.addAll(dynOpts);
 					} else
 						filteringOptions = dynOpts;
-					setDefaultItems(filteringOptions);
 					GenericFilterOption<A> defaultItem = getFilterOption(preSelectionGeneralEnglish);
+					if(filteringOptions.isEmpty()) {
+						if(defaultItem == null)
+							defaultItem = NONE_OPTION;
+						filteringOptions = new ArrayList<>();
+						filteringOptions.add(defaultItem);
+					}
+						
+					setDefaultItems(filteringOptions);
 					selectDefaultItem(defaultItem);
 					update(filteringOptions, defaultItem, req);
 				}
@@ -287,7 +311,6 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 			//empty option = All
 			return true;
 		}
-		List<T> alist = getDestinationList(selected);
 		Long lastUpdate = destinationObjectsChecked.get(object);
 		long now = getFrameworkTime();
 		if(lastUpdate == null ||
@@ -309,6 +332,7 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 			}
 			destinationObjectsChecked.put(object, now);
 		}
+		List<T> alist = getDestinationList(selected);
 		return alist.contains(object);
 	}
 }
