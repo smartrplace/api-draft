@@ -2,6 +2,8 @@ package org.ogema.accessadmin.api;
 
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
+import org.smartrplace.external.accessadmin.config.AccessConfigUser;
+import org.smartrplace.gui.filtering.GenericFilterFixedGroup;
 
 /** This service shall be offered to applications for checking whether relevant permissions are available
  * TODO: Move this to smartrplace-util or ogema-gui-api*/
@@ -99,7 +101,7 @@ public interface UserPermissionService {
 	int getUserSystemPermission(String userName, String permissionType);
 
 	/** Permission types allowed here are from APP_ACCESS_PERMISSIONS*/
-	int getUserStatusAppPermission(UserStatus userStatus, String permissionType);
+	int getUserStatusAppPermission(UserStatus userStatus, String permissionType, boolean useWorkingCopy);
 	
 	/** Returns the permission value that may be greater than one for a permission granted*/
 	//int getUserPermissionForUnitApps(String userName, String unitName, String appName, String permissionType);
@@ -120,5 +122,15 @@ public interface UserPermissionService {
 	
 	//TODO: Add methods to check directly for write, read and write
 	
-	//default 
+	/** Get filter for a user group for which membership is not specified by {@link AccessConfigUser#superGroups()}
+	 * 
+	 * @param userGroupName name of the group
+	 * @return null if the group membership specified via superGroups
+	 */
+	default GenericFilterFixedGroup<String, AccessConfigUser> getUserGroupFiler(String userGroupName) {
+		return null;
+	}
+	default GenericFilterFixedGroup<Room, BuildingPropertyUnit> getRoomGroupFiler(String roomGroupName) {
+		return null;
+	}
 }
