@@ -36,6 +36,8 @@ public class GUIUtilHelper {
 	}
 	public static String getUserLoggedInBase(HttpSession session) {
         SessionAuth sauth = (SessionAuth) session.getAttribute(Constants.AUTH_ATTRIBUTE_NAME);
+        if(sauth == null)
+        	return null;
         return sauth.getName();
 	}
 	
