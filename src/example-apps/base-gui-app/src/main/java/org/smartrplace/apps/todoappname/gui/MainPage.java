@@ -1,6 +1,6 @@
 package org.smartrplace.apps.todoappname.gui;
 
-import org.smartplace.apps.todoappname.TodoTemplateController;
+import org.smartrplace.apps.todoappname.TodoTemplateController;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.html.alert.Alert;
