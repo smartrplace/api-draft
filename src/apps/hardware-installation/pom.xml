@@ -78,6 +78,11 @@
             <artifactId>roomsimulation-service</artifactId>
             <version>2.2.2-SNAPSHOT</version>
         </dependency>
+   		<dependency>
+            <groupId>org.smartrplace.apps</groupId>
+            <artifactId>smartr-efficiency-util</artifactId>
+            <version>2.1.3-SNAPSHOT</version>
+        </dependency>  
         
         <dependency>
             <groupId>org.ogema.widgets</groupId>

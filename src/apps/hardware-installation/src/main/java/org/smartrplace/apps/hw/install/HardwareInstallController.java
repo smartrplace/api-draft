@@ -211,7 +211,7 @@ public class HardwareInstallController {
 		if(Boolean.getBoolean("org.smartrplace.apps.hw.install.autologging")) {
 			activateLogging(tableProvider, appDevice);
 		}
-		if(!Boolean.getBoolean("org.ogema.sim.simulateRemoteGateway"))
+		if(!Boolean.getBoolean("org.ogema.devicefinder.api.simulateRemoteGateway"))
 			return;
 		Set<String> deviceSimsStarted = simulationsStarted.get(tableProvider.id());
 		if(deviceSimsStarted == null) {

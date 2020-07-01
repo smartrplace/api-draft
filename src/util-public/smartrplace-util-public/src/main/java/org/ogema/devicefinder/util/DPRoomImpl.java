@@ -55,6 +55,13 @@ public class DPRoomImpl implements DPRoom {
 	}
 
 	@Override
+	public void setResource(Room room) {
+		this.resource = room;		
+		this.location = room.getLocation();
+		this.label = ResourceUtils.getHumanReadableShortName(room);
+	}
+	
+	@Override
 	public String id() {
 		return location;
 	}

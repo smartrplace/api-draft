@@ -13,6 +13,8 @@ public interface DPRoom extends GatewayResource {
 	@Override
 	Room getResource();
 	
+	void setResource(Room room);
+	
 	Integer getRoomType();
 	
 	/**TODO: To be discussed if this would make sense, not implemented yet*/

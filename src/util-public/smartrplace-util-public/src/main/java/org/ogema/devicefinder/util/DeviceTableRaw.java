@@ -44,6 +44,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return null;
 	}
 
+	protected Button getAddButton() {
+		return null;
+	}
+	
 	//protected abstract String getHeader(); // {return "Smartrplace Hardware InstallationApp";}
 	//protected final InstalledAppsSelector appSelector;
 	
@@ -78,7 +82,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 
 		DocumentationLinkProvider docLinkProv = getDocLinkProvider();
 		if(docLinkProv != null) {
-			StaticTable topTable = new StaticTable(1, 3, new int[] {8, 2, 2});
+			Button addButton = getAddButton();
+			StaticTable topTable = new StaticTable(1, 4, new int[] {6, 2, 2, 2});
 			RedirectButton docButtonPub = new RedirectButton(page, WidgetHelper.getValidWidgetId("docButtonPub_"+id()), "Driver Guide") {
 				private static final long serialVersionUID = 1L;
 				@Override
@@ -111,8 +116,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 					setUrl(docLinkProv.getDriverDocumentationPageURL(false), req);
 				}
 			};
-			topTable.setContent(0, 0, headerWinSens).setContent(0, 1, "<br>").setContent(0, 1, docButtonPub).
-					setContent(0, 2, "<br>").setContent(0, 2, docButtonInternal);
+			topTable.setContent(0, 0, headerWinSens).setContent(0, 2, "<br>").setContent(0, 2, docButtonPub).
+					setContent(0, 3, "<br>").setContent(0, 3, docButtonInternal);
+			if(addButton != null)
+				topTable.setContent(0, 1, "<br>").setContent(0, 1, addButton);
 			page.append(topTable);
 		} else
 			page.append(headerWinSens);

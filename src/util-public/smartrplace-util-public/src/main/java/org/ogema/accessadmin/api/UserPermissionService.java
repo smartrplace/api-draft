@@ -10,7 +10,7 @@ import org.smartrplace.gui.filtering.GenericFilterFixedGroup;
 public interface UserPermissionService {
 	/** Rooms marked as priority are the primary rooms displayed to the user. Other rooms may be viewed, but
 	 * are not shown by default. Implies USER_ROOM_PERM*/
-	public static final String USER_PRIORITY_PERM = "UserRoomPiority";	
+	public static final String USER_PRIORITY_PERM = "UserRoomPriority";	
 	
 	/** General access permission to the room. If this is granted then checking for read or write
 	 * shall return true for both. If read/write are set separately then the integer of the most
