@@ -1,4 +1,4 @@
-package org.smartplace.apps.todoappname;
+package org.smartrplace.apps.todoappname;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;

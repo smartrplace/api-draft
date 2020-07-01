@@ -1,4 +1,4 @@
-package org.smartplace.apps.todoappname;
+package org.smartrplace.apps.todoappname;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.accessadmin.api.UserPermissionService;
