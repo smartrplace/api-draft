@@ -74,7 +74,7 @@ public interface UserPermissionService {
 	public static final String BACNET = "BACnet Admin";
 	
 	public static final String[] APP_ACCESS_PERMISSIONS = {MONITORING, ROOM_STATUS_CONTROL, INSTALLATION_SETUP, ALARMING,
-			GROUP_AND_PERMISSION_MANAGEMENT, APPSTORE, BACNET};
+			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT, APPSTORE, BACNET};
 	
 	/** Permissions for which the building property units rooms per user and per app or app permission type
 	 * shall be chosen via Multiselect. So the table will most likely only show one app or app permission type
