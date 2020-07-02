@@ -107,11 +107,16 @@ public class UserServlet extends HttpServlet {
 		pages.put(pageId, prov);
 	}
 	
+	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String user = req.getParameter("user");
-		if(user == null || user.startsWith("["))
-			user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+		//String user = req.getParameter("user");
+		//if(user == null || user.startsWith("["))
+		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+		doGet(req, resp, user);
+	}
+	void doGet(HttpServletRequest req, HttpServletResponse resp, String user)
+			throws ServletException, IOException {
 		String pageId = req.getParameter("page");
 		String object = req.getParameter("object");
 		String timeStr = req.getParameter("time");

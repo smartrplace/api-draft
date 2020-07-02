@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ogema.accesscontrol.RestAccess;
+import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 /** Core class to provide testing variants for servlets based on widgets pages. This servlet
  * does only provide relevant information in the HTTP response when the property 
@@ -32,6 +33,7 @@ public abstract class UserServletTest extends HttpServlet {
     //public static final String CONTEXT_FILTER = 
     //		"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + CONTEXT + ")";
 	//private static final String SERVLET_ADDRESS = "org/smartrplace/apps/smartrplaceheatcontrolv2/userdatatest";
+	public static final String DEFAULT_LOGIN_USER_NAME = "TEST_INSTANCE_USER";
 
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -49,15 +51,38 @@ public abstract class UserServletTest extends HttpServlet {
 	@Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     	//if(!req.getRequestURI().endsWith(SERVLET_ADDRESS)) return;
-       	if(!checkAccessAllowedAndSendError(req, resp)) return;
+    	String user = checkAccessAllowedAndSendErrorToUser(req, resp);
+    	if(user == null) return;
+    	//TODO: Perform mapping from REST user to natural user
+    	
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
     	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
         resp.addHeader("Access-Control-Allow-Headers", "*");
         //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
-        resp.addHeader("Access-Control-Allow-Credentials", "true");    	try{
-    		getUserServlet().doGet(req, resp);
+        resp.addHeader("Access-Control-Allow-Credentials", "true");
+		
+        if(user.equals(DEFAULT_LOGIN_USER_NAME))
+        	user = req.getParameter("user");
+        else
+        	user = "#REST#"+user;
+		/*String test = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+		System.out.println("Body : "+test);
+		String auth = req.getAuthType();
+		String ctype = req.getContentType();
+		String contxtpath = req.getContextPath();
+		String auth2 = req.getRemoteUser();
+		Enumeration headers = req.getHeaderNames();
+		Principal princ = req.getUserPrincipal();
+		Enumeration auth3 = req.getHeaders("Authorization");
+		Enumeration auth4 = req.getHeaders("Host");
+		Enumeration auth5 = req.getHeaders("User-Agent");
+		Enumeration auth6 = req.getHeaders("Accept");*/
+		if(user == null || user.startsWith("["))
+			user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+        try{
+    		getUserServlet().doGet(req, resp, user);
     	} catch(NullPointerException e) {
     		throw new IllegalStateException("Error for req:"+javax.servlet.http.HttpUtils.getRequestURL(req), e);
     	}
@@ -110,21 +135,32 @@ public abstract class UserServletTest extends HttpServlet {
     	super.doTrace(arg0, arg1);
     }*/
     
+    /** 
+     * 
+     * @param req
+     * @param resp
+     * @return null if authentication failed, otherwise user name or test login
+     */
     public boolean checkAccessAllowedAndSendError(final HttpServletRequest req, final HttpServletResponse resp) {
+    	String userName = checkAccessAllowedAndSendErrorToUser(req, resp);
+    	return userName != null;   	
+    }
+    public String checkAccessAllowedAndSendErrorToUser(final HttpServletRequest req, final HttpServletResponse resp) {
     	boolean isTest = isTestInstance(resp);
     	if(isTest)
-    		return true;
+    		return DEFAULT_LOGIN_USER_NAME;
     	RestAccess restAcc = getRESTAccess();
     	if(restAcc == null) {
     		sendError(resp);
-    		return false;
+    		return null;
     	}
     	try {
-			return(restAcc.authenticate(req, resp) != null);
+    		String userName = restAcc.authenticateToUser(req, resp);
+ 			return userName;
 		} catch (ServletException | IOException e) {
 			e.printStackTrace();
 			sendError(resp);
-			return false;
+			return null;
 		}
     }
     
