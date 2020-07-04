@@ -95,7 +95,7 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase implements
 	public void addWidgetsAboveTable() {
 		if(!isParentTable) return;
 		header = new Header(page, "header", getHeader());
-		header.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_CENTERED);
+		header.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_LEFT);
 		page.append(header).linebreak();
 		
 		StaticTable topTable = new StaticTable(1, 6, new int[] {2, 2, 2, 2, 2, 2});
@@ -120,8 +120,10 @@ public abstract class DeviceTablePageFragment extends DeviceTableBase implements
 		topTable.setContent(0, 0, roomsDrop)
 				.setContent(0, 1, installFilterDrop)
 				.setContent(0, 2, installMode);//setContent(0, 2, roomLinkButton).
-		RoomEditHelper.addButtonsToStaticTable(topTable, (WidgetPage<RoomLinkDictionary>) page,
-				alert, appMan, 0, 3);
+		RedirectButton addRoomLink = new RedirectButton(page, "addRoomLink", "Add room", "/org/smartrplace/external/actionadmin/roomconfig.html");
+		topTable.setContent(0, 3, addRoomLink);
+		//RoomEditHelper.addButtonsToStaticTable(topTable, (WidgetPage<RoomLinkDictionary>) page,
+		//		alert, appMan, 0, 3);
 		topTable.setContent(0, 5, calendarConfigButton);
 		page.append(topTable);
 	}

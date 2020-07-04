@@ -97,6 +97,13 @@ public interface UserPermissionService {
 	/** Returns the permission value that may be greater than one for a permission granted*/
 	int getUserPermissionForRoom(String userName, Room room, String permissionType);
 
+	/**
+	 * @param getSuperSetting if true the specific setting for the user and room will be ignored and
+	 * 		only the more general setting will be returned
+	 */
+	public int getUserPermissionForRoom(String userName, String resourceId, String permissionType,
+			boolean getSuperSetting);
+
 	/** Returns the permission value that may be greater than one for a permission granted*/
 	int getUserSystemPermission(String userName, String permissionType);
 

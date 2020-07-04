@@ -39,7 +39,7 @@ public enum UserStatus {
 		case SECRETARY:
 			return "Secretary";
 		case ADMIN:
-			return "Administrator";
+			return "Facility Manager";
 		case SUPERADMIN:
 			return "Master Administrator";
 		default:
