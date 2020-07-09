@@ -42,6 +42,8 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	final Long knownEndUpdateInterval;
 	long lastKnownEndUpdate = -1;
 	
+	protected final long creationTime;
+	
 	protected final InterpolationMode interpolationMode;
 	
 	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode) {
@@ -50,6 +52,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode, Long knownEndUpdateInterval) {
 		this.interpolationMode = interpolationMode;
 		this.knownEndUpdateInterval = knownEndUpdateInterval;
+		this.creationTime = getCurrentTime();
 	}
 
 	@Override
@@ -214,4 +217,11 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		return getPreviousValue(Long.MAX_VALUE).getTimestamp();
 	}
 	
+	public List<SampledValue> getValuesInternal() {
+		return values;
+	}
+	
+	public long getCreationTime() {
+		return creationTime;
+	}
 }

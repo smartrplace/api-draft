@@ -36,6 +36,11 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	
 	private Long firstTimestampInSource = null;
 	private Long lastTimestampInSource = null;
+	public Long getTimeStampInSourceInternal(boolean first) {
+		if(first)
+			return firstTimestampInSource;
+		return lastTimestampInSource;
+	}
 
 	/*public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
 			MonitoringController controller) {
@@ -127,7 +132,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 		String tsLocationOrBaseId;
 		if(getDp() != null) {
 			label = getDp().label(null)+getLabelPostfix();
-			tsLocationOrBaseId = getDp().getLocation()+getLocationPostifx();
+			tsLocationOrBaseId = getDpLocation(getDp(), getLabelPostfix()); //getDp().getLocation()+getLocationPostifx();
 		} else {
 			label = getShortId()+getLabelPostfix();
 			tsLocationOrBaseId = tsdi.id()+getLocationPostifx();
@@ -147,5 +152,9 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	}
 	public Datapoint getDp() {
 		return dp;
+	}
+	
+	public static String getDpLocation(Datapoint dpSource, String locationPostfix) {
+		return dpSource.getLocation()+locationPostfix;
 	}
 }

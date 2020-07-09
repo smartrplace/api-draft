@@ -14,7 +14,13 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.form.dropdown.TemplateDropdown;
 import de.iwes.widgets.template.DefaultDisplayTemplate;
 
-/** Provides a dropdown for filtering, typically for filtering of the objects used to generate table lines.
+/** Provides a dropdown for filtering, typically for filtering of the objects used to generate table lines.<br>
+ * There are two ways of filtering integration:<br>
+ * - Filtering of the elements of a table on a page. This filtering usually returns true for several T objects
+ * per filter option in {@link GenericFilterI#isInSelection(Object, OgemaHttpRequest)}.
+ * - Selection of a single object that is configured in the table or otherwise on the page. This is a typical
+ * use case for a {@link DualFiltering2Steps}. Here usually the decisive right dropdown only returns true
+ * for a single T object in {@link GenericFilterI#isInSelection(Object, OgemaHttpRequest)}.
  *
  * @param <A> attribute type for which the filtering shall take place
  * @param <T> type of object returned as filtering result (typically type of object used in table)
@@ -238,7 +244,8 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 	public void onPOSTComplete(String data, OgemaHttpRequest req) {
 		if(saveOptionMode == OptionSavingMode.GENERAL) {
 			preSelectionGeneralEnglish = LocaleHelper.getLabel(getSelectedItem(req).optionLabel(), null);
-			//selectDefaultItem(preSelectionGeneral);
+			GenericFilterOption<A> defaultItem = getFilterOption(preSelectionGeneralEnglish);
+			selectDefaultItem(defaultItem);
 		} else if (saveOptionMode == OptionSavingMode.PER_USER) {
 			GenericFilterOption<A> selected = getSelectedItem(req);
 			String user = GUIUtilHelper.getUserLoggedIn(req);

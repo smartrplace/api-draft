@@ -178,6 +178,18 @@ public class TimeProcPrint {
 		return "["+(int)(good.totalNum)+"/"+(int)(good.nonNanNum)+"/"+(int)(good.nonZeroNum)+"]";
 	}
 	
+	public static String getStartEndSummary(List<SampledValue> values) {
+		if(values == null)
+			return "--";
+		if(values.isEmpty())
+			return "-/ 0 /-";
+		String start = StringFormatHelper.getFullTimeDateInLocalTimeZone(values.get(0).getTimestamp());
+		if(values.size() == 1)
+			return start+"/ 1 /-";
+		String end = StringFormatHelper.getFullTimeDateInLocalTimeZone(values.get(values.size()-1).getTimestamp());
+		return start+"/ "+values.size()+" /"+end;
+	}
+	
 	public static List<SampledValue> getValuesWithoutCalc(ReadOnlyTimeSeries ts, Integer limitResSize, Long startTime, Long endTime) {
 		List<SampledValue> result;
 		if(ts instanceof ProcessedReadOnlyTimeSeries) {
@@ -188,10 +200,8 @@ public class TimeProcPrint {
 			int lastIdx = result.size()-1;
 			boolean changed = false;
 			if(startTime != null) {
-				boolean found = false;
 				for(int i=0; i<result.size(); i++) {
 					if(result.get(i).getTimestamp() >= startTime) {
-						found = true;
 						changed = true;
 						firstIdx = i;
 						break;
@@ -199,10 +209,8 @@ public class TimeProcPrint {
 				}
 			}
 			if(endTime != null) {
-				boolean found = false;
 				for(int i=result.size()-1; i>=firstIdx; i--) {
 					if(result.get(i).getTimestamp() <= endTime) {
-						found = true;
 						changed = true;
 						lastIdx = i;
 						break;
