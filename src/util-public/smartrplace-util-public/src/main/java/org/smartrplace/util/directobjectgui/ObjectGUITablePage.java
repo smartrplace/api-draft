@@ -81,7 +81,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 			return ResourceUtils.getValidResourceName(object.toString().replace('$', '_'));
 		}
 	}
-	private String pid() {
+	protected String pid() {
 		return WidgetHelper.getValidWidgetId(this.getClass().getName());
 	}
 
@@ -149,15 +149,15 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		
 		//init all widgets
 		if(alert == null) {
-			this.alert = new Alert(page, "alert"+pid(), "");
+			this.alert = new Alert(page, WidgetHelper.getValidWidgetId("alert"+pid()), "");
 			isAlertNew = true;
 		} else {
 			this.alert = alert;
 			isAlertNew = false;
 		}		
-		knownWidgets = new KnownWidgetHolder<T>(page, "knownWidgets"+pid());
+		knownWidgets = new KnownWidgetHolder<T>(page, WidgetHelper.getValidWidgetId("knownWidgets"+pid()));
 		page.append(knownWidgets);
-		popMore1 = new ClosingPopup<T>(page, "popMore1"+pid(),
+		popMore1 = new ClosingPopup<T>(page, WidgetHelper.getValidWidgetId("popMore1"+pid()),
 				"More Information", true, ClosingMode.CLOSE) {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -218,7 +218,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 				return super.getLineId(object);
 			}
 		};
-		mainTable = new DynamicTable<T>(page, "appTable"+pid()) {
+		mainTable = new DynamicTable<T>(page, WidgetHelper.getValidWidgetId("appTable"+pid())) {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void onGET(OgemaHttpRequest req) {
