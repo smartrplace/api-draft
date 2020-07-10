@@ -5,6 +5,7 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.devicefinder.api.DatapointService;
 
 import de.iwes.widgets.api.OgemaGuiService;
+import de.iwes.widgets.api.services.MessagingService;
 
 /** Collection of typical extended framework services for comprehensive access within applications*/
 public class ApplicationManagerPlus {
@@ -13,6 +14,7 @@ public class ApplicationManagerPlus {
 	private DatapointService dpService;
 	private UserPermissionService userPermService;
 	private PermissionManager permMan;
+	private MessagingService messagingService;
 	
 	public ApplicationManagerPlus(ApplicationManager appMan) {
 		this.appMan = appMan;		
@@ -23,6 +25,8 @@ public class ApplicationManagerPlus {
 		this.guiService = guiService;
 		this.dpService = dpService;
 		this.userPermService = userPermService;
+		if(guiService != null)
+			setMessagingService(guiService.getMessagingService());
 	}
 
 	public ApplicationManager appMan() {
@@ -39,6 +43,7 @@ public class ApplicationManagerPlus {
 
 	public void setGuiService(OgemaGuiService guiService) {
 		this.guiService = guiService;
+		this.messagingService = guiService.getMessagingService();
 	}
 
 	public DatapointService dpService() {
@@ -63,5 +68,11 @@ public class ApplicationManagerPlus {
 
 	public void setPermMan(PermissionManager permMan) {
 		this.permMan = permMan;
+	}
+	public MessagingService getMessagingService() {
+		return messagingService;
+	}
+	public void setMessagingService(MessagingService messagingService) {
+		this.messagingService = messagingService;
 	}
 }
