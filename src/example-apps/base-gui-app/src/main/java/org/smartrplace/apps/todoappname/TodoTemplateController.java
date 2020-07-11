@@ -4,6 +4,7 @@ import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.accessadmin.api.UserPermissionService;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
+import org.ogema.devicefinder.api.DatapointService;
 import org.smartrplace.apps.todoappname.gui.MainPage;
 import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 
@@ -13,10 +14,11 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 // here the controller logic is implemented
 public class TodoTemplateController {
 
-	public OgemaLogger log;
-    public ApplicationManager appMan;
+	public final OgemaLogger log;
+    public final ApplicationManager appMan;
     /** This will not be available in the constructor*/
-    public UserPermissionService userPermService;
+    public final UserPermissionService userPermService;
+    public final DatapointService dpService;
     
 	public AccessAdminConfig appConfigData;
 	public TodoTemplateApp accessAdminApp;
@@ -31,9 +33,11 @@ public class TodoTemplateController {
 		this.log = appMan.getLogger();
 		this.accessAdminApp = initApp;
 		this.userPermService = initApp.userAccService;
+		this.dpService = initApp.dpService;
 		this.appManPlus = new ApplicationManagerPlus(appMan);
 		appManPlus.setPermMan(initApp.permMan);
 		appManPlus.setUserPermService(userPermService);
+		appManPlus.setDpService(dpService);
 		
 		WidgetPage<?> pageRes10 = initApp.widgetApp.createWidgetPage("mainpage.html", true);
 		mainPage = new MainPage(pageRes10, this);

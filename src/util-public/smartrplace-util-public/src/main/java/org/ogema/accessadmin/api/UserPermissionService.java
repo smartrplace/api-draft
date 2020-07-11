@@ -29,7 +29,7 @@ public interface UserPermissionService {
 	/** Permission to view and download the historical log data*/
 	public static final String USER_READ_HISTORICALDATA_PERM = "UserReadHistoricalDataPermission";
 	
-	/** Permission to administer the data point, especially change permissions*/
+	/** Permission to administer the room, especially change general settings like eco mode temperature*/
 	public static final String USER_ADMIN_PERM = "UserAdminPermission";
 	
 	/** Permission to set back the setting for a {@link BuildingPropertyUnit} to the last

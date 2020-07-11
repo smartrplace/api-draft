@@ -65,8 +65,12 @@ public abstract class UserServletTest extends HttpServlet {
 		
         if(user.equals(DEFAULT_LOGIN_USER_NAME))
         	user = req.getParameter("user");
-        else
-        	user = "#REST#"+user;
+        else {
+        	if(user.endsWith("_rest"))
+        		user = user.substring(0, user.length()-"_rest".length());
+        	else
+        		user = "#REST#"+user;
+        }
 		/*String test = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 		System.out.println("Body : "+test);
 		String auth = req.getAuthType();
