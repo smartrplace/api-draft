@@ -64,17 +64,19 @@ public interface UserPermissionService {
 	public static final String[] PROPUNITPERMISSIONS = {RESTORE_SAFE_PERM, UPDATE_INSTALL_PERM, UPDATE_RATING_PERM,
 			UPDATE_DEFINITION_PERM};
 	
-	public static final String MONITORING = "Monitoring";
+	public static final String MONITORING = "KPIs and Charts";
 	public static final String ROOM_STATUS_CONTROL = "Room Status Control";
-	public static final String INSTALLATION_SETUP = "Installation&Setup";
+	public static final String INSTALLATION_SETUP = "Setup&Installation";
 	public static final String ALARMING = "Alarming";
 	public static final String USER_MANAGEMENT = "User Management";
-	public static final String GROUP_AND_PERMISSION_MANAGEMENT = "Permissions and Groups";
+	public static final String GROUP_AND_PERMISSION_MANAGEMENT = "Groups and Permissions";
 	public static final String APPSTORE = "Appstore";
 	public static final String BACNET = "BACnet Admin";
 	
-	public static final String[] APP_ACCESS_PERMISSIONS = {MONITORING, ROOM_STATUS_CONTROL, INSTALLATION_SETUP, ALARMING,
-			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT, APPSTORE, BACNET};
+	public static final String[] APP_ACCESS_PERMISSIONS = {MONITORING, INSTALLATION_SETUP, ALARMING,
+			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT};
+	public static final String[] APP_ACCESS_PERMISSIONS_WITHAPPSTORE = {MONITORING, INSTALLATION_SETUP, ALARMING,
+			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT, APPSTORE};
 	
 	/** Permissions for which the building property units rooms per user and per app or app permission type
 	 * shall be chosen via Multiselect. So the table will most likely only show one app or app permission type
