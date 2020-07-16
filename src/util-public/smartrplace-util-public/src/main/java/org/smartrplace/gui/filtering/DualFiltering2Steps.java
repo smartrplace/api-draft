@@ -22,7 +22,7 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 	
 	//protected abstract List<G> getAllGroups(OgemaHttpRequest req);
 	//protected abstract List<A> elementsInGroup(G group, OgemaHttpRequest req);
-	protected abstract List<GenericFilterOption<A>> getOptionsDynamic(G group);
+	protected abstract List<GenericFilterOption<A>> getOptionsDynamic(G group, OgemaHttpRequest req);
 	protected abstract List<GenericFilterFixedGroup<A, G>> getGroupOptionsDynamic();
 	protected abstract GenericFilterFixedGroup<A, G> getGroupOptionDynamic(G group);
 	protected abstract List<G> getGroups(A object);
@@ -63,17 +63,17 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 			}
 			
 			@Override
-			protected List<GenericFilterOption<A>> getOptionsDynamic(OgemaHttpRequest req) {
-				return getOptionsDynamic();
-			}
 			@SuppressWarnings({ "unchecked", "rawtypes" })
-			protected List<GenericFilterOption<A>> getOptionsDynamic() {
+			protected List<GenericFilterOption<A>> getOptionsDynamic(OgemaHttpRequest req) {
+			//	return getOptionsDynamic();
+			//}
+			//protected List<GenericFilterOption<A>> getOptionsDynamic() {
 				if(suppressEmptyOptionsInFirstDropdown) {
 					List<GenericFilterFixedGroup<A, G>> all = (getGroupOptionsDynamic());
 					List<GenericFilterOption<A>> result = new ArrayList<>();
 					for(GenericFilterFixedGroup<A, G> a: all) {
 						GenericFilterFixedGroup<A, G> opt = getGroupOptionDynamic(a.getGroup());
-						List<GenericFilterOption<A>> secondSel = DualFiltering2Steps.this.getOptionsDynamic(a.getGroup());
+						List<GenericFilterOption<A>> secondSel = DualFiltering2Steps.this.getOptionsDynamic(a.getGroup(), req);
 						if(secondSel == null || secondSel.isEmpty() || secondSel.get(0) == DualFiltering2Steps.this.NONE_OPTION)
 							continue;
 						result.add(a);
@@ -107,10 +107,10 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 	protected List<GenericFilterOption<A>> getOptionsDynamic(OgemaHttpRequest req) {
 		GenericFilterOption<A> groupFilterSelected = firstDropDown.getSelectedItem(req);
 		if(groupFilterSelected == firstDropDown.ALL_OPTION || groupFilterSelected == null)
-			return getOptionsDynamic((G)null);
+			return getOptionsDynamic((G)null, req);
 		if(!(groupFilterSelected instanceof GenericFilterFixedGroup))
 			throw new IllegalStateException();
-		return getOptionsDynamic(((GenericFilterFixedGroup<A, G>)groupFilterSelected).getGroup());
+		return getOptionsDynamic(((GenericFilterFixedGroup<A, G>)groupFilterSelected).getGroup(), req);
 	}
 	
 	@Override
