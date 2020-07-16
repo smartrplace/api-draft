@@ -1,5 +1,7 @@
 package org.ogema.accessadmin.api;
 
+import java.util.List;
+
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
@@ -142,4 +144,10 @@ public interface UserPermissionService {
 	default GenericFilterFixedGroup<Room, BuildingPropertyUnit> getRoomGroupFiler(String roomGroupName) {
 		return null;
 	}
+	
+	public static class UserStatusResult {
+		public UserStatus status = null;
+		public List<String> addPerms = null;
+	}
+	UserStatusResult getUserStatus(String userName);
 }
