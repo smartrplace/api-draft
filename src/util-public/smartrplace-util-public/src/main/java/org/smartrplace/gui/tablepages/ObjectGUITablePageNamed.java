@@ -1,4 +1,4 @@
-package org.smartrplace.gui.filtering;
+package org.smartrplace.gui.tablepages;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;

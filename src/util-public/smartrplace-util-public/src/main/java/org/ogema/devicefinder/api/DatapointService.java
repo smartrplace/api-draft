@@ -143,4 +143,6 @@ public interface DatapointService {
 	
 	/** true if {@link #getGroup(String)} has been called once for the respective id*/
 	boolean hasGroup(String id);
+	
+	AlarmingService alarming();
 }

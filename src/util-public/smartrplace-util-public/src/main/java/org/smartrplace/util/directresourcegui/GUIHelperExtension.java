@@ -19,21 +19,21 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.StringResource;
-import org.smartrplace.util.directresourcegui.ResourceGUIHelper;
+import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.util.resource.OGEMAResourceCopyHelper;
+import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.buttonconfirm.ButtonConfirm;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.object.widget.popup.WidgetEntryData;
-import de.iwes.widgets.resource.widget.table.ResourceTable;
 
 public class GUIHelperExtension {
 	public static <T extends Resource> ButtonConfirm addDeleteButton(
-			ResourceList<T> objectList, T object, ResourceTable<T> mainTable,
-			String id, Alert alert, Row row, ResourceGUIHelper<T> vh, OgemaHttpRequest req) {
+			ResourceList<T> objectList, T object, OgemaWidget mainTable,
+			String id, Alert alert, Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req) {
 		if(req != null) {
 			ButtonConfirm deleteButton = new ButtonConfirm(mainTable, "deleteButton_"+id, req) {
 				private static final long serialVersionUID = 1L;
@@ -64,8 +64,8 @@ public class GUIHelperExtension {
 	
 	//TODO: It would be better to provide a class with methods that can be overriden here
 	public static <T extends Resource> Button addCopyButton(
-			ResourceList<T> objectList, T object, ResourceTable<T> mainTable,
-			String id, Alert alert, Row row, ResourceGUIHelper<T> vh, OgemaHttpRequest req,
+			ResourceList<T> objectList, T object, OgemaWidget mainTable,
+			String id, Alert alert, Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req,
 			ApplicationManager appMan) {
 		if(req != null) {
 			Button copyButton = new Button(mainTable, "copyButton_"+id, "copy", req) {
