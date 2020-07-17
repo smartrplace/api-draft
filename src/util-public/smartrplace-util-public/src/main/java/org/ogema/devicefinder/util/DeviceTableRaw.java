@@ -48,6 +48,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return null;
 	}
 	
+	protected Header headerWinSens;
+	
 	//protected abstract String getHeader(); // {return "Smartrplace Hardware InstallationApp";}
 	//protected final InstalledAppsSelector appSelector;
 	
@@ -77,7 +79,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 
 	@Override
 	public void addWidgetsAboveTable() {
-		Header headerWinSens = new Header(page, WidgetHelper.getValidWidgetId("header_"+id()), getTableTitle());
+		headerWinSens = new Header(page, WidgetHelper.getValidWidgetId("header_"+id()), getTableTitle());
 		headerWinSens.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_LEFT);
 
 		DocumentationLinkProvider docLinkProv = getDocLinkProvider();

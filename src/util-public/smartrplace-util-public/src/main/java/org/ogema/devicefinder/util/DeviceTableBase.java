@@ -14,7 +14,9 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
+import de.iwes.widgets.html.complextable.DynamicTable;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.label.Header;
 
 public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,InstallAppDevice>  {
 
@@ -98,5 +100,13 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 		}
 		if(tail.isEmpty()) return "102";
 		else return tail;
+	}
+	
+	public DynamicTable<InstallAppDevice> getMainTable() {
+		return mainTable;
+	}
+	
+	public Header getHeaderWidget() {
+		return headerWinSens;
 	}
 }

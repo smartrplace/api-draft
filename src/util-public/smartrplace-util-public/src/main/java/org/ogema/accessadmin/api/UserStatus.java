@@ -21,7 +21,7 @@ public enum UserStatus {
 	/** An admin user can access at least all apps defined in ADMIN_APPS*/
 	ADMIN,
 	/** Super admin has access to framework administration, full message settings etc.*/
-	SUPERADMIN,;
+	SUPERADMIN;
 
 	/** Only access to standard room control interface*/
 	//GUEST,
