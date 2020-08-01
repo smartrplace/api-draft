@@ -44,6 +44,12 @@ public class ResourceEditPage<T extends Resource> {
 	protected final ResourceDropdown<T> drop;
 	protected final T aggregatedData;
 	
+	/** Overwrite if necessary
+	 * @param resourceType */
+	protected Collection<? extends T> getItemsInDropdown(Class<T> resourceType) {
+		return appMan.getResourceAccess().getResources(resourceType);		
+	}
+	
 	/**Overwrite this to provide different url or set to null to avoid having the "Main Page" button*/
 	protected String getOverviewPageUrl() {
 		return "index.html";
@@ -68,7 +74,7 @@ public class ResourceEditPage<T extends Resource> {
 			@Override
 			public void updateDependentWidgets(OgemaHttpRequest req) {
 				T res = getSelectedItem(req);
-				Collection<? extends T> items = appMan.getResourceAccess().getResources(resourceType);
+				Collection<? extends T> items = getItemsInDropdown(resourceType);
 				drop.update(items , req);
 				drop.selectItem(res, req);
 				/*for( T opt: drop.getItems(req)) {
