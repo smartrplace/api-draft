@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.util;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
@@ -23,6 +24,11 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	protected abstract Class<? extends ResourcePattern<T>> getPatternClass();
 
 	protected PatternListenerExtended<ResourcePattern<T>, T> listener = null;
+	public List<ResourcePattern<T>> getAllPatterns() {
+		if(listener == null)
+			return Collections.emptyList();
+		return listener.getAllPatterns();
+	}
 	
 	protected abstract ResourcePatternAccess advAcc();
 	

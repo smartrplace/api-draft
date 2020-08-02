@@ -10,7 +10,14 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
+import org.ogema.model.devices.buildingtechnology.AirConditioner;
+import org.ogema.model.devices.buildingtechnology.Thermostat;
+import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
+import org.ogema.model.devices.generators.PVPlant;
+import org.ogema.model.devices.sensoractordevices.SensorDevice;
+import org.ogema.model.devices.sensoractordevices.SingleSwitchBox;
 import org.ogema.model.locations.Room;
+import org.ogema.model.sensors.DoorWindowSensor;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -205,9 +212,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static String getName(InstallAppDevice object) {
 		final Resource device;
 		device = object.device();
-		final String name;
+		String name;
 		if(device.getLocation().toLowerCase().contains("homematic")) {
-			name = "WindowSens HM:"+ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
+			name = getDeviceStdName(device) + ":" +
+					ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
 		} else {
 			// resolve reference here, otherwise we'd just get "device"
 			int idx = device.getLocation().lastIndexOf('/');
@@ -216,6 +224,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			else
 				idx++;
 			name = device.getLocation().substring(idx);
+			if(name.equals("device"))
+				name = getDeviceStdName(device) +
+					ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
 			//name = device.getLocation().replaceAll(".*/([^/])", "");
 		}
 		return name;
@@ -235,5 +246,41 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return device;
 	}
 	
+	
+	public static String getDeviceStdName(Resource model) {
+		//switch(typeClassName) {
+		Class<? extends Resource> resType = model.getResourceType();
+		if(DoorWindowSensor.class.isAssignableFrom(resType))
+			return "WindowSens";
+		if(Thermostat.class.isAssignableFrom(resType))
+			return "Thermostat";
+		if(SensorDevice.class.isAssignableFrom(resType))
+			return getSensorDeviceStdName((SensorDevice) model);
+		if(SingleSwitchBox.class.isAssignableFrom(resType))
+			return "SwitchBox";
+		if(ElectricityConnectionBox.class.isAssignableFrom(resType))
+			return "ElectricMeter";
+		if(AirConditioner.class.isAssignableFrom(resType))
+			return "AirConditioning";
+		if(PVPlant.class.isAssignableFrom(resType))
+			return "PVPlant";
+		return resType.getSimpleName();
+	}
+	
+	public static String getSensorDeviceStdName(SensorDevice model) {
+		// If more types of SensorDevices are supported in the future add detection here
+		if(isTempHumSens(model))
+			return "TempHumSens";
+		return "SensorDevice";
+	}
+	public static boolean isTempHumSens(SensorDevice model) {
+		if(model.getLocation().toLowerCase().startsWith("homematic"))
+			return true;
+		//for(Sensor sens: model.getSubResources(Sensor.class, false)) {
+		//	if(sens instanceof TemperatureSensor || sens instanceof HumiditySensor)
+		//		return true;
+		//}
+		return false;
+	}
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -23,10 +24,13 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	protected abstract Class<? extends Resource> getResourceType();
 	
 	protected final InstalledAppsSelector appSelector;
+	protected final DeviceHandlerBase<?> devHand;
 	
 	public DeviceTableBase(WidgetPage<?> page, ApplicationManager appMan, Alert alert,
-			InstalledAppsSelector appSelector) {
+			InstalledAppsSelector appSelector,
+			DeviceHandlerBase<?> devHand) {
 		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class));
+		this.devHand = devHand;
 		if(appSelector != null)
 			this.appSelector = appSelector;
 		else if(this instanceof InstalledAppsSelector)
@@ -77,9 +81,15 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 		List<InstallAppDevice> all = appSelector.getDevicesSelected();
 		List<InstallAppDevice> result = new ArrayList<InstallAppDevice>();
 		for(InstallAppDevice dev: all) {
-			if(getResourceType().isAssignableFrom(dev.device().getResourceType())) {
-				result.add(dev);
+			for(ResourcePattern<?> pat: devHand.getAllPatterns()) {
+				if(pat.model.equalsLocation(dev.device())) {
+					result.add(dev);
+					break;
+				}
 			}
+			//if(getResourceType().isAssignableFrom(dev.device().getResourceType())) {
+			//	result.add(dev);
+			//}
 		}
 		return result;
 	}
