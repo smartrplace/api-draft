@@ -8,6 +8,7 @@ import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.model.gateway.LocalGatewayInformation;
 import org.ogema.model.gateway.remotesupervision.GatewayTransferInfo;
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.smartrplace.intern.backup.pattern.SCPTransferPattern;
 import org.smartrplace.intern.backup.patternlistener.SCPTransferListener;
@@ -83,7 +84,7 @@ public class BackupInstallController {
 		if (gateway != null && (rsl == null || rsl.size() == 0)) {
 			rsl = appMan.getResourceManagement().createResource("RemoteSuperVisionList", ResourceList.class);
 			rsl.setElementType(GatewayTransferInfo.class);
-			final String id = gateway.id().getValue();
+			final String id =  ResourceUtils.getValidResourceName(gateway.id().getValue());
 			final GatewayTransferInfo gti = rsl.addDecorator(id, GatewayTransferInfo.class);
 			gti.id().<StringResource> create().setValue(id);
 			rsl.activate(true);
