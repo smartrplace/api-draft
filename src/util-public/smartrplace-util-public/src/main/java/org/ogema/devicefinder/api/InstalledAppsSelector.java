@@ -2,9 +2,14 @@ package org.ogema.devicefinder.api;
 
 import java.util.List;
 
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+
+import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
+import de.iwes.widgets.html.complextable.RowTemplate.Row;
 
 public interface InstalledAppsSelector {
 	List<InstallAppDevice> getDevicesSelected();
@@ -26,4 +31,7 @@ public interface InstalledAppsSelector {
 	 */
 	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device);
 	//ApplicationManager getAppManForSimulationStart();
+	
+	void addWidgetsExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan);
 }
