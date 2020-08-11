@@ -3,6 +3,7 @@ package org.ogema.devicefinder.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
@@ -21,12 +22,13 @@ import de.iwes.widgets.html.form.label.Header;
 
 public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,InstallAppDevice>  {
 
+	/** Required to generate sample resource*/
 	protected abstract Class<? extends Resource> getResourceType();
 	
 	protected final InstalledAppsSelector appSelector;
 	protected final DeviceHandlerBase<?> devHand;
 	
-	public DeviceTableBase(WidgetPage<?> page, ApplicationManager appMan, Alert alert,
+	public DeviceTableBase(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
 			InstalledAppsSelector appSelector,
 			DeviceHandlerBase<?> devHand) {
 		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class));
@@ -59,7 +61,7 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
             deviceId = "initId";
         }
 		else {
-			name = getName(object);
+			name = getName(object, appManPlus);
             if (object.deviceId().exists())
                 deviceId = object.deviceId().getValue();
             else

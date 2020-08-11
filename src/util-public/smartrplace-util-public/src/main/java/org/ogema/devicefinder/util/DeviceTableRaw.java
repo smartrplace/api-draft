@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
@@ -56,13 +58,15 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	protected Header headerWinSens;
+	protected final ApplicationManagerPlus appManPlus;
 	
 	//protected abstract String getHeader(); // {return "Smartrplace Hardware InstallationApp";}
 	//protected final InstalledAppsSelector appSelector;
 	
-	public DeviceTableRaw(WidgetPage<?> page, ApplicationManager appMan, Alert alert,
+	public DeviceTableRaw(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
 			T initSampleObject) {
-		super(page, appMan, null, initSampleObject, null, false, true, alert);
+		super(page, appMan!=null?appMan.appMan():null, null, initSampleObject, null, false, true, alert);
+		this.appManPlus = appMan;
 	}
 
 	public Button addDeleteButton(ObjectResourceGUIHelper<T, R> vh, String id,
@@ -209,9 +213,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return null;
 	}
 
-	public static String getName(InstallAppDevice object) {
+	public static String getName(InstallAppDevice object, ApplicationManagerPlus appManPlus) {
 		final Resource device;
 		device = object.device();
+		
+		DatapointGroup dpDev = appManPlus.dpService().getGroup(device.getLocation());
+		if(dpDev.label(null) != null)
+			return dpDev.label(null);
+		
 		String name;
 		if(device.getLocation().toLowerCase().contains("homematic")) {
 			name = getDeviceStdName(device) + ":" +
@@ -229,6 +238,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 					ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
 			//name = device.getLocation().replaceAll(".*/([^/])", "");
 		}
+		dpDev.setLabel(null, name);
+		dpDev.setType("DEVICE");
 		return name;
 	}
 	public Resource addNameWidgetRaw(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
@@ -238,7 +249,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(req == null)
 			name = "initResName"; //ResourceHelper.getSampleResource(getResourceType());
 		else
-			name = getName(object);
+			name = getName(object, appManPlus);
 		vh.stringLabel("Name", id, name, row);
 		
 		final Resource device;

@@ -57,12 +57,18 @@ public class DatapointGroupImpl implements DatapointGroup {
 
 	@Override
 	public boolean addDatapoint(Datapoint dp) {
+		for(Datapoint dpknown: this.datapoints) {
+			if(dpknown.id().equals(dp.id()))
+				return false;
+		}
 		return this.datapoints.add(dp);
 	}
 
 	@Override
 	public void addAll(Collection<Datapoint> datapoints) {
-		this.datapoints.addAll(datapoints);
+		for(Datapoint dp: datapoints)
+			addDatapoint(dp);
+		//this.datapoints.addAll(datapoints);
 	}
 
 	@Override

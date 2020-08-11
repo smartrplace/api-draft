@@ -15,6 +15,7 @@
  */
 package org.smartrplace.widget.extensions;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,8 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.tools.resource.util.ResourceUtils;
 
+import de.iwes.widgets.api.widgets.WidgetApp;
+import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 
 public class GUIUtilHelper {
@@ -65,4 +68,19 @@ public class GUIUtilHelper {
 		}
 		return valuesToSet;
 	}
+	
+	/*public static void registerStyleSheet(String cssFileName, String baseURL, WidgetApp wApp,
+			ApplicationManager appMan) {
+		final String stylesheet_URL = baseURL + "/"+ cssFileName;
+		final String stylesheet_LINK = "<link rel=\"stylesheet\" href=\""+ stylesheet_URL + "\">";
+		appMan.getWebAccessManager().registerWebResource(stylesheet_URL, cssFileName);
+		wApp.addStylesheet(cssFileName, null);
+		addStyle(wApp.getPages().values(), stylesheet_LINK);
+		
+	}
+	
+	public static void addStyle(Collection<WidgetPage<?>> pages, String stylesheet_LINK) {
+		for (WidgetPage<?> p : pages)
+			p.append(stylesheet_LINK);
+	}*/
 }

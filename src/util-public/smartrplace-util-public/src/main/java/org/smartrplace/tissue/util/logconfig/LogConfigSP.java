@@ -22,7 +22,7 @@ import org.ogema.model.prototypes.PhysicalElement;
 
 import de.iwes.util.resource.ResourceHelper;
 
-/** Intended to move to {@link LogConfigSP} in the future
+/** Intended to move to {@link LogConfig} in the future
  *
  */
 public class LogConfigSP {

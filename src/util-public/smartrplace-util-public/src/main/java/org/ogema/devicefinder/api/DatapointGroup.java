@@ -3,9 +3,14 @@ package org.ogema.devicefinder.api;
 import java.util.Collection;
 import java.util.List;
 
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.template.LabelledItem;
 
+/** Datapoint groups can be registered with an arbitraty ID, e.g. to register a plot of a set of datapoints.<br>
+ * DatepointGroups are also used to represent devices. In this case the resource location of the device registered with {@link InstallAppDevice#device()}
+ * is used as ID. The type of these groups shall be "DEVICE".*/
 public interface DatapointGroup extends LabelledItem {
 	public static final String DEFAULT_PLOT_CONFIG_PAGE = "DevicePlotPage";
 	/** Set label for the group that is used as label for the chart if a

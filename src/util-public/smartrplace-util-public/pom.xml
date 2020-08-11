@@ -177,6 +177,11 @@
             <artifactId>httpcore-osgi</artifactId>
             <version>4.4.5</version>
         </dependency>
+         <dependency>
+            <groupId>org.ogema.model</groupId>
+            <artifactId>fhg-proposed</artifactId>
+            <version>2.2.2-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

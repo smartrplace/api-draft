@@ -2,6 +2,11 @@ package org.ogema.accessadmin.api;
 
 import org.ogema.accesscontrol.PermissionManager;
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.logging.OgemaLogger;
+import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.core.resourcemanager.ResourceManagement;
+import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.core.security.WebAccessManager;
 import org.ogema.devicefinder.api.DatapointService;
 
 import de.iwes.widgets.api.OgemaGuiService;
@@ -74,5 +79,24 @@ public class ApplicationManagerPlus {
 	}
 	public void setMessagingService(MessagingService messagingService) {
 		this.messagingService = messagingService;
+	}
+	
+	public long getFrameworkTime() {
+		return appMan.getFrameworkTime();
+	}
+	public OgemaLogger getLogger() {
+		return appMan.getLogger();
+	}
+	public ResourceAccess getResourceAccess() {
+		return appMan.getResourceAccess();
+	}
+	public ResourcePatternAccess getResourcePatternAccess() {
+		return appMan.getResourcePatternAccess();
+	}
+	public ResourceManagement getResourceManagement() {
+		return appMan.getResourceManagement();
+	}
+	public WebAccessManager getWebAccessManager() {
+		return appMan.getWebAccessManager();
 	}
 }

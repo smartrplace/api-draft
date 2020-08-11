@@ -30,7 +30,7 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	
 	/** Get device name. Usually this should be the same name as the name shown in the table provided if {@link DriverHandlerProvider}
 	 * is also implemented.*/
-	String getDeviceName(InstallAppDevice installDeviceRes);
+	//String getDeviceName(InstallAppDevice installDeviceRes);
 	
 	/** Provide information whether a sensor/actor resource inside a device is relevant for
 	 * default logging.
