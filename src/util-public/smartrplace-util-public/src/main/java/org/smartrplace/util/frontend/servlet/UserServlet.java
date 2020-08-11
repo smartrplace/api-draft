@@ -421,6 +421,7 @@ public class UserServlet extends HttpServlet {
 		Collection<T> objects = getObjects(objectId, user, pageprov);
 		if(objects == null) return response;
 		
+		paramMap.put("METHOD", new String[] {"POST"});
 		for(T obj: objects) {
 			Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user, paramMap);
 			for(String key: result.keySet()) {
