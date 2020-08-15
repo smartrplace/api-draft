@@ -7,8 +7,11 @@ import java.util.Map;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.units.VoltageResource;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
@@ -18,7 +21,9 @@ import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
 import org.ogema.model.devices.generators.PVPlant;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.devices.sensoractordevices.SingleSwitchBox;
+import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.DoorWindowSensor;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -203,16 +208,61 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom,
 			FloatResource valueReadingResource) {
+		return addLastContact("Last Contact", vh, id, req, row, valueReadingResource);
+	}
+	protected Label addLastContact(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, 
+			SingleValueResource reading) {
 		Label lastContact = null;
 		if(req != null) {
-			lastContact = new LastContactLabel(valueReadingResource, appMan, mainTable, "lastContact"+id, req);
-			row.addCell(WidgetHelper.getValidWidgetId("Last Contact"), lastContact);
+			lastContact = new LastContactLabel(reading, appMan, mainTable, "lastContact"+id, req);
+			row.addCell(WidgetHelper.getValidWidgetId(columnLabel), lastContact);
 			return lastContact;
 		} else
-			vh.registerHeaderEntry("Last Contact");
+			vh.registerHeaderEntry(columnLabel);
 		return null;
 	}
 
+	public static class AddBatteryVoltageResult {
+		public AddBatteryVoltageResult(Label label, SingleValueResource reading) {
+			super();
+			this.label = label;
+			this.reading = reading;
+		}
+		public Label label;
+		public SingleValueResource reading;
+	}
+	protected AddBatteryVoltageResult addBatteryVoltage(ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row,
+			PhysicalElement device2) {
+		if(device2.getSubResource("battery") != null) {
+			ElectricityStorage bat = device2.getSubResource("battery",  ElectricityStorage.class);
+			if(bat != null && bat.internalVoltage().exists()) {
+				return new AddBatteryVoltageResult(vh.floatLabel("Battery", id, bat.internalVoltage().reading(), row, "%.1f#min:0.1"),
+						bat.internalVoltage().reading());
+			}
+		}
+		VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(device2,
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
+		if(batteryVoltage != null)
+			return new AddBatteryVoltageResult(vh.floatLabel("Battery", id, batteryVoltage, row, "%.1f#min:0.1"),
+					batteryVoltage);
+		else if(req == null)
+			vh.registerHeaderEntry("Battery");
+		return null;
+	}
+	protected AddBatteryVoltageResult addBatteryStatus(ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row,
+			PhysicalElement device2) {
+		BooleanResource batteryStatus = ResourceHelper.getSubResourceOfSibbling(device2,
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "batteryLow", BooleanResource.class);
+		if(batteryStatus != null)
+			return new AddBatteryVoltageResult(vh.booleanLabel("Bat.Low", id, batteryStatus, row, 0), batteryStatus);
+		else if(req == null)
+			vh.registerHeaderEntry("Bat.Low");
+		return null;
+	}
+	
 	public static String getName(InstallAppDevice object, ApplicationManagerPlus appManPlus) {
 		final Resource device;
 		device = object.device();
