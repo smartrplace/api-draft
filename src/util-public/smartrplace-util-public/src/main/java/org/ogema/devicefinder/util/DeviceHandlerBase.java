@@ -1,6 +1,5 @@
 package org.ogema.devicefinder.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -18,9 +17,7 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.PatternListenerExtended;
-import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.prototypes.PhysicalElement;
-import org.ogema.model.sensors.Sensor;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -97,6 +94,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	
 	public Collection<Datapoint> addtStatusDatapointsHomematic(PhysicalElement dev, DatapointService dpService,
 			List<Datapoint> result) {
+		dev = dev.getLocationResource();
 		VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(dev,
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
 		if(batteryVoltage != null)

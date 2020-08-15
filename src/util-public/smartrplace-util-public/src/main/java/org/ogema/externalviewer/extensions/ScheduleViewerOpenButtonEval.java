@@ -239,12 +239,12 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			
 			//avoid overwriting of more significant names
 			if(tsId == null) {
-				if(shortNames.containsKey(timeSeries)) {
+				if(shortNames.containsKey(timeSeries) && nameProvider != null) {
 					if(nameProvider.compareInput(shortNames.get(timeSeries), shortName) > 0)
 						continue;
 				}
 			} else {
-				if(shortNamesRD.containsKey(tsId)) {
+				if(shortNamesRD.containsKey(tsId) && nameProvider != null) {
 					if(nameProvider.compareInput(shortNamesRD.get(tsId), shortName) > 0)
 						continue;
 				}
