@@ -30,7 +30,7 @@ public abstract class PerMultiselectConfigPage<T, G, R extends Resource> extends
 	protected abstract Collection<G> getAllGroups(OgemaHttpRequest req); 
 	protected abstract List<G> getGroups(T object, OgemaHttpRequest req);
 	protected abstract void setGroups(T object, List<G> groups, OgemaHttpRequest req);
-	protected abstract String getGroupLabel(G object);
+	protected abstract String getGroupLabel(G object, OgemaLocale locale);
 
 	//protected abstract String getGroupLabel(G group);
 	//protected abstract 
@@ -86,7 +86,7 @@ public abstract class PerMultiselectConfigPage<T, G, R extends Resource> extends
 					//String result = groupLabels.get(object);
 					//if(result != null)
 					//	return result;
-					String result = getGroupLabel(object);
+					String result = getGroupLabel(object, locale);
 					groupLabels.put(object, result);
 					return result;
 				}

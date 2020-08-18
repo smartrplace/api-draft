@@ -37,6 +37,15 @@ public class KPIResourceAccess {
 		return result;
 	}
 	
+	public static Room getRealRoom(String humanReadableShortname, ResourceAccess resAcc) {
+		List<Room> result = resAcc.getResources(Room.class);
+		for(Room room: result) {
+			if(ResourceUtils.getHumanReadableShortName(room).equals(humanReadableShortname))
+				return room;
+		}
+		return null;
+	}
+	
 	public static FloatResource getDefaultPriceResource(UtilityType type, ApplicationManager appMan) {
 		switch(type) {
 		case ELECTRICITY:

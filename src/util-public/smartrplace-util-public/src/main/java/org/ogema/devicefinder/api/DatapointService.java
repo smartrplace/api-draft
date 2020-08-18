@@ -114,7 +114,8 @@ public interface DatapointService {
 	GatewayResource getStructure(String id, String gatewayId);
 	List<GatewayResource> getAllStructures();
 	
-	/** Note: For now the room id shall always be the same as the label(English)*/
+	/** Note: For now the room id shall be the room location on the source gateway. For local rooms the name shall be determined
+	 * from the resource, for others user {@link DPRoom#setLabel(String, OgemaLocale)}.*/
 	DPRoom getRoom(String id, String gatewayId);
 	DPRoom getRoom(String id);
 	List<DPRoom> getAllRooms();

@@ -171,13 +171,20 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		vh.stringEdit("Comment", id, object.installationComment(), row, alert);
 	}
 	
+	private static Map<Room, String> roomsToSet = new HashMap<>();
+	private static long lastUpdate = -1;
 	protected void addRoomWidget(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
-		Map<Room, String> roomsToSet = new HashMap<>();
-		List<Room> rooms = KPIResourceAccess.getRealRooms(appMan.getResourceAccess()); //.getResources(Room.class);
-		for(Room room: rooms) {
-			roomsToSet.put(room, ResourceUtils.getHumanReadableShortName(room));
+		long now = appMan.getFrameworkTime();
+		if(now - lastUpdate > 10000) {
+			List<Room> allRooms = KPIResourceAccess.getRealRooms(appMan.getResourceAccess()); //.getResources(Room.class);
+			Map<Room, String> roomsToSetLoc = new HashMap<>();
+			for(Room room: allRooms) {
+				roomsToSetLoc.put(room, ResourceUtils.getHumanReadableShortName(room));
+			}
+			roomsToSet = roomsToSetLoc;
+			lastUpdate = now;
 		}
 		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet, 3);
 	}

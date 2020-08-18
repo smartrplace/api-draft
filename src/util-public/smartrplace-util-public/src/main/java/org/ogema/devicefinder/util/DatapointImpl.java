@@ -6,12 +6,14 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointInfo;
+import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.devicefinder.api.DatapointInfoProvider;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DpConnection;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
-import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.frontend.servlet.UserServletUtil;
@@ -24,6 +26,7 @@ import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint {
+	private static final long LABEL_UPDATE_RATE = 10000;
 	protected final String location;
 	protected String gatewayId = null;
 	protected Resource resource = null;
@@ -37,6 +40,8 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	
 	protected ReadOnlyTimeSeries tseries = null;
 	
+	protected final DatapointService dpService;
+	
 	//overwrite
 	protected DpConnection getConnection(String connectionLocation, UtilityType type) {
 		return null;
@@ -46,15 +51,27 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			OGEMADriverPropertyService<Resource> driverService,
 			GaRoDataType garoDataType, DPRoom dpRoom, DatapointInfo consumptionInfo,
 			String subRoomLocation) {
+		this(location, gatewayId, resource, driverService, garoDataType, dpRoom,
+				consumptionInfo, subRoomLocation, null);
+	}
+	public DatapointImpl(String location, String gatewayId, Resource resource,
+			OGEMADriverPropertyService<Resource> driverService,
+			GaRoDataType garoDataType, DPRoom dpRoom, DatapointInfo consumptionInfo,
+			String subRoomLocation, DatapointService dpService) {
 		super(garoDataType, dpRoom, consumptionInfo, subRoomLocation);
 		this.location = location;
 		this.gatewayId = gatewayId;
 		this.resource = resource;
+		this.dpService =dpService;
 		setDriverService(driverService);
 	}
 	public DatapointImpl(String location, String gatewayId, Resource resource,
 			OGEMADriverPropertyService<Resource> driverService) {
 		this(location, gatewayId, resource, driverService, null, null, null, null);
+	}
+	public DatapointImpl(String location, String gatewayId, Resource resource,
+			OGEMADriverPropertyService<Resource> driverService, DatapointService dpService) {
+		this(location, gatewayId, resource, driverService, null, null, null, null, dpService);
 	}
 	public DatapointImpl(TimeSeriesDataImpl tsdi) {
 		this(tsdi.id(), null, (tsdi.getTimeSeries() instanceof Resource)?(Resource)tsdi.getTimeSeries():null,
@@ -122,15 +139,27 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		return resource;
 	}
 
+	long lastLabelUpdate = -1;
 	@Override
 	public String label(OgemaLocale locale) {
 		String result;
 		if(locale == null)
 			result = labelDefault;
 		else {
-			result = labels.get(locale);
-			if(result == null)
-				result = labelDefault;
+			boolean useExist = true;
+			if(dpService != null) {
+				long now = dpService.getFrameworkTime();
+				if(now - lastLabelUpdate > LABEL_UPDATE_RATE)
+					lastLabelUpdate = now;
+				else
+					useExist = false;
+			}
+			if(useExist) {
+				result = labels.get(locale);
+				if(result == null)
+					result = labelDefault;
+			} else
+				result = null;
 		}
 		if(result != null)
 			return result;
@@ -217,6 +246,13 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		DPRoom dpr = getRoom();
 		if(dpr != null)
 			return dpr.label(locale);
+		Resource devRes = getDeviceResource();
+		if(devRes != null && dpService != null) {
+			DatapointGroup dev = dpService.getGroup(devRes.getLocation());
+			if(dev != null) {
+				return "*"+dev.label(null);
+			}
+		}
 		return Datapoint.super.getRoomName(locale);
 	}
 	

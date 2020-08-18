@@ -9,6 +9,7 @@ import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.timeseries.eval.api.TimeSeriesData;
 import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
