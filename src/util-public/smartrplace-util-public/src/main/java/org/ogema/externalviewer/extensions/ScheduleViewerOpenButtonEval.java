@@ -32,6 +32,7 @@ import de.iwes.timeseries.eval.api.TimeSeriesDataOffline;
 import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
 import de.iwes.timeseries.eval.garo.api.base.GaRoMultiEvalDataProvider;
+import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.reswidget.scheduleviewer.api.ScheduleViewerConfiguration;
@@ -66,6 +67,14 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		super(page, widgetId, text,
 			scheduleViewerProviderId,
 			scheduleViewerProviderInstance);
+	}
+	public ScheduleViewerOpenButtonEval(OgemaWidget parent, String widgetId, String text,
+			String scheduleViewerProviderId,
+			DefaultScheduleViewerConfigurationProviderExtended scheduleViewerProviderInstance,
+			OgemaHttpRequest req) {
+		super(parent, widgetId, text,
+			scheduleViewerProviderId,
+			scheduleViewerProviderInstance, req);
 	}
 
 	public void setNameProvider(TimeSeriesNameProvider nameProvider) {
