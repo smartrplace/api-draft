@@ -2,6 +2,7 @@ package org.ogema.devicefinder.util;
 
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.api.AlarmingExtension;
 import org.ogema.devicefinder.api.AlarmingExtensionListener;
@@ -14,14 +15,22 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 		public ValueListenerDataBase(FloatResource res) {
 			this.res = res;
 			this.bres = null;
+			this.ires = null;
 		}
 		public ValueListenerDataBase(BooleanResource bres) {
 			this.res = null;
 			this.bres = bres;
+			this.ires = null;
+		}
+		public ValueListenerDataBase(IntegerResource ires) {
+			this.res = null;
+			this.bres = null;
+			this.ires = ires;
 		}
 		//public AlarmValueListenerI listener;
 		public final FloatResource res;
 		public final BooleanResource bres;
+		public final IntegerResource ires;
 		public CountDownDelayedExecutionTimer timer = null;
 		public CountDownDelayedExecutionTimer alarmReleaseTimer = null;
 		public long nextTimeAlarmAllowed = -1;
@@ -41,8 +50,10 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 				valueListener = new ValueListenerDataBase((FloatResource) ac.sensorVal());
 			else if(ac.sensorVal() instanceof BooleanResource)
 				valueListener = new ValueListenerDataBase((BooleanResource) ac.sensorVal());
+			else if(ac.sensorVal() instanceof IntegerResource)
+				valueListener = new ValueListenerDataBase((IntegerResource) ac.sensorVal());
 			else
-				throw new IllegalArgumentException("Only Float- and BooleanResource supported!");
+				throw new IllegalArgumentException("Only Float-, Integer- and BooleanResource supported!");
 		}
 		
 		@Override
