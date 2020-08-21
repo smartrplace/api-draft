@@ -17,7 +17,7 @@ public class AlarmingServiceImpl implements AlarmingService {
 	}
 
 	@Override
-	public Collection<AlarmingExtension> getAlarmingExtionsions() {
+	public Collection<AlarmingExtension> getAlarmingExtensions() {
 		return extensions.values();
 	}
 

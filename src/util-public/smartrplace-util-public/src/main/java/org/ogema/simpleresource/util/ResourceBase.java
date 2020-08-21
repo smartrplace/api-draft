@@ -2,6 +2,7 @@ package org.ogema.simpleresource.util;
 
 import java.util.List;
 
+/** This is an initial draft and not implemented yet*/
 public interface ResourceBase {
 	String getName();
 	String getLocation();

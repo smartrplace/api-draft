@@ -1,5 +1,7 @@
 package org.ogema.devicefinder.api;
 
+import java.util.List;
+
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
@@ -98,4 +100,7 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 			return device.device().getClass().getSimpleName().replaceAll("[^A-Z]", "");
 		return "UNK"; // unknown
 	}
+
+	/** Required for hardware installation. Provided by DeviceHandlerBase*/
+	List<ResourcePattern<T>> getAllPatterns();
 }

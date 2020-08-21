@@ -18,6 +18,7 @@ public class DatapointGroupImpl implements DatapointGroup {
 	protected String type;
 	protected Map<OgemaLocale, String> labels = new HashMap<>();
 	protected List<Datapoint> datapoints = new ArrayList<>();
+	protected Map<String, DatapointGroup> subGroups = new HashMap<>();
 	protected Set<String> charts = new HashSet<>();
 	
 	public DatapointGroupImpl(String id) {
@@ -85,4 +86,23 @@ public class DatapointGroupImpl implements DatapointGroup {
 		return new ArrayList<String>(charts);
 	}
 
+	@Override
+	public List<DatapointGroup> getSubGroups() {
+		return new ArrayList<DatapointGroup>(subGroups.values());
+	}
+
+	@Override
+	public boolean addSubGroup(DatapointGroup dpGrp) {
+		return subGroups.put(dpGrp.id(), dpGrp) == null;
+	}
+
+	@Override
+	public boolean removeSubGroup(DatapointGroup dpGrp) {
+		return subGroups.remove(dpGrp.id()) != null;
+	}
+	
+	@Override
+	public DatapointGroup getSubGroup(String id) {
+		return subGroups.get(id);
+	}
 }

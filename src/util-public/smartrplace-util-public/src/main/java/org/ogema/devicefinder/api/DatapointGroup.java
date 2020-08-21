@@ -39,4 +39,9 @@ public interface DatapointGroup extends LabelledItem {
 	boolean registerAsChart(String configurationPage);
 	
 	List<String> getChartConfigPagesRegistered();
+	
+	List<DatapointGroup> getSubGroups();
+	boolean addSubGroup(DatapointGroup dpGrp);
+	boolean removeSubGroup(DatapointGroup dpGrp);
+	DatapointGroup getSubGroup(String id);
 }
