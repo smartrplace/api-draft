@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.devicefinder.util.DeviceHandlerBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -12,7 +13,7 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 
 public interface InstalledAppsSelector {
-	List<InstallAppDevice> getDevicesSelected();
+	List<InstallAppDevice> getDevicesSelected(DeviceHandlerProvider<?> devHand);
 	
 	InstallAppDevice getInstallResource(Resource device);
 

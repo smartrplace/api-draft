@@ -9,6 +9,7 @@ import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
+import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
@@ -103,4 +104,14 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 
 	/** Required for hardware installation. Provided by DeviceHandlerBase*/
 	List<ResourcePattern<T>> getAllPatterns();
+	
+	/** This method is called when the first resource of a type is created. The handler shall then
+	 * fill in the {@link InstallAppDevice} resource and the device resource as a template, e.g. for
+	 * alarming. If not template filling is relevant or is not supported then the method does not
+	 * need to be overwritten.
+	 * @param appDevice
+	 * @param appConfigData
+	 */
+	default void initAlarmingForDevice(InstallAppDevice appDevice,
+			HardwareInstallConfig appConfigData) {}
 }

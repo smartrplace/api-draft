@@ -1,12 +1,10 @@
 package org.ogema.devicefinder.util;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
-import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -80,10 +78,13 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 
 	@Override
 	public List<InstallAppDevice> getObjectsInTable(OgemaHttpRequest req) {
-		List<InstallAppDevice> all = appSelector.getDevicesSelected();
-		List<InstallAppDevice> result = new ArrayList<InstallAppDevice>();
+		List<InstallAppDevice> all = appSelector.getDevicesSelected(devHand);
+		return all;
+		/*List<InstallAppDevice> result = new ArrayList<InstallAppDevice>();
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		List<ResourcePattern<?>> allPatterns = (List)devHand.getAllPatterns();
 		for(InstallAppDevice dev: all) {
-			for(ResourcePattern<?> pat: devHand.getAllPatterns()) {
+			for(ResourcePattern<?> pat: allPatterns) {
 				if(pat.model.equalsLocation(dev.device())) {
 					result.add(dev);
 					break;
@@ -93,7 +94,7 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 			//	result.add(dev);
 			//}
 		}
-		return result;
+		return result;*/
 	}
 	
 	@Override
