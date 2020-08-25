@@ -87,7 +87,7 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	 * 		this also means that the step method in the object returned is not called
 	 * @return null if no simulation is available for the device
 	 */
-	default RoomInsideSimulationBase startSimulationForDevice(T deviceResource,
+	default List<RoomInsideSimulationBase> startSimulationForDevice(InstallAppDevice device, T deviceResource,
 			SingleRoomSimulationBase roomSimulation,
 			DatapointService dpService) {
 		return null;

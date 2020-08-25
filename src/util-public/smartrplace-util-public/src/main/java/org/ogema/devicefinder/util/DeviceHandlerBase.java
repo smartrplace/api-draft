@@ -34,6 +34,13 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 			return Collections.emptyList();
 		return listener.getAllPatterns();
 	}
+	public ResourcePattern<T> getPattern(T device) {
+		for(ResourcePattern<T> pat: getAllPatterns()) {
+			if(pat.model.equalsLocation(device))
+				return pat;
+		}
+		return null;
+	}
 	
 	protected abstract ResourcePatternAccess advAcc();
 	
