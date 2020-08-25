@@ -13,6 +13,7 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.devicefinder.api.DatapointGroup;
+import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
@@ -351,4 +352,16 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 
+	/** 
+	 * 
+	 * @param object
+	 * @param devHand may be null, in this case we just check if a non-empty value is given for the handler id
+	 * @return
+	 */
+	public static boolean isTemplate(InstallAppDevice object, DeviceHandlerProvider<?> devHand) {
+		if(devHand == null)
+			return  object.isTemplate().isActive() && (!object.isTemplate().getValue().isEmpty());
+		final boolean isTemplate = object.isTemplate().isActive() && object.isTemplate().getValue().equals(devHand.id());
+		return isTemplate;
+	}
 }

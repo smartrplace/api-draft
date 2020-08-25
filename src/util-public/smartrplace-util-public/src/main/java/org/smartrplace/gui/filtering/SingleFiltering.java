@@ -300,7 +300,13 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 	}
 	
 	protected final Map<String, List<T>> destinationObjects = new HashMap<>();
-	protected final Map<T, Long> destinationObjectsChecked = new HashMap<>();
+	private final Map<T, Long> destinationObjectsChecked2 = new HashMap<>();
+	private Long getLastDestUpdateTime(T object) {
+		return destinationObjectsChecked2.get(object);
+	}
+	private void setLastDestUpdateTime(T object, long time) {
+		destinationObjectsChecked2.put(object, time);
+	}
 	List<T> getDestinationList(GenericFilterOption<A> attribute) {
 		String stdLabel = LocaleHelper.getLabel(attribute.optionLabel(), null);
 		List<T> alist = destinationObjects.get(stdLabel);
@@ -318,10 +324,11 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 			//empty option = All
 			return true;
 		}
-		Long lastUpdate = destinationObjectsChecked.get(object);
-		long now = getFrameworkTime();
-		if(lastUpdate == null ||
-				((optionSetUpdateRate >= 0) && ((now-lastOptionsUpdate) > optionSetUpdateRate))) {
+		//Long lastUpdate = destinationObjectsChecked.get(object);
+		final Long lastUpdate = getLastDestUpdateTime(object);
+		final long now = getFrameworkTime();
+		if((lastUpdate == null) ||
+				((optionSetUpdateRate >= 0) && ((now-lastUpdate) > optionSetUpdateRate))) {
 			List<A> tlist = getAttributes(object);
 			for(GenericFilterOption<A> option: filteringOptions) {
 				boolean found = false;
@@ -331,13 +338,17 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 						break;
 					}
 				}
-				if(!found)
-					continue;
 				List<T> alistsub = getDestinationList(option);
+				if(!found) {
+					if(alistsub.contains(object))
+						alistsub.remove(object);
+					continue;
+				}
 				if(!alistsub.contains(object))
 					alistsub.add(object);
 			}
-			destinationObjectsChecked.put(object, now);
+			//destinationObjectsChecked.put(object, now);
+			setLastDestUpdateTime(object, now);
 		}
 		List<T> alist = getDestinationList(selected);
 		return alist.contains(object);
