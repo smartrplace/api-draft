@@ -8,7 +8,7 @@ import org.ogema.model.locations.Room;
  */
 public interface TemperatureControlBase {
 
-    /** 
+    /** Get temperature control setpoint resource ("setpoint set")
      * 
      * @return null if no suitable device is available in the room
      */
@@ -16,7 +16,7 @@ public interface TemperatureControlBase {
     
     public void setTemperatureSetpoint(float t);
 
-    /** 
+    /** Get temperature setpoint feedback resource
      * 
      * @return null if no suitable device is available in the room
      */
@@ -27,6 +27,12 @@ public interface TemperatureControlBase {
      * @return null if no suitable device is available in the room
      */
     public Float getTempSetpointFeedbackValue();
+
+    /** 
+     * 
+     * @return null if no suitable device is available in the room
+     */
+    public Float getTempSetpointSetValue();
 
     /** 
      * 
