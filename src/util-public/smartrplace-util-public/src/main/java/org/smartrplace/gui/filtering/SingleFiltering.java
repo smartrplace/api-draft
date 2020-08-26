@@ -14,13 +14,29 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.form.dropdown.TemplateDropdown;
 import de.iwes.widgets.template.DefaultDisplayTemplate;
 
-/** Provides a dropdown for filtering, typically for filtering of the objects used to generate table lines.<br>
+/** Provides a dropdown for filtering, typically for filtering of the objects used to generate table lines.
+ * Filtering is done for groups of A. These groups are defined by objects of {@link GenericFilterI}. If filtering shall be done directly for instances of A then for each such instance an instance of
+ * {@link GenericFilterFixedSingle} can be generated.<br>
+ * In the method {@link #getAttribute(Object)} or {@link #getAttributes(Object)} you provide the information which of
+ * the finally filtered T objects belong to which attribute of type A. So A already has a "grouping character". But
+ * the actual dropdown options allow to further group the attributes of type A into options that are represented by
+ * GenericFilterI or the inherited GenericFilterOption. These option groups are defined in {@link #getOptionsDynamic(OgemaHttpRequest)}.<br>
+ * 
+ * If filtering requires two steps, e.g. providing real groups of A in the left dropdown and single-A options in the
+ * right dropdown a {@link DualFiltering2Steps} element usually is the right choice. Here usually the decisive right dropdown only returns true
+ * for a single A object in {@link GenericFilterI#isInSelection(Object, OgemaHttpRequest)}.<br>
+ * If two independent groups of different types of attributes A shall be combined in an AND-filtering then a
+ * {@link DualFiltering} can be used to generate the combined AND filter. This does not create the dropdown widgets
+ * directly.
+ * 
  * There are two ways of filtering integration:<br>
- * - Filtering of the elements of a table on a page. This filtering usually returns true for several T objects
- * per filter option in {@link GenericFilterI#isInSelection(Object, OgemaHttpRequest)}.
- * - Selection of a single object that is configured in the table or otherwise on the page. This is a typical
- * use case for a {@link DualFiltering2Steps}. Here usually the decisive right dropdown only returns true
- * for a single T object in {@link GenericFilterI#isInSelection(Object, OgemaHttpRequest)}.
+ * - Filtering of the elements of a table on a page. This filtering usually returns true for several A objects
+ * per filter option in {@link GenericFilterI#isInSelection(Object, OgemaHttpRequest)}. In this case you usually have to overwrite
+ * {@link #isAttributeSinglePerDestinationObject()}, getAttribute or getAttributes,
+ * {@link #getOptionsDynamic(OgemaHttpRequest)} and {@link #getFrameworkTime()}.
+ * - Selection of a single object that is configured in the table or otherwise on the page. In this case the decisive
+ * dropdown usually should only offer a single A object, which may link to a single T object. So to offer a
+ * meaningful navigation usually a {@link DualFiltering2Steps} is used in this case.
  *
  * @param <A> attribute type for which the filtering shall take place
  * @param <T> type of object returned as filtering result (typically type of object used in table)

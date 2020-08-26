@@ -6,13 +6,13 @@ import java.util.List;
 
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 
-public interface GenericFilterI<T> {
-	boolean isInSelection(T object, OgemaHttpRequest req);
+public interface GenericFilterI<A> {
+	boolean isInSelection(A object, OgemaHttpRequest req);
 	
 	/** Overwrite this to improve efficiency, the behaviour should not change*/
-	default List<T> getFiltered(Collection<T> result2, OgemaHttpRequest req) {
-		List<T> result = new ArrayList<>();
-		for(T obj: result2) {
+	default List<A> getFiltered(Collection<A> result2, OgemaHttpRequest req) {
+		List<A> result = new ArrayList<>();
+		for(A obj: result2) {
 			if(isInSelection(obj, req))
 				result.add(obj);
 		}

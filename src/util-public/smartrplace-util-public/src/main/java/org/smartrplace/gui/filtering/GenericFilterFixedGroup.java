@@ -11,10 +11,10 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
  * attribute type like in {@link UserFilteringWithGroups}
  * @author dnestle
  *
- * @param <T>
+ * @param <A>
  * @param <G>
  */
-public abstract class GenericFilterFixedGroup<T, G> extends GenericFilterBase<T> {
+public abstract class GenericFilterFixedGroup<A, G> extends GenericFilterBase<A> {
 	protected final G group;
 	
 	public GenericFilterFixedGroup(G group, Map<OgemaLocale, String> optionLabel) {
@@ -26,10 +26,10 @@ public abstract class GenericFilterFixedGroup<T, G> extends GenericFilterBase<T>
 		return group;
 	}
 	
-	public abstract boolean isInSelection(T object, G group);
+	public abstract boolean isInSelection(A object, G group);
 
 	@Override
-	public boolean isInSelection(T object, OgemaHttpRequest req) {
+	public boolean isInSelection(A object, OgemaHttpRequest req) {
 		return isInSelection(object, group);
 	}
 }
