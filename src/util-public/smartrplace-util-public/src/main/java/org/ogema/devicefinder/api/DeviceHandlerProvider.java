@@ -93,6 +93,20 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 		return null;
 	}
 	
+	/** Like {@link #startSimulationForDevice(InstallAppDevice, Resource, SingleRoomSimulationBase, DatapointService)},
+	 * but this method is called on device startup for every device on productive systems without
+	 * simulation as well as on test systems with simulation
+	 * @param device
+	 * @param deviceResource
+	 * @param roomSimulation
+	 * @param dpService
+	 * @return
+	 */
+	default List<RoomInsideSimulationBase> startSupportingLogicForDevice(InstallAppDevice device, T deviceResource,
+			SingleRoomSimulationBase roomSimulation,
+			DatapointService dpService) {
+		return null;
+	}
 	/**
 	 * @return A 3-4 letter abbreviation indicating the type of device.
 	 */
