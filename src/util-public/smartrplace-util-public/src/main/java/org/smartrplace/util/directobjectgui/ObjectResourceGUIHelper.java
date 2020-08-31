@@ -883,6 +883,13 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 			@Override
 			public void onGET(OgemaHttpRequest req) {
 				StringResource source = getResource(sva, req, StringResource.class);
+				if(source == null) {
+					R gw = getResource(getGatewayInfo(req), req);
+					if(gw != null)
+						throw new IllegalStateException("Could not find "+sva.altIdUsed+" for "+gw.getLocation());
+					else
+						throw new IllegalStateException("Could not find "+sva.altIdUsed);
+				}
 				myField.setValue(source.getValue()+"",req);
 			}
 			
