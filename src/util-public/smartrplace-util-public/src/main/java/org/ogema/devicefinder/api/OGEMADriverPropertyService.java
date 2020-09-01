@@ -2,8 +2,23 @@ package org.ogema.devicefinder.api;
 
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.ValueResource;
+import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.model.prototypes.PhysicalElement;
+import org.ogema.model.sensors.Sensor;
 
+/** A driver can offer an reference to its {@link OGEMADriverPropertyService} for a device. The properties
+ * shall be stored in sub resources below the sensor or the value resource for which properties are provided.
+ * If the properties are stored per device then the resources can be placed below the device resource. The
+ * properties shall be stored via StringArrayResources named propertyNames and propertyValues where
+ * propertyNames holds the property names and propertyValues holds the values for each property at the same
+ * index as the respective property name. See BACnet driver for example.
+ * 
+ * @author dnestle
+ *
+ * @param <T> for most drivers T can be {@link SingleValueResource} or {@link ValueResource}
+ * 		or {@link Sensor} or the device type extending {@link PhysicalElement}
+ */
 public interface OGEMADriverPropertyService<T extends Resource> {
 	
 	/** Request that a certain property shall be updated	 * 
