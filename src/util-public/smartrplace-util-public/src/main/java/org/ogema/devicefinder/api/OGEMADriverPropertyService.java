@@ -7,6 +7,8 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.Sensor;
 
+import de.iwes.widgets.template.LabelledItem;
+
 /** A driver can offer an reference to its {@link OGEMADriverPropertyService} for a device. The properties
  * shall be stored in sub resources below the sensor or the value resource for which properties are provided.
  * If the properties are stored per device then the resources can be placed below the device resource. The
@@ -19,7 +21,7 @@ import org.ogema.model.sensors.Sensor;
  * @param <T> for most drivers T can be {@link SingleValueResource} or {@link ValueResource}
  * 		or {@link Sensor} or the device type extending {@link PhysicalElement}
  */
-public interface OGEMADriverPropertyService<T extends Resource> {
+public interface OGEMADriverPropertyService<T extends Resource> extends LabelledItem {
 	
 	/** Request that a certain property shall be updated	 * 
 	 * @param dataPointResource dataPoint collecting resource e.g. {@link BACnetSubdevice}
