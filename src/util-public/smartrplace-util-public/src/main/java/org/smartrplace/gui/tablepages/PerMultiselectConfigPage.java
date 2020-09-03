@@ -53,7 +53,7 @@ public abstract class PerMultiselectConfigPage<T, G, R extends Resource> extends
 	public void addWidgets(T object, ObjectResourceGUIHelper<T, R> vh, String id, OgemaHttpRequest req,
 			Row row, ApplicationManager appMan) {
 		
-		addNameLabel(object, vh, id, row);
+		addNameLabel(object, vh, id, row, req);
 
 		addWidgetsBeforeMultiSelect(object, vh, id, req, row, appMan);
 

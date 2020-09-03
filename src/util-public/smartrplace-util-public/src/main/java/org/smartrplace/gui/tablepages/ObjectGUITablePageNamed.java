@@ -21,15 +21,19 @@ public abstract class ObjectGUITablePageNamed <T, R extends Resource> extends Ob
 	protected String getHeader(OgemaLocale locale) {
 		return "View and Configuration for "+getTypeName(locale);
 	}
-	protected abstract String getLabel(T obj);
+	protected abstract String getLabel(T obj, OgemaHttpRequest req);
 
 	@Override
 	public R getResource(T object, OgemaHttpRequest req) {
 		return null;
 	}
 
-	protected void addNameLabel(T object, ObjectResourceGUIHelper<T, R> vh, String id, Row row) {
-		vh.stringLabel(getTypeName(null), "name"+id, getLabel(object), row);
+	protected void addNameLabel(T object, ObjectResourceGUIHelper<T, R> vh, String id, Row row,
+			OgemaHttpRequest req) {
+		if(req == null)
+			vh.stringLabel(getTypeName(null), "name"+id, "init", row);
+		else
+			vh.stringLabel(getTypeName(null), "name"+id, getLabel(object, req), row);
 	};
 
 	@Override
