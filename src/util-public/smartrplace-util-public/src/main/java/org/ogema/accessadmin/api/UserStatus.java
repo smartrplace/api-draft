@@ -8,6 +8,10 @@ public enum UserStatus {
 	 * perform the standard logout process, so such a user should not exist on the system.
 	 */
 	DISABLED,
+	/** A public user can be accessed by a public login, this user can e.g. be used to display the page to reset
+	 * the password for new users or those who forgot their password
+	 */
+	PUBLIC,
 	/** A raw user does not have all permissions in USER_APPS. Such a user cannot acsess the
 	 * basic SmartrRoomControl user apps*/
 	//RAW,
@@ -32,6 +36,8 @@ public enum UserStatus {
 		switch(obj) {
 		case DISABLED:
 			return "Disabled";
+		case PUBLIC:
+			return "Public Access";
 		case DISPLAY:
 			return "Display User";
 		case USER_STD:
