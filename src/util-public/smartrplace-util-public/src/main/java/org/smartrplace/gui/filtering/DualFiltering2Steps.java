@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.internationalization.util.LocaleHelper;
+
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 
@@ -55,6 +57,11 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 			}
 			
 			@Override
+			protected A getAttribute(A object) {
+				return null;
+			}
+			
+			@Override
 			protected List<A> getAttributes(A object) {
 				List<A> result = new ArrayList<>();
 				result.add(object);
@@ -90,23 +97,34 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 
 			@Override
 			public boolean isInSelection(A object, G group) {
-				List<G> grpsForObject = getGroups(object);
+				return isInSelectionObjectInGroup(object, group);
+				/*List<G> grpsForObject = getGroups(object);
 				for(G grp1: grpsForObject) {
 					if(isGroupEqual(grp1, group))
 						return true;
 				}
 				return false;
-				//return grpsForObject.contains(group);
+				//return grpsForObject.contains(group);*/
 			}
 		};
 		firstDropDown.registerDependentWidget(this);
 	}
 
+	protected boolean isInSelectionObjectInGroup(A object, G group) {
+		List<G> grpsForObject = getGroups(object);
+		for(G grp1: grpsForObject) {
+			if(isGroupEqual(grp1, group))
+				return true;
+		}
+		return false;
+		//return grpsForObject.contains(group);		
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected List<GenericFilterOption<A>> getOptionsDynamic(OgemaHttpRequest req) {
 		GenericFilterOption<A> groupFilterSelected = firstDropDown.getSelectedItem(req);
-		if(groupFilterSelected == firstDropDown.ALL_OPTION || groupFilterSelected == null)
+		if(groupFilterSelected == firstDropDown.getAllOption(req) || groupFilterSelected == null)
 			return getOptionsDynamic((G)null, req);
 		if(!(groupFilterSelected instanceof GenericFilterFixedGroup))
 			throw new IllegalStateException();
@@ -120,5 +138,22 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 	
 	public SingleFiltering<A, A> getFirstDropdown() {
 		return firstDropDown;
+	}
+	
+	@Override
+	public GenericFilterOption<A> getAllOption(OgemaHttpRequest req) {
+		if(req == null)
+			return super.getAllOption(req);
+		GenericFilterOption<A> groupFilterSelected = firstDropDown.getSelectedItem(req);
+		if(groupFilterSelected == firstDropDown.getAllOption(req) || groupFilterSelected == null)
+			return super.getAllOption(req);
+		return new GenericFilterBase<A>(LocaleHelper.getLabelMap(allOptionsForStandardLocales())) {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public boolean isInSelection(A object, OgemaHttpRequest req) {
+				return isInSelectionObjectInGroup(object, ((GenericFilterFixedGroup<A, G>)groupFilterSelected).getGroup());
+			}
+		};
 	}
 }

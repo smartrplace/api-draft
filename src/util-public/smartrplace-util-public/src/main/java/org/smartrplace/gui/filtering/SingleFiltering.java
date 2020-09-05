@@ -64,8 +64,8 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 	 */
 	protected abstract boolean isAttributeSinglePerDestinationObject();
 	
-	/** Only relevant if options update is configured*/
-	protected long getFrameworkTime( ) {return 0;}
+	/** Only relevant if options update is configured, default implementation can just return 0*/
+	protected abstract long getFrameworkTime( ); // {return 0;}
 	
 	/**If null is returned the default options set via {@link #addOption(GenericFilterOption, Map)} etc.
 	 * are used. Otherwise only the dynamic options are displayed
@@ -77,9 +77,10 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 		return null;
 	}
 
-	protected A getAttribute(T object) {
-		throw new IllegalStateException("Either getAttribute or getAttributes must be overriden!");
-	};
+	/** Can just return null if {@link #getAttributes(Object)} is overwritten*/
+	protected abstract A getAttribute(T object); /* {
+		throw new IllegalStateException("Either getAttribute or getAttributes must be overriden! Not found for:"+this.getClass().getName()+" object:"+object);
+	};*/
 	protected List<A> getAttributes(T object) {
 		List<A> result = new ArrayList<>();
 		result.add(getAttribute(object));
@@ -111,7 +112,10 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 		}
 		
 	}
-	public final AllOption ALL_OPTION = new AllOption();
+	private final AllOption ALL_OPTION = new AllOption();
+	public GenericFilterOption<A> getAllOption(OgemaHttpRequest req) {
+		return ALL_OPTION;
+	};
 	public class NoneOption implements GenericFilterOption<A> {
 
 		@Override
@@ -166,8 +170,8 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 		} else
 			preSelectionPerUser = null;
 		if(addAllOption) {
-			addOption(ALL_OPTION);
-			preSelectionGeneralEnglish = LocaleHelper.getLabel(ALL_OPTION.optionLabel(), null);
+			addOption(getAllOption(null));
+			preSelectionGeneralEnglish = LocaleHelper.getLabel(getAllOption(null).optionLabel(), null);
 		}
 		//int idx = 0;
 		//for(String allLabel: allOptionsForStandardLocales()) {
@@ -280,7 +284,7 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 				if(dynOpts != null) {
 					if(addAllOption) {
 						filteringOptions = new ArrayList<>();
-						filteringOptions.add(ALL_OPTION);
+						filteringOptions.add(getAllOption(req));
 						filteringOptions.addAll(dynOpts);
 					} else
 						filteringOptions = dynOpts;

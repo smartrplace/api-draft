@@ -13,7 +13,7 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 
 public interface InstalledAppsSelector {
-	List<InstallAppDevice> getDevicesSelected(DeviceHandlerProvider<?> devHand);
+	List<InstallAppDevice> getDevicesSelected(DeviceHandlerProvider<?> devHand, OgemaHttpRequest req);
 	
 	InstallAppDevice getInstallResource(Resource device);
 

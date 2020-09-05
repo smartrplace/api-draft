@@ -78,7 +78,7 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 
 	@Override
 	public List<InstallAppDevice> getObjectsInTable(OgemaHttpRequest req) {
-		List<InstallAppDevice> all = appSelector.getDevicesSelected(devHand);
+		List<InstallAppDevice> all = appSelector.getDevicesSelected(devHand, req);
 		return all;
 		/*List<InstallAppDevice> result = new ArrayList<InstallAppDevice>();
 		@SuppressWarnings({ "rawtypes", "unchecked" })

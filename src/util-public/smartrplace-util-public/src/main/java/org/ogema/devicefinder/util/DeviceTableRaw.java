@@ -158,9 +158,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			Room deviceRoom) {
 		Map<String, String> valuesToSet = new HashMap<>();
 		valuesToSet.put("0", "unknown");
-		valuesToSet.put("1", "Device installed physically");
-		valuesToSet.put("10", "Physical installation done including all on-site tests");
-		valuesToSet.put("20", "All configuration finished, device is in full operation");
+		valuesToSet.put("1", "SerialNumberRecorded: Teach-in process alsofinished");
+		valuesToSet.put("3", "PackedForShipping");
+		valuesToSet.put("5", "Shipping: Parcel handed over to delivery service");
+		valuesToSet.put("7", "AtCustomerSite: Delivery confirmed");
+		valuesToSet.put("10", "Physical installation done");
+		valuesToSet.put("20", "Physical testing done: Installation including all on-site tests");
+		valuesToSet.put("30", "All configuration finished, device is in full operation");
 		valuesToSet.put("-10", "Error in physical installation and/or testing (explain in comment)");
 		valuesToSet.put("-20", "Error in configuration, device cannot be used/requires action for real usage");
 		vh.dropdown("Status", id, object.installationStatus(), row, valuesToSet );
