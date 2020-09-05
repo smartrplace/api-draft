@@ -154,8 +154,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	protected void addInstallationStatus(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
-			OgemaHttpRequest req, Row row, ApplicationManager appMan,
-			Room deviceRoom) {
+			OgemaHttpRequest req, Row row) {
 		Map<String, String> valuesToSet = new HashMap<>();
 		valuesToSet.put("0", "unknown");
 		valuesToSet.put("1", "SerialNumberRecorded: Teach-in process alsofinished");
@@ -171,19 +170,18 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	protected void addComment(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
-			OgemaHttpRequest req, Row row, ApplicationManager appMan,
-			Room deviceRoom) {
+			OgemaHttpRequest req, Row row) {
 		vh.stringEdit("Comment", id, object.installationComment(), row, alert);
 	}
 	
 	private static Map<Room, String> roomsToSet = new HashMap<>();
 	private static long lastUpdate = -1;
-	protected void addRoomWidget(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
+	protected void addRoomWidget(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
-		addRoomWidgetStatic(object, vh, id, req, row, appMan, deviceRoom);
+		addRoomWidgetStatic(vh, id, req, row, appMan, deviceRoom);
 	}
-	public static void addRoomWidgetStatic(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
+	public static void addRoomWidgetStatic(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
 		long now = appMan.getFrameworkTime();
@@ -200,19 +198,16 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	protected void addSubLocation(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
-			OgemaHttpRequest req, Row row, ApplicationManager appMan,
-			Room deviceRoom) {
-		addSubLocationStatic(object, vh, id, req, row, appMan, deviceRoom, alert);
+			OgemaHttpRequest req, Row row) {
+		addSubLocationStatic(object, vh, id, req, row, alert);
 	}
 	public static void addSubLocationStatic(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
-			OgemaHttpRequest req, Row row, ApplicationManager appMan,
-			Room deviceRoom, Alert alert) {
+			OgemaHttpRequest req, Row row, Alert alert) {
 		vh.stringEdit("Location", id, object.installationLocation(), row, alert);
 	}
 	
 	protected IntegerResource addRSSI(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
-			OgemaHttpRequest req, Row row, ApplicationManager appMan,
-			Room deviceRoom) {
+			OgemaHttpRequest req, Row row) {
 		IntegerResource source = ResourceHelper.getSubResourceOfSibbling(object.device().getLocationResource(),
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
 		vh.intLabel("RSSI", id, source, row, 0);
@@ -220,21 +215,21 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 		
 	protected Label addBattery(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
-			OgemaHttpRequest req, Row row, ApplicationManager appMan,
-			Room deviceRoom,
+			OgemaHttpRequest req, Row row,
 			FloatResource batteryReading) {
 		return vh.floatLabel("Battery", id, batteryReading, row, "%.1f#min:0.1");
 	}
 	
-	protected Label addLastContact(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
-			OgemaHttpRequest req, Row row, ApplicationManager appMan,
-			Room deviceRoom,
+	protected Label addLastContact(ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row,
 			FloatResource valueReadingResource) {
-		return addLastContact("Last Contact", vh, id, req, row, valueReadingResource);
+		return addLastContact(null, vh, id, req, row, valueReadingResource);
 	}
 	protected Label addLastContact(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, 
 			SingleValueResource reading) {
+		if(columnLabel == null)
+			columnLabel = "Last Contact";
 		Label lastContact = null;
 		if(req != null) {
 			lastContact = new LastContactLabel(reading, appMan, mainTable, "lastContact"+id, req);
