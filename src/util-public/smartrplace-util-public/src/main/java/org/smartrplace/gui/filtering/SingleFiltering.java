@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.ogema.internationalization.util.LocaleHelper;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
@@ -212,6 +213,7 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 	 * Note that the filtering on this level should not depend on the {@link OgemaHttpRequest} for now.*/
 	public void addOption(GenericFilterOption<A> newOption) {
 		filteringOptions.add(newOption);
+		checkFilteringOptions();
 		//addLabels(newOption, optionLabel);
 	}
 	
@@ -295,7 +297,7 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 						filteringOptions = new ArrayList<>();
 						filteringOptions.add(defaultItem);
 					}
-						
+					checkFilteringOptions();
 					setDefaultItems(filteringOptions);
 					selectDefaultItem(defaultItem);
 					update(filteringOptions, defaultItem, req);
@@ -317,6 +319,27 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 			}
 		}
 		return null;
+	}
+	
+	protected void checkFilteringOptions() {
+		Map<OgemaLocale, List<String>> knownLabels = new HashMap<>();
+		for(GenericFilterOption<A> option: filteringOptions) {
+			for(Entry<OgemaLocale, String> labelsLoc: option.optionLabel().entrySet()) {
+				List<String> known = knownLabels.get(labelsLoc.getKey());
+				if(known == null) {
+					known = new ArrayList<>();
+					known.add(labelsLoc.getValue());
+					knownLabels.put(labelsLoc.getKey(), known);
+				} else {
+					if(known.contains(labelsLoc.getValue())) {
+						String newLabel = labelsLoc.getValue()+"(*)";
+						option.optionLabel().put(labelsLoc.getKey(), newLabel);
+						known.add(newLabel);
+					} else
+						known.add(labelsLoc.getValue());
+				}
+			}
+		}
 	}
 	
 	protected final Map<String, List<T>> destinationObjects = new HashMap<>();

@@ -1,6 +1,7 @@
 package org.smartrplace.gui.filtering;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
@@ -16,4 +17,5 @@ public abstract class GenericFilterBase<A> implements GenericFilterOption<A> {
 	public Map<OgemaLocale, String> optionLabel() {
 		return optionLabel;
 	}
+	
 }
