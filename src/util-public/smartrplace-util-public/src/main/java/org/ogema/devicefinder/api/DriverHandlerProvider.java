@@ -89,7 +89,7 @@ public interface DriverHandlerProvider extends LabelledItem, DocumentationLinkPr
 	 * information for each data point that shall not be modeled / provided via OGEMA resources e.g. because
 	 * the content would cause too much overhead in the OGEMA database or because the information is only
 	 * relevant in rare cases.*/
-	default OGEMADriverPropertyService<?> getDriverPropertyService() {return null;}
+	//default OGEMADriverPropertyService<?> getDriverPropertyService() {return null;}
 	
 	/** Get a link to the driver configuration page. For drivers like ModBus typically profiles definied registers
 	 * to be used have to be defined for device types, which cannot be done via the DriverHandlerProvider tables.

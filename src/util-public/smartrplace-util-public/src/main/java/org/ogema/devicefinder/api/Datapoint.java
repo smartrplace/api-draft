@@ -71,9 +71,13 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	default Resource getDeviceResource() {return getSensorActorResource();}
 	default boolean setDeviceResource(Resource resource) {return false;}
 	
-	/** Access to driver functionalities that is not modeled in the OGEMA data model*/
+	/** Access to driver functionalities that is not modeled in the OGEMA data model
+	 * @deprecated Setting {@link OGEMADriverPropertyService} for datapoints is not implemented yet.
+	 * We currently focus on processing properties on device level. See {@link DatapointService}*/
 	OGEMADriverPropertyAccess getPropertyAccess();
 	
+	/** @deprecated Setting {@link OGEMADriverPropertyService} for datapoints is not implemented yet.
+	 * We currently focus on processing properties on device level.*/
 	boolean setDriverService(OGEMADriverPropertyService<Resource> driverService);
 	
 	/** Register Provider for information

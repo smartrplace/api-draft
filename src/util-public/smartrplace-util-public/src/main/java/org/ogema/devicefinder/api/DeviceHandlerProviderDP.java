@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.api;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.ogema.devicefinder.util.DatapointImpl;
@@ -14,11 +15,20 @@ import de.iwes.widgets.template.LabelledItem;
 public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledItem {
 	Class<T> getResourceType();
 	
-	/** TODO: Check if this makes sense. This method shall be implemented if the driver provides additional
-	 * information for each data point that shall not be modeled / provided via OGEMA resources e.g. because
+	/** This method shall be implemented if the driver provides additional
+	 * information for each device and/or each data point that shall not be modeled / provided via OGEMA resources e.g. because
 	 * the content would cause too much overhead in the OGEMA database or because the information is only
-	 * relevant in rare cases.*/
-	default OGEMADriverPropertyService<?> getDriverPropertyService() {return null;}
+	 * relevant in rare cases.<br>
+	 * Note that this is a raw property data access. To get semantic property data you should call
+	 * {@link #getPropertyService()}<br>
+	 * The data for each device may be split on several property services so a list may be returned.*/
+	default List<OGEMADriverPropertyService<?>> getDriverPropertyService() {return null;}
+	
+	/** Get access to semantic properties of the device and its datapoints. The parameter resources must be the
+	 * resources defined by {@link InstallAppDevice#device()} for the devices provided by the handler or datapoint resources
+	 * returned by {@link #getDatapoints(InstallAppDevice, DatapointService)} depending on the PropertyAccessLevel. Note that
+	 * only access level DATAPOINT and DEVICE is supported here.*/
+	default PropertyService getPropertyService() {return null;}
 	
 	/** Get all datapoints for a device. Datapoints are all sensor and actor resources that might be worth
 	 * logging. Usually the datapoints shall be obtained via

@@ -104,10 +104,6 @@ public interface DatapointService {
 	 */
 	RecIdVal registerTypeForEvaluation(GaRoDataType type);
 	
-	Collection<Class<? extends Resource>> getManagedDeviceResoureceTypes();
-	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
-	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
-	
 	/** Provide framework time where ApplicationManager is not available*/
 	long getFrameworkTime();
 	
@@ -136,7 +132,15 @@ public interface DatapointService {
 	 */
 	List<DpConnection> getConnections(UtilityType type);
 	
-	/** Get all groups for which {@link #getGroup(String)} has been called at least once*/
+	/** Device information*/
+	Collection<Class<? extends Resource>> getManagedDeviceResoureceTypes();
+	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
+	/** This handler also provides access to Driver Properties*/
+	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
+	
+	/** Get all groups for which {@link #getGroup(String)} has been called at least once<br>
+	 * Note that each DatapointGroup for a DEVICE has the device() resource location as id<br>
+	 * groups of type DEVICE_TYPE have the DeviceHandler id as id*/
 	List<DatapointGroup> getAllGroups();
 	
 	/** Get or create group*/
@@ -146,4 +150,8 @@ public interface DatapointService {
 	boolean hasGroup(String id);
 	
 	AlarmingService alarming();
+	
+	/** Provides all known driver property services. This is required by {@link DeviceHandlerProvider}s in order to provide
+	 * access to driver properties.*/
+	Map<String, OGEMADriverPropertyService<?>> driverpropertyServices();
 }
