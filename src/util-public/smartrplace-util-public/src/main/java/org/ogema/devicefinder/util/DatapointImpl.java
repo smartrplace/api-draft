@@ -149,10 +149,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			boolean useExist = true;
 			if(dpService != null) {
 				long now = dpService.getFrameworkTime();
-				if(now - lastLabelUpdate > LABEL_UPDATE_RATE)
+				if(now - lastLabelUpdate > LABEL_UPDATE_RATE) {
 					lastLabelUpdate = now;
-				else
 					useExist = false;
+				}
 			}
 			if(useExist) {
 				result = labels.get(locale);
@@ -165,11 +165,12 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			return result;
 		String stdLabel = getRoomName(locale);
 		String subRoom = getSubRoomLocation(locale, null);
-		if(subRoom != null)
+		if(subRoom != null)  {
 			if(stdLabel.equals(DPRoom.BUILDING_OVERALL_ROOM_LABEL))
 				stdLabel = subRoom;
 			else
 				stdLabel += "-"+subRoom;
+		}
 		stdLabel += "-"+getTypeName(locale);
 		if(!isLocal()) {
 			String gwId = getGatewayId();
