@@ -44,4 +44,31 @@ public interface DatapointGroup extends LabelledItem {
 	boolean addSubGroup(DatapointGroup dpGrp);
 	boolean removeSubGroup(DatapointGroup dpGrp);
 	DatapointGroup getSubGroup(String id);
+	
+	Object getParameter(String id);
+	void setParameter(String id, Object param);
+	
+	/** Groups can aggregate datapoints from several gateways. Still in many cases each group is
+	 * assigned to a certain gateway. This method provides a standardized group id for a group
+	 * on a remote gateway. For groups aggregating over several gateways a custom app specification
+	 * has to be made
+	 * @param localId
+	 * @param gwId
+	 * @return
+	 */
+	public static String getGroupIdForGw(String localId, String gwId) {
+		if(gwId == null)
+			return localId;
+		return localId+"#"+gwId;
+	}
+	public static String[] getGroupIdAndGw(String groupId) {
+		String[] els = groupId.split("#");
+		if(els.length == 1)
+			return new String[] {groupId, "Local"};
+		if(els.length == 2)
+			return els;
+		throw new IllegalStateException("GroupId cannot be split into gateway and local id: "+groupId);
+	}
+	public static final String DEVICE_TYPE_SHORT_PARAM = "DeviceTypeShortId";
+	public static final String DEVICE_TYPE_FULL_PARAM = "deviceType";
 }

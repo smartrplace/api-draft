@@ -80,8 +80,8 @@ public class DPUtil {
 	}
 	
 	public static void copyExistingDataRoomDevice(Datapoint source, Datapoint dest) {
-		if(source.getDeviceResource() != null)
-			dest.setDeviceResource(source.getDeviceResource());
+		//if(source.getDeviceResource() != null)
+		//	dest.setDeviceResource(source.getDeviceResource());
 		if(source.getRoom() != null)
 			dest.setRoom(source.getRoom());
 	}

@@ -15,6 +15,7 @@ import org.ogema.devicefinder.api.DpConnection;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.model.sensors.GenericFloatSensor;
+import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.frontend.servlet.UserServletUtil;
 
@@ -35,8 +36,8 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	protected DatapointInfoProvider infoProvider = null;
 	protected int infoProviderPriority = Integer.MAX_VALUE;
 	protected OgemaLogger logger = null;
-	protected Resource sensorActorResource = null;
-	protected Resource deviceResource = null;
+	//protected Resource sensorActorResource = null;
+	protected DatapointGroup deviceResource = null;
 	
 	protected ReadOnlyTimeSeries tseries = null;
 	
@@ -247,13 +248,13 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		DPRoom dpr = getRoom();
 		if(dpr != null)
 			return dpr.label(locale);
-		Resource devRes = getDeviceResource();
+		/*Resource devRes = getDeviceResource();
 		if(devRes != null && dpService != null) {
 			DatapointGroup dev = dpService.getGroup(devRes.getLocation());
 			if(dev != null) {
 				return "*"+dev.label(null);
 			}
-		}
+		}*/
 		return Datapoint.super.getRoomName(locale);
 	}
 	
@@ -280,25 +281,37 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		super.setConsumptionInfo(new DatapointInfoImpl(this));
 		return super.info();
 	}
-	@Override
-	public Resource getSensorActorResource() {
+	/*@Override
+	public DatapointGroup getSensorActorResource() {
 		return sensorActorResource;
 	}
 	@Override
 	public boolean setSensorActorResource(Resource resource) {
 		sensorActorResource = resource;
 		return true;
-	}
+	}*/
 	
 	@Override
-	public Resource getDeviceResource() {
+	public DatapointGroup getDeviceResource() {
 		return deviceResource;
 	}
 	@Override
-	public boolean setDeviceResource(Resource resource) {
+	public boolean setDeviceResource(DatapointGroup resource) {
 		this.deviceResource = resource;
 		return true;
 	}
+	@Override
+	public boolean setDeviceResource(Resource devResource) {
+		if(dpService == null)
+			return Datapoint.super.setDeviceResource(devResource);
+		DatapointGroup dev = dpService.getGroup(devResource.getLocation());
+		String devName = DeviceTableRaw.getNameForDevice(devResource, dpService);
+		dev.setParameter(DatapointGroup.DEVICE_TYPE_FULL_PARAM, devResource.getResourceType().getName());
+		dev.setLabel(null, devName);
+		dev.setType("DEVICE");
+		return true;
+	}
+	
 	@Override
 	public TimeSeriesDataImpl getTimeSeriesDataImpl(OgemaLocale locale) {
 		ReadOnlyTimeSeries ts = getTimeSeries();
@@ -348,5 +361,29 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	public boolean setScale(ScalingProvider scale) {
 		this.scale = scale;
 		return true;
+	}
+
+	@Override
+	public Float getCurrentValue() {
+		if(resource != null) try {
+			return ValueResourceUtils.getFloatValue((SingleValueResource) resource);
+		} catch(NumberFormatException e) {
+			return null;
+		}
+		if(infoProvider != null)
+			return infoProvider.getCurrentValue();
+		return null;
+	}
+
+	@Override
+	public boolean setCurrentValue(Float value) {
+		if(resource != null) try {
+			return ValueResourceUtils.setValue((SingleValueResource) resource, value);
+		} catch(NumberFormatException e) {
+			return false;
+		}
+		if(infoProvider != null)
+			return infoProvider.setCurrentValue(value);
+		return false;
 	}
 }

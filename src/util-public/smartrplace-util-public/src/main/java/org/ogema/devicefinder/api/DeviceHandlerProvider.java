@@ -107,13 +107,19 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 			DatapointService dpService) {
 		return null;
 	}
-	/**
-	 * @return A 3-4 letter abbreviation indicating the type of device.
+	/** Get a 3-4 letter abbreviation indicating the type of device.
+	 * @param device shall support a null argument
+	 * @param dpService
+	 * @return short id
+	 * 
 	 */
 	default String getDeviceTypeShortId(InstallAppDevice device, DatapointService dpService) {
+		if(device == null)
+			return getResourceType().getClass().getSimpleName().replaceAll("[^A-Z]", "");
 		if (device.device().exists())
 			return device.device().getClass().getSimpleName().replaceAll("[^A-Z]", "");
-		return "UNK"; // unknown
+		return getDeviceTypeShortId(null, dpService);
+		//return "UNK"; // unknown
 	}
 
 	/** Required for hardware installation. Provided by DeviceHandlerBase*/

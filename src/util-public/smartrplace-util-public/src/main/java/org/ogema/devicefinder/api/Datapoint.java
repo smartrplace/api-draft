@@ -65,11 +65,12 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	 */
 	boolean setTimeSeriesID(String id);
 	
-	Resource getSensorActorResource();
-	boolean setSensorActorResource(Resource resource);
+	//Resource getSensorActorResource();
+	//boolean setSensorActorResource(Resource resource);
 	/** This shall be the highest device resource, typically of type PhysicalElement*/
-	default Resource getDeviceResource() {return getSensorActorResource();}
-	default boolean setDeviceResource(Resource resource) {return false;}
+	default DatapointGroup getDeviceResource() {return null;}
+	default boolean setDeviceResource(DatapointGroup group) {return false;}
+	default boolean setDeviceResource(Resource devResource) {return false;}
 	
 	/** Access to driver functionalities that is not modeled in the OGEMA data model
 	 * @deprecated Setting {@link OGEMADriverPropertyService} for datapoints is not implemented yet.
@@ -128,4 +129,9 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	GenericFloatSensor registerAsVirtualSensor(String sensorDeviceName);
 	
 	boolean setScale(ScalingProvider scale);
+	
+	/** Some datapoints support a current values besides time series. For datapoints based on SingleValueResource
+	 * implementation is simple, otherwise the implementation should be provided via a {@link DatapointInfoProvider}*/
+	Float getCurrentValue();
+	boolean setCurrentValue(Float value);
 }

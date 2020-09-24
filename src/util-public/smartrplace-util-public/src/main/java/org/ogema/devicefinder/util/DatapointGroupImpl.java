@@ -20,6 +20,7 @@ public class DatapointGroupImpl implements DatapointGroup {
 	protected List<Datapoint> datapoints = new ArrayList<>();
 	protected Map<String, DatapointGroup> subGroups = new HashMap<>();
 	protected Set<String> charts = new HashSet<>();
+	protected Map<String, Object> parameters = new HashMap<>();
 	
 	public DatapointGroupImpl(String id) {
 		this.id = id;
@@ -106,5 +107,15 @@ public class DatapointGroupImpl implements DatapointGroup {
 	@Override
 	public DatapointGroup getSubGroup(String id) {
 		return subGroups.get(id);
+	}
+
+	@Override
+	public Object getParameter(String id) {
+		return parameters.get(id);
+	}
+
+	@Override
+	public void setParameter(String id, Object param) {
+		parameters.put(id, param);
 	}
 }

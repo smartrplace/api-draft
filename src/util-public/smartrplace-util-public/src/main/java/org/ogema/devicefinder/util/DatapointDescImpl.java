@@ -113,5 +113,4 @@ public class DatapointDescImpl implements DatapointDesc {
 	public ScalingProvider getScale() {
 		return scale;
 	}
-
 }

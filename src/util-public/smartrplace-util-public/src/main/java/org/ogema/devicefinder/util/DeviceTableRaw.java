@@ -13,6 +13,7 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.devicefinder.api.DatapointGroup;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
@@ -283,8 +284,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static String getName(InstallAppDevice object, ApplicationManagerPlus appManPlus) {
 		final Resource device;
 		device = object.device();
-		
-		DatapointGroup dpDev = appManPlus.dpService().getGroup(device.getLocation());
+		return getNameForDevice(device, appManPlus.dpService());
+	}		
+	public static String getNameForDevice(Resource device, DatapointService dpService) {
+		DatapointGroup dpDev = dpService.getGroup(device.getLocation());
 		if(dpDev.label(null) != null)
 			return dpDev.label(null);
 		
@@ -328,7 +331,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static String getDeviceStdName(Resource model) {
 		//switch(typeClassName) {
 		Class<? extends Resource> resType = model.getResourceType();
-		if(DoorWindowSensor.class.isAssignableFrom(resType))
+		return getDeviceStdName(resType.getName(), model.getLocation());
+		/*if(DoorWindowSensor.class.isAssignableFrom(resType))
 			return "WindowSens";
 		if(Thermostat.class.isAssignableFrom(resType))
 			return "Thermostat";
@@ -342,10 +346,30 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return "AirConditioning";
 		if(PVPlant.class.isAssignableFrom(resType))
 			return "PVPlant";
-		return resType.getSimpleName();
+		return resType.getSimpleName();*/
 	}
-	
-	public static String getSensorDeviceStdName(SensorDevice model) {
+	public static String getDeviceStdName(String resType, String resourceLocation) {
+		if(DoorWindowSensor.class.getName().equals(resType))
+			return "WindowSens";
+		if(Thermostat.class.getName().equals(resType))
+			return "Thermostat";
+		if(SensorDevice.class.getName().equals(resType))
+			return getSensorDeviceStdName(resourceLocation);
+		if(SingleSwitchBox.class.getName().equals(resType))
+			return "SwitchBox";
+		if(ElectricityConnectionBox.class.getName().equals(resType))
+			return "ElectricMeter";
+		if(AirConditioner.class.getName().equals(resType))
+			return "AirConditioning";
+		if(PVPlant.class.getName().equals(resType))
+			return "PVPlant";
+		String[] els = resType.split("\\.");
+		if(els.length == 0)
+			return resType;
+		return els[els.length-1];
+	}
+
+	/*public static String getSensorDeviceStdName(SensorDevice model) {
 		// If more types of SensorDevices are supported in the future add detection here
 		if(isTempHumSens(model))
 			return "TempHumSens";
@@ -353,6 +377,21 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	public static boolean isTempHumSens(SensorDevice model) {
 		if(model.getLocation().toLowerCase().startsWith("homematic"))
+			return true;
+		//for(Sensor sens: model.getSubResources(Sensor.class, false)) {
+		//	if(sens instanceof TemperatureSensor || sens instanceof HumiditySensor)
+		//		return true;
+		//}
+		return false;
+	}*/
+	public static String getSensorDeviceStdName(String resourceLocation) {
+		// If more types of SensorDevices are supported in the future add detection here
+		if(isTempHumSens(resourceLocation))
+			return "TempHumSens";
+		return "SensorDevice";
+	}
+	public static boolean isTempHumSens(String resourceLocation) {
+		if(resourceLocation.toLowerCase().startsWith("homematic"))
 			return true;
 		//for(Sensor sens: model.getSubResources(Sensor.class, false)) {
 		//	if(sens instanceof TemperatureSensor || sens instanceof HumiditySensor)
