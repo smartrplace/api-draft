@@ -9,20 +9,69 @@ public class ViaHeartbeatUtil {
 	public static final String VIA_HEARTBEAT_SEND = "##Transfer_via_Heartbeat_Send";
 	public static final String VIA_HEARTBEAT_RECEIVE = "##Transfer_via_Heartbeat_Receive";
 	
-	public static void registerForTansferViaHeartbeatToGateway(Datapoint dp, String gwId, DatapointService dpService) {
-		String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_SEND, gwId);
+	public static void registerForTansferViaHeartbeatToGateway(Datapoint dp, String gwId,
+			DatapointService dpService) {
+		registerForTansferViaHeartbeatSend(dp, gwId, dpService);
+	}
+	public static void registerForTansferViaHeartbeatToServer(Datapoint dp, String serverUrl,
+			DatapointService dpService) {
+		registerForTansferViaHeartbeatSend(dp, serverUrl, dpService);
+	}
+	public static void registerForTansferViaHeartbeatSend(Datapoint dp, String commPartnerId,
+			DatapointService dpService) {
+		String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_SEND, commPartnerId);
 		DatapointGroup grp = dpService.getGroup(id);
 		grp.setType(VIA_HEARTBEAT_TYPE);
 		grp.addDatapoint(dp);
 	}
 	
-	public static void registerForTansferViaHeartbeatFromGateway(Datapoint dp, String gwId, DatapointService dpService) {
-		String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_RECEIVE, gwId);
+	public static void registerForTansferViaHeartbeatFromGateway(Datapoint dp, String gwId,
+			DatapointService dpService) {
+		registerForTansferViaHeartbeatRecv(dp, gwId, dpService);
+	}
+	public static void registerForTansferViaHeartbeatFromServer(Datapoint dp, String serverUrl,
+			DatapointService dpService) {
+		registerForTansferViaHeartbeatRecv(dp, serverUrl, dpService);
+	}
+	public static void registerForTansferViaHeartbeatRecv(Datapoint dp, String commPartnerId,
+			DatapointService dpService) {
+		String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_RECEIVE, commPartnerId);
 		DatapointGroup grp = dpService.getGroup(id);
 		grp.setType(VIA_HEARTBEAT_TYPE);
 		grp.addDatapoint(dp);
 	}
 
+	public static void updateAllTransferRegistrations(DatapointService dpService, boolean connectingAsClient) {
+		ViaHeartbeatLocalData hbData = ViaHeartbeatLocalData.getInstance();
+		for(ViaHeartbeartOGEMAInstanceDpTransfer partnerData: hbData.partnerData.values()) {
+			updateTransferRegistration(partnerData.commPartnerId, hbData, dpService, connectingAsClient);
+		}
+	}
+
+	public static void updateTransferRegistration(String commPartnerId,
+			DatapointService dpService, boolean connectingAsClient) {
+		updateTransferRegistration(commPartnerId, ViaHeartbeatLocalData.getInstance(),
+				dpService, connectingAsClient);
+	}
+	public static void updateTransferRegistration(String commPartnerId,
+			ViaHeartbeatLocalData hbData,
+			DatapointService dpService, boolean connectingAsClient) {
+		ViaHeartbeartOGEMAInstanceDpTransfer partnerData = hbData.getOrCreatePartnerData(
+				commPartnerId, connectingAsClient);
+		updateTransferRegistration(commPartnerId, partnerData, dpService, connectingAsClient);
+	}
+	public static void updateTransferRegistration(String commPartnerId,
+				ViaHeartbeartOGEMAInstanceDpTransfer partnerData,
+				DatapointService dpService, boolean connectingAsClient) {
+		String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_RECEIVE, commPartnerId);
+		DatapointGroup recvGroup = dpService.getGroup(id);
+		
+		id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_SEND, commPartnerId);
+		DatapointGroup sendGroup = dpService.getGroup(id);
+		
+		partnerData.updateByDpGroups(sendGroup, recvGroup);
+	}
+	
 	//TODO: We have to provide a similar API for the gateway or move the above API so that both gateway and server can
 	//use it, then gateways set gwId = null
 	

@@ -93,6 +93,9 @@ public class DPRoomImpl implements DPRoom {
 	}
 	@Override
 	public void setLabel(String label, OgemaLocale locale) {
-		labels.put(locale, label);
+		if(locale == null)
+			labels.put(OgemaLocale.ENGLISH, label);
+		else
+			labels.put(locale, label);
 	}
 }

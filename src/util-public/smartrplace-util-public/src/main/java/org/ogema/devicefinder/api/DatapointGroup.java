@@ -59,16 +59,17 @@ public interface DatapointGroup extends LabelledItem {
 	public static String getGroupIdForGw(String localId, String gwId) {
 		if(gwId == null)
 			return localId;
-		return localId+"#"+gwId;
+		return gwId+"::"+localId;
 	}
 	public static String[] getGroupIdAndGw(String groupId) {
-		String[] els = groupId.split("#");
+		String[] els = groupId.split("::");
 		if(els.length == 1)
 			return new String[] {groupId, "Local"};
 		if(els.length == 2)
-			return els;
+			return new String[]{els[1], els[0]};
 		throw new IllegalStateException("GroupId cannot be split into gateway and local id: "+groupId);
 	}
 	public static final String DEVICE_TYPE_SHORT_PARAM = "DeviceTypeShortId";
 	public static final String DEVICE_TYPE_FULL_PARAM = "deviceType";
+	public static final String DEVICE_UNIQUE_ID_PARAM = "deviceId";
 }

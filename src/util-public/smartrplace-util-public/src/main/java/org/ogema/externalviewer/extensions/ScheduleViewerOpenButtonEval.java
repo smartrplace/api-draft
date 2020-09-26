@@ -117,9 +117,11 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 	
 	public static String getDeviceShortId(String location) {
 		String[] parts = location.split("/");
-		if(parts.length < 3) return "?S?";
-		if(!(parts[0].toLowerCase().startsWith("homematic")))
-			return "?X?";
+		//if(parts.length < 3) return "?S?";
+		if(!(parts[0].toLowerCase().startsWith("homematic"))) {
+			return parts[0].substring(parts[0].length()-4);	
+			//return "?X?";
+		}
 		if(!parts[1].equals("devices")) return "?Y?";
 		if(parts[2].length() < 5) return parts[2];
 		return parts[2].substring(parts[2].length()-4);	

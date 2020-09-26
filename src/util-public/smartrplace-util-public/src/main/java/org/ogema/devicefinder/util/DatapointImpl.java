@@ -164,7 +164,11 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		}
 		if(result != null)
 			return result;
-		String stdLabel = getRoomName(locale);
+		String subRoom = getSubRoomLocation(locale, null);
+		String stdLabel = getDeviceLabel(locale, getRoomName(locale), subRoom, isLocal()?null:getGatewayId());
+		stdLabel += "-"+getTypeName(locale);
+
+		/*String stdLabel = getRoomName(locale);
 		String subRoom = getSubRoomLocation(locale, null);
 		if(subRoom != null)  {
 			if(stdLabel.equals(DPRoom.BUILDING_OVERALL_ROOM_LABEL))
@@ -175,6 +179,20 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		stdLabel += "-"+getTypeName(locale);
 		if(!isLocal()) {
 			String gwId = getGatewayId();
+			return gwId +"::"+stdLabel;
+		}*/
+		return stdLabel;
+	}
+	
+	public static String getDeviceLabel(OgemaLocale locale, String roomName, String subRoom, String gwId) {
+		String stdLabel = roomName;
+		if(subRoom != null)  {
+			if(stdLabel.equals(DPRoom.BUILDING_OVERALL_ROOM_LABEL))
+				stdLabel = subRoom;
+			else
+				stdLabel += "-"+subRoom;
+		}
+		if(gwId != null) {
 			return gwId +"::"+stdLabel;
 		}
 		return stdLabel;
