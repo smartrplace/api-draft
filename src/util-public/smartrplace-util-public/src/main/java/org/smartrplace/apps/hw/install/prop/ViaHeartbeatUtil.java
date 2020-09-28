@@ -1,5 +1,8 @@
 package org.smartrplace.apps.hw.install.prop;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
@@ -43,12 +46,36 @@ public class ViaHeartbeatUtil {
 
 	public static void updateAllTransferRegistrations(DatapointService dpService, boolean connectingAsClient) {
 		ViaHeartbeatLocalData hbData = ViaHeartbeatLocalData.getInstance();
-		for(ViaHeartbeartOGEMAInstanceDpTransfer partnerData: hbData.partnerData.values()) {
-			updateTransferRegistration(partnerData.commPartnerId, hbData, dpService, connectingAsClient);
+		List<String> gwsDone = new ArrayList<String>();
+		for(DatapointGroup dpg: dpService.getAllGroups()) {
+			if(!"VIA_HEARTBT".equals(dpg.getType()))
+				continue;
+			String[] gwPlus = DatapointGroup.getGroupIdAndGw(dpg.id());
+			DatapointGroup recvGroup;
+			DatapointGroup sendGroup;
+			String commPartnerId = gwPlus[1];
+			if(gwsDone.contains(commPartnerId))
+				continue;
+			if(gwPlus[0].equals(VIA_HEARTBEAT_RECEIVE)) {
+				recvGroup = dpg;
+				String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_SEND, commPartnerId);
+				sendGroup = dpService.getGroup(id);
+			} else {
+				sendGroup = dpg;
+				String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_RECEIVE, commPartnerId);
+				recvGroup = dpService.getGroup(id);				
+			}
+			ViaHeartbeartOGEMAInstanceDpTransfer partnerData = hbData.getOrCreatePartnerData(
+					commPartnerId, connectingAsClient);
+			partnerData.updateByDpGroups(sendGroup, recvGroup);
+			gwsDone.add(commPartnerId);
 		}
+		//for(ViaHeartbeartOGEMAInstanceDpTransfer partnerData: hbData.partnerData.values()) {
+		//	updateTransferRegistration(partnerData.commPartnerId, hbData, dpService, connectingAsClient);
+		//}
 	}
 
-	public static void updateTransferRegistration(String commPartnerId,
+	/*public static void updateTransferRegistration(String commPartnerId,
 			DatapointService dpService, boolean connectingAsClient) {
 		updateTransferRegistration(commPartnerId, ViaHeartbeatLocalData.getInstance(),
 				dpService, connectingAsClient);
@@ -59,7 +86,7 @@ public class ViaHeartbeatUtil {
 		ViaHeartbeartOGEMAInstanceDpTransfer partnerData = hbData.getOrCreatePartnerData(
 				commPartnerId, connectingAsClient);
 		updateTransferRegistration(commPartnerId, partnerData, dpService, connectingAsClient);
-	}
+	}*/
 	public static void updateTransferRegistration(String commPartnerId,
 				ViaHeartbeartOGEMAInstanceDpTransfer partnerData,
 				DatapointService dpService, boolean connectingAsClient) {

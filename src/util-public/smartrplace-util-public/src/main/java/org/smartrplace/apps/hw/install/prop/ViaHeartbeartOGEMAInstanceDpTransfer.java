@@ -47,7 +47,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			throw new IllegalStateException("Received unknown transferId: "+transferId+" Value:"+value);
 		}
 		ViaHeartbeatInfoProvider infoP = infoProvidersM.get(dp);
-		infoP.setLastValueReceived(value);
+		infoP.setCurrentValue(value); //.setLastValueReceived(value);
 		return true;
 	}
 	
@@ -91,7 +91,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			result = registerDatapointForSend(dp, datapointsToSendM, null, infoProvidersM);
 		else
 			result = new SendDatapointData();
-		result.value = result.infoP.getCurrentValueToSend();
+		result.value = result.infoP.getCurrentValue(); //.getCurrentValueToSend();
 		return result;
 	}
 	
