@@ -388,6 +388,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		// If more types of SensorDevices are supported in the future add detection here
 		if(isTempHumSens(resourceLocation))
 			return "TempHumSens";
+		if(isDimmerSensorDevice(resourceLocation))
+			return "smartDimmer";
 		return "SensorDevice";
 	}
 	public static boolean isTempHumSens(String resourceLocation) {
@@ -400,6 +402,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 
+	public static boolean isDimmerSensorDevice(String resourceLocation) {
+		if(resourceLocation.toLowerCase().startsWith("vekin"))
+			return true;
+		return false;
+	}
 	/** 
 	 * 
 	 * @param object
