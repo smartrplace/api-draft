@@ -1,8 +1,6 @@
 package org.smartrplace.apps.hw.install.prop;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -17,6 +15,9 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	Map<Datapoint, ViaHeartbeatInfoProvider> infoProvidersM = new HashMap<>();
 	protected int lastTransferId = 0;
 	protected boolean structureUpdateToRemotePending = false;
+	protected long lastStructureUpdate = -1;
+	
+	protected final DatapointService dpService;
 	
 	/** If false then list is for receiving datapoints. This means that the transfer ID
 	 * is set and is created by the remote partner*/
@@ -26,9 +27,11 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	String commPartnerId;
 	boolean connectingAsClient;
 	
-	public ViaHeartbeartOGEMAInstanceDpTransfer(String communicationPartnerId, boolean connectingAsClient) {
+	public ViaHeartbeartOGEMAInstanceDpTransfer(String communicationPartnerId, boolean connectingAsClient,
+			DatapointService dpService) {
 		this.commPartnerId = communicationPartnerId;
 		this.connectingAsClient = connectingAsClient;
+		this.dpService = dpService;
 	}
 
 	public boolean receiveDatapointData(String transferId, float value) {
@@ -46,8 +49,9 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			//received information for unknown datapoint
 			throw new IllegalStateException("Received unknown transferId: "+transferId+" Value:"+value);
 		}
-		ViaHeartbeatInfoProvider infoP = infoProvidersM.get(dp);
-		infoP.setCurrentValue(value); //.setLastValueReceived(value);
+		ViaHeartbeatInfoProvider infoP = getOrCreateInfoProvider(dp, transferId, infoProvidersM);
+		infoP.checkMirrorResorce();
+		infoP.setValueReceived(value, dpService.getFrameworkTime()); //.setLastValueReceived(value);
 		return true;
 	}
 	
@@ -65,14 +69,14 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 				return true;
 			}
 		}
-		SendDatapointData subRes = new SendDatapointData();
+		SendDatapointDataPlus subRes = new SendDatapointDataPlus();
 		addDataProvider(dp, subRes, infoProviders);
 		datapointsToRecv.put(subRes.transferId, dp);
 		structureUpdateToRemotePending = true;
 		return true;
 	}
 	
-	public static class SendDatapointData {
+	public static class SendDatapointDataPlus {
 		String transferId;
 		Float value;
 		ViaHeartbeatInfoProvider infoP;
@@ -85,23 +89,26 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	 * @param transferId may be null if not known
 	 * @return
 	 */
-	public SendDatapointData sendDatapointData(Datapoint dp, String transferId) {
-		final SendDatapointData result;
+	public SendDatapointDataPlus sendDatapointData(Datapoint dp, String transferId) {
+		final SendDatapointDataPlus result;
 		if(transferId == null)
 			result = registerDatapointForSend(dp, datapointsToSendM, null, infoProvidersM);
-		else
-			result = new SendDatapointData();
-		result.value = result.infoP.getCurrentValue(); //.getCurrentValueToSend();
+		else {
+			result = new SendDatapointDataPlus();
+			result.infoP = getOrCreateInfoProvider(dp, transferId, infoProvidersM);
+		}
+		result.infoP.checkMirrorResorce();
+		result.value = result.infoP.getValueToSend(dpService.getFrameworkTime()); //.getCurrentValueToSend();
 		return result;
 	}
 	
 	/** Register for sending and provide data for sending
 	 * @param knownDps 
 	 * @param infoProviders2 */
-	public SendDatapointData registerDatapointForSend(Datapoint dp,
+	public SendDatapointDataPlus registerDatapointForSend(Datapoint dp,
 			Map<Datapoint, String> datapointsToSend, Map<Datapoint, String> knownDps,
 			Map<Datapoint, ViaHeartbeatInfoProvider> infoProviders) {
-		SendDatapointData result = new SendDatapointData();
+		SendDatapointDataPlus result = new SendDatapointDataPlus();
 		result.transferId = datapointsToSend.get(dp);
 		if(result.transferId == null) {
 			result.transferId = knownDps.get(dp);
@@ -127,13 +134,20 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		return result;
 	}
 	
-	protected void addDataProvider(Datapoint dp, SendDatapointData result,
+	protected void addDataProvider(Datapoint dp, SendDatapointDataPlus result,
 			Map<Datapoint, ViaHeartbeatInfoProvider> infoProviders) {
 		result.transferId = addTransferId();
-		result.infoP = new ViaHeartbeatInfoProvider() {
-		};
-		infoProviders.put(dp, result.infoP);
-		dp.registerInfoProvider(result.infoP, 1000);
+		result.infoP = getOrCreateInfoProvider(dp, result.transferId, infoProviders);
+	}
+	protected ViaHeartbeatInfoProvider getOrCreateInfoProvider(Datapoint dp, String transferId,
+			Map<Datapoint, ViaHeartbeatInfoProvider> infoProviders) {
+		ViaHeartbeatInfoProvider result = infoProviders.get(dp);
+		if(result != null)
+			return result;
+		result = new ViaHeartbeatInfoProvider(dp, dpService);
+		infoProviders.put(dp, result);
+		dp.registerInfoProvider(result, 1000);
+		return result;
 	}
 	
 	protected String addTransferId() {
@@ -179,14 +193,13 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	}
 	
 	public static class ProcessRemoteDataResult {
-		public List<SendDatapointData> efficientTransferData;
+		public SendDatapointData efficientTransferData;
 		public String configJsonToSend;
 	}
 	
 	/** To be called by heartbeat to process data received*/
-	public void processRemoteData(List<SendDatapointData> dataReceived,
-			String configJsonReceived, boolean connectingAsClient,
-			DatapointService dpService) {
+	public void processRemoteData(Map<String, Float> dataReceived,
+			String configJsonReceived, boolean connectingAsClient) {
 		if(configJsonReceived != null) {
 			ViaHeartbeatRemoteTransferList tlist = JSONManagement.importFromJSON(configJsonReceived,
 					ViaHeartbeatRemoteTransferList.class);
@@ -209,36 +222,46 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 						ViaHeartbeatUtil.registerForTansferViaHeartbeatSend(dp, commPartnerId, dpService);
 					}
 				}
-				ViaHeartbeatUtil.updateTransferRegistration(commPartnerId, this, dpService, connectingAsClient);
+				//ViaHeartbeatUtil.updateTransferRegistration(commPartnerId, this, dpService, connectingAsClient);
 			}
 		}
-		for(SendDatapointData recv: dataReceived) {
-			receiveDatapointData(recv.transferId, recv.value);
+		if(dataReceived != null) for(Entry<String, Float> recv: dataReceived.entrySet()) {
+			receiveDatapointData(recv.getKey(), recv.getValue());
 		}
 	}		
 	/** To be called by heartbeat to obtain data to send*/
-	public ProcessRemoteDataResult getRemoteData(boolean connectingAsClient,
-			DatapointService dpService) {
+	public ProcessRemoteDataResult getRemoteData(boolean connectingAsClient) {
 
+		Long autoStructureUpdateRate = Long.getLong("org.smartrplace.apps.hw.install.prop.autostructureupdaterate");
+		long now = dpService.getFrameworkTime();
+		if(autoStructureUpdateRate != null) {
+			if(now - lastStructureUpdate > autoStructureUpdateRate)
+				structureUpdateToRemotePending = true;
+		}
 		ProcessRemoteDataResult result = new ProcessRemoteDataResult();
 		if(structureUpdateToRemotePending) {
 			ViaHeartbeatRemoteTransferList tlist = new ViaHeartbeatRemoteTransferList();
 			tlist.datapointsFromCreatorToAcceptor = new HashMap<>();
 			for(Entry<Datapoint, String> dp: datapointsToSendM.entrySet()) {
-				String rawId = DatapointGroup.getGroupIdAndGw(dp.getKey().id())[0];
+				String rawId = dp.getKey().id();
 				tlist.datapointsFromCreatorToAcceptor.put(dp.getValue(), rawId);
 			}
+			tlist.datapointsFromAccptorToCreator = new HashMap<>();
 			for(Entry<String, Datapoint> dp: datapointsToRecvM.entrySet()) {
-				String rawId = DatapointGroup.getGroupIdAndGw(dp.getValue().id())[0];
-				tlist.datapointsFromCreatorToAcceptor.put(dp.getKey(), rawId);
+				String rawId = dp.getValue().id();
+				tlist.datapointsFromAccptorToCreator.put(dp.getKey(), rawId);
 			}
 			result.configJsonToSend = JSONManagement.getJSON(tlist);
+			lastStructureUpdate = now;
 			structureUpdateToRemotePending = false;
 		}
 		
-		result.efficientTransferData = new ArrayList<>();
+		result.efficientTransferData = new SendDatapointData();
+		result.efficientTransferData.values = new HashMap<>();
 		for(Entry<Datapoint, String> send: datapointsToSendM.entrySet()) {
-			result.efficientTransferData.add(sendDatapointData(send.getKey(), send.getValue()));
+			SendDatapointDataPlus sdpPlus = sendDatapointData(send.getKey(), send.getValue());
+			if(sdpPlus.value != null)
+				result.efficientTransferData.values.put(send.getValue(), sdpPlus.value);
 		}
 		return result;
 	}

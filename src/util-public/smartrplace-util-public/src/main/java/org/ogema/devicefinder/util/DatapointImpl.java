@@ -1,5 +1,8 @@
 package org.ogema.devicefinder.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
@@ -38,6 +41,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	protected OgemaLogger logger = null;
 	//protected Resource sensorActorResource = null;
 	protected DatapointGroup deviceResource = null;
+	protected Map<String, Object> parameters = new HashMap<>();
 	
 	protected ReadOnlyTimeSeries tseries = null;
 	
@@ -62,7 +66,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		super(garoDataType, dpRoom, consumptionInfo, subRoomLocation);
 		this.location = location;
 		this.gatewayId = gatewayId;
-		this.resource = resource;
+		if(resource != null)
+			this.resource = resource.getLocationResource();
+		else
+			this.resource = null;
 		this.dpService =dpService;
 		setDriverService(driverService);
 	}
@@ -128,6 +135,11 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	@Override
 	public String getLocation() {
 		return location;
+	}
+	
+	@Override
+	public String id() {
+		return getLocation();
 	}
 
 	@Override
@@ -403,5 +415,16 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		if(infoProvider != null)
 			return infoProvider.setCurrentValue(value);
 		return false;
+	}
+	
+
+	@Override
+	public Object getParameter(String id) {
+		return parameters.get(id);
+	}
+
+	@Override
+	public void setParameter(String id, Object param) {
+		parameters.put(id, param);
 	}
 }

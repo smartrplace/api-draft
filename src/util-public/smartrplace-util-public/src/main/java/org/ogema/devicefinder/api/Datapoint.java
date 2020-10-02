@@ -134,4 +134,8 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	 * implementation is simple, otherwise the implementation should be provided via a {@link DatapointInfoProvider}*/
 	Float getCurrentValue();
 	boolean setCurrentValue(Float value);
+	
+	Object getParameter(String id);
+	void setParameter(String id, Object param);
+	public static final String MIRROR_RESOURCE_PARAM = "MIRROR_RESOURCE";
 }

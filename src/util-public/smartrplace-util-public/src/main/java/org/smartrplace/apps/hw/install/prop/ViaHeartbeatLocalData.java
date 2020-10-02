@@ -3,12 +3,19 @@ package org.smartrplace.apps.hw.install.prop;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.ogema.devicefinder.api.DatapointService;
+
 /** All data required for communication with all partners*/
 public class ViaHeartbeatLocalData {
+	public ViaHeartbeatLocalData(DatapointService dpService) {
+		this.dpService = dpService;
+	}
+
 	private static ViaHeartbeatLocalData instance = null;
-	public static ViaHeartbeatLocalData getInstance() {
+	protected final DatapointService dpService;
+	public static ViaHeartbeatLocalData getInstance(DatapointService dpService) {
 		if(instance == null)
-			instance = new ViaHeartbeatLocalData();
+			instance = new ViaHeartbeatLocalData(dpService);
 		return instance;
 	}
 	
@@ -26,7 +33,7 @@ public class ViaHeartbeatLocalData {
 		ViaHeartbeartOGEMAInstanceDpTransfer result = partnerData.get(communicationPartnerId);
 		if(result != null)
 			return result;
-		result = new ViaHeartbeartOGEMAInstanceDpTransfer(communicationPartnerId, connectingAsClient);
+		result = new ViaHeartbeartOGEMAInstanceDpTransfer(communicationPartnerId, connectingAsClient, dpService);
 		partnerData.put(communicationPartnerId, result);
 		return result;
 	}

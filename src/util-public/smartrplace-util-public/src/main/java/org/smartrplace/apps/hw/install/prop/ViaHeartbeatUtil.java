@@ -45,7 +45,7 @@ public class ViaHeartbeatUtil {
 	}
 
 	public static void updateAllTransferRegistrations(DatapointService dpService, boolean connectingAsClient) {
-		ViaHeartbeatLocalData hbData = ViaHeartbeatLocalData.getInstance();
+		ViaHeartbeatLocalData hbData = ViaHeartbeatLocalData.getInstance(dpService);
 		List<String> gwsDone = new ArrayList<String>();
 		for(DatapointGroup dpg: dpService.getAllGroups()) {
 			if(!"VIA_HEARTBT".equals(dpg.getType()))
@@ -86,7 +86,7 @@ public class ViaHeartbeatUtil {
 		ViaHeartbeartOGEMAInstanceDpTransfer partnerData = hbData.getOrCreatePartnerData(
 				commPartnerId, connectingAsClient);
 		updateTransferRegistration(commPartnerId, partnerData, dpService, connectingAsClient);
-	}*/
+	}
 	public static void updateTransferRegistration(String commPartnerId,
 				ViaHeartbeartOGEMAInstanceDpTransfer partnerData,
 				DatapointService dpService, boolean connectingAsClient) {
@@ -97,7 +97,7 @@ public class ViaHeartbeatUtil {
 		DatapointGroup sendGroup = dpService.getGroup(id);
 		
 		partnerData.updateByDpGroups(sendGroup, recvGroup);
-	}
+	}*/
 	
 	//TODO: We have to provide a similar API for the gateway or move the above API so that both gateway and server can
 	//use it, then gateways set gwId = null
