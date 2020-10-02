@@ -6,6 +6,8 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.util.DatapointInfoProviderImpl;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 
+import de.iwes.util.format.StringFormatHelper;
+
 public class ViaHeartbeatInfoProvider extends DatapointInfoProviderImpl {
 
 	private Float lastValue = null;
@@ -65,8 +67,12 @@ public class ViaHeartbeatInfoProvider extends DatapointInfoProviderImpl {
 		else {
 			lastWriteTime = lastValueWritten;
 		}
-		return (lastWriteTime > lastValueUpdateSent &&
+		boolean result = (lastWriteTime > lastValueUpdateSent &&
 				((lastWriteTime - lastValueReceiveTime) > 10));
+System.out.println("    For "+dp.getLocation()+"result: "+result+" lastWrite:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastWriteTime));
+System.out.println("        lastSent:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueUpdateSent)+
+	" lastRecv:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueReceiveTime)+ " sres:"+(sres!=null));		
+		return result;
 	}
 	
 	public Float getValueToSend(long now) {
