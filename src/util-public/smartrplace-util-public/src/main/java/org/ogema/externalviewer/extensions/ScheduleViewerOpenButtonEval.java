@@ -119,7 +119,10 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		String[] parts = location.split("/");
 		//if(parts.length < 3) return "?S?";
 		if(!(parts[0].toLowerCase().startsWith("homematic"))) {
-			return parts[0].substring(parts[0].length()-4);	
+			String result = parts[0].substring(parts[0].length()-4);
+			if(result.matches(".*\\d.*"))
+				return result;
+			return parts[parts.length-1].substring(parts[parts.length-1].length()-4);
 			//return "?X?";
 		}
 		if(!parts[1].equals("devices")) return "?Y?";
