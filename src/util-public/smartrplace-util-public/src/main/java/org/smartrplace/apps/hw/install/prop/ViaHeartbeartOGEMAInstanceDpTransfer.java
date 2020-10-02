@@ -204,6 +204,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			ViaHeartbeatRemoteTransferList tlist = JSONManagement.importFromJSON(configJsonReceived,
 					ViaHeartbeatRemoteTransferList.class);
 			if(tlist != null) {
+System.out.println("   Received Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
 				//TODO: We cannot handle any unsubscribes here. For this we will need separate
 				//DatapointGroups for local and remote requests
 				if(tlist.datapointsFromCreatorToAcceptor != null) {
@@ -224,7 +225,9 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 				}
 				//ViaHeartbeatUtil.updateTransferRegistration(commPartnerId, this, dpService, connectingAsClient);
 			}
-		}
+		} else
+System.out.println("   Received Structure update tlist == null");			
+			
 		if(dataReceived != null) for(Entry<String, Float> recv: dataReceived.entrySet()) {
 			receiveDatapointData(recv.getKey(), recv.getValue());
 		}
@@ -234,6 +237,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 
 		Long autoStructureUpdateRate = Long.getLong("org.smartrplace.apps.hw.install.prop.autostructureupdaterate");
 		long now = dpService.getFrameworkTime();
+System.out.println("   Auto update Rate: "+autoStructureUpdateRate!=null?(""+autoStructureUpdateRate):"null");
 		if(autoStructureUpdateRate != null) {
 			if(now - lastStructureUpdate > autoStructureUpdateRate)
 				structureUpdateToRemotePending = true;
@@ -254,6 +258,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			result.configJsonToSend = JSONManagement.getJSON(tlist);
 			lastStructureUpdate = now;
 			structureUpdateToRemotePending = false;
+System.out.println("   Sending Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
 		}
 		
 		result.efficientTransferData = new SendDatapointData();
