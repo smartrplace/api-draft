@@ -58,13 +58,11 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	public boolean registerDatapointForReceive(Datapoint dp,
 		Map<String, Datapoint> datapointsToRecv, Map<Datapoint, String> knownDps,
 		Map<Datapoint, ViaHeartbeatInfoProvider> infoProviders) {
-System.out.println("   In registerDpsForRecv: Dps2Re:"+datapointsToRecv.size());
 		for(Entry<String, Datapoint> recv: datapointsToRecv.entrySet()) {
 			if(recv.getValue().equals(dp)) {
 				return false;
 			}
 		}
-System.out.println("   In registerDpsForRecv: KnownDps:"+knownDps.size());
 		for(Entry<Datapoint, String> send: knownDps.entrySet()) {
 			if(send.getKey().equals(dp)) {
 				datapointsToRecv.put(send.getValue(), dp);
@@ -75,7 +73,6 @@ System.out.println("   In registerDpsForRecv: KnownDps:"+knownDps.size());
 		addDataProvider(dp, subRes, infoProviders);
 		datapointsToRecv.put(subRes.transferId, dp);
 		structureUpdateToRemotePending = true;
-System.out.println("   In registerDpsForRecv: finish with transferid:"+subRes.transferId);
 		return true;
 	}
 	
@@ -179,7 +176,6 @@ System.out.println("   In registerDpsForRecv: finish with transferid:"+subRes.tr
 		}
 		for(Datapoint dp: recvGroup.getAllDatapoints()) {
 			String transferId = knownDps.get(dp);
-System.out.println("Processing datapoint:"+dp.id()+" with transferId "+transferId!=null?transferId:"(null)");
 			if(transferId != null)
 				datapointsToRecv.put(transferId, dp);
 			else {
@@ -191,7 +187,6 @@ System.out.println("Processing datapoint:"+dp.id()+" with transferId "+transferI
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-System.out.println("Registering datapoints to recv:"+datapointsToRecv.size());
 		this.datapointsToRecvM = datapointsToRecv;
 		this.datapointsToSendM = datapointsToSend;
 		this.infoProvidersM = infoProviders;
@@ -209,7 +204,7 @@ System.out.println("Registering datapoints to recv:"+datapointsToRecv.size());
 			ViaHeartbeatRemoteTransferList tlist = JSONManagement.importFromJSON(configJsonReceived,
 					ViaHeartbeatRemoteTransferList.class);
 			if(tlist != null) {
-System.out.println("   Received Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
+//System.out.println("   Received Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
 				//TODO: We cannot handle any unsubscribes here. For this we will need separate
 				//DatapointGroups for local and remote requests
 				if(tlist.datapointsFromCreatorToAcceptor != null) {
@@ -231,7 +226,7 @@ System.out.println("   Received Structure update: A2C:"+tlist.datapointsFromAccp
 				//ViaHeartbeatUtil.updateTransferRegistration(commPartnerId, this, dpService, connectingAsClient);
 			}
 		} else
-System.out.println("   Received Structure update tlist == null");			
+//System.out.println("   Received Structure update tlist == null");			
 			
 		if(dataReceived != null) for(Entry<String, Float> recv: dataReceived.entrySet()) {
 			receiveDatapointData(recv.getKey(), recv.getValue());
@@ -242,7 +237,7 @@ System.out.println("   Received Structure update tlist == null");
 
 		Long autoStructureUpdateRate = Long.getLong("org.smartrplace.apps.hw.install.prop.autostructureupdaterate");
 		long now = dpService.getFrameworkTime();
-System.out.println("   Auto update Rate: "+autoStructureUpdateRate!=null?(""+autoStructureUpdateRate):"null");
+//System.out.println("   Auto update Rate: "+(autoStructureUpdateRate!=null?(""+autoStructureUpdateRate):"null")+" commPartner:"+commPartnerId);
 		if(autoStructureUpdateRate != null) {
 			if(now - lastStructureUpdate > autoStructureUpdateRate)
 				structureUpdateToRemotePending = true;
@@ -263,7 +258,7 @@ System.out.println("   Auto update Rate: "+autoStructureUpdateRate!=null?(""+aut
 			result.configJsonToSend = JSONManagement.getJSON(tlist);
 			lastStructureUpdate = now;
 			structureUpdateToRemotePending = false;
-System.out.println("   Sending Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
+//System.out.println("   Sending Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
 		}
 		
 		result.efficientTransferData = new SendDatapointData();
