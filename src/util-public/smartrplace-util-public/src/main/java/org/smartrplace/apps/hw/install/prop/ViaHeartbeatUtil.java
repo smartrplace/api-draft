@@ -47,9 +47,11 @@ public class ViaHeartbeatUtil {
 	public static void updateAllTransferRegistrations(DatapointService dpService, boolean connectingAsClient) {
 		ViaHeartbeatLocalData hbData = ViaHeartbeatLocalData.getInstance(dpService);
 		List<String> gwsDone = new ArrayList<String>();
+System.out.println("Update all Transfer from groups... ("+connectingAsClient+")");
 		for(DatapointGroup dpg: dpService.getAllGroups()) {
 			if(!"VIA_HEARTBT".equals(dpg.getType()))
 				continue;
+System.out.println("Use group:"+dpg.id());
 			String[] gwPlus = DatapointGroup.getGroupIdAndGw(dpg.id());
 			DatapointGroup recvGroup;
 			DatapointGroup sendGroup;
@@ -65,6 +67,7 @@ public class ViaHeartbeatUtil {
 				String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_RECEIVE, commPartnerId);
 				recvGroup = dpService.getGroup(id);				
 			}
+System.out.println("Use send group:"+sendGroup.id()+" recvGroup"+recvGroup.id());
 			ViaHeartbeartOGEMAInstanceDpTransfer partnerData = hbData.getOrCreatePartnerData(
 					commPartnerId, connectingAsClient);
 			partnerData.updateByDpGroups(sendGroup, recvGroup);
