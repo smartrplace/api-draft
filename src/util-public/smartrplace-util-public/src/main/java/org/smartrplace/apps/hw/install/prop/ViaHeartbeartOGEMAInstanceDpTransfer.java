@@ -58,11 +58,13 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	public boolean registerDatapointForReceive(Datapoint dp,
 		Map<String, Datapoint> datapointsToRecv, Map<Datapoint, String> knownDps,
 		Map<Datapoint, ViaHeartbeatInfoProvider> infoProviders) {
+System.out.println("   In registerDpsForRecv: Dps2Re:"+datapointsToRecv.size());
 		for(Entry<String, Datapoint> recv: datapointsToRecv.entrySet()) {
 			if(recv.getValue().equals(dp)) {
 				return false;
 			}
 		}
+System.out.println("   In registerDpsForRecv: KnownDps:"+knownDps.size());
 		for(Entry<Datapoint, String> send: knownDps.entrySet()) {
 			if(send.getKey().equals(dp)) {
 				datapointsToRecv.put(send.getValue(), dp);
@@ -73,6 +75,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		addDataProvider(dp, subRes, infoProviders);
 		datapointsToRecv.put(subRes.transferId, dp);
 		structureUpdateToRemotePending = true;
+System.out.println("   In registerDpsForRecv: finish with transferid:"+subRes.transferId);
 		return true;
 	}
 	
@@ -176,6 +179,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		}
 		for(Datapoint dp: recvGroup.getAllDatapoints()) {
 			String transferId = knownDps.get(dp);
+System.out.println("Processing datapoint:"+dp.id()+" with transferId "+transferId!=null?transferId:"(null)");
 			if(transferId != null)
 				datapointsToRecv.put(transferId, dp);
 			else {
@@ -187,6 +191,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+System.out.println("Registering datapoints to recv:"+datapointsToRecv.size());
 		this.datapointsToRecvM = datapointsToRecv;
 		this.datapointsToSendM = datapointsToSend;
 		this.infoProvidersM = infoProviders;
