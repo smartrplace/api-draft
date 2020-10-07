@@ -1,5 +1,6 @@
 package org.smartrplace.appstore.api;
 
+import java.util.Collections;
 import java.util.List;
 
 // TODO: Specify all data relevant to define Git repository data for access and management
@@ -32,4 +33,15 @@ public interface GitRepository {
 	 * 		from outside the repository, which may require an update of the GUI content.
 	 */
 	boolean performCommitPush(String commitMessage, boolean forcePush);
+	
+	/** Get relative paths of all maven projects that are directly or indirectly referenced by the rootPOMFile
+	 * Final projects to not contain a <modules> section. Referenced pom files of non-final maven project can be
+	 * found via the <modules> sections.
+	 * @param relative path to rootPOMFile. If not provided then first in the root directory, then in src shall be searched.
+	 * @return relative paths of final maven projects in the repository
+	 * 
+	 * */
+	default List<String> getMavenFinalProjects(String rootPOMFile) {
+		return Collections.emptyList();
+	};
 }
