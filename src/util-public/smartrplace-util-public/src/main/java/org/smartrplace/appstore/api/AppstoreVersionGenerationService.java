@@ -1,6 +1,7 @@
 package org.smartrplace.appstore.api;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -71,5 +72,21 @@ public interface AppstoreVersionGenerationService {
 	 * @return
 	 */
 	Future<ArtifactoryBundle> deployArtifact(SourceCodeBundle sourceBundle, String version, GitCommit commit);
+    
+    /**
+     * Get relative paths of all maven projects that are directly or indirectly
+     * referenced by the rootPOMFile. Final projects do not contain a modules
+     * section.
+     *
+     * @param rootPOMFile relative path to rootPOMFile. If not provided then first in the
+     * root directory, then in src shall be searched.
+     * @return relative paths of final maven projects in the repository
+     *
+     *
+     */
+    default List<String> getMavenFinalProjects(GitRepository repo, String rootPOMFile) {
+        return Collections.emptyList();
+    }
+;
 
 }
