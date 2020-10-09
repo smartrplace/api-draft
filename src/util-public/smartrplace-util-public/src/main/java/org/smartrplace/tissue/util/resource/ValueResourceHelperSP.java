@@ -27,10 +27,15 @@ import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.recordeddata.RecordedData;
+import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.core.resourcemanager.ResourceManagement;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.autoconfig.api.OneTimeConfigStep;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 /** Intended to move into {@link ValueResourceHelper} in the future.
@@ -89,4 +94,23 @@ public class ValueResourceHelperSP {
 		}
 		return result;		
 	}
+	
+	/** create resource if it does not yet exist. If the resource is newly created write
+	 * value into it, otherwise do nothing. Note that the activation status is not changed,
+	 * so the resource usually has to be activated later on if it was created.
+	 * @return true if resource was created and value was written
+	 */
+	public static boolean setIfNew(String resLocation, String value, OneTimeConfigStep otc,
+			ResourceAccess resAcc) {
+		if(!otc.performConfig(resLocation))
+			return false;
+		StringResource fres = ResourceHelperSP.getSubResource(null, resLocation, StringResource.class, resAcc);
+		if(!fres.exists()) {
+			fres.create();
+			fres.setValue(value);
+			return true;
+		}
+		return false;
+	}
+
 }
