@@ -134,6 +134,9 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 
 	protected final Map<String, String> preSelectionPerUser;
 	protected String preSelectionGeneralEnglish = null;
+	public void setDefaultPreSelectionGeneral(String label) {
+		preSelectionGeneralEnglish = label;
+	}
 	
 	protected String[] allOptionsForStandardLocales() {
 		return new String[] {"All", "Alle", "Tous", "All"};
