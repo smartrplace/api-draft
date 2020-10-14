@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.internationalization.util.LocaleHelper;
+
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 
@@ -13,6 +15,9 @@ public class GenericFilterFixed<A> implements GenericFilterOption<A> {
 	protected final List<A> baseOptions = new ArrayList<>();
 	protected final Map<OgemaLocale, String> optionLabel;
 	
+	public GenericFilterFixed(A object, String optionLabel) {
+		this(object, LocaleHelper.getLabelMap(optionLabel));
+	}
 	public GenericFilterFixed(A object, Map<OgemaLocale, String> optionLabel) {
 		baseOptions.add(object);
 		this.optionLabel = optionLabel;
