@@ -151,10 +151,13 @@ public abstract class ResourceGUITableTemplate<T extends Resource> extends Defau
 	public Row addRow(T object, OgemaHttpRequest req) {
 		if(req != null) {
 			if((lastAccessTime > 0)&&(getFrameworkTime() - lastAccessTime > IDLE_TIME_TO_CLEANUP)) {
+System.out.println("   in ResourceGUITemplage#addRow:CLEAR");
 				objectsInitialized.clear();
 			} else {
-				if(objectsInitialized.get(object) != null && objectsInitialized.get(object).contains(req.getSessionId()))
+				if(objectsInitialized.get(object) != null && objectsInitialized.get(object).contains(req.getSessionId())) {
+System.out.println("   in ResourceGUITemplage#addRow:RETURN NULL");
 					return null;
+				}
 			}
 			lastAccessTime = getFrameworkTime();
 			Set<String> sessions = objectsInitialized.get(object);

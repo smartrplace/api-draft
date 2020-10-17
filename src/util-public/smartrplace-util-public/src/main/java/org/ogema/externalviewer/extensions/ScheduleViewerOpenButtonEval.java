@@ -122,7 +122,10 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			String result = parts[0].substring(parts[0].length()-4);
 			if(result.matches(".*\\d.*"))
 				return result;
-			return parts[parts.length-1].substring(parts[parts.length-1].length()-4);
+			result = parts[parts.length-1].substring(parts[parts.length-1].length()-4);
+			if(result.matches(".*\\d.*"))
+				return result;
+			return "";
 			//return "?X?";
 		}
 		if(!parts[1].equals("devices")) return "?Y?";

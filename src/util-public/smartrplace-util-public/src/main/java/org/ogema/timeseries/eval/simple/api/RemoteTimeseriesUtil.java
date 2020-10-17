@@ -7,17 +7,31 @@ import org.ogema.devicefinder.api.DatapointService;
 
 public class RemoteTimeseriesUtil {
 	public static String[] getGatewayLocationForMirror(SingleValueResource sres) {
+		return getGatewayLocationForMirror(sres.getLocation());
+	}
+	public static String[] getGatewayLocationForMirror(String mirrorResourceLocation) {
 		String gwId;
 		String location;
-		String[] els = sres.getLocation().split("/", 4);
+		String[] els = mirrorResourceLocation.split("/", 4);
 		if(els[0].equals("serverMirror") && (els.length >= 4)) {
 			gwId = els[1].substring(1);
 			location = els[3];
 		} else  {
 			gwId = "Local";
-			location = sres.getLocation();
+			location = mirrorResourceLocation;
 		}
 		return new String[] {gwId, location};
+	}
+	
+	public static Datapoint getRemoteDpForMirrorExisting(SingleValueResource sres, DatapointService dpService) {
+		String[] gwLoc = getGatewayLocationForMirror(sres);
+		if(gwLoc[0].equals("Local"))
+			return dpService.getDataPointAsIs(gwLoc[1]);
+		for(Datapoint dp: dpService.getAllDatapoints(gwLoc[0])) {
+			if(dp.getLocation().endsWith(gwLoc[1]))
+				return dp;
+		}
+		return null;
 	}
 	
 	public static Datapoint getRemoteDpForMirror(SingleValueResource sres, DatapointService dpService,
@@ -66,8 +80,8 @@ public class RemoteTimeseriesUtil {
 				}*/
 			}
 		}
-		if(fullPathPre == null)
-			throw new IllegalStateException("Full path does not fit to mirrorResource!");
+		//if(fullPathPre == null)
+		//	throw new IllegalStateException("Full path does not fit to mirrorResource!");
 		
 		return dpService.getDataPointStandard(fullPathPre+gwLoc[1], gwLoc[0]);
 	}

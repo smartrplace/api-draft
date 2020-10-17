@@ -52,6 +52,7 @@ public interface DatapointService {
 	
 	/** We need some kind of filtering, but initially this is up to the application*/
 	List<Datapoint> getAllDatapoints();
+	Collection<Datapoint> getAllDatapoints(String gwId);
 	
 	public static enum DataTypeRegistrationStatus {
 		/** means all known data types even if no datapoint is registered*/
