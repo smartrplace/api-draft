@@ -74,11 +74,11 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	public String getLineId(T object) {
 		if (object instanceof Resource) {
 			Resource r = (Resource) object;
-			return ResourceUtils.getValidResourceName(r.getLocation());
+			return WidgetHelper.getValidWidgetId(r.getLocation());
 		} else if (object instanceof ResourcePattern<?>) {
-			return ResourceUtils.getValidResourceName(((ResourcePattern<?>) object).model.getLocation());
+			return WidgetHelper.getValidWidgetId(((ResourcePattern<?>) object).model.getLocation());
 		} else {
-			return ResourceUtils.getValidResourceName(object.toString().replace('$', '_'));
+			return WidgetHelper.getValidWidgetId(object.toString().replace('$', '_'));
 		}
 	}
 	protected String pid() {

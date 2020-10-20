@@ -419,4 +419,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		final boolean isTemplate = object.isTemplate().isActive() && object.isTemplate().getValue().equals(devHand.id());
 		return isTemplate;
 	}
+	
+	public static InstallAppDevice getTemplateForType(List<InstallAppDevice> devsOfhandler,
+			DeviceHandlerProvider<?> devHand) {
+		for(InstallAppDevice dev: devsOfhandler) {
+			if(isTemplate(dev, devHand))
+				return dev;
+		}
+		return null;
+	}
 }

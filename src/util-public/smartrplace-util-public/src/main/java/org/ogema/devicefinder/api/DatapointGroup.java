@@ -3,6 +3,7 @@ package org.ogema.devicefinder.api;
 import java.util.Collection;
 import java.util.List;
 
+import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -72,4 +73,7 @@ public interface DatapointGroup extends LabelledItem {
 	public static final String DEVICE_TYPE_SHORT_PARAM = "DeviceTypeShortId";
 	public static final String DEVICE_TYPE_FULL_PARAM = "deviceType";
 	public static final String DEVICE_UNIQUE_ID_PARAM = "deviceId";
+	
+	public static final String DEVICE = "DEVICE";
+	public static final String DEVICE_TYPE = "DEVICE_TYPE";
 }

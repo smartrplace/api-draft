@@ -5,6 +5,7 @@ import java.util.List;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -24,11 +25,11 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	protected abstract Class<? extends Resource> getResourceType();
 	
 	protected final InstalledAppsSelector appSelector;
-	protected final DeviceHandlerBase<?> devHand;
+	protected final DeviceHandlerProvider<?> devHand;
 	
 	public DeviceTableBase(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
 			InstalledAppsSelector appSelector,
-			DeviceHandlerBase<?> devHand) {
+			DeviceHandlerProvider<?> devHand) {
 		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class));
 		this.devHand = devHand;
 		if(appSelector != null)
