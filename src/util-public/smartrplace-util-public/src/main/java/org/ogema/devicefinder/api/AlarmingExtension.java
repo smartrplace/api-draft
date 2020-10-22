@@ -6,7 +6,7 @@ import org.ogema.model.extended.alarming.AlarmConfiguration;
 import de.iwes.widgets.template.LabelledItem;
 
 /** An alarming extension defines an additional alarming evaluation that can be applied
- * to any {@link SingleValueResource}
+ * to any {@link SingleValueResource}. For implementation information see {@link AlarmingExtensionListener}.
  *
  */
 public interface AlarmingExtension extends LabelledItem {
@@ -15,7 +15,7 @@ public interface AlarmingExtension extends LabelledItem {
 	 * @param res
 	 * @return
 	 */
-	boolean offerInGeneralAlarmingConfiguration(SingleValueResource res);
+	boolean offerInGeneralAlarmingConfiguration(AlarmConfiguration ac);
 	
 	AlarmingExtensionListener getListener(SingleValueResource res, AlarmConfiguration ac);
 }

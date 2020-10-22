@@ -27,7 +27,7 @@ import de.iwes.widgets.template.DefaultDisplayTemplate;
  */
 public abstract class PerMultiselectConfigPage<T, G, R extends Resource> extends ObjectGUITablePageNamed<T, R> {
 	protected abstract String getGroupColumnLabel();
-	protected abstract Collection<G> getAllGroups(OgemaHttpRequest req); 
+	protected abstract Collection<G> getAllGroups(T object, OgemaHttpRequest req); 
 	protected abstract List<G> getGroups(T object, OgemaHttpRequest req);
 	protected abstract void setGroups(T object, List<G> groups, OgemaHttpRequest req);
 	protected abstract String getGroupLabel(G object, OgemaLocale locale);
@@ -69,7 +69,7 @@ public abstract class PerMultiselectConfigPage<T, G, R extends Resource> extends
 				public void onGET(OgemaHttpRequest req) {
 					List<G> selected = getGroups(object, req);
 					//TODO: Maybe a caching could be implemented
-					Collection<G> all = getAllGroups(req);
+					Collection<G> all = getAllGroups(object, req);
 					update(all, req);
 					selectItems(selected, req);
 				}
