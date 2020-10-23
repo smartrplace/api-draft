@@ -257,7 +257,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					}
 					result.put(sub);
 				}
-			} else
+			} else if(!svMap.isEmpty())
 				result.put(svMap);
 		}
 		return result;
