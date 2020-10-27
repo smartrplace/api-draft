@@ -37,4 +37,6 @@ public interface AlarmingExtensionListener {
 	<T extends SingleValueResource> AlarmResult resourceChanged(T resource, float value, long now);
 	
 	default String id() {return this.getClass().getName();}
+
+	AlarmingExtension sourceExtension();
 }

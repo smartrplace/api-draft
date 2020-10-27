@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.api;
 
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.widgets.configuration.service.OGEMAConfigurationProvider;
@@ -137,5 +138,7 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
 	Object getParameter(String id);
 	void setParameter(String id, Object param);
+	
+	/** Shall provide a {@link SingleValueResource} object in a server/superior environment*/
 	public static final String MIRROR_RESOURCE_PARAM = "MIRROR_RESOURCE";
 }

@@ -14,7 +14,9 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.devicefinder.api.AlarmingService;
+import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -265,5 +267,18 @@ public class AlarmingConfigUtil {
 			return "NoDev";
 		else
 			return device.deviceId().getValue();
+	}
+	
+	public static String getDatapointLabel(AlarmConfiguration ac, DatapointService dpService) {
+		Datapoint dp = getDatapointAsIs(ac, dpService);
+		if(dp == null)
+			return getDeviceId(ac)+"::"+ac.getName();
+		else
+			return dp.label(null);
+	}
+	public static Datapoint getDatapointAsIs(AlarmConfiguration ac, DatapointService dpService) {
+		SingleValueResource sensor = ac.sensorVal().getLocationResource();
+		Datapoint dp = dpService.getDataPointAsIs(sensor);
+		return dp;
 	}
 }

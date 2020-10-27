@@ -70,10 +70,12 @@ public interface DatapointGroup extends LabelledItem {
 			return new String[]{els[1], els[0]};
 		throw new IllegalStateException("GroupId cannot be split into gateway and local id: "+groupId);
 	}
+	/** Property names for DatapointGroups*/
 	public static final String DEVICE_TYPE_SHORT_PARAM = "DeviceTypeShortId";
 	public static final String DEVICE_TYPE_FULL_PARAM = "deviceType";
 	public static final String DEVICE_UNIQUE_ID_PARAM = "deviceId";
 	
+	/** Values for {@link DatapointGroup#getType()}*/
 	public static final String DEVICE = "DEVICE";
 	public static final String DEVICE_TYPE = "DEVICE_TYPE";
 }

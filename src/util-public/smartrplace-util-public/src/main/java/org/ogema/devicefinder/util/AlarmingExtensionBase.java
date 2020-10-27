@@ -60,8 +60,11 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 
 	protected class AlarmExtListenerBase implements AlarmingExtensionListener {
 		public final ValueListenerDataBase valueListener;
+		protected final AlarmingExtension source;
 		
-		public AlarmExtListenerBase(SingleValueResource res, AlarmConfiguration ac) {
+		public AlarmExtListenerBase(SingleValueResource res, AlarmConfiguration ac,
+				AlarmingExtension source) {
+			this.source = source;
 			if(ac.sensorVal() instanceof FloatResource)
 				valueListener = new ValueListenerDataBase((FloatResource) ac.sensorVal());
 			else if(ac.sensorVal() instanceof BooleanResource)
@@ -77,6 +80,11 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 			// TODO Auto-generated method stub
 			return null;
 		}
+
+		@Override
+		public AlarmingExtension sourceExtension() {
+			return source;
+		}
 		
 	}
 	
@@ -84,7 +92,7 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 	public AlarmingExtensionListener getListener(SingleValueResource res, AlarmConfiguration ac) {
 		//final Long maxTime = (long) Math.max(ac.maxIntervalBetweenNewValues().getValue(),
 		//		ac.maxViolationTimeWithoutAlarm().getValue())*60000;
-		return new AlarmExtListenerBase(res, ac);
+		return new AlarmExtListenerBase(res, ac, this);
 	}
 
 }
