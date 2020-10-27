@@ -3,6 +3,7 @@ package org.ogema.devicefinder.api;
 import java.util.List;
 
 import org.ogema.model.extended.alarming.AlarmConfiguration;
+import org.ogema.model.extended.alarming.AlarmGroupData;
 
 import de.iwes.widgets.template.LabelledItem;
 
@@ -22,7 +23,7 @@ public interface AlarmOngoingGroup extends LabelledItem {
 	/** Persistent data of the object. Note that resources for which not object is created anymore
 	 * shall be deleted
 	 */
-	AlarmConfiguration getResource();
+	AlarmGroupData getResource();
 	
 	AlarmingExtension sourceOfGroup();
 	

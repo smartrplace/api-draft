@@ -2,6 +2,8 @@ package org.ogema.devicefinder.api;
 
 import java.util.Collection;
 
+import org.ogema.recordreplay.testing.RecReplayObserver;
+
 public interface AlarmingService {
 	public static final String ALARMSTATUS_RES_NAME = "alarmStatus";
 
@@ -31,4 +33,8 @@ public interface AlarmingService {
 	 * @return
 	 */
 	boolean finishOngoingGroup(String id);
+	
+	void registerRecReplayObserver(RecReplayObserver observer);
+	RecReplayObserver getRecReplayObserver(String id);
+	Collection<RecReplayObserver> getAllObservers();
 }

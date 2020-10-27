@@ -9,6 +9,7 @@ import java.util.Map;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.IntegerValue;
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.devicefinder.util.AlarmingConfigUtil;
@@ -45,6 +46,10 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 	protected static class EventAlarmingBase extends EventRecorded {
 		public AlarmConfiguration ac;
 		public int value;
+		@Override
+		public Resource reference() {
+			return ac;
+		}
 	}
 	
 	protected static class AlarmConfigReplayData {
@@ -75,6 +80,7 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 		this.alarms = alarms;
 		RecReplayData rrData = ResourceHelper.getTopLevelResource(RecReplayData.class, appMan.getResourceAccess());
 		observerData = (RecReplayAlarmingBaseData) ResourceListHelper.getOrCreateNamedElementFlex(rrData.observerData(), resourceType());
+		ValueResourceHelper.setCreate(observerData.name(), this.id());
 		isInReplayMode = Boolean.getBoolean("org.ogema.recordreplay.testing.replaytestmode");
 		if(!isInReplayMode) {
 			ResourceList<IntegerResource> rlist = observerData.alarms();
@@ -84,24 +90,39 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 				throw new IllegalStateException("Resource must be empty intially for recording!");
 			if(!(observerData.alarmingConigPaths().size() == 0))
 				throw new IllegalStateException("Resource must be empty initially for recording!");
+			int size = 0;
 			for(AlarmConfiguration ac: alarms) {
-				IntegerResource res = rlist.add();
+				IntegerResource res = ResourceListHelper.addWithOrderedName(rlist);
+				ValueResourceUtils.appendValue(observerData.alarmingConigPaths(), ac.getLocation());
+				size++;
+				if((rlist.size() != size) || (observerData.alarmingConigPaths().size() != size))
+					throw new IllegalStateException("Sizes: "+size+ " / "+rlist.size()+ " / "+ observerData.alarmingConigPaths().size());
 				resForRecording.put(ac.getLocation(), res);
 				IntegerResource alStatus = AlarmingConfigUtil.getAlarmStatus(ac.sensorVal().getLocationResource());
-				ValueResourceHelper.setCreate(res, alStatus.getValue());
-				ValueResourceUtils.appendValue(observerData.alarmingConigPaths(), ac.getLocation());
+				int val = alStatus.getValue();
+				ValueResourceHelper.setCreate(res, val);
 			}
 			observerData.activate(true);
 		} else {
 			ResourceList<IntegerResource> rlist = observerData.alarms();
-			List<IntegerResource> allEls = rlist.getAllElements();
+			List<IntegerResource> allEls = ResourceListHelper.getAllElementsSorted(rlist);
 			if(!(rlist.size() == observerData.alarmingConigPaths().size()))
 				throw new IllegalStateException("Size of lists must be equal!");
 			for(int idx=0; idx<rlist.size(); idx++) {
 				IntegerResource res = allEls.get(idx);
 				String alLoc = observerData.alarmingConigPaths().getElementValue(idx);
 				resForRecording.put(alLoc, res);
-			}			
+			}
+			
+			observerData.numberOfElementsFinished().create();
+			observerData.numberOfAlarmsProcessed().create();
+			observerData.numberOfSuccess().create();
+			observerData.averageTimeDeviation().create();
+			observerData.maximumTimeDeviation().create();
+			observerData.activate(true);
+			
+			//TODO: This is only feasible if alarming setup is fully done when the constructor is called
+			checkInitialReplay();
 		}
 		//we do this at the end as this is the most relevant point for further processing
 		checkStartTime(appMan);
@@ -117,6 +138,7 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 				System.out.println("   WARNING : Observer startup deviation for "+label(null)+" of "+diff+" msec");
 			else
 				System.out.println("     INFO  : Observer startup deviation for "+label(null)+" of "+diff+" msec");
+			ValueResourceHelper.setCreate(observerData.replayStartTimeDeviation(), diff);
 		}
 		
 	}
@@ -125,6 +147,10 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 	//}
 	
 	public void recordNewAlarm(AlarmConfiguration ac, long now) {
+		if(isInReplayMode) {
+			newEvent(ac, now);
+			return;
+		}
 		IntegerResource alStatus = AlarmingConfigUtil.getAlarmStatus(ac.sensorVal().getLocationResource());
 		IntegerResource res = resForRecording.get(ac.getLocation());
 		int statVal = alStatus.getValue();
@@ -143,6 +169,7 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 		ev.description = "Alarm at "+ac.getName()+" expected:"+statVal;
 		ev.ac = ac;
 		ev.value = statVal;
+		ev.observer = this;
 		
 		if(isInReplayMode) {
 			ev.timeLatest = now + maxDeviationTime;
@@ -157,14 +184,17 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 		List<RecReplayDeviation> result = new ArrayList<>();
 		ResourceList<RecReplayDeviation> devlist = observerData.deviations();
 		devlist.create();
+		//TODO: This should not be necessary, maybe a framework bug? Was necessary when calling add directly below
+		//devlist.setElementType(RecReplayDeviation.class);
 		if(!(devlist.size() == 0))
 			throw new IllegalStateException("Resource must be empty intially for replay!");
 		for(AlarmConfiguration ac: alarms) {
 			IntegerResource res = resForRecording.get(ac.getLocation());
 			IntegerResource alStatus = AlarmingConfigUtil.getAlarmStatus(ac.sensorVal().getLocationResource());
-			if(!(res.getValue() != alStatus.getValue())) {
-				RecReplayDeviation dev = devlist.add();
-				getNewDeviation(ac, "Init-AC:"+ac.getName()+" expected:"+res.getValue()+" Found:"+alStatus.getValue(), null, null);
+			int expected = res.getValue();
+			int found = alStatus.getValue();
+			if(expected != found) {
+				RecReplayDeviation dev = getNewDeviation(ac, "Init-AC:"+AlarmingConfigUtil.getDeviceId(ac)+" expected:"+expected+" Found:"+found, null, null);
 				result.add(dev);
 			}
 			if(res.program().exists()) for(SampledValue sv: res.program().getValues(0)) {
@@ -188,27 +218,43 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 		return (List)events;
 	}
 	
+	long sumDev = 0;
 	//Just check new event without expired
 	protected RecReplayDeviation newEvent(AlarmConfiguration ac, long now) {
-		IntegerResource res = resForRecording.get(ac.getLocation());
+		//IntegerResource res = resForRecording.get(ac.getLocation());
 		AlarmConfigReplayData data = getACData(ac.getLocation());
-		List<SampledValue> svs = null;
 		EventAlarmingBase ev = null;
+		observerData.numberOfAlarmsProcessed().getAndAdd(1);
 		if(data.events.size() > (data.lastEventIndexFound+1)) {
 			ev = data.events.get(data.lastEventIndexFound+1);
 		}			
 		if(ev == null)
 			return getNewDeviation(ac, "Unexpected alarm for "+ac.getName()+" at "+StringFormatHelper.getTimeDateInLocalTimeZone(now), now, null);
+		
+		int count = observerData.numberOfElementsFinished().getAndAdd(1)+1;
+		long deviation = Math.abs(ev.timeExpected - now);
+		long curMax = observerData.maximumTimeDeviation().getValue();
+		if(deviation > curMax)
+			observerData.maximumTimeDeviation().setValue(deviation);
+		sumDev += deviation;
+		observerData.averageTimeDeviation().setValue(sumDev / count);
+		
 		ev.isFound = true;
 		ev.success = false;
 		(data.lastEventIndexFound)++;
 		if(now < ev.timeEarliest)
-			return getNewDeviation(ac, "Alarm too early for "+ac.getName()+" by "+StringFormatHelper.getFormattedValue(ev.timeEarliest - now)+
+			return getNewDeviation(ac, "Alarm too early for "+AlarmingConfigUtil.getDeviceId(ac)+" by "+StringFormatHelper.getFormattedValue(ev.timeEarliest - now)+
 					" at "+StringFormatHelper.getTimeDateInLocalTimeZone(now), now, ev.timeExpected);
 		if(now > ev.timeLatest)
-			return getNewDeviation(ac, "Alarm too late for "+ac.getName()+" by "+StringFormatHelper.getFormattedValue(now - ev.timeLatest)+
+			return getNewDeviation(ac, "Alarm too late for "+AlarmingConfigUtil.getDeviceId(ac)+" by "+StringFormatHelper.getFormattedValue(now - ev.timeLatest)+
+					" at "+StringFormatHelper.getTimeDateInLocalTimeZone(now), now, ev.timeExpected);
+		IntegerResource alStatus = AlarmingConfigUtil.getAlarmStatus(ac.sensorVal().getLocationResource());
+		int found = alStatus.getValue();
+		if(ev.value != found)
+			return getNewDeviation(ac, "Alarm with wrong value for "+AlarmingConfigUtil.getDeviceId(ac)+" expected:"+ev.value+" found:"+found+
 					" at "+StringFormatHelper.getTimeDateInLocalTimeZone(now), now, ev.timeExpected);
 		ev.success = true;
+		observerData.numberOfSuccess().getAndAdd(1);
 		return null;
 	}
 	
@@ -221,7 +267,7 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 			if(ev.isFound)
 				continue;
 			ev.success = false;
-			RecReplayDeviation dev = getNewDeviation(ev.ac, "Alarm not found for "+ev.ac.getName()+
+			RecReplayDeviation dev = getNewDeviation(ev.ac, "Alarm not found for "+AlarmingConfigUtil.getDeviceId(ev.ac)+
 					" at "+StringFormatHelper.getTimeDateInLocalTimeZone(now), null, ev.timeExpected);
 			result.add(dev);
 		}

@@ -259,4 +259,11 @@ public class AlarmingConfigUtil {
 		}
 	}
 
+	public static String getDeviceId(AlarmConfiguration ac) {
+		InstallAppDevice device = ResourceHelper.getFirstParentOfType(ac, InstallAppDevice.class);
+		if(device == null)
+			return "NoDev";
+		else
+			return device.deviceId().getValue();
+	}
 }

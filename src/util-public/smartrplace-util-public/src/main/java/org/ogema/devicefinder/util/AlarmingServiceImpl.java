@@ -7,9 +7,14 @@ import java.util.Map;
 import org.ogema.devicefinder.api.AlarmOngoingGroup;
 import org.ogema.devicefinder.api.AlarmingExtension;
 import org.ogema.devicefinder.api.AlarmingService;
+import org.ogema.recordreplay.testing.RecReplayObserver;
+
+import de.iwes.util.resource.ValueResourceHelper;
 
 public class AlarmingServiceImpl implements AlarmingService {
 	Map<String, AlarmingExtension> extensions = new HashMap<>();
+	Map<String, RecReplayObserver> observers = new HashMap<>();
+	Map<String, AlarmOngoingGroup> groups = new HashMap<>();
 	
 	@Override
 	public boolean registerAlarmingExtension(AlarmingExtension ext) {
@@ -29,26 +34,43 @@ public class AlarmingServiceImpl implements AlarmingService {
 
 	@Override
 	public void registerOngoingAlarmGroup(AlarmOngoingGroup grp) {
-		// TODO Auto-generated method stub
-		
+		if(groups.containsKey(grp.id()))
+			throw new IllegalArgumentException("Alarming group with id "+grp.id()+" already exists!");
+		groups.put(grp.id(), grp);
 	}
 
 	@Override
 	public AlarmOngoingGroup getOngoingGroup(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		return groups.get(id);
 	}
 
 	@Override
 	public Collection<AlarmOngoingGroup> getOngoingGroups(boolean includeFinisheds) {
-		// TODO Auto-generated method stub
-		return null;
+		return groups.values();
 	}
 
 	@Override
 	public boolean finishOngoingGroup(String id) {
-		// TODO Auto-generated method stub
-		return false;
+		AlarmOngoingGroup grp = getOngoingGroup(id);
+		if(grp == null)
+			return false;
+		ValueResourceHelper.setCreate(grp.getResource().isFinished(), true);
+		return true;
+	}
+
+	@Override
+	public void registerRecReplayObserver(RecReplayObserver observer) {
+		observers.put(observer.id(), observer);
+	}
+
+	@Override
+	public RecReplayObserver getRecReplayObserver(String id) {
+		return observers.get(id);
+	}
+
+	@Override
+	public Collection<RecReplayObserver> getAllObservers() {
+		return observers.values();
 	}
 
 }

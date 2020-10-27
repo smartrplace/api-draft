@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.devicefinder.util.AlarmingConfigUtil;
@@ -48,10 +49,15 @@ public interface RecReplayObserver extends LabelledItem {
 
 	Class<? extends RecReplayObserverData> resourceType();
 	
-	public static class EventRecorded {
+	public static abstract class EventRecorded {
 		public long timeExpected;
 		public String description;
 		
+		/** overwrite this with your reference type*/
+		public abstract Resource reference();
+
+		public RecReplayObserver observer;
+
 		//********************************************
 		//The following elements are for replay only
 		//********************************************
@@ -60,9 +66,9 @@ public interface RecReplayObserver extends LabelledItem {
 		 * true: successful
 		 * false: failed (entry for {@link RecReplayDeviation} must be set)
 		 */
-		Boolean success = null;
+		public Boolean success = null;
 		/** If true the recorded event was assigned to a real event even if the timing and/or values were not correct*/
-		boolean isFound = false;
+		public boolean isFound = false;
 		
 		public long timeLatest;
 		public long timeEarliest;
