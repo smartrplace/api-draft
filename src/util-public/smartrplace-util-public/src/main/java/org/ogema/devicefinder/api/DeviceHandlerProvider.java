@@ -134,4 +134,11 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	 */
 	default void initAlarmingForDevice(InstallAppDevice appDevice,
 			HardwareInstallConfig appConfigData) {}
+
+	/** Provide version of alarming initializiation. If a new version is provided then
+	 * {@link #initAlarmingForDevice(InstallAppDevice, HardwareInstallConfig)}
+	 * is called once more. Implementation should take care then that existing special configurations
+	 * for the devices are not overwritten.
+	 */
+	default String getInitVersion() {return "";}
 }
