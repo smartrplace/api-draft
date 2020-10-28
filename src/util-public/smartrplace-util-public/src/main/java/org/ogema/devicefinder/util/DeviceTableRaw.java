@@ -233,7 +233,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			columnLabel = "Last Contact";
 		Label lastContact = null;
 		if(req != null) {
-			lastContact = new LastContactLabel(reading, appMan, mainTable, "lastContact"+id, req);
+			lastContact = new LastContactLabel(reading, appMan, mainTable, WidgetHelper.getValidWidgetId(columnLabel)+id, req);
 			row.addCell(WidgetHelper.getValidWidgetId(columnLabel), lastContact);
 			return lastContact;
 		} else
