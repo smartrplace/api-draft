@@ -286,9 +286,13 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		Datapoint dp = dpService.getDataPointStandard(dpId);
 		return dp;
 	}
-	//public static class SingleDpTransfer {
-	//	 Datapoint dp;
-	//	 /** Short Id*/
-	//	 String transferId;
-	//}
+	
+	public Map<String, Datapoint> getDatapointsToRecvM() {
+		return datapointsToRecvM;
+	}
+
+	public Map<Datapoint, String> getDatapointsToSendM() {
+		return datapointsToSendM;
+	}
+
 }

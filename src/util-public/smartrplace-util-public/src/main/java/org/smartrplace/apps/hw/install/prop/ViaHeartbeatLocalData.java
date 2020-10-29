@@ -37,4 +37,8 @@ public class ViaHeartbeatLocalData {
 		partnerData.put(communicationPartnerId, result);
 		return result;
 	}
+
+	public ViaHeartbeartOGEMAInstanceDpTransfer getPartnerData(String communicationPartnerId) {
+		return partnerData.get(communicationPartnerId);
+	}
 }

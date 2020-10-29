@@ -1,6 +1,7 @@
 package org.smartrplace.apps.hw.install.prop;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.ogema.devicefinder.api.Datapoint;
@@ -73,39 +74,24 @@ System.out.println("Use send group:"+sendGroup.id()+" recvGroup"+recvGroup.id())
 			partnerData.updateByDpGroups(sendGroup, recvGroup);
 			gwsDone.add(commPartnerId);
 		}
-		//for(ViaHeartbeartOGEMAInstanceDpTransfer partnerData: hbData.partnerData.values()) {
-		//	updateTransferRegistration(partnerData.commPartnerId, hbData, dpService, connectingAsClient);
-		//}
+	}
+	
+	public static List<String> getAlternativeGwIds(String gatewayId) {
+		String baseId = getBaseGwId(gatewayId);
+		return getAlternativeGwIdsForBase(baseId);
+	}
+	
+	protected static List<String> getAlternativeGwIdsForBase(String baseId) {
+		return Arrays.asList(new String[] {baseId, "_"+baseId, "gw"+baseId, "_gw"+baseId});
 	}
 
-	/*public static void updateTransferRegistration(String commPartnerId,
-			DatapointService dpService, boolean connectingAsClient) {
-		updateTransferRegistration(commPartnerId, ViaHeartbeatLocalData.getInstance(),
-				dpService, connectingAsClient);
+	public static String getBaseGwId(String gatewayId) {
+		if(gatewayId.startsWith("_gw"))
+			return gatewayId.substring(3);
+		if(gatewayId.startsWith("gw"))
+			return gatewayId.substring(2);
+		if(gatewayId.startsWith("_"))
+			return gatewayId.substring(1);
+		return gatewayId;
 	}
-	public static void updateTransferRegistration(String commPartnerId,
-			ViaHeartbeatLocalData hbData,
-			DatapointService dpService, boolean connectingAsClient) {
-		ViaHeartbeartOGEMAInstanceDpTransfer partnerData = hbData.getOrCreatePartnerData(
-				commPartnerId, connectingAsClient);
-		updateTransferRegistration(commPartnerId, partnerData, dpService, connectingAsClient);
-	}
-	public static void updateTransferRegistration(String commPartnerId,
-				ViaHeartbeartOGEMAInstanceDpTransfer partnerData,
-				DatapointService dpService, boolean connectingAsClient) {
-		String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_RECEIVE, commPartnerId);
-		DatapointGroup recvGroup = dpService.getGroup(id);
-		
-		id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_SEND, commPartnerId);
-		DatapointGroup sendGroup = dpService.getGroup(id);
-		
-		partnerData.updateByDpGroups(sendGroup, recvGroup);
-	}*/
-	
-	//TODO: We have to provide a similar API for the gateway or move the above API so that both gateway and server can
-	//use it, then gateways set gwId = null
-	
-	//TODO: heartbeat gateway and server must find the datapoint groups and register InfoProviders on the datapoints
-	//registered providing/consuming the information transmitted. Registration of receive/send must also be initiated via
-	//heartbeat when the counter action is registered there.
 }
