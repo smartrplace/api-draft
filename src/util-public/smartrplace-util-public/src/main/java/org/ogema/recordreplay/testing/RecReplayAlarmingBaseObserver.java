@@ -191,6 +191,10 @@ public class RecReplayAlarmingBaseObserver implements RecReplayObserver {
 		for(AlarmConfiguration ac: alarms) {
 			IntegerResource res = resForRecording.get(ac.getLocation());
 			IntegerResource alStatus = AlarmingConfigUtil.getAlarmStatus(ac.sensorVal().getLocationResource());
+			if(res == null) {
+				System.out.println("Warning: New Alarming configuration not recoded: "+ac.getLocation());
+				continue;
+			}
 			int expected = res.getValue();
 			int found = alStatus.getValue();
 			if(expected != found) {

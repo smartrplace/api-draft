@@ -407,6 +407,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return true;
 		return false;
 	}
+	
+	/** For {@link ElectricityConnectionBox} devices*/
+	public static boolean isEnergyServerDevice(String resourceLocation) {
+		if(resourceLocation.startsWith("EnergyServerReadings_ESE/ESE_"))
+			return true;
+		return false;
+	}
+	
 	/** 
 	 * 
 	 * @param object
