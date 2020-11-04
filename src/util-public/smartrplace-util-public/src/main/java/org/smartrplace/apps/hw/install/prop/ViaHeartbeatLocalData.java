@@ -30,9 +30,12 @@ public class ViaHeartbeatLocalData {
 	 */
 	public ViaHeartbeartOGEMAInstanceDpTransfer getOrCreatePartnerData(String communicationPartnerId,
 			boolean connectingAsClient) {
-		ViaHeartbeartOGEMAInstanceDpTransfer result = partnerData.get(communicationPartnerId);
-		if(result != null)
-			return result;
+		ViaHeartbeartOGEMAInstanceDpTransfer result = null;
+		for(String gwOpt: ViaHeartbeatUtil.getAlternativeGwIds(communicationPartnerId)) {
+			result = partnerData.get(gwOpt);
+			if(result != null)
+				return result;
+		}
 		result = new ViaHeartbeartOGEMAInstanceDpTransfer(communicationPartnerId, connectingAsClient, dpService);
 		partnerData.put(communicationPartnerId, result);
 		return result;

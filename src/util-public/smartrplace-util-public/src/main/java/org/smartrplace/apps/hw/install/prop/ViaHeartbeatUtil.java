@@ -82,10 +82,14 @@ System.out.println("Use send group:"+sendGroup.id()+" recvGroup"+recvGroup.id())
 	}
 	
 	protected static List<String> getAlternativeGwIdsForBase(String baseId) {
-		return Arrays.asList(new String[] {baseId, "_"+baseId, "gw"+baseId, "_gw"+baseId});
+		return Arrays.asList(new String[] {baseId, "_"+baseId, "gw"+baseId, "_gw"+baseId, "config_"+baseId, "_config_"+baseId});
 	}
 
 	public static String getBaseGwId(String gatewayId) {
+		if(gatewayId.startsWith("_config_"))
+			return gatewayId.substring(8);
+		if(gatewayId.startsWith("config_"))
+			return gatewayId.substring(7);
 		if(gatewayId.startsWith("_gw"))
 			return gatewayId.substring(3);
 		if(gatewayId.startsWith("gw"))

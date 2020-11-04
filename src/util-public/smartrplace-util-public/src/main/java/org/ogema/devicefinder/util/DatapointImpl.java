@@ -67,9 +67,9 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		this.location = location;
 		this.gatewayId = gatewayId;
 		if(resource != null)
-			this.resource = resource.getLocationResource();
+			this.setResource(resource.getLocationResource());
 		else
-			this.resource = null;
+			this.setResource(null);
 		this.dpService =dpService;
 		setDriverService(driverService);
 	}
@@ -426,5 +426,12 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	@Override
 	public void setParameter(String id, Object param) {
 		parameters.put(id, param);
+	}
+
+	/** Be very careful to use this !! Only intended to be used by DatapointService implementation*/
+	public void setResource(Resource resource) {
+		if(resource != null && (!location.equals(resource.getLocation())))
+			throw new IllegalArgumentException("Trying to set resource "+resource.getLocation()+" for Datapoint "+location);
+		this.resource = resource;
 	}
 }
