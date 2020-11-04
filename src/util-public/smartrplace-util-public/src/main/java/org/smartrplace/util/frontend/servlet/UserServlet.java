@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -117,6 +118,7 @@ public class UserServlet extends HttpServlet {
 	}
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user)
 			throws ServletException, IOException {
+System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(req));
 		String pageId = req.getParameter("page");
 		String object = req.getParameter("object");
 		String timeStr = req.getParameter("time");

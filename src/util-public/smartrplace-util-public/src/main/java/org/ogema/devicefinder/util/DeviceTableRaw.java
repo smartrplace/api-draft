@@ -36,6 +36,7 @@ import org.smartrplace.util.format.WidgetHelper;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.util.resource.ResourceHelper;
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -426,6 +427,17 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return  object.isTemplate().isActive() && (!object.isTemplate().getValue().isEmpty());
 		final boolean isTemplate = object.isTemplate().isActive() && object.isTemplate().getValue().equals(devHand.id());
 		return isTemplate;
+	}
+	
+	public static void setTemplateStatus(InstallAppDevice object, DeviceHandlerProvider<?> devHand, boolean newStatus) {
+		if(newStatus) {
+			ValueResourceHelper.setCreate(object.isTemplate(), devHand.id());
+			if(!object.isTemplate().isActive())
+				object.isTemplate().activate(false);
+		} else if(object.isTemplate().exists()) {
+			object.isTemplate().deactivate(false);
+			object.isTemplate().setValue("");
+		}
 	}
 	
 	public static InstallAppDevice getTemplateForType(List<InstallAppDevice> devsOfhandler,
