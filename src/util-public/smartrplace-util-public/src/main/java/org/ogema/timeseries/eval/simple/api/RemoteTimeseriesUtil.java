@@ -36,6 +36,10 @@ public class RemoteTimeseriesUtil {
 	
 	public static Datapoint getRemoteDpForMirror(SingleValueResource sres, DatapointService dpService,
 			DatapointGroup dpg) {
+		return getRemoteDpForMirror(sres, dpService, dpg, true);
+	}
+	public static Datapoint getRemoteDpForMirror(SingleValueResource sres, DatapointService dpService,
+			DatapointGroup dpg, boolean createIfNotExisting) {
 		String[] gwLoc = getGatewayLocationForMirror(sres);
 		if(gwLoc[0].equals("Local"))
 			return dpService.getDataPointStandard(gwLoc[1]);

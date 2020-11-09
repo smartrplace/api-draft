@@ -370,6 +370,48 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return els[els.length-1];
 	}
 
+	/** Get additional String that shall be added to subRoomLocation of datapoint
+	 * Usually this is just the device installationLocation, but if the sensor type is not unique
+	 * within the device (e.g. because a sensor type appears on each phase) then a sensor information
+	 * has to be added to the device sublocation
+	 * @param dpLocation
+	 * @return
+	 */
+	public static String getDatapointSubname(String dpLocation) {
+		if(dpLocation.toLowerCase().contains("vekin") && dpLocation.contains("/CH")) {
+			String[] els = dpLocation.split("/CH", 2);
+			if(els.length == 2) {
+				int idx = els[1].indexOf("/");
+				String nums;
+				if(idx >= 0) {
+					nums = els[1].substring(0, idx);
+				} else
+					nums = els[1];
+				try {
+					int num = Integer.parseInt(nums);
+					return ""+num;
+				} catch(NumberFormatException e) {}
+			}
+		}
+		if(isEnergyServerDevice(dpLocation) && dpLocation.contains("/L")) {
+			String[] els = dpLocation.split("/L", 2);
+			if(els.length == 2) {
+				int idx = els[1].indexOf("/");
+				String nums;
+				if(idx >= 0) {
+					nums = els[1].substring(0, idx);
+				} else
+					nums = els[1];
+				try {
+					int num = Integer.parseInt(nums);
+					return "L"+num;
+				} catch(NumberFormatException e) {}
+			}
+			
+		}
+		return null;
+	}
+	
 	/*public static String getSensorDeviceStdName(SensorDevice model) {
 		// If more types of SensorDevices are supported in the future add detection here
 		if(isTempHumSens(model))

@@ -20,6 +20,8 @@ import org.ogema.devicefinder.api.PatternListenerExtended;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
+import com.google.common.collect.Sets;
+
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -88,8 +90,15 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	protected Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result,
 			String subLocation, DatapointService dpService) {
 		Datapoint dp = addDatapoint(res, result, dpService);
-		if(dp != null)
-			dp.setSubRoomLocation(null, null, subLocation);
+		if(dp != null) {
+			dp.addToSubRoomLocationAtomic(null, null, subLocation, false);
+			/*synchronized(dp) {
+				String existing = dp.getSubRoomLocation(null, null);
+				if(existing != null && (!existing.isEmpty()) && (!existing.contains(subLocation)))
+					subLocation = existing+"-"+subLocation;
+				dp.setSubRoomLocation(null, null, subLocation);
+			}*/
+		}
 		return dp;
 	}
 	
@@ -106,7 +115,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	protected void checkDpSubLocations(InstallAppDevice device, Collection<Datapoint> dps) {
 		for(Datapoint dp: dps) {
 			if(dp.getSubRoomLocation(null, null) == null)
-				dp.setSubRoomLocation(null, null, device.installationLocation().getValue());
+				dp.addToSubRoomLocationAtomic(null, null, device.installationLocation().getValue(), true);
 		}		
 	}
 	

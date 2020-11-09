@@ -46,8 +46,44 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 
 	@Override
 	public boolean setSubRoomLocation(OgemaLocale locale, Object context, String value) {
-		subRoomLocation = value;
+		if(subRoomLocation == null) {
+if(id().contains("subPhaseConnections"))
+System.out.println("Val:"+value+"  Id:"+id()+"  Instance:"+instanceCount);
+			subRoomLocation = value;
+			return true;
+		}
+			
+		synchronized(subRoomLocation) {
+if(id().contains("subPhaseConnections"))
+System.out.println("Val:"+value+"  Id:"+id()+"  Instance:"+instanceCount);
+if(id().contains("subPhaseConnections") && (subRoomLocation != null) &&  (subRoomLocation.length() > value.length()))
+System.out.println("Existing:"+subRoomLocation+"Val:"+value);
+
+			subRoomLocation = value;
+		}
 		return true;
+	}
+	
+	@Override
+	public boolean addToSubRoomLocationAtomic(OgemaLocale locale, Object context, String value, boolean isFirstElement) {
+		if(subRoomLocation == null) {
+			subRoomLocation = value;
+			return true;
+		}
+
+		synchronized(subRoomLocation) {
+			//String existing = getSubRoomLocation(null, null);
+			if(subRoomLocation != null && (!subRoomLocation.isEmpty())) {
+				if(subRoomLocation.contains(value))
+					return false;
+				if(isFirstElement)
+					value = value+"-"+subRoomLocation;
+				else
+					value = subRoomLocation+"-"+value;
+			}
+			subRoomLocation = value;
+			return true;
+		}
 	}
 	
 	@Override

@@ -26,10 +26,13 @@ public class DatapointDescImpl implements DatapointDesc {
 	protected Map<OgemaLocale, String> labels = new HashMap<>();
 	protected DPRoom dpRoom = null;
 	protected DatapointInfo consumptionInfo = null;
-	protected String subRoomLocation = null;
+	protected volatile String subRoomLocation = null;
 	protected Boolean isLocal = null;
 	protected ScalingProvider scale = null;
 
+	public final int instanceCount;
+	protected static int instanceCounter = 0;
+	
 	public DatapointDescImpl(GaRoDataType garoDataType, DPRoom dpRoom, DatapointInfo consumptionInfo,
 			String subRoomLocation, Boolean isLocal) {
 		this.garoDataType = garoDataType;
@@ -37,6 +40,8 @@ public class DatapointDescImpl implements DatapointDesc {
 		this.consumptionInfo = consumptionInfo;
 		this.subRoomLocation = subRoomLocation;
 		this.isLocal = isLocal;
+		instanceCount = instanceCounter;
+		instanceCounter++;
 	}
 	
 	@Override

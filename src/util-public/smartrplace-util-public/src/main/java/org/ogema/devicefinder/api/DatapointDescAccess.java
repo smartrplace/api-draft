@@ -41,6 +41,15 @@ public interface DatapointDescAccess extends DatapointDesc {
 	boolean setRoom(DPRoom room);
 	
 	boolean setSubRoomLocation(OgemaLocale locale, Object context, String value);
+	/** If the sub room location already exists and it does not contain the new String yet then
+	 * the new String is added with a hyphen
+	 * @param locale
+	 * @param context
+	 * @param value
+	 * @param if true then the element will be added to the beginning of the String followed by a hyphen, otherwise appended
+	 * @return
+	 */
+	boolean addToSubRoomLocationAtomic(OgemaLocale locale, Object context, String value, boolean isFirstElement);
 	
 	@Deprecated
 	boolean setConsumptionInfo(DatapointInfo info);
