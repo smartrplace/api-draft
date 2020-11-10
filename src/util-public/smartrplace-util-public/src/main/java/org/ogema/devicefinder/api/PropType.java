@@ -34,7 +34,38 @@ public class PropType implements LabelledItem {
 			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
 			Integer.class);
 	
-	public static final List<PropType> STD_PROPS = Arrays.asList(new PropType[] {ENCRYPTION_ENABLED, THERMOSTAT_OPERATION_MODE});
+	public static final PropType CURRENT_SENSOR_VALUE = new PropType("CurrentSensorValue", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.READ,
+			Float.class);
+
+	public static final PropType DEVICE_ERROR = new PropType("DeviceError", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.READ,
+			Integer.class);
+
+	public static final PropType TRANSMIT_TRY_MAX = new PropType("TransmitTryMax", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
+			Integer.class);
+
+	public static final PropType EXPECT_AES = new PropType("ExpectAES", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
+			Boolean.class);
+
+	public static final PropType PEER_NEEDS_BURST = new PropType("PeerNeedsBurst", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
+			Boolean.class);
+
+	public static final PropType LOCAL_RESET_DISABLE = new PropType("LocalResetDisable", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
+			Boolean.class);
+
+	public static final PropType TRANSMIT_DEV_TRY_MAX = new PropType("TransmitDevTryMax", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
+			Integer.class);
+
+	public static final List<PropType> STD_PROPS = Arrays.asList(new PropType[] {ENCRYPTION_ENABLED, THERMOSTAT_OPERATION_MODE,
+			CURRENT_SENSOR_VALUE, DEVICE_ERROR, TRANSMIT_TRY_MAX, TRANSMIT_DEV_TRY_MAX, EXPECT_AES,
+			PEER_NEEDS_BURST, LOCAL_RESET_DISABLE});
+
 	public static enum PropUsage {
 		THERMOSTAT,
 		TEMPERATURE_SENSOR,

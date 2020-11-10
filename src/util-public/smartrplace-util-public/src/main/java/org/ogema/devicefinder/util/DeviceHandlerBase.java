@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
@@ -15,8 +17,11 @@ import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.devicefinder.api.DriverPropertySuccessHandler;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
+import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.devicefinder.api.PatternListenerExtended;
+import org.ogema.devicefinder.api.PropType;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
@@ -145,6 +150,50 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		return result;
 	}
 
+	/** Get anchor resource for homematic property access
+	 * 
+	 * @param device
+	 * @param channelName the resource name must start with this String
+	 * @return
+	 */
+	public static Resource getAnchorResource(PhysicalElement device, String channelName) {
+		Resource hmDevice = ResourceHelper.getFirstParentOfType(device, "org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice");
+		if(hmDevice == null)
+			return null;
+		ResourceList<?> channels = hmDevice.getSubResource("channels", ResourceList.class);
+		if(!channels.exists())
+			return null;
+		for(Resource res: channels.getAllElements()) {
+			if(res.getName().startsWith(channelName))
+				return res;
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void writePropertyHm(String propertyId, Resource propDev, String value,
+			DriverPropertySuccessHandler<?> successHandler,
+			OGEMADriverPropertyService<Resource> hmPropService,
+			OgemaLogger logger) {
+		if(propDev == null)
+			return;
+		//String propertyId = getPropId(propType);
+		if(propertyId == null)
+			return;
+		hmPropService.writeProperty(propDev, propertyId , logger, value,
+				(DriverPropertySuccessHandler<Resource>)successHandler);
+		
+	}
+
+	public static class PropAccessDataHm {
+		public Resource anchorRes;
+		public String propId;
+		
+		public PropAccessDataHm(Resource anchorRes, String propId) {
+			this.anchorRes = anchorRes;
+			this.propId = propId;
+		}
+	}
 }
 
 
