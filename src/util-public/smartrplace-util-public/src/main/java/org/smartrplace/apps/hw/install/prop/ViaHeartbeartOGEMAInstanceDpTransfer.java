@@ -283,11 +283,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			dpId = dpls[0];
 		else
 			dpId = DatapointGroup.getGroupIdForGw(dpls[0], commPartnerId);
-if(dpId.contains("onnection/powerSensor/reading"))
-System.out.println("DP:"+dpId);
 		Datapoint dp = dpService.getDataPointStandard(dpId);
-if(dp.getResource() == null)
-System.out.println("DP:"+dp.getLocation()+"  gw:"+dp.getGatewayId());
 		return dp;
 	}
 	

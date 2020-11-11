@@ -69,9 +69,6 @@ public class ViaHeartbeatInfoProvider extends DatapointInfoProviderImpl {
 		}
 		boolean result = (lastWriteTime > lastValueUpdateSent &&
 				((lastWriteTime - lastValueReceiveTime) > 10));
-System.out.println("   isValNew: For "+dp.getLocation()+" result: "+result+" lastWrite:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastWriteTime));
-System.out.println("        lastSent:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueUpdateSent)+
-	" lastRecv:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueReceiveTime)+ " sres:"+(sres!=null?ValueResourceUtils.getValue(sres):"null"));		
 		return result;
 	}
 	
