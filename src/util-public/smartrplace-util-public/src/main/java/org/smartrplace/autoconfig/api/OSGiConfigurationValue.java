@@ -5,6 +5,7 @@ import org.ogema.simpleresource.util.ResourceNonPersistentService;
 /** This is an initial draft and not implemented yet
  * Note that this is a simpler approach than the ResourceBase / {@link ResourceNonPersistentService}
  * approach drafted before*/
+@Deprecated //not used and implemented anymore
 public interface OSGiConfigurationValue {
 	/** Name of variable as defined in the JSON and interface*/
 	String getVariableName();

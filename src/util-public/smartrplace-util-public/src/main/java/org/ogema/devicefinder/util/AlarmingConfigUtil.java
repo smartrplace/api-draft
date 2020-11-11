@@ -13,12 +13,14 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.devicefinder.api.AlarmingService;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -280,5 +282,34 @@ public class AlarmingConfigUtil {
 		SingleValueResource sensor = ac.sensorVal().getLocationResource();
 		Datapoint dp = dpService.getDataPointAsIs(sensor);
 		return dp;
+	}
+	
+	public static int[] getActiveAlarms(ResourceAccess resAcc) {
+		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
+		int[] result = new int[] {0,0};
+		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
+			int[] devNum = getActiveAlarms(dev);
+			result[0] += devNum[0];
+			result[1] += devNum[1];
+		}
+		return result;
+	}
+	/** index 0: number of datapoints in alarm state<br>
+	 *  index 1: number of datapoints for which alarming is configured.
+	 * @param object
+	 * @return
+	 */
+	public static int[] getActiveAlarms(InstallAppDevice object) {
+		int alNum = 0;
+		int alStatusNum = 0;
+		for(AlarmConfiguration ac: object.alarms().getAllElements()) {
+			if(ac.sendAlarm().getValue()) {
+				alNum++;
+				IntegerResource status = AlarmingConfigUtil.getAlarmStatus(ac.sensorVal().getLocationResource());
+				if(status != null && status.getValue() > 0)
+					alStatusNum++;
+			}
+		}
+		return new int[] {alStatusNum, alNum};
 	}
 }

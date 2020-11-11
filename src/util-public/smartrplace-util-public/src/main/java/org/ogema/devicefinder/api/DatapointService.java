@@ -8,6 +8,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.autoconfig.api.OSGiConfigAccessService;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
@@ -155,4 +156,8 @@ public interface DatapointService {
 	/** Provides all known driver property services. This is required by {@link DeviceHandlerProvider}s in order to provide
 	 * access to driver properties.*/
 	Map<String, OGEMADriverPropertyService<?>> driverpropertyServices();
+	
+	default OSGiConfigAccessService configService() {
+		return null;
+	}
 }

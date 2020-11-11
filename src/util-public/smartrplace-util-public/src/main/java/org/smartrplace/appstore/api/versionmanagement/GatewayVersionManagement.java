@@ -24,7 +24,6 @@ public interface GatewayVersionManagement {
 	 * the order in which the files shall be processed<br>
 	 * - files provided in config_<gatewayID>/config/MM_*.xml with NNNNN being the gatewayID and MM_*.xml files that are
 	 * used to overwrite the default files in the main config directory.
-	 * Development note: This is described in [Mirror Rundirs, internally](https://gitlab.com/smartrplace/smartrplace-main/-/wikis/Development/MirrorRundirs#setting-up-and-management-of-instances) 
 	 * 
 	 * @param rundirPath repository of the local rundir directory to be used
 	 * @param gatewayID usually in the form of a 5-digit number. If null then only the general xml files in the main

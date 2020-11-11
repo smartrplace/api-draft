@@ -1,10 +1,15 @@
 package org.ogema.devicefinder.util;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.model.prototypes.PhysicalElement;
+import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+
+import de.iwes.util.resource.ResourceHelper;
 
 public class DpGroupUtil {
 	public static DatapointGroup getDeviceGroup(String devLoc, DatapointService dpService, boolean createIfNotExisting) {
@@ -46,5 +51,16 @@ public class DpGroupUtil {
 		dpGrp.setType(DatapointGroup.DEVICE_TYPE);
 		dpGrp.setLabel(null, devHand.label(null));
 		return dpGrp;
+	}
+	
+	public static InstallAppDevice getInstallAppDevice(PhysicalElement devRes, ResourceAccess resAcc) {
+		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
+		if(hwInstall == null)
+			return null;
+		for(InstallAppDevice idev: hwInstall.knownDevices().getAllElements()) {
+			if(idev.device().equalsLocation(devRes))
+				return idev;
+		}
+		return null;
 	}
 }

@@ -34,6 +34,42 @@ public class PropType implements LabelledItem {
 			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
 			Integer.class);
 	
+	/** 1: temperature fall detection active for window openings
+	 *  ? : detection inactive
+	 */
+	public static final PropType THERMOSTAT_WINDOWOPEN_MODE = new PropType("ThermostatWindowOpenMode", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Integer.class);
+
+	/** In Celsius*/
+	public static final PropType THERMOSTAT_WINDOWOPEN_TEMPERATURE = new PropType("ThermostatWindowOpenTemperature", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Float.class);
+
+	/** integer in minutes*/
+	public static final PropType THERMOSTAT_WINDOWOPEN_MINUTES = new PropType("ThermostatWindowOpenMode", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Integer.class);
+
+	/** integer in minutes*/
+	public static final PropType THERMOSTAT_BOOST_MINUTES = new PropType("ThermostatBoostMinutes", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Integer.class);
+
+	/** valve position in per cent (0..100)*/
+	public static final PropType THERMOSTAT_BOOST_POSITION= new PropType("ThermostatBoostPosition", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Integer.class);
+
+	public static final PropType BUTTON_LOCK = new PropType("ButtonLock", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
+			Boolean.class);
+
+	/** maximum valve position, e.g. for hydraulic levelling, 0...100*/
+	public static final PropType THERMOSTAT_VALVE_MAXPOSITION = new PropType("ThermostatValveMaxposition", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Integer.class);
+
 	public static final PropType CURRENT_SENSOR_VALUE = new PropType("CurrentSensorValue", Arrays.asList(
 			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.READ,
 			Float.class);
@@ -51,6 +87,10 @@ public class PropType implements LabelledItem {
 			Boolean.class);
 
 	public static final PropType PEER_NEEDS_BURST = new PropType("PeerNeedsBurst", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
+			Boolean.class);
+
+	public static final PropType BURST_RX = new PropType("BurstRx", Arrays.asList(
 			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
 			Boolean.class);
 

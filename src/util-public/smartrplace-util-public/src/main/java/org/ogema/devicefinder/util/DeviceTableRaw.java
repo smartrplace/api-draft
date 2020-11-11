@@ -155,20 +155,22 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return null;
 	}
 	
+	public static Map<String, String> valuesToSetInstall = new HashMap<>();
+	static  {
+		valuesToSetInstall.put("0", "unknown");
+		valuesToSetInstall.put("1", "SerialNumberRecorded: Teach-in process alsofinished");
+		valuesToSetInstall.put("3", "PackedForShipping");
+		valuesToSetInstall.put("5", "Shipping: Parcel handed over to delivery service");
+		valuesToSetInstall.put("7", "AtCustomerSite: Delivery confirmed");
+		valuesToSetInstall.put("10", "Physical installation done");
+		valuesToSetInstall.put("20", "Physical testing done: Installation including all on-site tests");
+		valuesToSetInstall.put("30", "All configuration finished, device is in full operation");
+		valuesToSetInstall.put("-10", "Error in physical installation and/or testing (explain in comment)");
+		valuesToSetInstall.put("-20", "Error in configuration, device cannot be used/requires action for real usage");		
+	}
 	protected void addInstallationStatus(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row) {
-		Map<String, String> valuesToSet = new HashMap<>();
-		valuesToSet.put("0", "unknown");
-		valuesToSet.put("1", "SerialNumberRecorded: Teach-in process alsofinished");
-		valuesToSet.put("3", "PackedForShipping");
-		valuesToSet.put("5", "Shipping: Parcel handed over to delivery service");
-		valuesToSet.put("7", "AtCustomerSite: Delivery confirmed");
-		valuesToSet.put("10", "Physical installation done");
-		valuesToSet.put("20", "Physical testing done: Installation including all on-site tests");
-		valuesToSet.put("30", "All configuration finished, device is in full operation");
-		valuesToSet.put("-10", "Error in physical installation and/or testing (explain in comment)");
-		valuesToSet.put("-20", "Error in configuration, device cannot be used/requires action for real usage");
-		vh.dropdown("Status", id, object.installationStatus(), row, valuesToSet );
+		vh.dropdown("Status", id, object.installationStatus(), row, valuesToSetInstall);
 	}
 	
 	protected void addComment(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
