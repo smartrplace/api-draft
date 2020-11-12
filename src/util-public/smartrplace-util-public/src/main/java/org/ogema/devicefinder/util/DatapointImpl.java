@@ -19,6 +19,7 @@ import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.frontend.servlet.UserServletUtil;
 
@@ -65,6 +66,8 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			String subRoomLocation, DatapointService dpService) {
 		super(garoDataType, dpRoom, consumptionInfo, subRoomLocation);
 		this.location = location;
+		if(gatewayId != null)
+			gatewayId = ViaHeartbeatUtil.getBaseGwId(gatewayId);
 		this.gatewayId = gatewayId;
 		if(resource != null)
 			this.setResource(resource.getLocationResource());
@@ -205,7 +208,8 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 				stdLabel += "-"+subRoom;
 		}
 		if(gwId != null) {
-			return gwId +"::"+stdLabel;
+			String gwToUse = ViaHeartbeatUtil.getBaseGwId(gwId);
+			return gwToUse +"::"+stdLabel;
 		}
 		return stdLabel;
 	}
@@ -433,5 +437,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		if(resource != null && (!location.equals(resource.getLocation())))
 			throw new IllegalArgumentException("Trying to set resource "+resource.getLocation()+" for Datapoint "+location);
 		this.resource = resource;
+	}
+	
+	@Override
+	public String toString() {
+		return "DP:"+location;
 	}
 }

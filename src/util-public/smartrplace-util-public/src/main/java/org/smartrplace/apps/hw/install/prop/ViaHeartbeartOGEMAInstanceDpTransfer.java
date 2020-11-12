@@ -4,9 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.ogema.core.model.Resource;
+import org.ogema.core.model.ValueResource;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	/** Short transfer Id -> Local Datapoint*/
@@ -14,10 +19,22 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	Map<Datapoint, String> datapointsToSendM = new HashMap<>();
 	Map<Datapoint, ViaHeartbeatInfoProvider> infoProvidersM = new HashMap<>();
 	protected int lastTransferId = 0;
-	protected boolean structureUpdateToRemotePending = false;
+	protected boolean structureUpdateToRemotePending = true;
+	protected boolean allValueUpdatePending = true;
 	protected long lastStructureUpdate = -1;
+	protected boolean initStructureRequestSent = false;
+	
+	protected Long autoStructureUpdateRate = Long.getLong("org.smartrplace.apps.hw.install.prop.autostructureupdaterate");
+	public void setAutoStructureUpdateRate(long interval) {
+		this.autoStructureUpdateRate = interval;
+	}
+	public Long getAutoStructureUpdateRate() {
+		return autoStructureUpdateRate;
+	}
 	
 	protected final DatapointService dpService;
+	protected final ResourceAccess resAcc;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	/** If false then list is for receiving datapoints. This means that the transfer ID
 	 * is set and is created by the remote partner*/
@@ -28,10 +45,11 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	boolean connectingAsClient;
 	
 	public ViaHeartbeartOGEMAInstanceDpTransfer(String communicationPartnerId, boolean connectingAsClient,
-			DatapointService dpService) {
+			DatapointService dpService, ResourceAccess resAcc) {
 		this.commPartnerId = communicationPartnerId;
 		this.connectingAsClient = connectingAsClient;
 		this.dpService = dpService;
+		this.resAcc = resAcc;
 	}
 
 	public boolean receiveDatapointData(String transferId, float value) {
@@ -47,7 +65,8 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		}
 		if(dp == null) {
 			//received information for unknown datapoint
-			throw new IllegalStateException("Received unknown transferId: "+transferId+" Value:"+value);
+			logger.warn("Received unknown transferId: "+transferId+" Value:"+value);
+			return false;
 		}
 		ViaHeartbeatInfoProvider infoP = getOrCreateInfoProvider(dp, transferId, infoProvidersM);
 		infoP.checkMirrorResorce();
@@ -87,9 +106,10 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	 * updateByDpGroups is made, the sending configuration would be lost
 	 * @param dp
 	 * @param transferId may be null if not known
+	 * @param forceSendAllValues 
 	 * @return
 	 */
-	public SendDatapointDataPlus sendDatapointData(Datapoint dp, String transferId) {
+	public SendDatapointDataPlus sendDatapointData(Datapoint dp, String transferId, boolean forceSendAllValues) {
 		final SendDatapointDataPlus result;
 		if(transferId == null)
 			result = registerDatapointForSend(dp, datapointsToSendM, null, infoProvidersM);
@@ -98,7 +118,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			result.infoP = getOrCreateInfoProvider(dp, transferId, infoProvidersM);
 		}
 		result.infoP.checkMirrorResorce();
-		result.value = result.infoP.getValueToSend(dpService.getFrameworkTime()); //.getCurrentValueToSend();
+		result.value = result.infoP.getValueToSend(dpService.getFrameworkTime(), forceSendAllValues); //.getCurrentValueToSend();
 		return result;
 	}
 	
@@ -207,7 +227,9 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 //System.out.println("   Received Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
 				//TODO: We cannot handle any unsubscribes here. For this we will need separate
 				//DatapointGroups for local and remote requests
-				if(tlist.datapointsFromCreatorToAcceptor != null) {
+				if(tlist.isStructureRequestStatus > 0)
+					structureUpdateToRemotePending = true;
+				if(tlist.datapointsFromCreatorToAcceptor != null && (tlist.isStructureRequestStatus < 2)) {
 					for(Entry<String, String> dpl: tlist.datapointsFromCreatorToAcceptor.entrySet()) {
 						Datapoint dp = getDatapointForRemoteRequest(dpl.getValue(), connectingAsClient, dpService);
 						//We cannot put into knownDatapoint directly for the updateByDpGroups that is
@@ -216,13 +238,14 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 						ViaHeartbeatUtil.registerForTansferViaHeartbeatRecv(dp, commPartnerId, dpService);
 					}
 				}
-				if(tlist.datapointsFromAccptorToCreator != null) {
+				if(tlist.datapointsFromAccptorToCreator != null && (tlist.isStructureRequestStatus < 2)) {
 					for(Entry<String, String> dpl: tlist.datapointsFromAccptorToCreator.entrySet()) {
 						Datapoint dp = getDatapointForRemoteRequest(dpl.getValue(), connectingAsClient, dpService);
 						datapointsToSendM.put(dp, dpl.getKey());
 						ViaHeartbeatUtil.registerForTansferViaHeartbeatSend(dp, commPartnerId, dpService);
 					}
 				}
+				allValueUpdatePending = true;
 				//ViaHeartbeatUtil.updateTransferRegistration(commPartnerId, this, dpService, connectingAsClient);
 			}
 		} //else
@@ -235,8 +258,9 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	/** To be called by heartbeat to obtain data to send*/
 	public ProcessRemoteDataResult getRemoteData(boolean connectingAsClient) {
 
-		Long autoStructureUpdateRate = Long.getLong("org.smartrplace.apps.hw.install.prop.autostructureupdaterate");
 		long now = dpService.getFrameworkTime();
+		boolean forceSendAllValues = allValueUpdatePending;
+		allValueUpdatePending = false;
 //System.out.println("   Auto update Rate: "+(autoStructureUpdateRate!=null?(""+autoStructureUpdateRate):"null")+" commPartner:"+commPartnerId);
 		if(autoStructureUpdateRate != null) {
 			if(now - lastStructureUpdate > autoStructureUpdateRate)
@@ -255,16 +279,22 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 				String rawId = dp.getValue().id();
 				tlist.datapointsFromAccptorToCreator.put(dp.getKey(), rawId);
 			}
+			
+			if(!initStructureRequestSent) {
+				tlist.isStructureRequestStatus = 1;
+				initStructureRequestSent = true;
+			}
 			result.configJsonToSend = JSONManagement.getJSON(tlist);
 			lastStructureUpdate = now;
 			structureUpdateToRemotePending = false;
+			forceSendAllValues = true;
 //System.out.println("   Sending Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
 		}
 		
 		result.efficientTransferData = new SendDatapointData();
 		result.efficientTransferData.values = new HashMap<>();
 		for(Entry<Datapoint, String> send: datapointsToSendM.entrySet()) {
-			SendDatapointDataPlus sdpPlus = sendDatapointData(send.getKey(), send.getValue());
+			SendDatapointDataPlus sdpPlus = sendDatapointData(send.getKey(), send.getValue(), forceSendAllValues);
 			if(sdpPlus.value != null)
 				result.efficientTransferData.values.put(send.getValue(), sdpPlus.value);
 		}
@@ -276,14 +306,24 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			DatapointService dpService) {
 		//Should be raw datapoints, but better check
 		String[] dpls = DatapointGroup.getGroupIdAndGw(dpIdFromRemote);
-		final String dpId;
+		//final String dpId;
 		//TODO: If we would allow for several hierarchies of OGEMA instances then this
 		//would not work anymore
-		if(connectingAsClient)
-			dpId = dpls[0];
-		else
-			dpId = DatapointGroup.getGroupIdForGw(dpls[0], commPartnerId);
-		Datapoint dp = dpService.getDataPointStandard(dpId);
+		//if(connectingAsClient)
+		//	dpId = dpls[0];
+		//else
+		//	dpId = DatapointGroup.getGroupIdForGw(dpls[0], commPartnerId);
+		Datapoint dp = null;
+		if(connectingAsClient) {
+			try {
+				Resource dpRes = resAcc.getResource(dpls[0]);
+				if(dpRes != null && dpRes instanceof ValueResource)
+					dp = dpService.getDataPointStandard((ValueResource)dpRes);
+			} catch(Exception e) {}
+			if(dp == null)
+				dp = dpService.getDataPointStandard(dpls[0]);
+		} else
+			dp = dpService.getDataPointStandard(dpls[0], commPartnerId);
 		return dp;
 	}
 	

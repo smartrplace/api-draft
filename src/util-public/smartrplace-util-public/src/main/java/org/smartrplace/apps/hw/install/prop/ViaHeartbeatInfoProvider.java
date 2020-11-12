@@ -6,8 +6,6 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.util.DatapointInfoProviderImpl;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 
-import de.iwes.util.format.StringFormatHelper;
-
 public class ViaHeartbeatInfoProvider extends DatapointInfoProviderImpl {
 
 	private Float lastValue = null;
@@ -72,8 +70,8 @@ public class ViaHeartbeatInfoProvider extends DatapointInfoProviderImpl {
 		return result;
 	}
 	
-	public Float getValueToSend(long now) {
-		if(!isValueNew(now))
+	public Float getValueToSend(long now, boolean forceSendAllValues) {
+		if((!forceSendAllValues) && (!isValueNew(now)))
 			return null;
 		lastValueUpdateSent = now;
 		return getCurrentValue();

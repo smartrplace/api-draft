@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.template.LabelledItem;
@@ -60,7 +61,8 @@ public interface DatapointGroup extends LabelledItem {
 	public static String getGroupIdForGw(String localId, String gwId) {
 		if(gwId == null)
 			return localId;
-		return gwId+"::"+localId;
+		String gwToUse = ViaHeartbeatUtil.getBaseGwId(gwId);
+		return gwToUse+"::"+localId;
 	}
 	public static String[] getGroupIdAndGw(String groupId) {
 		String[] els = groupId.split("::");
@@ -70,6 +72,18 @@ public interface DatapointGroup extends LabelledItem {
 			return new String[]{els[1], els[0]};
 		throw new IllegalStateException("GroupId cannot be split into gateway and local id: "+groupId);
 	}
+	public static class GroupGwResult {
+		List<String> gwIdOptions;
+		String localId;
+	}
+	public static GroupGwResult getGroupIdAndGwOptions(String groupId) {
+		GroupGwResult result = new GroupGwResult();
+		String[] baseResult = getGroupIdAndGw(groupId);
+		result.localId = baseResult[1];
+		result.gwIdOptions = ViaHeartbeatUtil.getAlternativeGwIds(baseResult[0]);
+		return result;
+	}
+	
 	/** Property names for DatapointGroups*/
 	public static final String DEVICE_TYPE_SHORT_PARAM = "DeviceTypeShortId";
 	public static final String DEVICE_TYPE_FULL_PARAM = "deviceType";
