@@ -226,7 +226,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	protected Label addLastContact(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
-			FloatResource valueReadingResource) {
+			SingleValueResource valueReadingResource) {
 		return addLastContact(null, vh, id, req, row, valueReadingResource);
 	}
 	protected Label addLastContact(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,

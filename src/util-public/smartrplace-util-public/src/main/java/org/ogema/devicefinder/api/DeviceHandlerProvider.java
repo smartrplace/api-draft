@@ -6,6 +6,7 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.devicefinder.util.DeviceHandlerSimple;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
@@ -17,9 +18,18 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.html.alert.Alert;
 
 /** Implement this service to add another device table to the hardware installation app and to provide
- * everything to provide device information for device and application configuration
+ * everything to provide device information for device and application configuration.<br>
  *
- * It is also recommended to use an existing implementation as template such as
+ * For implementation of simple standard device handlers implement the class {@link DeviceHandlerSimple}.<br>
+ *
+ * Note that the package and class name of a {@link DeviceHandlerProvider} should not be refactored after productive usage
+ * started as the {@link #id()} method by default uses the class and package name and this id is stored persistently in the
+ * {@link InstallAppDevice} resource of the device. So you would have to overwrite the id() method before you perform the
+ * refactoring.<br>
+ *
+ * The following information is only relevant if you need to implement a more complex device handler.<br>
+ * 
+ * For more complex imeplemtnation you can also check exisiting implementations, e.g in
  * {@link https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-service-base/src/main/java/org/smartrplace/mqtt/devicetable},
  * especially [DeviceHandlerMQTT_Aircond](https://github.com/smartrplace/smartr-efficiency/tree/master/monitoring-service-base/src/main/java/org/smartrplace/mqtt/devicetable/DeviceHandlerMQTT_Aircond.class)
  * 
@@ -128,7 +138,9 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	/** This method is called when the first resource of a type is created. The handler shall then
 	 * fill in the {@link InstallAppDevice} resource and the device resource as a template, e.g. for
 	 * alarming. If not template filling is relevant or is not supported then the method does not
-	 * need to be overwritten.
+	 * need to be overwritten.<br>
+	 * You should call org.ogema.eval.timeseries.simple.smarteff.AlarmingUtiH#setTemplateValues for each
+	 * value for which alarming shall be configurable with the relevant default alarming limit parameters.
 	 * @param appDevice
 	 * @param appConfigData
 	 */

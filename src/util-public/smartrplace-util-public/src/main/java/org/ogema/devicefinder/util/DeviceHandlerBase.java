@@ -33,6 +33,11 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHandlerProvider<T> {
 
+	/** You have to provide a resource pattern to find the devices that shall be processed by the
+	 * {@link DeviceHandlerProvider}. If there are also other DeviceHandlerProviders working on the
+	 * same device ResourceType then you have to make sure that the {@link ResourcePattern#accept()} method
+	 * of the patterns make sure that each device of the type is assigned to exactly one DeviceHandlerProvider.
+	 */
 	protected abstract Class<? extends ResourcePattern<T>> getPatternClass();
 
 	protected PatternListenerExtended<ResourcePattern<T>, T> listener = null;
