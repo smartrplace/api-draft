@@ -1,6 +1,7 @@
 package org.smartrplace.util.frontend.servlet;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.model.prototypes.PhysicalElement;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 
@@ -106,4 +108,20 @@ public class UserServletUtil {
 		TimeSeriesDataImpl tsd = new TimeSeriesDataImpl(tsDataRaw, hash, hash, InterpolationMode.NONE);
 		return getOrAddTimeSeriesData(tsd);
 	}
+	
+	public static <T extends PhysicalElement> T getObject(String objectId, List<T> allObjects) {
+		for(T resource: allObjects) {
+			if(resource.name().getValue().equals(objectId)) return resource;
+			if(resource.getLocation().equals(objectId)) return resource;
+		}
+		return null;
+	}
+
+	public static boolean isDepthTimeSeries(Map<String, String[]> paramMap) {
+		String depth = UserServlet.getParameter("depth", paramMap);
+		if(depth == null)
+			return false;
+		return depth.contains("timeseries");
+	}
+
 }

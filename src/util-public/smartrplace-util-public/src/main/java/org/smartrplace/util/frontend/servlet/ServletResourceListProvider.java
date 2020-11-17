@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
+import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 public abstract class ServletResourceListProvider<T extends Resource> implements ServletValueProvider {
@@ -62,7 +63,7 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 	}
 	
 	@Override
-	public JSONObject getJSON(String user, String key) {
+	public JSONVarrRes getJSON(String user, String key) {
 		JSONArray result = new JSONArray();
 		for(T el: res.getAllElements()) {
 			JSONObject eljson = getJSON(el);
@@ -71,7 +72,11 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 		}
 		JSONObject res = new JSONObject();
 		res.put(id, result);
-		return res;
+		
+		//TODO: Also support to return array
+		JSONVarrRes realResult = new JSONVarrRes();
+		realResult.result = res;
+		return realResult;
 	}
 	
 	@Override

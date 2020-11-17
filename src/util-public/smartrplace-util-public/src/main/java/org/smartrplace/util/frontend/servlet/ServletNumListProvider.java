@@ -5,6 +5,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.Value;
+import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 public class ServletNumListProvider<T> implements ServletValueProvider {
@@ -25,7 +26,7 @@ public class ServletNumListProvider<T> implements ServletValueProvider {
 	}
 	
 	@Override
-	public JSONObject getJSON(String user, String key) {
+	public JSONVarrRes getJSON(String user, String key) {
 		JSONObject result = new JSONObject();
 		JSONArray arr = new JSONArray();
 		for(T obj: floatVal) {
@@ -48,7 +49,11 @@ public class ServletNumListProvider<T> implements ServletValueProvider {
 				arr.put(obj.toString());
 		}
 		result.put("value", arr);
-		return result;
+		
+		//TODO: Also support to return array
+		JSONVarrRes realResult = new JSONVarrRes();
+		realResult.result = result;
+		return realResult;
 	}
 	
 	@Override

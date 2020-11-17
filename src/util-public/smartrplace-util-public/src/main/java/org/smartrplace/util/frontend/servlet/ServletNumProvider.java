@@ -26,6 +26,17 @@ public class ServletNumProvider extends ServletNumProviderBase {
 		booleanVal = null;
 	}
 		
+	public ServletNumProvider(long val) {
+		if(val <= Integer.MAX_VALUE && val >= Integer.MIN_VALUE) {
+			intVal = (int) val;
+			floatVal = null;
+		} else {
+			floatVal = (float) val;
+			intVal = null;			
+		}
+		booleanVal = null;
+	}
+
 	public Value getValueInternal(String user, String key) {
 		if(floatVal != null)
 			return new FloatValue(floatVal);

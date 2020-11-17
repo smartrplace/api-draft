@@ -1,6 +1,5 @@
 package org.smartrplace.util.frontend.servlet;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
@@ -112,7 +112,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		throw new UnsupportedOperationException("Use getJSON!!!");
 	}
 	@Override
-	public JSONObject getJSON(String user, String key) {
+	public JSONVarrRes getJSON(String user, String key) {
 		JSONObject json = new JSONObject();
 		Integer valueDist = UserServlet.getInteger("valueDist", paramMap);
 		//json.put("name", name); //res.name().getValue());
@@ -126,7 +126,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			//TODO
 			vals = bareTimeSeries.getValues(startEnd[0], startEnd[1]);
 			json.put("value", vals);
-			return json;
+			
+			JSONVarrRes realResult = new JSONVarrRes();
+			realResult.result = json;
+			return realResult;
 		} else
 			vals = bareTimeSeries.getValues(startEnd[0], startEnd[1]);
 		boolean shortXY = UserServlet.getBoolean("shortXY", paramMap);
@@ -138,7 +141,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		}
 		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
 				structList, shortXY, pData.suppressNan));
-		return json;
+
+		JSONVarrRes realResult = new JSONVarrRes();
+		realResult.result = json;
+		return realResult;
 	}
 
 	protected long[] getDayStartEnd(String key) {

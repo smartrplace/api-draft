@@ -3,10 +3,10 @@ package org.ogema.devicefinder.api;
 import java.util.Collection;
 import java.util.List;
 
-import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
 
+import de.iwes.timeseries.eval.garo.api.base.GaRoMultiEvalDataProvider;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.template.LabelledItem;
 
@@ -15,6 +15,8 @@ import de.iwes.widgets.template.LabelledItem;
  * is used as ID. The type of these groups shall be "DEVICE".*/
 public interface DatapointGroup extends LabelledItem {
 	public static final String DEFAULT_PLOT_CONFIG_PAGE = "DevicePlotPage";
+	public static final String LOCAL_SHORT_NAME = "Local";
+	
 	/** Set label for the group that is used as label for the chart if a
 	 * chart is configured
 	 * @param locale if null the {@link OgemaLocale#ENGLISH} is used. This will also be used if
@@ -65,9 +67,15 @@ public interface DatapointGroup extends LabelledItem {
 		return gwToUse+"::"+localId;
 	}
 	public static String[] getGroupIdAndGw(String groupId) {
+		return getGroupIdAndGwForDp(groupId, LOCAL_SHORT_NAME);
+	}
+	public static String[] getGroupIdAndGwForDp(String groupId) {
+		return getGroupIdAndGwForDp(groupId, GaRoMultiEvalDataProvider.LOCAL_GATEWAY_ID);
+	}
+	public static String[] getGroupIdAndGwForDp(String groupId, String localGwName) {
 		String[] els = groupId.split("::");
 		if(els.length == 1)
-			return new String[] {groupId, "Local"};
+			return new String[] {groupId, LOCAL_SHORT_NAME};
 		if(els.length == 2)
 			return new String[]{els[1], els[0]};
 		throw new IllegalStateException("GroupId cannot be split into gateway and local id: "+groupId);

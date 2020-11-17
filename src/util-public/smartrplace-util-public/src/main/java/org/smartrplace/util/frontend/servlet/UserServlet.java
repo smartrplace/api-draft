@@ -36,6 +36,8 @@ import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider.Va
 import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
+import de.iwes.util.format.StringFormatHelper;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 /** Core class to provide servlets based on widgets pages
  * TODO: Entire package to be moved to smartrplace-util-proposed or similar location for Utils*/
@@ -45,6 +47,38 @@ public class UserServlet extends HttpServlet {
 
 	/** Management of timeseriesIDs*/
 	public static final Map<String, TimeSeriesDataImpl> knownTS = new HashMap<>();
+	
+	/** Management of known pages
+	 * ServletClassName -> pageName -> Provider*/
+	private static Map<String, Map<String, ServletPageProvider<?>>> knownPages = new HashMap<>();
+	public static ServletPageProvider<?> getProvider(String servletClassName, String providerName) {
+		if(servletClassName == null) {
+			for(Map<String, ServletPageProvider<?>> myMap: knownPages.values()) {
+				ServletPageProvider<?> result = getProvider(providerName, myMap);
+				if(result != null)
+					return result;
+			}
+			return null;
+		} else
+			return getProvider(providerName, knownPages.get(servletClassName));
+	}
+	protected static ServletPageProvider<?> getProvider(String providerName, Map<String, ServletPageProvider<?>> myMap) {
+		if(myMap == null)
+			return null;
+		return myMap.get(providerName);
+	}
+	public static void addProvider(String servletClassName, String providerName, ServletPageProvider<?> provider) {
+		Map<String, ServletPageProvider<?>> myMap = knownPages.get(servletClassName);
+		if(myMap == null) {
+			myMap = new HashMap<>();
+			knownPages.put(servletClassName, myMap);
+		}
+		myMap.put(providerName, provider);		
+	}
+	
+	/** Management of numerical IDs*/
+	protected static final Map<Long, String> num2stringObjects = new HashMap<>();
+ 	
 	public static final String TimeSeriesServletImplClassName = "org.smartrplace.app.monbase.servlet.TimeseriesBaseServlet";
 	
 	final Logger logger = LoggerFactory.getLogger(UserServlet.class);
@@ -53,7 +87,8 @@ public class UserServlet extends HttpServlet {
 		standard elements may be defined in the future when elements are generated from
 		widgets*/
 		LIST,
-		DICTIONARY
+		DICTIONARY,
+		TOPARRAY_DICTIONARY
 	}
 	public interface ServletPageProvider<T extends Object> {
 		Map<String, ServletValueProvider> getProviders(T object, String user, Map<String, String[]> parameters);
@@ -77,11 +112,21 @@ public class UserServlet extends HttpServlet {
 			else
 				return obj.toString();			
 		}
+		
+		/** By default the object can be obtained via a REST path element or parameter named object.
+		 * If this is set also a more expressive String can be used like "building", "room" or similar.
+		 * @return
+		 */
+		default String getObjectName() { return null;}
+		
+		default int getNumericalId(String stringId) {
+			return stringId.hashCode();
+		}
 	}
 	public interface ServletValueProvider {
 		/** Called on GET*/
 		Value getValue(String user, String key);
-		default JSONObject getJSON(String user, String key) {throw new UnsupportedOperationException("Not implemented for VALUEMODE STRING");}
+		default JSONVarrRes getJSON(String user, String key) {throw new UnsupportedOperationException("Not implemented for VALUEMODE STRING");}
 		/** Called on POST*/
 		default void setValue(String user, String key, String value) {};
 		default long getPollInterval() {return 30000l;}
@@ -106,6 +151,7 @@ public class UserServlet extends HttpServlet {
 		if(stdPageId == null)
 			stdPageId = pageId;
 		pages.put(pageId, prov);
+		addProvider(this.getClass().getName(), pageId, prov);
 	}
 	
 	@Override
@@ -119,19 +165,44 @@ public class UserServlet extends HttpServlet {
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user)
 			throws ServletException, IOException {
 System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(req));
-		String pageId = req.getParameter("page");
-		String object = req.getParameter("object");
+		//String object = req.getParameter("object");
 		String timeStr = req.getParameter("time");
 		String returnStruct = req.getParameter("structure");
 		//if(user == null) return;
-		if(pageId == null) pageId = stdPageId ;
-		ServletPageProvider<?> pageMap = pages.get(pageId);
-		//if(pageMap == null) return;
+		String pageId1 = req.getParameter("page");
+		List<String> pageList = null;
+		if(pageId1 == null) {
+			String pageIds = req.getParameter("pages");
+			if(pageIds != null)
+				pageList = StringFormatHelper.getListFromString(pageIds);
+			else
+				pageId1 = stdPageId;
+		}
+		if(pageList == null) {
+			pageList = new ArrayList<>();
+			pageList.add(pageId1);
+		}
 		String pollStr = req.getParameter("poll");
 		Map<String, String[]> paramMap = getParamMap(req);
 		
-		JSONVarrRes result = getJSON(object, user, pollStr, timeStr, pageMap, returnStruct, paramMap);
-		
+		JSONVarrRes result;
+		if(pageList.isEmpty())
+			throw new IllegalStateException("No page found!!");
+		else if(pageList.size() == 1) {
+			ServletPageProvider<?> pageMap = pages.get(pageList.get(0));
+			result = getJSON(user, pollStr, timeStr, pageMap, returnStruct, paramMap);			
+		} else {
+			result = new JSONVarrRes();
+			result.result = new JSONObject();
+			for(String pageId: pageList) {
+				ServletPageProvider<?> pageMap = pages.get(pageId);
+				JSONVarrRes resultSub = getJSON(user, pollStr, timeStr, pageMap, returnStruct, paramMap);
+				if(resultSub.result != null)
+					result.result.put(pageId, resultSub.result);
+				else
+					result.result.put(pageId, resultSub.resultArr);
+			}
+		}
 		resp.addHeader("content-type", "application/json;charset=utf-8");
 		if(result.result != null)
 			resp.getWriter().write(result.result.toString());
@@ -154,11 +225,35 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 	
 	protected static class JSONVarrRes {
 		JSONObject result = null;
-		JSONArray resultArr = null;		
+		JSONArray resultArr = null;
+		String message = null;
 	}
-	protected <T> JSONVarrRes getJSON(String objectId, String user, String pollStr, String timeString,
+	protected <T> JSONVarrRes getJSON(String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap) {
-		final boolean topArray = UserServlet.getBoolean("topArray", paramMap);
+		final ReturnStructure retStruct;
+		if(returnStruct == null)
+			retStruct = pageprov.getGETStructure();
+		else {
+			if(returnStruct.toLowerCase().equals("toparray"))
+				retStruct = ReturnStructure.TOPARRAY_DICTIONARY;
+			else if(returnStruct.toLowerCase().equals("list"))
+				retStruct = ReturnStructure.LIST;
+			else
+				retStruct = ReturnStructure.DICTIONARY;
+		}
+
+		JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, retStruct, paramMap, logger);
+		if(result.message != null) {
+			writeMessage(result, "exception", result.message);
+		}
+		return result;
+	}
+	protected static <T> JSONVarrRes getJSON(String user, String pollStr, String timeString,
+			ServletPageProvider<T> pageprov, ReturnStructure retStruct, Map<String, String[]> paramMap,
+			Logger logger) {
+		final boolean topArray = UserServlet.getBoolean("topArray", paramMap) || retStruct==ReturnStructure.TOPARRAY_DICTIONARY;
+		if(retStruct == ReturnStructure.TOPARRAY_DICTIONARY)
+			retStruct = ReturnStructure.DICTIONARY;
 		JSONVarrRes res = new JSONVarrRes();
 		if(topArray)
 			res.resultArr = new JSONArray();
@@ -167,33 +262,24 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		boolean suppressNan = UserServletUtil.suppressNan(paramMap);
 		
 		if(pageprov == null) {
-			String message = "In Userservlet page not found: "+getParameter("page", paramMap);
+			res.message = "In Userservlet page not found: "+getParameter("page", paramMap);
 			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
-				System.out.println(message);
+				System.out.println(res.message);
 			else
-				logger.info("Servlet provider exception: {}", message);
-			writeMessage(res, "exception", message);
+				logger.info("Servlet provider exception: {}", res.message);
+			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
 			return res;
 		}
 
-		final ReturnStructure retStruct;
-		if(returnStruct == null)
-			retStruct = pageprov.getGETStructure();
-		else {
-			if(returnStruct.toLowerCase().equals("list"))
-				retStruct = ReturnStructure.LIST;
-			else
-				retStruct = ReturnStructure.DICTIONARY;
-		}
-		Collection<T> objects = getObjects(objectId, user, pageprov);
-		if(objects == null || objects.contains(null)) {
-			String message = "In Userservlet object not found:"+objectId+" Pageprov:"+pageprov.getClass().getName();
+		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap);
+		if(odata.objects == null || odata.objects.contains(null)) {
+			res.message = "In Userservlet object not found:"+odata.objectId+" Pageprov:"+pageprov.getClass().getName();
 			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
-				System.out.println(message);
+				System.out.println(res.message);
 			else
-				logger.info("Servlet provider exception: {}", message);
-			writeMessage(res, "exception", message);
+				logger.info("Servlet provider exception: {}", res.message);
+			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
 			return res;
 		}
@@ -210,9 +296,9 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			}
 		}
 		
-		int orgSize = objects.size();
+		int orgSize = odata.objects.size();
 		int count = 0;
-		try { for(T obj: objects) {
+		try { for(T obj: odata.objects) {
 			count++;
 			//if(obj == null) continue;
 			Map<String, ServletValueProvider> data = null;
@@ -225,7 +311,8 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 					e.printStackTrace();
 				else
 					logger.info("Servlet provider exception: ", e);
-				writeMessage(res, "exception", e.toString());
+				res.message = e.toString();
+				//writeMessage(res, "exception", e.toString());
 				//result.put("exception", e.toString());
 				return res;
 			}
@@ -293,12 +380,22 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 					addValue(value, jsonkey, subJson, suppressNan);
 
 				} else {
-					JSONObject value = valprov.getJSON(user, key);
-					if(value.toString() == null) {
-						logger.info("JSON toString null for "+valprov.getClass().getName());
-						continue;
+					JSONVarrRes valueF = valprov.getJSON(user, key);
+					if(valueF.result != null) {
+						JSONObject value = valueF.result;
+						if(value.toString() == null) {
+							logger.info("JSON toString null for "+valprov.getClass().getName());
+							continue;
+						}
+						subJson.put(jsonkey, value);
+					} else {
+						JSONArray value = valueF.resultArr;
+						if(value.toString() == null) {
+							logger.info("JSON toString null for "+valprov.getClass().getName());
+							continue;
+						}
+						subJson.put(jsonkey, value);						
 					}
-					subJson.put(jsonkey, value);
 				}
 				} catch(Exception e) {
 					subJson.put(jsonkey, e.toString());
@@ -322,7 +419,7 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 					res.resultArr.put(subJson);
 		}
 		} catch(ConcurrentModificationException e) {
-			System.out.println("Count:"+count+"  Org size:"+orgSize+" now:"+objects.size());
+			System.out.println("Count:"+count+"  Org size:"+orgSize+" now:"+odata.objects.size());
 			e.printStackTrace();
 		}
 		return res;
@@ -336,23 +433,56 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			res.resultArr.put(key+" : "+message);
 	}
 	
-	protected <T> Collection<T> getObjects(String objectId, String user, ServletPageProvider<T> prov) {
-		if(objectId != null) {
-			T obj = prov.getObject(objectId);
-			List<T> result = new ArrayList<T>();
-			result.add(obj);
+	protected static class GetObjectResult<T> {
+		public Collection<T> objects;
+		public String objectId = null;
+	}
+	protected static <T> GetObjectResult<T> getObjects(String user, ServletPageProvider<T> pageprov, Map<String, String[]> paramMap) {
+		GetObjectResult<T> result = new GetObjectResult<T>();
+		
+		String objectName = pageprov.getObjectName();
+		if(objectName != null)
+			result.objectId = UserServlet.getParameter(objectName, paramMap);
+		if(result.objectId == null)
+			result.objectId = UserServlet.getParameter("object", paramMap);
+		if(result.objectId != null) {
+			try {
+				long numId = Long.parseLong(result.objectId);
+				result.objectId = num2stringObjects.get(numId);
+			} catch(NumberFormatException e) {
+				long numId = result.objectId.hashCode();
+				num2stringObjects.put(numId, result.objectId);
+			}
+		}
+		if(result.objectId != null) {
+			T obj = pageprov.getObject(result.objectId);
+			result.objects = new ArrayList<T>();
+			result.objects.add(obj);
 			return result;
 		}
-		return Collections.unmodifiableList(new ArrayList<T>(prov.getAllObjects(user)));
+		Collection<T> allObj = pageprov.getAllObjects(user);
+		for(T obj: allObj) {
+			String id = pageprov.getObjectId(obj);
+			long numId = id.hashCode();
+			num2stringObjects.put(numId, id);			
+		}
+		result.objects = Collections.unmodifiableList(new ArrayList<T>(allObj));
+		return result;
 	}
 	
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String user = req.getParameter("user");
-		if(user == null) return;
+		//String user = req.getParameter("user");
+		//if(user == null) return;
+		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+		doPost(req, resp, user);
+	}		
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user)
+			throws ServletException, IOException {
+
 		String pageId = req.getParameter("page");
 		if(pageId == null) pageId = stdPageId ;
-		String object = req.getParameter("object");
+		//String object = req.getParameter("object");
 		ServletPageProvider<?> pageMap = pages.get(pageId);
 		if(pageMap == null) return;
 		String timeStr = req.getParameter("time");
@@ -375,7 +505,7 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 
 		try {
 			JSONObject result = new JSONObject(request);
-			postJSON(object, user, result, pageMap, response, timeStr, paramMap);
+			postJSON(user, result, pageMap, response, timeStr, paramMap);
 			//Map<String, ServletValueProvider> userMap = postData.get(user);
 			//for(String key: result.keySet()) {
 			//	ServletValueProvider prov = userMap.get(key);
@@ -396,7 +526,7 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		resp.setStatus(status);
 	}
 	
-	protected void addValue(Value value, String jsonkey, JSONObject subJson,
+	protected static void addValue(Value value, String jsonkey, JSONObject subJson,
 			boolean suppressNan) {
 		if(value == null)
 			subJson.put(jsonkey, "");
@@ -417,14 +547,15 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			subJson.put(jsonkey, value);
 	}
 	
-	protected <T> String postJSON(String objectId, String user, JSONObject result,
+	protected <T> String postJSON(String user, JSONObject result,
 			ServletPageProvider<T> pageprov, String response, String timeString,
 			Map<String, String[]> paramMap) {
-		Collection<T> objects = getObjects(objectId, user, pageprov);
-		if(objects == null) return response;
+		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap);
+		//Collection<T> objects
+		if(odata.objects == null) return response;
 		
 		paramMap.put("METHOD", new String[] {"POST"});
-		for(T obj: objects) {
+		for(T obj: odata.objects) {
 			Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user, paramMap);
 			for(String key: result.keySet()) {
 				ServletValueProvider prov = userMap.get(key);
@@ -444,8 +575,8 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 						keyForSetValue = key;
 					prov.setValue(user, keyForSetValue, value);
 				} catch(Exception e) {
-					if(objectId != null)
-						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object; "+e.getMessage()+objectId, e);
+					if(odata.objectId != null)
+						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object; "+e.getMessage()+odata.objectId, e);
 					else
 						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object not provided; "+e.getMessage(), e);
 				}
@@ -456,35 +587,60 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 	}
 
 	public static String getParameter(String name, Map<String, String[]> paramMap) {
+		return getParameter(name, paramMap, null);
+	}
+	public static String getParameter(String name, Map<String, String[]> paramMap,
+			String defaultValue) {
 		String[] arr = paramMap.get(name);
 		if(arr==null)
-			return null;
+			return defaultValue;
 		if(arr.length == 0)
-			return null;
+			return defaultValue;
 		return arr[0];
 	}
 	public static Integer getInteger(String name, Map<String, String[]> paramMap) {
+		return getInteger(name, paramMap, null);
+	}
+	public static Integer getInteger(String name, Map<String, String[]> paramMap,
+			Integer defaultValue) {
 		String val = getParameter(name, paramMap);
 		if(val == null)
-			return null;
+			return defaultValue;
 		try  {
 			return Integer.parseInt(val);
 		} catch(NumberFormatException e) {
-			return null;
+			return defaultValue;
 		}
 	}
 	public static Float getFloat(String name, Map<String, String[]> paramMap) {
+		return getFloat(name, paramMap, null);
+	}
+	public static Float getFloat(String name, Map<String, String[]> paramMap,
+			Float defaultValue) {
 		String val = getParameter(name, paramMap);
 		if(val == null)
-			return null;
+			return defaultValue;
 		try  {
 			return Float.parseFloat(val);
 		} catch(NumberFormatException e) {
-			return null;
+			return defaultValue;
 		}
 	}
 	public static boolean getBoolean(String name, Map<String, String[]> paramMap) {
 		String val = getParameter(name, paramMap);
 		return Boolean.parseBoolean(val);
+	}
+
+	public static OgemaLocale getLocale(Map<String, String[]> paramMap) {
+		return getLocale(paramMap, null);
+	}
+	public static OgemaLocale getLocale(Map<String, String[]> paramMap, OgemaLocale defaultLocale) {
+		String loc = getParameter("locale", paramMap);
+		if(loc == null)
+			return defaultLocale;
+		OgemaLocale result = OgemaLocale.getLocale(loc);
+		if(result == null)
+			return defaultLocale;
+		return result;
 	}
 }

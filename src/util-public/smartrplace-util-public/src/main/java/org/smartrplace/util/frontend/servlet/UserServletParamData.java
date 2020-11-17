@@ -18,6 +18,7 @@ public class UserServletParamData {
 		if(structureStr != null && structureStr.equals("list"))
 			structureList = true;
 		provideExtended = UserServlet.getBoolean("extendedData", paramMap);
+		timeString = UserServlet.getParameter("time", paramMap);
 		// supported values: de=de, en=en, fr=fr, zh=zh
 		String localStr = UserServlet.getParameter("locale", paramMap);
 		if(localStr != null) for(OgemaLocale lo: OgemaLocale.getAllLocales()) {
@@ -34,6 +35,8 @@ public class UserServletParamData {
 
 	public Map<String, String[]> paramMap;
 	public boolean suppressNan = false;
+	public String timeString;
+
 	
 	/** If true then extended information like time series and user write permission is added to the result
 	 * if supported by the ServletValueProvider

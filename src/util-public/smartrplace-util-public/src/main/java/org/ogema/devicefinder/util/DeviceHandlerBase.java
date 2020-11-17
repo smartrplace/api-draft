@@ -21,11 +21,8 @@ import org.ogema.devicefinder.api.DriverPropertySuccessHandler;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.devicefinder.api.PatternListenerExtended;
-import org.ogema.devicefinder.api.PropType;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-
-import com.google.common.collect.Sets;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;

@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
+import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 /** Provides basic information for any resource. Currently implementation is only relevant for
@@ -29,7 +30,7 @@ public class ServletResourceDataProvider implements ServletValueProvider {
 	}
 	
 	@Override
-	public JSONObject getJSON(String user, String key) {
+	public JSONVarrRes getJSON(String user, String key) {
 		JSONObject result = new JSONObject();
 		result.put("type", res.getResourceType().getName());
 		if(res instanceof ValueResource)
@@ -37,7 +38,10 @@ public class ServletResourceDataProvider implements ServletValueProvider {
 		if(!suppressLocation)
 			result.put("location", res.getLocation());
 		addAdditionalInformation(result);
-		return result;
+		
+		JSONVarrRes realResult = new JSONVarrRes();
+		realResult.result = result;
+		return realResult;
 	}
 	
 	@Override

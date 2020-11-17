@@ -47,22 +47,11 @@ public abstract class UserServletTest extends HttpServlet {
         resp.addHeader("Access-Control-Allow-Credentials", "true");
     }
     
-    @SuppressWarnings("deprecation")
-	@Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-    	//if(!req.getRequestURI().endsWith(SERVLET_ADDRESS)) return;
+    protected String getUser(HttpServletRequest req, final HttpServletResponse resp) {
     	String user = checkAccessAllowedAndSendErrorToUser(req, resp);
-    	if(user == null) return;
+    	if(user == null) return null;
     	//TODO: Perform mapping from REST user to natural user
-    	
-    	resp.setCharacterEncoding("UTF-8");
-    	resp.setContentType("application/json");
-    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
-        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
-        resp.addHeader("Access-Control-Allow-Headers", "*");
-        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
-        resp.addHeader("Access-Control-Allow-Credentials", "true");
-		
+    	//Perform mapping from REST user to natural user
         if(user.equals(DEFAULT_LOGIN_USER_NAME))
         	user = req.getParameter("user");
         else {
@@ -71,6 +60,43 @@ public abstract class UserServletTest extends HttpServlet {
         	else
         		user = "#REST#"+user;
         }
+    	
+		if(user == null || user.startsWith("["))
+			user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+    	return user;
+    }
+    
+    @SuppressWarnings("deprecation")
+	@Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    	String user = getUser(req, resp);
+    	if(user == null) return;
+    	
+    	//if(!req.getRequestURI().endsWith(SERVLET_ADDRESS)) return;
+    	/*String user = checkAccessAllowedAndSendErrorToUser(req, resp);
+    	if(user == null) return;
+    	
+    	//Perform mapping from REST user to natural user
+        if(user.equals(DEFAULT_LOGIN_USER_NAME))
+        	user = req.getParameter("user");
+        else {
+        	if(user.endsWith("_rest"))
+        		user = user.substring(0, user.length()-"_rest".length());
+        	else
+        		user = "#REST#"+user;
+        }
+    	
+		if(user == null || user.startsWith("["))
+			user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+    	 */
+		resp.setCharacterEncoding("UTF-8");
+    	resp.setContentType("application/json");
+    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
+        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+        resp.addHeader("Access-Control-Allow-Headers", "*");
+        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
+        resp.addHeader("Access-Control-Allow-Credentials", "true");
+		
 		/*String test = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 		System.out.println("Body : "+test);
 		String auth = req.getAuthType();
@@ -83,8 +109,6 @@ public abstract class UserServletTest extends HttpServlet {
 		Enumeration auth4 = req.getHeaders("Host");
 		Enumeration auth5 = req.getHeaders("User-Agent");
 		Enumeration auth6 = req.getHeaders("Accept");*/
-		if(user == null || user.startsWith("["))
-			user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
         try{
     		getUserServlet().doGet(req, resp, user);
     	} catch(NullPointerException e) {
@@ -99,7 +123,10 @@ public abstract class UserServletTest extends HttpServlet {
     
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-       	if(!checkAccessAllowedAndSendError(req, resp)) return;
+    	String user = getUser(req, resp);
+    	if(user == null) return;
+    	//if(!checkAccessAllowedAndSendError(req, resp)) return;
+    	
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
     	getUserServlet().doPost(req, resp);
