@@ -223,10 +223,10 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		return paramMap;
 	}
 	
-	protected static class JSONVarrRes {
-		JSONObject result = null;
-		JSONArray resultArr = null;
-		String message = null;
+	public static class JSONVarrRes {
+		public JSONObject result = null;
+		public JSONArray resultArr = null;
+		public String message = null;
 	}
 	protected <T> JSONVarrRes getJSON(String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap) {
