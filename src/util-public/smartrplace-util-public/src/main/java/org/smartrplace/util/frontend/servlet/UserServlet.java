@@ -77,7 +77,7 @@ public class UserServlet extends HttpServlet {
 	}
 	
 	/** Management of numerical IDs*/
-	protected static final Map<Long, String> num2stringObjects = new HashMap<>();
+	protected static final Map<Integer, String> num2stringObjects = new HashMap<>();
  	
 	public static final String TimeSeriesServletImplClassName = "org.smartrplace.app.monbase.servlet.TimeseriesBaseServlet";
 	
@@ -439,6 +439,7 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 	}
 	protected static <T> GetObjectResult<T> getObjects(String user, ServletPageProvider<T> pageprov, Map<String, String[]> paramMap) {
 		GetObjectResult<T> result = new GetObjectResult<T>();
+		int numId = 0;
 		
 		String objectName = pageprov.getObjectName();
 		if(objectName != null)
@@ -447,11 +448,11 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			result.objectId = UserServlet.getParameter("object", paramMap);
 		if(result.objectId != null) {
 			try {
-				long numId = Long.parseLong(result.objectId);
+				numId = Integer.parseInt(result.objectId);
 				result.objectId = num2stringObjects.get(numId);
 			} catch(NumberFormatException e) {
-				long numId = result.objectId.hashCode();
-				num2stringObjects.put(numId, result.objectId);
+				int numIdNew = result.objectId.hashCode();
+				num2stringObjects.put(numIdNew, result.objectId);
 			}
 		}
 		if(result.objectId != null) {
@@ -463,8 +464,18 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		Collection<T> allObj = pageprov.getAllObjects(user);
 		for(T obj: allObj) {
 			String id = pageprov.getObjectId(obj);
-			long numId = id.hashCode();
-			num2stringObjects.put(numId, id);			
+			int numIdNew = id.hashCode();
+			num2stringObjects.put(numIdNew, id);			
+		}
+		if(numId != 0) {
+			//we try to find the object once more with the new information
+			result.objectId = num2stringObjects.get(numId);
+			if(result.objectId != null) {
+				T obj = pageprov.getObject(result.objectId);
+				result.objects = new ArrayList<T>();
+				result.objects.add(obj);
+				return result;				
+			}
 		}
 		result.objects = Collections.unmodifiableList(new ArrayList<T>(allObj));
 		return result;
