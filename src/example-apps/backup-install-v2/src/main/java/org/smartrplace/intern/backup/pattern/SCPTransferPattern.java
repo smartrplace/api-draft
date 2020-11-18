@@ -144,6 +144,7 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 	ResourceValueListener<IntegerResource> controlByKbListener = null;
 	@Override
 	public boolean accept() {
+System.out.println("  STARTING ACCEPT");
 		super.accept();
 		//IntegerResource cloc = controlByMaxSizeKb.getLocationResource();
 		//System.out.println("CloC:"+cloc.getLocation()+" active:"+cloc.isActive());
@@ -160,6 +161,7 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 			//cloc.addValueListener(controlByKbListener);
 			controlByMaxSizeKb.addValueListener(controlByKbListener, false);
 		}
+System.out.println("  ACCEPT RETURN TRUE");
 		return true;
 	}
 }

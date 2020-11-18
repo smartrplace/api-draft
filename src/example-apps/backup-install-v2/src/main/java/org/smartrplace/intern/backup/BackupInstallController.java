@@ -32,10 +32,12 @@ public class BackupInstallController {
 		//incidentReporting = new IncidentProviderSpaceBase(appMan);
 		
         reinitTransferData();
-        long demandRetard = Long.getLong("org.smartrplace.backup-install.retardation", 15*60000l);
+        long demandRetard = Long.getLong("org.smartrplace.backup-install.retardation", 1*30000l);
+System.out.println("  WAIT FOR INIT DEMANDS with retard:"+demandRetard);				
         if(demandRetard > 0) new CountDownDelayedExecutionTimer(appMan, demandRetard) {
 			@Override
 			public void delayedExecution() {
+System.out.println("  INIT DEMANDS FOR BackupInstall V2");				
 				initDemands();
 			}
 		};
