@@ -1,6 +1,8 @@
 package org.smartrplace.intern.backup;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.application.Timer;
+import org.ogema.core.application.TimerListener;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.StringResource;
@@ -34,14 +36,27 @@ public class BackupInstallController {
         reinitTransferData();
         long demandRetard = Long.getLong("org.smartrplace.backup-install.retardation", 1*30000l);
 System.out.println("  WAIT FOR INIT DEMANDS with retard:"+demandRetard);				
-        if(demandRetard > 0) new CountDownDelayedExecutionTimer(appMan, demandRetard) {
-			@Override
-			public void delayedExecution() {
+/*if(demandRetard > 0) new CountDownDelayedExecutionTimer(appMan, demandRetard) {
+@Override
+public void delayedExecution() {
 System.out.println("  INIT DEMANDS FOR BackupInstall V2");				
-				initDemands();
-			}
-		};
-		else initDemands();
+	initDemands();
+}
+}*/
+		if(demandRetard > 0) {
+			appMan.createTimer(demandRetard, new TimerListener() {
+				
+				@Override
+				public void timerElapsed(Timer timer) {
+System.out.println("  INIT DEMANDS FOR BackupInstall V2");
+					timer.destroy();
+					initDemands();
+				}
+			});
+		} else {
+			System.out.println("  INIT DEMANDS FOR BackupInstall V2 directly");				
+			initDemands();
+		}
  	}
 
 	//public BackupActionListener backupActionListener;
