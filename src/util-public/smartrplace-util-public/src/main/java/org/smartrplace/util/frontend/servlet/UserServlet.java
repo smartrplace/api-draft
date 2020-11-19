@@ -78,6 +78,16 @@ public class UserServlet extends HttpServlet {
 	
 	/** Management of numerical IDs*/
 	protected static final Map<Integer, String> num2stringObjects = new HashMap<>();
+	protected static void num2StringPut(String value) {
+		try {
+			int num = Integer.parseInt(value);
+			num2stringObjects.put(num, value);
+		} catch(NumberFormatException e) {
+			int num = value.hashCode();
+			num2stringObjects.put(num, value);
+		}
+		
+	}
  	
 	public static final String TimeSeriesServletImplClassName = "org.smartrplace.app.monbase.servlet.TimeseriesBaseServlet";
 	
@@ -451,8 +461,8 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 				numId = Integer.parseInt(result.objectId);
 				result.objectId = num2stringObjects.get(numId);
 			} catch(NumberFormatException e) {
-				int numIdNew = result.objectId.hashCode();
-				num2stringObjects.put(numIdNew, result.objectId);
+				//int numIdNew = result.objectId.hashCode();
+				num2StringPut(result.objectId);
 			}
 		}
 		if(result.objectId != null) {
@@ -464,8 +474,8 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		Collection<T> allObj = pageprov.getAllObjects(user);
 		for(T obj: allObj) {
 			String id = pageprov.getObjectId(obj);
-			int numIdNew = id.hashCode();
-			num2stringObjects.put(numIdNew, id);			
+			//int numIdNew = id.hashCode();
+			num2StringPut(id);			
 		}
 		if(numId != 0) {
 			//we try to find the object once more with the new information
