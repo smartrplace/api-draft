@@ -21,6 +21,7 @@ import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -99,6 +100,10 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	public DeviceTableBase getDeviceTable(WidgetPage<?> page, Alert alert,
 			InstalledAppsSelector appSelector) {
 		return new DeviceTableBase(page, appMan, alert, appSelector, this) {
+			@Override
+			protected String pid() {
+				return WidgetHelper.getValidWidgetId(DeviceHandlerSimple.this.getClass().getName());
+			}
 			
 			@Override
 			public void addWidgets(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh,
