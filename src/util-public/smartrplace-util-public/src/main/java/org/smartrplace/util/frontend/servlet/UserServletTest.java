@@ -178,17 +178,27 @@ public abstract class UserServletTest extends HttpServlet {
     }
     public String checkAccessAllowedAndSendErrorToUser(final HttpServletRequest req, final HttpServletResponse resp) {
     	boolean isTest = isTestInstance(resp);
-    	if(isTest)
-    		return DEFAULT_LOGIN_USER_NAME;
     	RestAccess restAcc = getRESTAccess();
     	if(restAcc == null) {
+        	if(isTest)
+        		return DEFAULT_LOGIN_USER_NAME;
     		sendError(resp);
     		return null;
     	}
     	try {
-    		String userName = restAcc.authenticateToUser(req, resp);
- 			return userName;
+    		String userName = restAcc.authenticateToUser(req, resp, false);
+ 			if(userName == null) {
+ 				if(isTest)
+ 					return DEFAULT_LOGIN_USER_NAME;
+ 				else {
+ 					sendError(resp);
+ 					return null;
+ 				}
+ 			}
+    		return userName;
 		} catch (ServletException | IOException e) {
+	    	if(isTest)
+	    		return DEFAULT_LOGIN_USER_NAME;
 			e.printStackTrace();
 			sendError(resp);
 			return null;
