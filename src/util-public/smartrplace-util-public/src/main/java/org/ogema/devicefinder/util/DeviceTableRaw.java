@@ -285,19 +285,26 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static String getName(InstallAppDevice object, ApplicationManagerPlus appManPlus) {
-		final Resource device;
-		device = object.device();
-		return getNameForDevice(device, appManPlus.dpService());
-	}		
+		//final Resource device;
+		//device = object.device();
+		return DatapointImpl.getDeviceLabel(object, null, appManPlus.dpService(), null);
+		//return getNameForDevice(device, appManPlus.dpService());
+	}
+	@Deprecated //use DatapointImpl.getDeviceLabelPlus instead
 	public static String getNameForDevice(Resource device, DatapointService dpService) {
 		DatapointGroup dpDev = dpService.getGroup(device.getLocation());
 		if(dpDev.label(null) != null)
 			return dpDev.label(null);
 		
-		String name;
+		String subName = getSubNameForDevice(device, dpService);
+		String name = getDeviceStdName(device) + subName;
+		dpDev.setLabel(null, name);
+		dpDev.setType("DEVICE");
+		return name;		
+	}
+	public static String getSubNameForDevice(Resource device, DatapointService dpService) {
 		if(device.getLocation().toLowerCase().contains("homematic")) {
-			name = getDeviceStdName(device) + ":" +
-					ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
+			return	ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
 		} else {
 			// resolve reference here, otherwise we'd just get "device"
 			int idx = device.getLocation().lastIndexOf('/');
@@ -305,15 +312,12 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				idx = 0;
 			else
 				idx++;
-			name = device.getLocation().substring(idx);
+			String name = device.getLocation().substring(idx);
 			if(name.equals("device"))
-				name = getDeviceStdName(device) +
-					ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
+				return ScheduleViewerOpenButtonEval.getDeviceShortId(device.getLocation());
 			//name = device.getLocation().replaceAll(".*/([^/])", "");
+			return name;
 		}
-		dpDev.setLabel(null, name);
-		dpDev.setType("DEVICE");
-		return name;
 	}
 	public Resource addNameWidgetRaw(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {

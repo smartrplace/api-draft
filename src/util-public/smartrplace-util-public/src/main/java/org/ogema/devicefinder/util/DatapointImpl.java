@@ -6,19 +6,25 @@ import java.util.Map;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointInfo;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
+import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.devicefinder.api.DatapointInfoProvider;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.DpConnection;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
+import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.frontend.servlet.UserServletUtil;
@@ -199,6 +205,73 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		return stdLabel;
 	}
 	
+	public static String getDeviceLabel(InstallAppDevice appDev, OgemaLocale locale, DatapointService dpService,
+			DeviceHandlerProvider<?> tableProvider) {
+		return getDeviceLabelPlus(appDev, locale, dpService, tableProvider).deviceLabel;
+	}
+	public static class DeviceLabelPlus {
+		public String deviceLabel;
+		public String devTypeShort;
+		public String subLoc;
+		public DPRoom room;
+	}
+	public static DeviceLabelPlus getDeviceLabelPlus(InstallAppDevice appDev, OgemaLocale locale, DatapointService dpService,
+			DeviceHandlerProvider<?> tableProvider) {
+		DeviceLabelPlus result = new DeviceLabelPlus();
+		
+		//String devTypeShort;
+		if(tableProvider != null)
+			result.devTypeShort = tableProvider.getDeviceTypeShortId(appDev, dpService);
+		else {
+			String[] els = appDev.deviceId().getValue().split("-");
+			result.devTypeShort = els[0];
+		}
+		
+		PhysicalElement devRes = appDev.device().getLocationResource();
+		getDeviceLabelPlus(devRes, locale, dpService, appDev.installationLocation(), result);
+		return result;
+	}
+	
+	public static void getDeviceLabelPlus(PhysicalElement devRes, OgemaLocale locale, DatapointService dpService,
+			StringResource installationLocation, DeviceLabelPlus result) {
+		Room roomRes = devRes.location().room();
+		//final DPRoom room;
+		if(roomRes.exists()) {
+			result.room = dpService.getRoom(roomRes.getLocation());
+			result.room.setResource(roomRes);
+		} else 
+			result.room = null;
+		
+		if(result.devTypeShort != null && (result.devTypeShort.equals("UNK")))
+			result.devTypeShort = null;
+		if(result.devTypeShort == null)
+			result.devTypeShort = DeviceTableRaw.getDeviceStdName(devRes);
+		
+		//String subLoc = null;
+		if((installationLocation != null) && installationLocation.isActive()) {
+			if(result.devTypeShort != null)
+				result.subLoc = result.devTypeShort+"-"+installationLocation.getValue();
+			else
+				result.subLoc = installationLocation.getValue();
+		} else {
+			String subName = ScheduleViewerOpenButtonEval.getDeviceShortIdPlus(devRes.getLocation()); //DeviceTableRaw.getSubNameForDevice(devRes, dpService);
+			if(result.devTypeShort != null) {
+				if(subName != null && (!subName.isEmpty()))
+					result.subLoc = result.devTypeShort + subName;
+				else
+					result.subLoc = result.devTypeShort;
+			} else
+				result.subLoc = subName;
+		}
+		result.deviceLabel = DatapointImpl.getDeviceLabel(null,
+				result.room!=null?result.room.label(null):Datapoint.UNKNOWN_ROOM_NAME, result.subLoc, null);
+		/*PhysicalElement devRes = appDev.device();
+		Room room = devRes.location().room();
+		String roomName = room.exists()?ResourceUtils.getHumanReadableShortName(room):"NRI";
+		return getDeviceLabel(locale, roomName, appDev.installationLocation().getValue(), null);*/
+	}
+	/** This should only be used for remote devices AND this is also used to generate the
+	 * default DATAPOINT labels*/
 	public static String getDeviceLabel(OgemaLocale locale, String roomName, String subRoom, String gwId) {
 		String stdLabel = roomName;
 		if(subRoom != null)  {
@@ -339,9 +412,19 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		if(dpService == null)
 			return Datapoint.super.setDeviceResource(devResource);
 		DatapointGroup dev = dpService.getGroup(devResource.getLocation());
-		String devName = DeviceTableRaw.getNameForDevice(devResource, dpService);
 		dev.setParameter(DatapointGroup.DEVICE_TYPE_FULL_PARAM, devResource.getResourceType().getName());
-		dev.setLabel(null, devName);
+		if(dev.label(null) == null) {
+			if(devResource instanceof PhysicalElement) {
+				DeviceLabelPlus result = new DeviceLabelPlus();
+				getDeviceLabelPlus((PhysicalElement) devResource, null, dpService, null, result);
+				//DeviceTableRaw.getNameForDevice(devResource, dpService);
+				dev.setLabel(null, result.deviceLabel);
+			} else {
+				@SuppressWarnings("deprecation")
+				String devName = DeviceTableRaw.getNameForDevice(devResource, dpService);
+				dev.setLabel(null, devName);				
+			}
+		}
 		dev.setType("DEVICE");
 		return true;
 	}

@@ -115,6 +115,12 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		setConfigId(ci, req);
 	}
 	
+	public static String getDeviceShortIdPlus(String location) {
+		if(location.toLowerCase().startsWith("homematic")) {
+			return ":HM"+getDeviceShortId(location);
+		}
+		return getDeviceShortId(location);
+	}
 	public static String getDeviceShortId(String location) {
 		String[] parts = location.split("/");
 		//if(parts.length < 3) return "?S?";
