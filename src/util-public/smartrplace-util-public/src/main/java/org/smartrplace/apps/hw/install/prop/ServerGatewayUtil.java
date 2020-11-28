@@ -5,6 +5,7 @@ import java.util.List;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
 import org.smartrplace.system.guiappstore.config.AppstoreConfig;
+import org.smartrplace.system.guiappstore.config.AppstoreSystemUpdates;
 import org.smartrplace.system.guiappstore.config.GatewayData;
 
 import de.iwes.util.resource.ValueResourceHelper;
@@ -20,11 +21,11 @@ public class ServerGatewayUtil {
 		}
 		else {
 			appConfigData = (AppstoreConfig) appMan.getResourceManagement().createResource(name, AppstoreConfig.class);
-			appConfigData.appData().create();
+			//appConfigData.appData().create();
 			//appConfigData.appGroupData().create();
 			appConfigData.gatewayData().create();
 			appConfigData.gatewayGroupData().create();
-			appConfigData.systemUpdates().create();
+			//appConfigData.systemUpdates().create();
 
 			appConfigData.testingGroup().create();
 			ValueResourceHelper.setCreate(appConfigData.testingGroup().name(), "Testing Group");
@@ -39,6 +40,24 @@ public class ServerGatewayUtil {
 		return appConfigData;
     }
 
+    public static AppstoreSystemUpdates initAppstoreSystemUpdates(ApplicationManager appMan) {
+		//TODO provide Util?
+		String name = AppstoreSystemUpdates.class.getSimpleName().substring(0, 1).toLowerCase()+AppstoreSystemUpdates.class.getSimpleName().substring(1);
+		AppstoreSystemUpdates appConfigData = appMan.getResourceAccess().getResource(name);
+		if (appConfigData != null) { // resource already exists (appears in case of non-clean start)
+			appMan.getLogger().debug("{} started with previously-existing config resource", name);
+		}
+		else {
+			appConfigData = (AppstoreSystemUpdates) appMan.getResourceManagement().createResource(name, AppstoreSystemUpdates.class);
+			appConfigData.appData().create();
+			appConfigData.systemUpdates().create();
+			
+			appConfigData.activate(true);
+			appMan.getLogger().debug("{} started with new config resource", name);
+		}
+		return appConfigData;
+    }
+    
     public static GatewayData getOrCreateGwData(String gwId, ResourceList<GatewayData> appstoreData) {
     	List<String> gwIds = ViaHeartbeatUtil.getAlternativeGwIds(gwId);
     	for(String gi: gwIds) {
