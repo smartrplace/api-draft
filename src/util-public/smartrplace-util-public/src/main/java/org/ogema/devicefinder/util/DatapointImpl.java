@@ -187,21 +187,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			return result;
 		String subRoom = getSubRoomLocation(locale, null);
 		String stdLabel = getDeviceLabel(locale, getRoomName(locale), subRoom, isLocal()?null:getGatewayId());
+		if((subRoom != null) && (getGaroDataType() == null || getGaroDataType().equals(GaRoDataType.Unknown)) && typeName.isEmpty())
+			return stdLabel;
 		stdLabel += "-"+getTypeName(locale);
 
-		/*String stdLabel = getRoomName(locale);
-		String subRoom = getSubRoomLocation(locale, null);
-		if(subRoom != null)  {
-			if(stdLabel.equals(DPRoom.BUILDING_OVERALL_ROOM_LABEL))
-				stdLabel = subRoom;
-			else
-				stdLabel += "-"+subRoom;
-		}
-		stdLabel += "-"+getTypeName(locale);
-		if(!isLocal()) {
-			String gwId = getGatewayId();
-			return gwId +"::"+stdLabel;
-		}*/
 		return stdLabel;
 	}
 	

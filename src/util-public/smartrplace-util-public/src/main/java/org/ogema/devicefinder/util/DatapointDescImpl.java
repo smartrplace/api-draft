@@ -19,8 +19,7 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 public class DatapointDescImpl implements DatapointDesc {
 	protected GaRoDataType garoDataType = null;
 	
-	/** Type name is only relevant if garoDataType == null. Then a special type name may
-	 * be given*/
+	/** If this type name is set it will be used in priority to the {@link GaRoDataType} name of the datapoint*/
 	protected Map<OgemaLocale, String> typeName = new HashMap<>();
 	protected String labelDefault;
 	protected Map<OgemaLocale, String> labels = new HashMap<>();
