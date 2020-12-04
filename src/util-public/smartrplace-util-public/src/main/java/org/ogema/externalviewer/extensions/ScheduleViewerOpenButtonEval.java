@@ -125,10 +125,10 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		String[] parts = location.split("/");
 		//if(parts.length < 3) return "?S?";
 		if(!(parts[0].toLowerCase().startsWith("homematic"))) {
-			String result = parts[0].substring(parts[0].length()-4);
+			String result = getLastCharsWithDigitsPreferred(parts[0], 4);
 			if(result.matches(".*\\d.*"))
 				return result;
-			result = parts[parts.length-1].substring(parts[parts.length-1].length()-4);
+			result = getLastCharsWithDigitsPreferred(parts[parts.length-1], 4);
 			if(result.matches(".*\\d.*"))
 				return result;
 			return "";
@@ -136,9 +136,33 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		}
 		if(!parts[1].equals("devices")) return "?Y?";
 		if(parts[2].length() < 5) return parts[2];
-		return parts[2].substring(parts[2].length()-4);	
+		return getLastCharsWithDigitsPreferred(parts[2], 4);	
 	}
 
+	protected static String getLastCharsWithDigitsPreferred(String str, int num) {
+		if(str.isEmpty())
+			return str;
+		String baseResult;
+		if(str.length() >= num)
+			baseResult = str.substring(str.length()-num);
+		else
+			baseResult = str;
+		char last = baseResult.charAt(baseResult.length()-1);
+		if(!acceptCharAsDigitPreferred(last))
+			return baseResult;
+		for(int i=1; i<baseResult.length(); i++) {
+			last = baseResult.charAt(baseResult.length()-1-i);
+			if(!acceptCharAsDigitPreferred(last))
+				return baseResult.substring(baseResult.length()-i);
+		}
+		return baseResult;
+	}
+	
+	protected static boolean acceptCharAsDigitPreferred(char last) {
+		//return (last>='0' && last <='9');
+		return (last <='9');
+	}
+	
 	public static class TimeSeriesWithFilters {
 		public List<ReadOnlyTimeSeries> timeSeries = new ArrayList<>();
 		public List<TimeSeriesFilterExtended> filters;
