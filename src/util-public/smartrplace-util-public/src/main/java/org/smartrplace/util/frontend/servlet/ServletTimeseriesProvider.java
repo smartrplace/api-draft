@@ -25,7 +25,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	protected final Float minValue;
 	
 	//Special evaluations
-	protected final ReadOnlyTimeSeries bareTimeSeries;
+	protected final ReadOnlyTimeSeries timeSeries;
 	protected final String evaluationMode;
 	
 	protected final ApplicationManager appMan;
@@ -34,6 +34,11 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	protected final Long startTime;
 	protected final long endTime;
 	
+	//Overwrite if POST shall not always be accepted
+	public boolean acceptPOST(String user, String key, String value) {return true;}
+	//set to true if only integers shall be written
+	public boolean integerOnly = false;
+
 	public static enum DownSamplingMode {
 		AVERAGE,
 		/** If more than one value is used to calculate a downsampled value the minimum and the maximum are both included*/
@@ -48,7 +53,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		/** Like ONE_PER_DAY, but two values for morning and afternoon are supported. The day is separated around 13:00*/
 		TWO_PER_DAY
 	}
-	/** Only relevant if startTime and endTime are not provided*/
+	/** Only relevant if startTime and endTime are not provided. This is especially important for automated pre-setting of
+	 * manual entry values*/
 	public enum PreviousDayMode {
 		//do not transmit previous day values
 		NONE,
@@ -60,26 +66,26 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	protected final WriteMode writeMode;
 	protected final PreviousDayMode previousDayMode;
 	
-	public ServletTimeseriesProvider(String name, ReadOnlyTimeSeries bareTimeseries, ApplicationManager appMan,
+	public ServletTimeseriesProvider(String name, ReadOnlyTimeSeries timeseries, ApplicationManager appMan,
 			String evaluationMode, Map<String, String[]> paramMap) {
-		this(name, bareTimeseries, appMan, evaluationMode, null, null, paramMap);
+		this(name, timeseries, appMan, evaluationMode, null, null, paramMap);
 	}
 
-	public ServletTimeseriesProvider(String name, ReadOnlyTimeSeries bareTimeseries, ApplicationManager appMan,
+	public ServletTimeseriesProvider(String name, ReadOnlyTimeSeries timeseries, ApplicationManager appMan,
 			String evaluationMode, WriteMode writeMode, PreviousDayMode previousDayMode,
 			Map<String, String[]> paramMap) {
-		this(name, bareTimeseries, appMan, evaluationMode, writeMode, previousDayMode,
+		this(name, timeseries, appMan, evaluationMode, writeMode, previousDayMode,
 				paramMap, 0, 0f);
 	}
-	public ServletTimeseriesProvider(String name, ReadOnlyTimeSeries bareTimeseries, ApplicationManager appMan,
+	public ServletTimeseriesProvider(String name, ReadOnlyTimeSeries timeseries, ApplicationManager appMan,
 			String evaluationMode, WriteMode writeMode, PreviousDayMode previousDayMode,
 			Map<String, String[]> paramMap,
 			float deleteValue, Float minValue) {
 		this.appMan = appMan;
-		this.writeMode = null;
+		this.writeMode = writeMode;
 		this.previousDayMode = null;
 		this.name = name;
-		this.bareTimeSeries = bareTimeseries;
+		this.timeSeries = timeseries;
 		this.evaluationMode = evaluationMode;
 		this.paramMap = paramMap;
 		this.pData = new UserServletParamData(paramMap);
@@ -124,14 +130,14 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		final List<SampledValue> vals;
 		if(evaluationMode != null) {
 			//TODO
-			vals = bareTimeSeries.getValues(startEnd[0], startEnd[1]);
+			vals = timeSeries.getValues(startEnd[0], startEnd[1]);
 			json.put("value", vals);
 			
 			JSONVarrRes realResult = new JSONVarrRes();
 			realResult.result = json;
 			return realResult;
 		} else
-			vals = bareTimeSeries.getValues(startEnd[0], startEnd[1]);
+			vals = timeSeries.getValues(startEnd[0], startEnd[1]);
 		boolean shortXY = UserServlet.getBoolean("shortXY", paramMap);
 		boolean structList = pData.structureList;
 		if(!structList) {
@@ -161,11 +167,23 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		return new long[] {start, end};
 	}
 	public static long[] getDayStartEnd(Map<String, String[]> paramMap, ApplicationManager appMan) {
+		String align = UserServlet.getParameter("align", paramMap);
+		long start = -1;
 		try {
-			long start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
+			start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
 			long end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
+			if(align != null && align.equals("day")) {
+				long startDay = AbsoluteTimeHelper.getIntervalStart(start, AbsoluteTiming.DAY);
+				long endDay = AbsoluteTimeHelper.getNextStepTime(end, AbsoluteTiming.DAY)-1;
+				return new long[] {startDay, endDay};
+			}
 			return new long[] {start, end};
 		} catch(NumberFormatException | NullPointerException e) {
+			if(align != null && align.equals("day") && start > 0) {
+				long startDay = AbsoluteTimeHelper.getIntervalStart(start, AbsoluteTiming.DAY);
+				long endDay = AbsoluteTimeHelper.addIntervalsFromAlignedTime(startDay, 1, AbsoluteTiming.DAY)-1;
+				return new long[] {startDay, endDay};
+			}
 			return getDayStartEnd((String)null, appMan);
 		}		
 	}
@@ -175,10 +193,17 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	@Override
 	public void setValue(String user, String key, String value) {
 		try  {
-			if(!(bareTimeSeries instanceof Schedule))
+			if(!(timeSeries instanceof Schedule))
 				throw new IllegalStateException("Writing only possible for time series of type schedule!");
-			Schedule sched = (Schedule) bareTimeSeries;
+			Schedule sched = (Schedule) timeSeries;
+			if(!acceptPOST(user, key, value)) {
+				throw new IllegalStateException("POST not accepted for "+sched.getLocation());
+			}
 			JSONObject in = new JSONObject(value);
+			if(writeMode == WriteMode.ANY) {
+				setValueAny(sched, value);
+				return;
+			}			
 			long ts = in.getLong("timestamp");
 			if(Math.abs(ts - lastTimestamp) < 90000)
 				return;
@@ -209,6 +234,71 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		}
 	}
 	
+	public void setValueAny(Schedule sched, String value) {
+		try  {
+			JSONObject in = new JSONObject(value);
+			if(in.has("values")) {
+				JSONArray values = in.getJSONArray("values");
+				for(int i=0; i<values.length(); i++) {
+					JSONObject jval = values.getJSONObject(i);
+					long tsloc = jval.getLong("timestamp");
+					float val = (float)(jval.getDouble("value"));
+					if(val == deleteValue) {
+						sched.deleteValues(tsloc, tsloc+1);
+						continue;
+					}
+					sched.addValue(tsloc, new FloatValue(val));
+				}
+				return;
+			}
+			long ts = in.getLong("timestamp");
+			if(Math.abs(ts - lastTimestamp) < 90000)
+				return;
+			lastTimestamp = ts;
+			float val;
+			try {
+				val = (float)(in.getDouble("value"));
+			} catch(Exception e) {
+				val = deleteValue;
+			}
+			boolean doDelete = false;
+			if(integerOnly)
+				val = Math.round(val);
+			if(val == deleteValue || (minValue != null && val < minValue))
+				if(writeMode != WriteMode.ANY)
+					doDelete = true;
+				else
+					return;
+			if(writeMode == WriteMode.ONE_PER_DAY) {
+				long start = AbsoluteTimeHelper.getIntervalStart(ts, AbsoluteTiming.DAY);
+				long end = AbsoluteTimeHelper.addIntervalsFromAlignedTime(start, 1, AbsoluteTiming.DAY);
+				sched.deleteValues(start, end);
+			} else if(writeMode == WriteMode.TWO_PER_DAY) {
+				long start = AbsoluteTimeHelper.getIntervalStart(ts, AbsoluteTiming.DAY);
+				final long end;
+				if(ts-start > MILLIS_TO_SERAPATE_DAY) {
+					//afternoon
+					start += MILLIS_TO_SERAPATE_DAY;
+					end = AbsoluteTimeHelper.addIntervalsFromAlignedTime(start, 1, AbsoluteTiming.DAY);
+				} else {
+					//morning
+					end = start + MILLIS_TO_SERAPATE_DAY;
+				}
+				sched.deleteValues(start, end);
+			}
+			if(doDelete)
+				return;
+			sched.addValue(ts, new FloatValue(val));
+		} catch(NumberFormatException e) {
+			//do nothing
+		}
+	}
+	
+	public void deleteValues(long start, long end) {
+		Schedule sched = (Schedule) timeSeries;
+		sched.deleteValues(start, end);
+	}
+
 	/** Structure for passing on downsampling information from one input sample to the next one*/
 	class DownSamplingData {
 		long lastTs = -1;

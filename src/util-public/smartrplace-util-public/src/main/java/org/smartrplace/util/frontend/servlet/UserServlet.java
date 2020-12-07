@@ -526,7 +526,7 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 
 		try {
 			JSONObject result = new JSONObject(request);
-			postJSON(user, result, pageMap, response, timeStr, paramMap);
+			postJSON(user, result, pageMap, timeStr, paramMap);
 			//Map<String, ServletValueProvider> userMap = postData.get(user);
 			//for(String key: result.keySet()) {
 			//	ServletValueProvider prov = userMap.get(key);
@@ -568,25 +568,27 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			subJson.put(jsonkey, value);
 	}
 	
-	protected <T> String postJSON(String user, JSONObject result,
-			ServletPageProvider<T> pageprov, String response, String timeString,
+	protected static <T> void postJSON(String user, JSONObject postData,
+			ServletPageProvider<T> pageprov,
+			//String response,
+			String timeString,
 			Map<String, String[]> paramMap) {
 		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap);
 		//Collection<T> objects
-		if(odata.objects == null) return response;
+		if(odata.objects == null) return;
 		
 		paramMap.put("METHOD", new String[] {"POST"});
 		for(T obj: odata.objects) {
 			Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user, paramMap);
-			for(String key: result.keySet()) {
+			for(String key: postData.keySet()) {
 				ServletValueProvider prov = userMap.get(key);
 				if(prov == null)
 					throw new IllegalStateException(key+" not available for "+pageprov.toString());
 				String value;
 				try {
-					value = result.getString(key).toString();
+					value = postData.getString(key).toString();
 				} catch(JSONException e) {
-					value = result.getJSONObject(key).toString();
+					value = postData.getJSONObject(key).toString();
 				}
 				try {
 					String keyForSetValue;
@@ -604,7 +606,7 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			}
 		}
 		
-		return response;
+		//return response;
 	}
 
 	public static String getParameter(String name, Map<String, String[]> paramMap) {

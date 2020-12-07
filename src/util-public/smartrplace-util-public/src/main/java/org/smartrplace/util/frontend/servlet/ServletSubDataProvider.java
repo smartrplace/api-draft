@@ -80,4 +80,21 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 	public Value getValue(String user, String key) {
 		throw new IllegalStateException("Returns JSON");
 	}
+	
+	@Override
+	public void setValue(String user, String keyMain, String value) {
+		JSONObject in = new JSONObject(value);
+		//Iterator<String> keys = in.keys();
+
+		String timeString = UserServlet.getParameter("time", parameters);
+		UserServlet.postJSON(user, in, provider, timeString, parameters);
+		/*while(keys.hasNext()) {
+		    String key = keys.next();
+		    if (in.get(key) instanceof JSONObject) {
+				String timeString = UserServlet.getParameter("time", parameters);
+				UserServlet.postJSON(user, (JSONObject)in.get(key), provider, timeString, parameters);
+		    	//provider..setValue(user, key, value);		             
+		    }
+		}*/
+	}
 }
