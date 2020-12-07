@@ -195,6 +195,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	
 	@Override
 	public void setValue(String user, String key, String value) {
+		String align = UserServlet.getParameter("align", paramMap);
 		try  {
 			if(!(timeSeries instanceof Schedule))
 				throw new IllegalStateException("Writing only possible for time series of type schedule!");
@@ -204,7 +205,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			}
 			JSONObject in = new JSONObject(value);
 			if(writeMode == WriteMode.ANY) {
-				setValueAny(sched, value);
+				setValueAny(sched, value, align != null && align.equals("day"));
 				return;
 			}			
 			long ts = in.getLong("timestamp");
@@ -237,7 +238,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		}
 	}
 	
-	public void setValueAny(Schedule sched, String value) {
+	public void setValueAny(Schedule sched, String value, boolean alignedDay) {
 		try  {
 			JSONObject in = new JSONObject(value);
 			if(in.has("values")) {
@@ -247,7 +248,12 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					long tsloc = jval.getLong("timestamp");
 					float val = (float)(jval.getDouble("value"));
 					if(val == deleteValue) {
-						sched.deleteValues(tsloc, tsloc+1);
+						if(alignedDay) {
+							long startDay = AbsoluteTimeHelper.getIntervalStart(tsloc, AbsoluteTiming.DAY);
+							long endDay = AbsoluteTimeHelper.addIntervalsFromAlignedTime(startDay, 1, AbsoluteTiming.DAY);
+							sched.deleteValues(startDay, endDay);
+						} else
+							sched.deleteValues(tsloc, tsloc+1);
 						continue;
 					}
 					sched.addValue(tsloc, new FloatValue(val));
