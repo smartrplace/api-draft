@@ -126,7 +126,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		if(startTime != null) {
 			startEnd = new long[]{startTime, endTime};
 		} else
-			startEnd = getDayStartEnd(key);
+			startEnd = getDayStartEnd(paramMap, appMan, key); //getDayStartEnd(key);
 		final List<SampledValue> vals;
 		if(evaluationMode != null) {
 			//TODO
@@ -167,6 +167,9 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		return new long[] {start, end};
 	}
 	public static long[] getDayStartEnd(Map<String, String[]> paramMap, ApplicationManager appMan) {
+		return getDayStartEnd(paramMap, appMan, null);
+	}
+	public static long[] getDayStartEnd(Map<String, String[]> paramMap, ApplicationManager appMan, String key) {
 		String align = UserServlet.getParameter("align", paramMap);
 		long start = -1;
 		try {
@@ -184,7 +187,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				long endDay = AbsoluteTimeHelper.addIntervalsFromAlignedTime(startDay, 1, AbsoluteTiming.DAY)-1;
 				return new long[] {startDay, endDay};
 			}
-			return getDayStartEnd((String)null, appMan);
+			return getDayStartEnd(key, appMan);
 		}		
 	}
 	
