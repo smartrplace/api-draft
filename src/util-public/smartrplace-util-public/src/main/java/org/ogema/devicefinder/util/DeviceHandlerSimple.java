@@ -77,6 +77,8 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	 * 		a feedback or status value of an actor or most relevant configuration value
 	 */
 	protected abstract SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration);
+	protected void addMoreValueWidgets(InstallAppDevice object, T device, ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh,
+			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {}
 	
 	/** See {@link DeviceHandlerProvider#getDatapoints(InstallAppDevice, DatapointService)}.
 	 * Note that you should call {@link #addDatapoint(SingleValueResource, java.util.List)} for each datapoint. This
@@ -127,6 +129,8 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 				
 				Label lastContact = addLastContact(vh, id, req, row, sampleSensor);
 				
+				addMoreValueWidgets(object, box, vh, id, req, row, appMan);
+				
 				if(req != null) {
 					valueLabel.setPollingInterval(DEFAULT_POLL_RATE, req);
 					lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
@@ -176,7 +180,9 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Datapoint> getDatapoints(InstallAppDevice installDeviceRes, DatapointService dpService) {
-		Collection<Datapoint> result = getDatapoints((T)installDeviceRes.device(), installDeviceRes);
+		T device = (T)installDeviceRes.device();
+		Collection<Datapoint> result = getDatapoints(device, installDeviceRes);
+		checkDpSubLocations(installDeviceRes, result);
 		return result;
 	}
 	
@@ -188,5 +194,22 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	 */
 	protected Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result) {
 		return super.addDatapoint(res, result, dpService);
+	}
+	
+	/** Doubled from {@link DeviceTableRaw}
+	 */
+	protected Label addLastContact(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, 
+			SingleValueResource reading) {
+		if(columnLabel == null)
+			columnLabel = "Last Contact";
+		Label lastContact = null;
+		if(req != null) {
+			lastContact = new LastContactLabel(reading, appMan.appMan(), vh.getParent(), WidgetHelper.getValidWidgetId(columnLabel)+id, req);
+			row.addCell(WidgetHelper.getValidWidgetId(columnLabel), lastContact);
+			return lastContact;
+		} else
+			vh.registerHeaderEntry(columnLabel);
+		return null;
 	}
 }

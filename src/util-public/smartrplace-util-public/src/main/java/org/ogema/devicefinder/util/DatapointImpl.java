@@ -6,20 +6,19 @@ import java.util.Map;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
-import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointInfo;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
-import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.devicefinder.api.DatapointInfoProvider;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.DpConnection;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
+import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericFloatSensor;
@@ -217,12 +216,12 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		}
 		
 		PhysicalElement devRes = appDev.device().getLocationResource();
-		getDeviceLabelPlus(devRes, locale, dpService, appDev.installationLocation(), result);
+		getDeviceLabelPlus(devRes, locale, dpService, appDev, result);
 		return result;
 	}
 	
 	public static void getDeviceLabelPlus(PhysicalElement devRes, OgemaLocale locale, DatapointService dpService,
-			StringResource installationLocation, DeviceLabelPlus result) {
+			InstallAppDevice appDev, DeviceLabelPlus result) {
 		Room roomRes = devRes.location().room();
 		//final DPRoom room;
 		if(roomRes.exists()) {
@@ -237,13 +236,19 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			result.devTypeShort = DeviceTableRaw.getDeviceStdName(devRes);
 		
 		//String subLoc = null;
-		if((installationLocation != null) && installationLocation.isActive()) {
+		if((appDev != null) && appDev.installationLocation().isActive()) {
 			if(result.devTypeShort != null)
-				result.subLoc = result.devTypeShort+"-"+installationLocation.getValue();
+				result.subLoc = result.devTypeShort+"-"+appDev.installationLocation().getValue();
 			else
-				result.subLoc = installationLocation.getValue();
+				result.subLoc = appDev.installationLocation().getValue();
 		} else {
-			String subName = ScheduleViewerOpenButtonEval.getDeviceShortIdPlus(devRes.getLocation()); //DeviceTableRaw.getSubNameForDevice(devRes, dpService);
+			String subName;
+			if(appDev != null) {
+				String devName = appDev.deviceId().getValue();
+				int devnr = ScheduleViewerOpenButtonEval.getNumberById(devName);
+				subName = ""+devnr;
+			} else
+				subName = ScheduleViewerOpenButtonEval.getDeviceShortIdPlus(devRes.getLocation()); //DeviceTableRaw.getSubNameForDevice(devRes, dpService);
 			if(result.devTypeShort != null) {
 				if(subName != null && (!subName.isEmpty()))
 					result.subLoc = result.devTypeShort + subName;

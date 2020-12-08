@@ -163,6 +163,16 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		return (last <='9');
 	}
 	
+	public static int getNumberById(String str) {
+		if(str.length() < 4)
+			return 9999;
+		try {
+			return Integer.parseInt(str.substring(str.length()-4));
+		} catch(NumberFormatException e) {
+			return 9998;
+		}
+	}
+	
 	public static class TimeSeriesWithFilters {
 		public List<ReadOnlyTimeSeries> timeSeries = new ArrayList<>();
 		public List<TimeSeriesFilterExtended> filters;

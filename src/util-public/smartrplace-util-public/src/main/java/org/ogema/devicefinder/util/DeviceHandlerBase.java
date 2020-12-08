@@ -14,6 +14,7 @@ import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
@@ -86,7 +87,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		return listener.getAllPatterns();
 	}
 	
-	protected Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result, DatapointService dpService) {
+	protected static Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result, DatapointService dpService) {
 		if(res.isActive()) {
 			Datapoint dp = dpService.getDataPointStandard(res);
 			result.add(dp);
@@ -94,7 +95,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		}
 		return null;
 	}
-	protected Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result,
+	protected static Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result,
 			String subLocation, DatapointService dpService) {
 		Datapoint dp = addDatapoint(res, result, dpService);
 		if(dp != null) {
@@ -119,11 +120,12 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		checkDpSubLocations(device, getDatapoints(device, dpService));
 	}
 	
+	@Deprecated
 	protected void checkDpSubLocations(InstallAppDevice device, Collection<Datapoint> dps) {
-		for(Datapoint dp: dps) {
+		/*for(Datapoint dp: dps) {
 			if(dp.getSubRoomLocation(null, null) == null)
 				dp.addToSubRoomLocationAtomic(null, null, device.installationLocation().getValue(), true);
-		}		
+		}*/		
 	}
 	
 	public Collection<Datapoint> addtStatusDatapointsHomematic(PhysicalElement dev, DatapointService dpService,
@@ -195,6 +197,13 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 			this.anchorRes = anchorRes;
 			this.propId = propId;
 		}
+	}
+	
+	public static void setBuildingAsRoom(Datapoint dp, DatapointService dpService) {
+		DPRoom room = dpService.getRoom(DPRoom.BUILDING_OVERALL_ROOM_LABEL);
+		if(room != null)
+			dp.setRoom(room);
+		
 	}
 }
 
