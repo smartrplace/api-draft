@@ -27,7 +27,7 @@ public interface DatapointInfo {
 		 * be divided by the respective time step to get power estimation values*/
 		Consumption2Meter,
 		/** Average power or other value. The average shall apply to the entire time series until the
-		 * next value. The last two values of the time series shall be equal an indicate the duration of
+		 * next value. The last two values of the time series shall be equal and indicate the duration of
 		 * the last interval. This can be applied to almost all evaluated measurement values and other
 		 * evaluation results.
 		 */

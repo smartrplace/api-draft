@@ -18,7 +18,13 @@ package org.smartrplace.tissue.util.logconfig;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.recordeddata.RecordedDataConfiguration;
 import org.ogema.model.prototypes.PhysicalElement;
+import org.ogema.recordeddata.DataRecorder;
+import org.ogema.recordeddata.DataRecorderException;
+import org.ogema.recordeddata.RecordedDataStorage;
+import org.slf4j.Logger;
 
 import de.iwes.util.resource.ResourceHelper;
 
@@ -72,5 +78,42 @@ public class LogConfigSP {
 			}
 		}
 	}
+
+	/** Copied from EnergyServerImport class*/
+    public static RecordedDataStorage getRecordedData(FloatResource res,
+    		DataRecorder dataRecorder, Logger logger) {
+        String id = res.getLocation();
+        RecordedDataStorage rds = dataRecorder.getRecordedDataStorage(id);
+        if (rds == null) {
+            RecordedDataConfiguration configuration = new RecordedDataConfiguration();
+            //setting ON_VALUE_CHANGED will cause a write immediately
+            configuration.setStorageType(RecordedDataConfiguration.StorageType.ON_VALUE_UPDATE);
+            //configuration.setFixedInterval(Long.MAX_VALUE);
+            try {
+				rds = dataRecorder.createRecordedDataStorage(id, configuration);
+			} catch (DataRecorderException e) {
+				throw new IllegalStateException(e);
+			}
+            if(logger != null)
+            	logger.debug("created new recorded data for {}", id);
+        } else {
+            if(logger != null)
+            	logger.debug("got data series for {}: {}", id, rds.getConfiguration());
+            if (rds.getConfiguration() == null || 
+                    rds.getConfiguration().getStorageType() != RecordedDataConfiguration.StorageType.ON_VALUE_UPDATE
+                    //|| rds.getConfiguration().getFixedInterval() != Long.MAX_VALUE
+                    ) {
+                if(logger != null)
+                	logger.debug("setting storage type to ON_VALUE_UPDATE for {}", id);
+                RecordedDataConfiguration configuration = new RecordedDataConfiguration();
+                configuration.setStorageType(RecordedDataConfiguration.StorageType.ON_VALUE_UPDATE);
+                //configuration.setFixedInterval(Long.MAX_VALUE);
+                rds.setConfiguration(configuration);
+            }
+            if(logger != null)
+            	logger.debug("returning recorded data for {}", id);
+        }
+        return rds;
+    }
 
 }

@@ -17,11 +17,26 @@ import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
 
+/** Implementation of {@link ProcessedReadOnlyTimeSeries} that has an input time series and assumes that the 
+ * {@link ProcessedReadOnlyTimeSeries} as result shall have exactly one resulting SampledValue for each input
+ * time stamp. The result values are requested via {@link #getResultValues(ReadOnlyTimeSeries, long, long, AggregationMode).
+ * Further input series may be taken into account by the implementation, but the timestamps must be provided by
+ * the input time series.<br>
+ * This implementation also provides a resulting TimeSeriesDataImpl and a resulting Datapoint. The label for the
+ * new timeseries is created based on #getShortId() and #getLabelPostfix()<br>
+ * It is very important to understand that calls to #getResultValues(ReadOnlyTimeSeries, long, long, AggregationMode) and
+ * further calculations are NOT triggered by calling #getResultSeries(), but by calling the #getValues(long, long) method of
+ * the timeseries (triggered potentially by any access to the standard ReadOnlyTimeseries API).
+ * 
+ * @author dnestle
+ *
+ */
 public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTimeSeries {
 	
 	protected abstract List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start, long end,
 			AggregationMode mode);
 	protected String getLabelPostfix() {return "";}
+	/** The result is appended to the id of the input time series to create the output datapoint location*/
 	protected String getLocationPostifx() {return getLabelPostfix();}
 	
 	//final protected MonitoringController controller;

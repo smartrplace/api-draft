@@ -8,6 +8,7 @@ import org.ogema.core.resourcemanager.ResourceManagement;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.core.security.WebAccessManager;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.recordeddata.DataRecorder;
 
 import de.iwes.widgets.api.OgemaGuiService;
 import de.iwes.widgets.api.services.MessagingService;
@@ -20,6 +21,7 @@ public class ApplicationManagerPlus {
 	private UserPermissionService userPermService;
 	private PermissionManager permMan;
 	private MessagingService messagingService;
+	private DataRecorder dataRecorder;
 	
 	public ApplicationManagerPlus(ApplicationManager appMan) {
 		this.appMan = appMan;		
@@ -98,5 +100,11 @@ public class ApplicationManagerPlus {
 	}
 	public WebAccessManager getWebAccessManager() {
 		return appMan.getWebAccessManager();
+	}
+	public DataRecorder dataRecorder() {
+		return dataRecorder;
+	}
+	public void setDataRecorder(DataRecorder dataRecorder) {
+		this.dataRecorder = dataRecorder;
 	}
 }

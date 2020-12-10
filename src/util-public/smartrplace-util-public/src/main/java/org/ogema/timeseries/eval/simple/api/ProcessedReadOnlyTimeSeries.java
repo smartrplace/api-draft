@@ -9,16 +9,19 @@ import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 
-/** Implementation for time series that is based on some input provided via {@link #updateValues(long, long)}
+/** Implementation for {@link ReadOnlyTimeSeries} that is based on some input provided via {@link #updateValues(long, long)}.
+ * The class requests any unknown values from the implementation via this method. It assumes that for a given interval all values
+ * in the interval are returned on the first request and that the values in the interval do not change. An exception are intervals
+ * that go beyond the current time (see next Section on knownEndUpdateInterval on this).<br>
  * Note that if knownEndUpdateInterval is null the limits of values provided via updateValues and the data within intervals that have been
  * requested before are NOT updated later on. If the interval is set then after the interval is finished the 
- * knownEnd is reset to the time of the last update meaning that it is assumed that everything behing this last
+ * knownEnd is reset to the time of the last update meaning that it is assumed that everything behind this last
  * update is unknown.<br>
- * TODO: If the result is aligned and the full input data is available from the beginning the calcuation may be not very efficient. When one
+ * TODO: If the result is aligned and the full input data is available from the beginning the calculation may be not very efficient. When one
  * aligend result is calculated taking into account all input data until the next aligned interval then knownEnd may be set to
  * some time at the result currently calculated or somewhere shortly behind unaligned, but before the next aligned result that may
  * be requested by the upper level evaluation in the next step. Then the previous aligned interval result is calculated once again
- * together with the new result. If the base input is flowing in via data logging then this behaviour may make sense as the last
+ * together with the new result. If the base input is flowing in via data logging then this behavior may make sense as the last
  * aligned aggregated value is updated all the time until the next aligned interval begins.*/
 public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries {
 	
@@ -49,6 +52,13 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode) {
 		this(interpolationMode, TimeProcUtil.HOUR_MILLIS*2);
 	}
+	
+	/** Constructor
+	 * 
+	 * @param interpolationMode currently only InterpolationMode.NONE is supported
+	 * @param knownEndUpdateInterval if not null this specifys a duration after which the interval for which the time series
+	 * 		values are assumed to be known is reset to the current time
+	 */
 	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode, Long knownEndUpdateInterval) {
 		this.interpolationMode = interpolationMode;
 		this.knownEndUpdateInterval = knownEndUpdateInterval;
@@ -108,8 +118,9 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			return Collections.emptyList();
 		if(endTime < firstValueInList)
 			return Collections.emptyList();
-		if(startTime <= firstValueInList && endTime >= lastValueInList)
+		if(startTime <= firstValueInList && endTime >= lastValueInList) {
 			return values;
+		}
 		if(values.isEmpty())
 			return values;
 		int fromIndex = -1;
@@ -173,8 +184,9 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		List<SampledValue> asList = getValues(0, time);
 		if(asList.isEmpty())
 			return null;
-		else
+		else {
 			return asList.get(asList.size()-1);
+		}
 	}
 
 	@Override
