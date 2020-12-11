@@ -210,7 +210,8 @@ public abstract class UserServletTest extends HttpServlet {
     }
     public void sendError(final HttpServletResponse resp) {
 		try {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "This servlet can only be used on testinstances! ");
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "REST Login failed!");
+			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "This servlet can only be used on testinstances! ");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
