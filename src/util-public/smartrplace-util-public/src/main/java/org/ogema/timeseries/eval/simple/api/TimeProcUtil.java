@@ -60,7 +60,7 @@ public class TimeProcUtil {
 		return valStart+interpolateTsStep(start, end, ts, valEnd-valStart);
 	}
 	public static double interpolateTsStep(long start, long end, long ts, float deltaVal) {
-		return ((double)(ts-start))/(end-start)*deltaVal;
+		return (((double)(ts-start))/(end-start))*deltaVal;
 	}
 	public static float getInterpolatedValue(ReadOnlyTimeSeries timeseries, long timestamp) {
 		SampledValue sv = timeseries.getValue(timestamp);

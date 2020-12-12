@@ -17,6 +17,7 @@ package org.smartrplace.tissue.util.logconfig;
 
 import java.util.List;
 
+import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.recordeddata.RecordedDataConfiguration;
@@ -114,6 +115,35 @@ public class LogConfigSP {
             	logger.debug("returning recorded data for {}", id);
         }
         return rds;
+    }
+
+    public static void storeData(List<SampledValue> toInsert,  RecordedDataStorage rds) {
+        //logger.debug("inserting {} values into recorded data for {}", toInsert.size(), res.getLocation());
+        
+    	RecordedDataConfiguration cfg_ovc = new RecordedDataConfiguration();
+        cfg_ovc.setStorageType(RecordedDataConfiguration.StorageType.ON_VALUE_CHANGED);
+        rds.setConfiguration(cfg_ovc);
+
+        if (!toInsert.isEmpty()) {
+            try {
+				rds.insertValues(toInsert);
+			} catch (DataRecorderException e) {
+				e.printStackTrace();
+			}
+            //SampledValue lastValue = toInsert.get(toInsert.size() - 1);
+            //if (logger.isTraceEnabled()) {
+            //    logger.trace(String.format("%d values from %tc to %tc", toInsert.size(),
+            //            toInsert.get(0).getTimestamp(), lastValue.getTimestamp()));
+            //}
+            //logger.debug("storing last value ({}) in resource {}",
+            //        lastValue.getValue().getFloatValue(), res.getPath());
+
+            // set logging back to FIXED_INTERVAL to prevent automatic logging
+            RecordedDataConfiguration cfg_fixed = new RecordedDataConfiguration();
+            cfg_fixed.setStorageType(RecordedDataConfiguration.StorageType.FIXED_INTERVAL);
+            cfg_fixed.setFixedInterval(Long.MAX_VALUE);
+            rds.setConfiguration(cfg_fixed);
+        }
     }
 
 }

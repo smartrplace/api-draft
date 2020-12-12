@@ -22,6 +22,8 @@ import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
 import org.ogema.tools.resource.util.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartrplace.util.frontend.servlet.ServletNumProvider;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletPageProvider;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
@@ -43,7 +45,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	
 	Map<String, ReadOnlyTimeSeries> knownSpecialTs = new HashMap<>();
 	protected final ApplicationManager appMan;
-	
+
+	public static final Logger log = LoggerFactory.getLogger(TimeSeriesServlet.class);
 	public TimeSeriesServlet(ApplicationManager appMan) {
 		this.appMan = appMan;
 	}
@@ -269,6 +272,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				myRefValue = -counter;
 			delta = ref.referenceMeterValue - myRefValue;
 			aggregateValuesForMeter(timeSeries, mode, start, end, prevVal, result, delta);
+log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-":""+result.get(result.size()-1).getValue().getFloatValue())+" delta:"+delta+" myRefValue:"+myRefValue);
 			return result;
 		} else {
 			myRefValue = TimeProcUtil.getInterpolatedValue(timeSeries, ref.referenceTime);
@@ -281,8 +285,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		//	counter = getPartialConsumptionValue(timeSeries, start, true);
 		//}
 		//Float prevValue = null;
-		//long prevTime = -1;
-		for(SampledValue sv: timeSeries.getValues(start, end)) {
+		List<SampledValue> tsInput = timeSeries.getValues(start, end);
+		for(SampledValue sv: tsInput) {
 			/*if(mode == AggregationMode.Consumption2Meter)
 				counter += sv.getValue().getFloatValue();
 			else if(mode == AggregationMode.Power2Meter) {
@@ -379,6 +383,10 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		if(svBefore == null || svNext == null)
 			return 0;
 		// Part of consumption represented by the value at the end of the interval that is used until timestamp
+		if(svBefore.getTimestamp() == svNext.getTimestamp()) {
+			System.out.println("This should neven occur as we tested for a value on the exact timestamp before!");
+			return 0;
+		}
 		float partialVal = (float) TimeProcUtil.interpolateTsStep(svBefore.getTimestamp(), svNext.getTimestamp(),
 				timestamp,
 				svNext.getValue().getFloatValue());
@@ -423,9 +431,11 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			long startLoc, long endLoc, Power2MeterPrevValues prevVal,
 			 List<SampledValue> result, double delta) {
 		double counter;
-		if(mode == AggregationMode.Consumption2Meter)
+		if(mode == AggregationMode.Consumption2Meter) {
 			counter = getPartialConsumptionValue(timeSeries, startLoc, true);
-		else {
+			if(Double.isNaN(counter))
+				log.warn("NAN for agg from"+timeSeries.toString()+" at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc));
+		} else {
 			SampledValue svBefore = timeSeries.getPreviousValue(startLoc);
 			SampledValue svFirst = timeSeries.getNextValue(startLoc);
 			long firstTs;
@@ -435,7 +445,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				firstTs = svFirst.getTimestamp();
 			if(svBefore != null && (!Float.isNaN(svBefore.getValue().getFloatValue())))
 				counter = svBefore.getValue().getFloatValue()*(firstTs - startLoc);
-			counter = 0;
+			else
+				counter = 0;
 		}
 		final List<SampledValue> svList;
 		svList = timeSeries.getValues(startLoc, endLoc);
@@ -449,6 +460,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			if(result != null) {
 				result.add(new SampledValue(new FloatValue((float) (counter+delta)), sv.getTimestamp(), sv.getQuality()));
 			}
+			if(Double.isNaN(counter))
+				log.warn("NAN for agg from"+timeSeries.toString()+" at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc));
 		}
 		if(mode == AggregationMode.Power2Meter) {
 			counter += getFinalPowerStep(prevVal, endLoc);
@@ -456,6 +469,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				result.add(new SampledValue(new FloatValue((float) (counter+delta)), prevVal.timestamp, Quality.GOOD));
 			else
 				counter += getPartialConsumptionValue(timeSeries, endLoc, false);
+			if(Double.isNaN(counter))
+				log.warn("NAN for agg from"+timeSeries.toString()+" at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc));
 		}
 		return counter;
 	}
