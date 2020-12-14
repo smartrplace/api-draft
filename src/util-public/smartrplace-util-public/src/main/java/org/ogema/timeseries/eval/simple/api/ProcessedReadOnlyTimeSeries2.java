@@ -51,6 +51,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	
 	private Long firstTimestampInSource = null;
 	private Long lastTimestampInSource = null;
+	private boolean updateLastTimestampInSourceOnEveryCall;
 	public Long getTimeStampInSourceInternal(boolean first) {
 		if(first)
 			return firstTimestampInSource;
@@ -67,11 +68,27 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	}
 	public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
 			AggregationMode mode, Datapoint dp) {
+		this(tsdi, nameProvider, mode, dp, false);
+		
+	}
+	/**
+	 * 
+	 * @param tsdi
+	 * @param nameProvider
+	 * @param mode
+	 * @param dp
+	 * @param updateLastTimestampInSourceOnEveryCall if false (default) then the input time series is only read once to determine start and end
+	 * 		otherwise the end is udpated on every call, the start is not updated, though
+	 */
+	public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
+			AggregationMode mode, Datapoint dp,
+			boolean updateLastTimestampInSourceOnEveryCall) {
 		super(InterpolationMode.NONE);
 		this.nameProvider = nameProvider;
 		this.tsdi = tsdi;
 		this.dp = dp;
 		this.mode = mode;
+		this.setUpdateLastTimestampInSourceOnEveryCall(updateLastTimestampInSourceOnEveryCall);
 	}
 
 	public ProcessedReadOnlyTimeSeries2(Datapoint dp) {
@@ -96,11 +113,11 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 			else
 				return Collections.emptyList();
 		}
-		if(lastTimestampInSource == null) {
+		if(lastTimestampInSource == null && updateLastTimestampInSourceOnEveryCall) {
 			SampledValue sv = ts.getPreviousValue(Long.MAX_VALUE);
 			if(sv != null)
 				lastTimestampInSource = sv.getTimestamp();
-			else
+			else if(lastTimestampInSource == null)
 				return Collections.emptyList();
 		}
 		if(end < firstTimestampInSource)
@@ -172,5 +189,13 @@ logger.error("Starting getResultValues for PROT:"+dp.getLocation());
 	
 	public static String getDpLocation(Datapoint dpSource, String locationPostfix) {
 		return dpSource.getLocation()+locationPostfix;
+	}
+	/** See constructor documentation*/
+	public boolean isUpdateLastTimestampInSourceOnEveryCall() {
+		return updateLastTimestampInSourceOnEveryCall;
+	}
+	/** See constructor documentation*/
+	public void setUpdateLastTimestampInSourceOnEveryCall(boolean updateLastTimestampInSourceOnEveryCall) {
+		this.updateLastTimestampInSourceOnEveryCall = updateLastTimestampInSourceOnEveryCall;
 	}
 }

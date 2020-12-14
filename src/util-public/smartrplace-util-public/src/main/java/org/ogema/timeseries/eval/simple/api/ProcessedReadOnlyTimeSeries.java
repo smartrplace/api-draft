@@ -101,7 +101,9 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			knownStart = startTime;			
 			updateValueLimits();
 		} else if(endTime > knownEnd) {
+logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd));
 			List<SampledValue> newVals = updateValues(knownEnd, endTime);
+logger.error("Found new vals:"+values.size());
 			if(isOwnList) {
 				try {
 					values.addAll(newVals);
@@ -112,7 +114,6 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 					values = concat;
 				}
 			} else {
-logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd));
 				List<SampledValue> concat = new ArrayList<SampledValue>(values);
 				concat.addAll(newVals);
 				values = concat;
@@ -120,7 +121,8 @@ logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDa
 			}
 			knownEnd = endTime;			
 			updateValueLimits();
-		}
+		} else
+logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd));
 		if(startTime > lastValueInList)
 			return Collections.emptyList();
 		if(endTime < firstValueInList)
@@ -251,9 +253,9 @@ logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDa
 	
 	public String getSummaryColumn() {
 		String result = StringFormatHelper.getTimeDateInLocalTimeZone(knownStart)+"/"+StringFormatHelper.getTimeDateInLocalTimeZone(knownEnd)+
-				StringFormatHelper.getTimeDateInLocalTimeZone(lastKnownEndUpdate);
+				"/"+StringFormatHelper.getTimeDateInLocalTimeZone(lastKnownEndUpdate);
 		if(knownEndUpdateInterval != null)
-			result += knownEndUpdateInterval/60000+"min";
+			result += "/"+knownEndUpdateInterval/60000+"min";
 		return result;
 	}
 
