@@ -16,6 +16,7 @@ import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeri
 import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
+import de.iwes.util.format.StringFormatHelper;
 
 /** Implementation of {@link ProcessedReadOnlyTimeSeries} that has an input time series and assumes that the 
  * {@link ProcessedReadOnlyTimeSeries} as result shall have exactly one resulting SampledValue for each input
@@ -41,7 +42,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	
 	//final protected MonitoringController controller;
 	final protected TimeSeriesDataImpl tsdi;
-	private final Datapoint dp;
+	private final Datapoint dpInput;
 	
 	/** only relevant if dp == null*/
 	final protected TimeSeriesNameProvider nameProvider;
@@ -68,7 +69,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	}
 	public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
 			AggregationMode mode, Datapoint dp) {
-		this(tsdi, nameProvider, mode, dp, false);
+		this(tsdi, nameProvider, mode, dp, !Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"));
 		
 	}
 	/**
@@ -81,12 +82,12 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	 * 		otherwise the end is udpated on every call, the start is not updated, though
 	 */
 	public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
-			AggregationMode mode, Datapoint dp,
+			AggregationMode mode, Datapoint dpInput,
 			boolean updateLastTimestampInSourceOnEveryCall) {
 		super(InterpolationMode.NONE);
 		this.nameProvider = nameProvider;
 		this.tsdi = tsdi;
-		this.dp = dp;
+		this.dpInput = dpInput;
 		this.mode = mode;
 		this.setUpdateLastTimestampInSourceOnEveryCall(updateLastTimestampInSourceOnEveryCall);
 	}
@@ -115,9 +116,10 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 		}
 		if(lastTimestampInSource == null && updateLastTimestampInSourceOnEveryCall) {
 			SampledValue sv = ts.getPreviousValue(Long.MAX_VALUE);
-			if(sv != null)
+			if(sv != null) {
 				lastTimestampInSource = sv.getTimestamp();
-			else if(lastTimestampInSource == null)
+logger.info("Found last input time stamp:"+StringFormatHelper.getTimeDateInLocalTimeZone(lastTimestampInSource));
+			} else if(lastTimestampInSource == null)
 				return Collections.emptyList();
 		}
 		if(end < firstTimestampInSource)
@@ -128,12 +130,13 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 			end = lastTimestampInSource;
 		if(start < firstTimestampInSource)
 			start = firstTimestampInSource;
-logger.error("Starting getResultValues for PROT:"+dp.getLocation());
+logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLabelPostfix()+" from "+StringFormatHelper.getTimeDateInLocalTimeZone(start)+
+		" to "+StringFormatHelper.getTimeDateInLocalTimeZone(end));
 		return getResultValues(ts, start, end, mode);
 	}
 
 	public String getShortId() {
-		return getShortId(tsdi, nameProvider, getDp());
+		return getShortId(tsdi, nameProvider, getInputDp());
 	}
 	
 	public static String getShortId(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
@@ -163,9 +166,9 @@ logger.error("Starting getResultValues for PROT:"+dp.getLocation());
 	public DatapointImpl getResultSeriesDP(DatapointService dpService) {
 		String label;
 		String tsLocationOrBaseId;
-		if(getDp() != null) {
-			label = getDp().label(null)+getLabelPostfix();
-			tsLocationOrBaseId = getDpLocation(getDp(), getLabelPostfix()); //getDp().getLocation()+getLocationPostifx();
+		if(getInputDp() != null) {
+			label = getInputDp().label(null)+getLabelPostfix();
+			tsLocationOrBaseId = getDpLocation(getInputDp(), getLabelPostfix()); //getDp().getLocation()+getLocationPostifx();
 		} else {
 			label = getShortId()+getLabelPostfix();
 			tsLocationOrBaseId = tsdi.id()+getLocationPostifx();
@@ -178,13 +181,13 @@ logger.error("Starting getResultValues for PROT:"+dp.getLocation());
 			result.setTimeSeries(this, false);
 			result.setLabel(label, null);
 		}
-		DPUtil.copyExistingDataRoomDevice(getDp(), result);
+		DPUtil.copyExistingDataRoomDevice(getInputDp(), result);
 		result.info().setAggregationMode(AggregationMode.Consumption2Meter);
 		result.info().setInterpolationMode(InterpolationMode.NONE);
 		return result ;
 	}
-	public Datapoint getDp() {
-		return dp;
+	public Datapoint getInputDp() {
+		return dpInput;
 	}
 	
 	public static String getDpLocation(Datapoint dpSource, String locationPostfix) {

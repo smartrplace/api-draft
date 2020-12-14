@@ -436,9 +436,14 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	public ReadOnlyTimeSeries getTimeSeries() {
 		if(tseries != null)
 			return tseries;
-		if(timeSeriesID != null)
-			return UserServlet.knownTS.get(timeSeriesID).getTimeSeries();
-		if(resource instanceof ReadOnlyTimeSeries)
+		if(timeSeriesID != null) {
+			TimeSeriesDataImpl ts = UserServlet.knownTS.get(timeSeriesID);
+			if(ts == null) {
+				timeSeriesID = null;
+				return null;
+			}
+			return ts.getTimeSeries();
+		} if(resource instanceof ReadOnlyTimeSeries)
 			return (ReadOnlyTimeSeries) resource;
 		if(resource instanceof SingleValueResource)
 			return ValueResourceHelper.getRecordedData((SingleValueResource) resource);

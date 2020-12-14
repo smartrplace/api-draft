@@ -72,7 +72,7 @@ public class TimeseriesSimpleProcUtil {
 			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
 					AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2) {
 				List<SampledValue> result = TimeSeriesServlet.getDayValues(timeSeries, start, end, mode,
-						newTs2.getDp()!=null?newTs2.getDp().getScale():null);
+						newTs2.getInputDp()!=null?newTs2.getInputDp().getScale():null);
 				return result;
 			}
 		};
@@ -84,7 +84,7 @@ public class TimeseriesSimpleProcUtil {
 			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
 					AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2) {
 				List<SampledValue> result = TimeSeriesServlet.getDayValues(timeSeries, start, end, mode,
-						newTs2.getDp()!=null?newTs2.getDp().getScale():null, false, AbsoluteTiming.HOUR);
+						newTs2.getInputDp()!=null?newTs2.getInputDp().getScale():null, false, AbsoluteTiming.HOUR);
 				return result;
 			}
 		};
