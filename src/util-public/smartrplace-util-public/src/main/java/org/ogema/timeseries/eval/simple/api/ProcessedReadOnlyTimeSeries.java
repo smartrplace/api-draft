@@ -8,6 +8,10 @@ import java.util.List;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.iwes.util.format.StringFormatHelper;
 
 /** Implementation for {@link ReadOnlyTimeSeries} that is based on some input provided via {@link #updateValues(long, long)}.
  * The class requests any unknown values from the implementation via this method. It assumes that for a given interval all values
@@ -49,6 +53,8 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	
 	protected final InterpolationMode interpolationMode;
 	
+	final static protected Logger logger = LoggerFactory.getLogger("ProcessedReadOnlyTimeSeries");
+
 	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode) {
 		this(interpolationMode, TimeProcUtil.HOUR_MILLIS*2);
 	}
@@ -106,6 +112,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 					values = concat;
 				}
 			} else {
+logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd));
 				List<SampledValue> concat = new ArrayList<SampledValue>(values);
 				concat.addAll(newVals);
 				values = concat;
@@ -236,4 +243,18 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	public long getCreationTime() {
 		return creationTime;
 	}
+	
+	
+	public static String getSummaryHeader() {
+		return "knownStart/End/lastUpd/interval";
+	}
+	
+	public String getSummaryColumn() {
+		String result = StringFormatHelper.getTimeDateInLocalTimeZone(knownStart)+"/"+StringFormatHelper.getTimeDateInLocalTimeZone(knownEnd)+
+				StringFormatHelper.getTimeDateInLocalTimeZone(lastKnownEndUpdate);
+		if(knownEndUpdateInterval != null)
+			result += knownEndUpdateInterval/60000+"min";
+		return result;
+	}
+
 }

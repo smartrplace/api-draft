@@ -111,6 +111,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 			end = lastTimestampInSource;
 		if(start < firstTimestampInSource)
 			start = firstTimestampInSource;
+logger.error("Starting getResultValues for PROT:"+dp.getLocation());
 		return getResultValues(ts, start, end, mode);
 	}
 
