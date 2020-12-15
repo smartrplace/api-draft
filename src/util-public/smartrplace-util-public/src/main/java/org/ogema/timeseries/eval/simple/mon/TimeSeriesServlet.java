@@ -250,6 +250,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				endLoc = start;			
 			}
 			double counter = aggregateValuesForMeter(timeSeries, mode, startLoc, endLoc, prevVal, null, 0);
+log.info("Calculated ref from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+
+		" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(endLoc)+" found: "+counter);
 			/*if(mode == AggregationMode.Consumption2Meter)
 				counter = getPartialConsumptionValue(timeSeries, startLoc, true);
 			else
@@ -271,6 +273,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			else
 				myRefValue = -counter;
 			delta = ref.referenceMeterValue - myRefValue;
+log.info("Aggregating from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(start)+
+		" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(end));
 			aggregateValuesForMeter(timeSeries, mode, start, end, prevVal, result, delta);
 log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-":""+result.get(result.size()-1).getValue().getFloatValue())+" delta:"+delta+" myRefValue:"+myRefValue);
 			return result;
@@ -450,6 +454,12 @@ log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-"
 		}
 		final List<SampledValue> svList;
 		svList = timeSeries.getValues(startLoc, endLoc);
+if(timeSeries instanceof RecordedData) {
+	RecordedData rec = (RecordedData) timeSeries;
+	log.error("Read from "+rec.getPath()+" values:"+svList.size());
+} else
+	log.error("Read from no-RecordedData values:"+svList.size()+" : "+timeSeries.toString());
+log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(endLoc));
 		for(SampledValue sv: svList) {
 			if(Float.isNaN(sv.getValue().getFloatValue()))
 				continue;

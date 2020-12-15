@@ -101,7 +101,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			knownStart = startTime;			
 			updateValueLimits();
 		} else if(endTime > knownEnd) {
-logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd));
+logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd)+" endTime:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(endTime));
 			List<SampledValue> newVals = updateValues(knownEnd, endTime);
 logger.error("Found new vals:"+values.size());
 			if(isOwnList) {

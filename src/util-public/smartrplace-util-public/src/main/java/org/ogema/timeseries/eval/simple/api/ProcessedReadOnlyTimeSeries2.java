@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
@@ -114,11 +115,16 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 			else
 				return Collections.emptyList();
 		}
-		if(lastTimestampInSource == null && updateLastTimestampInSourceOnEveryCall) {
+		if(lastTimestampInSource == null || updateLastTimestampInSourceOnEveryCall) {
 			SampledValue sv = ts.getPreviousValue(Long.MAX_VALUE);
 			if(sv != null) {
 				lastTimestampInSource = sv.getTimestamp();
-logger.info("Found last input time stamp:"+StringFormatHelper.getTimeDateInLocalTimeZone(lastTimestampInSource));
+logger.info("Found last input time stamp:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastTimestampInSource));
+if(ts instanceof RecordedData) {
+	RecordedData rec = (RecordedData) ts;
+	logger.info("Read from "+rec.getPath());
+} else
+	logger.info("Read from no-RecordedData values: "+ts.toString());
 			} else if(lastTimestampInSource == null)
 				return Collections.emptyList();
 		}
@@ -130,9 +136,10 @@ logger.info("Found last input time stamp:"+StringFormatHelper.getTimeDateInLocal
 			end = lastTimestampInSource;
 		if(start < firstTimestampInSource)
 			start = firstTimestampInSource;
-logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLabelPostfix()+" from "+StringFormatHelper.getTimeDateInLocalTimeZone(start)+
-		" to "+StringFormatHelper.getTimeDateInLocalTimeZone(end));
-		return getResultValues(ts, start, end, mode);
+logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLabelPostfix()+" from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(start)+
+		" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(end+1));
+		//we want end inclusive, so we have to add 1
+		return getResultValues(ts, start, end+1, mode);
 	}
 
 	public String getShortId() {

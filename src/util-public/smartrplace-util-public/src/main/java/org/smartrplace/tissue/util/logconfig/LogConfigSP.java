@@ -87,8 +87,17 @@ public class LogConfigSP {
         RecordedDataStorage rds = dataRecorder.getRecordedDataStorage(id);
         if (rds == null) {
             RecordedDataConfiguration configuration = new RecordedDataConfiguration();
-            //setting ON_VALUE_CHANGED will cause a write immediately
+            /*setting ON_VALUE_CHANGED/ON_VALUE_UPDATE will cause a write immediately when storage is created.
+             * 
+             * 
+             * CHANGED IMPLEMENTATION, SO THE FOLLOWING DOES NOT APPLY ANYMORE
+             * But setting to FIXED_INTERVAL means that it will try to read only rounded timestamps, which does
+             * not work for interval MAX_VALUE. So you have to make sure that resource contains a reasonable value
+             * on every startup that will be added on startup.<br>
+             * TODO: The implementation needs to be adapted regarding this.
+             */
             configuration.setStorageType(RecordedDataConfiguration.StorageType.ON_VALUE_UPDATE);
+            //configuration.setStorageType(RecordedDataConfiguration.StorageType.FIXED_INTERVAL);
             //configuration.setFixedInterval(Long.MAX_VALUE);
             try {
 				rds = dataRecorder.createRecordedDataStorage(id, configuration);
@@ -102,12 +111,14 @@ public class LogConfigSP {
             	logger.debug("got data series for {}: {}", id, rds.getConfiguration());
             if (rds.getConfiguration() == null || 
                     rds.getConfiguration().getStorageType() != RecordedDataConfiguration.StorageType.ON_VALUE_UPDATE
+                    //rds.getConfiguration().getStorageType() != RecordedDataConfiguration.StorageType.FIXED_INTERVAL
                     //|| rds.getConfiguration().getFixedInterval() != Long.MAX_VALUE
                     ) {
                 if(logger != null)
                 	logger.debug("setting storage type to ON_VALUE_UPDATE for {}", id);
                 RecordedDataConfiguration configuration = new RecordedDataConfiguration();
                 configuration.setStorageType(RecordedDataConfiguration.StorageType.ON_VALUE_UPDATE);
+                //configuration.setStorageType(RecordedDataConfiguration.StorageType.FIXED_INTERVAL);
                 //configuration.setFixedInterval(Long.MAX_VALUE);
                 rds.setConfiguration(configuration);
             }
@@ -129,20 +140,12 @@ public class LogConfigSP {
 				rds.insertValues(toInsert);
 			} catch (DataRecorderException e) {
 				e.printStackTrace();
+			} finally {
+	            RecordedDataConfiguration cfg_fixed = new RecordedDataConfiguration();
+	            cfg_fixed.setStorageType(RecordedDataConfiguration.StorageType.FIXED_INTERVAL);
+	            cfg_fixed.setFixedInterval(Long.MAX_VALUE);
+	            rds.setConfiguration(cfg_fixed);
 			}
-            //SampledValue lastValue = toInsert.get(toInsert.size() - 1);
-            //if (logger.isTraceEnabled()) {
-            //    logger.trace(String.format("%d values from %tc to %tc", toInsert.size(),
-            //            toInsert.get(0).getTimestamp(), lastValue.getTimestamp()));
-            //}
-            //logger.debug("storing last value ({}) in resource {}",
-            //        lastValue.getValue().getFloatValue(), res.getPath());
-
-            // set logging back to FIXED_INTERVAL to prevent automatic logging
-            RecordedDataConfiguration cfg_fixed = new RecordedDataConfiguration();
-            cfg_fixed.setStorageType(RecordedDataConfiguration.StorageType.FIXED_INTERVAL);
-            cfg_fixed.setFixedInterval(Long.MAX_VALUE);
-            rds.setConfiguration(cfg_fixed);
         }
     }
 
