@@ -777,6 +777,15 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		finishRowSnippet(row, widgetId, result);	
 		return result;
 	}
+	public TextField floatEdit(String widgetId, String lineId, final FloatResource source, Row row,
+			final Alert alert,final float minimumAllowed, final float maximumAllowed, String notAllowedMessage, int mode) {
+		if(checkLineId(widgetId)) return null;
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
+		TextField result = floatEdit(widgetId + lineId, source, null,
+				alert, minimumAllowed, maximumAllowed, notAllowedMessage, mode);
+		finishRowSnippet(row, widgetId, result);	
+		return result;
+	}
 	public TextField floatEdit(final FloatResource source, final Alert alert,
 			final float minimumAllowed, final float maximumAllowed, String notAllowedMessage) {
 		counter++;
@@ -797,7 +806,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	 * @param minimumAllowed
 	 * @param maximumAllowed
 	 * @param notAllowedMessage
-	 * @param mode 0: default, 1:no value transformation
+	 * @param mode 0: default, 1:no value transformation, 2: show "0" as default, 3: show 0.0 as default
 	 * @return
 	 */
 	private TextField floatEdit(String widgetId, final FloatResource optSource, String altId, final Alert alert,
@@ -812,7 +821,11 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 			@Override
 			public void onGET(OgemaHttpRequest req) {
 				FloatResource source = getResource(sva, req, FloatResource.class);
-				if((source instanceof TemperatureResource)&&(mode == 0))
+				if(mode == 2 && (!source.exists()))
+					myField.setValue("0",req);
+				else if(mode == 3 && (!source.exists()))
+					myField.setValue("0.0",req);
+				else if((source instanceof TemperatureResource)&&(mode == 0))
 					myField.setValue(((TemperatureResource)source).getCelsius()+"",req);
 				else {
 					myField.setValue(source.getValue()+"",req);

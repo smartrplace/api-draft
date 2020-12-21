@@ -193,6 +193,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	
 	protected long lastTimestamp = -1;
 	
+	/** TODO: Currently we only supprt structureList=true and shortXY=false*/
 	@Override
 	public void setValue(String user, String key, String value) {
 		String align = UserServlet.getParameter("align", paramMap);
@@ -309,7 +310,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	}
 
 	/** Structure for passing on downsampling information from one input sample to the next one*/
-	class DownSamplingData {
+	static class DownSamplingData {
 		long lastTs = -1;
 		Long lastTsCollected = null;
 		float maxVal = -Float.MAX_VALUE;
@@ -331,7 +332,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 * @param suppressNaN if true then any NaN and infinity values are removed from the result
 	 * @return JSON to be returned as value of the object result
 	 */
-	protected JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
+	public static JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
 			boolean structureList, boolean shortXY, boolean suppressNaN) {
 		if(valueDist != null && mode != DownSamplingMode.MINMAX)
 			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
@@ -368,7 +369,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		return result;
 	}
 	
-	protected void processMinMaxDownSampling(DownSamplingData data, long tsNow, int valueDist, float fval,
+	protected static void processMinMaxDownSampling(DownSamplingData data, long tsNow, int valueDist, float fval,
 			LinkedHashMap<Long, Float> svMap) {
 		if(data.lastTsCollected == null) {
 			if((tsNow - data.lastTs) < valueDist) {
@@ -395,7 +396,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		}		
 	}
 	
-	protected long putDownSampledTs(long timeStamp, float fval,
+	protected static long putDownSampledTs(long timeStamp, float fval,
 			LinkedHashMap<Long, Float> svMap, boolean suppressNaN) {
 		if(suppressNaN && (Float.isNaN(fval) || Float.isInfinite(fval) || (fval == Float.MAX_VALUE) || (fval == -Float.MAX_VALUE)))
 			return timeStamp;

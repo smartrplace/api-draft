@@ -15,12 +15,15 @@
  */
 package org.smartrplace.tissue.util.logconfig;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.recordeddata.RecordedDataConfiguration;
+import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.recordeddata.DataRecorder;
 import org.ogema.recordeddata.DataRecorderException;
@@ -87,14 +90,9 @@ public class LogConfigSP {
         RecordedDataStorage rds = dataRecorder.getRecordedDataStorage(id);
         if (rds == null) {
             RecordedDataConfiguration configuration = new RecordedDataConfiguration();
-            /*setting ON_VALUE_CHANGED/ON_VALUE_UPDATE will cause a write immediately when storage is created.
+            /*setting ON_VALUE_CHANGED will cause a write immediately when storage is created. May also occur with FIXED_INTERVAL.
+             * So it is good that new RecordedDataStorage's are created with ON_VALUE_UPDATE.
              * 
-             * 
-             * CHANGED IMPLEMENTATION, SO THE FOLLOWING DOES NOT APPLY ANYMORE
-             * But setting to FIXED_INTERVAL means that it will try to read only rounded timestamps, which does
-             * not work for interval MAX_VALUE. So you have to make sure that resource contains a reasonable value
-             * on every startup that will be added on startup.<br>
-             * TODO: The implementation needs to be adapted regarding this.
              */
             configuration.setStorageType(RecordedDataConfiguration.StorageType.ON_VALUE_UPDATE);
             //configuration.setStorageType(RecordedDataConfiguration.StorageType.FIXED_INTERVAL);
@@ -128,11 +126,64 @@ public class LogConfigSP {
         return rds;
     }
 
-    public static void storeData(List<SampledValue> toInsert,  RecordedDataStorage rds) {
+    /** Store data into slotsDB and make sure no gaps are created that cannot later be filled anymore. Avoid trying to write the same data again
+     * 
+     * @param toInsert
+     * @param rds must either be of type Schedule or RecordedDataStorage
+     * @param maxTimeStamp maximum time gap between two values in the slotsDB. If this value would be exceeded
+     * 		then no later values are written and the last value in the slotsDB after the operation is returned.
+     * @return null if all values could be written, otherwise see maxTimeStamp
+     */
+    public static SampledValue storeData(List<SampledValue> toInsert, ReadOnlyTimeSeries rds, long maxTimeStamp) {
+    	if(toInsert.isEmpty())
+    		return null;
+    	SampledValue lastVal = rds.getPreviousValue(Long.MAX_VALUE);
+    	if(lastVal == null) {
+    		storeData(toInsert, rds);
+    		return null;
+    	}
+    	if((toInsert.get(0).getTimestamp() - lastVal.getTimestamp()) > maxTimeStamp) {
+    		return lastVal;
+    	}
+    	int startIdx = 0;
+    	if(toInsert.get(0).getTimestamp() <= lastVal.getTimestamp()) {
+    		boolean found = false;
+    		for(int idx = 0; idx < toInsert.size(); idx++) {
+    			if(toInsert.get(idx).getTimestamp() > lastVal.getTimestamp()) {
+    				startIdx = idx;
+    				found = true;
+    				break;
+    			}
+    		}
+    		if(!found) {
+    			return null;
+    		}
+    	}
+    	List<SampledValue> realToInsert = new ArrayList<>();
+    	for(int idx = startIdx; idx < toInsert.size(); idx++) {
+    		SampledValue newVal = toInsert.get(idx);
+        	if((newVal.getTimestamp() - lastVal.getTimestamp()) > maxTimeStamp) {
+        		storeData(realToInsert, rds);
+        		return lastVal;
+        	}
+        	realToInsert.add(newVal);
+        	lastVal = newVal;
+    	}
+    	storeData(toInsert, rds);
+    	return null;
+    }
+    
+    /** rot must either be of type Schedule or RecordedDataStorage*/
+    public static void storeData(List<SampledValue> toInsert,  ReadOnlyTimeSeries rot) {
+    	if(rot instanceof Schedule) {
+    		((Schedule)rot).addValues(toInsert);
+    		return;
+    	}
+    	RecordedDataStorage rds = (RecordedDataStorage)rot;
         //logger.debug("inserting {} values into recorded data for {}", toInsert.size(), res.getLocation());
         
     	RecordedDataConfiguration cfg_ovc = new RecordedDataConfiguration();
-        cfg_ovc.setStorageType(RecordedDataConfiguration.StorageType.ON_VALUE_CHANGED);
+        cfg_ovc.setStorageType(RecordedDataConfiguration.StorageType.ON_VALUE_UPDATE);
         rds.setConfiguration(cfg_ovc);
 
         if (!toInsert.isEmpty()) {

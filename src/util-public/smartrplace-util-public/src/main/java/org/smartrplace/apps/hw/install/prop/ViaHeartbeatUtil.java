@@ -31,6 +31,14 @@ public class ViaHeartbeatUtil {
 		return grp;
 	}
 	
+	/** Register a data point for transfer from gateway to server, to be used on server<br>
+	 * If the datapoint on the server has a resource...
+	 * 
+	 * @param dp should be remote datapoint related to gateway specified by gwId. 
+	 * @param gwId TODO: Check if this is really necessary as gatewayId is also given by the datapoint
+	 * @param dpService
+	 * @return
+	 */
 	public static DatapointGroup registerForTansferViaHeartbeatFromGateway(Datapoint dp, String gwId,
 			DatapointService dpService) {
 		return registerForTansferViaHeartbeatRecv(dp, gwId, dpService);
@@ -39,6 +47,7 @@ public class ViaHeartbeatUtil {
 			DatapointService dpService) {
 		return registerForTansferViaHeartbeatRecv(dp, serverUrl, dpService);
 	}
+	
 	public static DatapointGroup registerForTansferViaHeartbeatRecv(Datapoint dp, String commPartnerId,
 			DatapointService dpService) {
 		String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_RECEIVE, commPartnerId);

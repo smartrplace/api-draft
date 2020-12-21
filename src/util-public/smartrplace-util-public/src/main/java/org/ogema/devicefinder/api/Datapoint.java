@@ -141,4 +141,5 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
 	/** Shall provide a {@link SingleValueResource} object in a server/superior environment*/
 	public static final String MIRROR_RESOURCE_PARAM = "MIRROR_RESOURCE";
+	public static final String HEARTBEAT_STRING_PROVIDER_PARAM = "HEARTBEAT_STRING_PROVIDER";
 }

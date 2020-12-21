@@ -35,6 +35,14 @@ import de.iwes.util.format.StringFormatHelper;
  */
 public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTimeSeries {
 	
+	/** This method is called to obtain the calculated values. The method may be called again for the same
+	 * time stamps.
+	 * @param timeSeries
+	 * @param start
+	 * @param end
+	 * @param mode
+	 * @return
+	 */
 	protected abstract List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start, long end,
 			AggregationMode mode);
 	protected String getLabelPostfix() {return "";}

@@ -9,7 +9,10 @@ import java.util.Map.Entry;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
@@ -54,6 +57,14 @@ public class TimeseriesSimpleProcUtil {
 					AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2) {
 				MeterReference ref = new MeterReference();
 				ref.referenceMeterValue = 0;
+				if(timeSeries instanceof RecordedData) {
+					Resource parent = appMan.getResourceAccess().getResource(((RecordedData)timeSeries).getPath());
+					if(parent != null) {
+						FloatResource refVal = parent.getSubResource("refTimeCounter", FloatResource.class);
+						if(refVal.exists())
+							ref.referenceMeterValue = refVal.getValue();
+					}
+				}
 				TimeResource refRes = TimeProcUtil.getDefaultMeteringReferenceResource(appMan.getResourceAccess());
 				if(!refRes.exists()) {
 					refRes.create();

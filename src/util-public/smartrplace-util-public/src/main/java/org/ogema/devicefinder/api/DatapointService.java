@@ -160,4 +160,7 @@ public interface DatapointService {
 	default OSGiConfigAccessService configService() {
 		return null;
 	}
+	default VirtualScheduleService virtualScheduleService() {
+		return null;
+	};
 }

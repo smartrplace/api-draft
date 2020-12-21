@@ -12,6 +12,7 @@ import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvider;
 
 public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	/** Short transfer Id -> Local Datapoint*/
@@ -52,7 +53,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		this.resAcc = resAcc;
 	}
 
-	public boolean receiveDatapointData(String transferId, float value) {
+	protected Datapoint getDatapointForTransferIdReceived(String transferId) {
 		Datapoint dp = datapointsToRecvM.get(transferId);
 		if(dp == null) {
 			for(Entry<Datapoint, String> send: datapointsToSendM.entrySet()) {
@@ -63,6 +64,20 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 				}
 			}
 		}
+		return dp;
+	}
+	public boolean receiveDatapointData(String transferId, float value) {
+		/*Datapoint dp = datapointsToRecvM.get(transferId);
+		if(dp == null) {
+			for(Entry<Datapoint, String> send: datapointsToSendM.entrySet()) {
+				if(send.getValue().equals(transferId)) {
+					dp = send.getKey();
+					datapointsToRecvM.put(transferId, dp);
+					break;
+				}
+			}
+		}*/
+		Datapoint dp = getDatapointForTransferIdReceived(transferId);
 		if(dp == null) {
 			//received information for unknown datapoint
 			logger.warn("Received unknown transferId: "+transferId+" Value:"+value);
@@ -98,6 +113,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	public static class SendDatapointDataPlus {
 		String transferId;
 		Float value;
+		String strVal;
 		ViaHeartbeatInfoProvider infoP;
 	}
 	
@@ -118,7 +134,10 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			result.infoP = getOrCreateInfoProvider(dp, transferId, infoProvidersM);
 		}
 		result.infoP.checkMirrorResorce();
-		result.value = result.infoP.getValueToSend(dpService.getFrameworkTime(), forceSendAllValues); //.getCurrentValueToSend();
+		if(result.infoP.getStrProv() != null)
+			result.strVal = result.infoP.getValueToSendString(dpService.getFrameworkTime(), forceSendAllValues); //.getCurrentValueToSend();
+		else
+			result.value = result.infoP.getValueToSend(dpService.getFrameworkTime(), forceSendAllValues); //.getCurrentValueToSend();
 		return result;
 	}
 	
@@ -218,7 +237,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	}
 	
 	/** To be called by heartbeat to process data received*/
-	public void processRemoteData(Map<String, Float> dataReceived,
+	public void processRemoteData(Map<String, Float> dataReceived, Map<String, String> dataReceivedString,
 			String configJsonReceived, boolean connectingAsClient) {
 		if(configJsonReceived != null) {
 			ViaHeartbeatRemoteTransferList tlist = JSONManagement.importFromJSON(configJsonReceived,
@@ -253,6 +272,22 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			
 		if(dataReceived != null) for(Entry<String, Float> recv: dataReceived.entrySet()) {
 			receiveDatapointData(recv.getKey(), recv.getValue());
+		}
+		long now = dpService.getFrameworkTime();
+		if(dataReceivedString != null) for(Entry<String, String> recv: dataReceivedString.entrySet()) {
+			String transferId = recv.getKey();
+			Datapoint dp = getDatapointForTransferIdReceived(transferId);
+			if(dp == null) {
+				//received information for unknown datapoint
+				logger.warn("Received unknown transferId: "+transferId);
+				return;
+			}
+			Object prov = dp.getParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM);
+			if(prov == null || (!(prov instanceof StringProvider))) {
+				logger.warn("No StringProvider for a String received on transferId: "+transferId);
+				return;
+			}
+			((StringProvider)prov).received(recv.getValue(), now);
 		}
 	}		
 	/** To be called by heartbeat to obtain data to send*/
@@ -293,10 +328,13 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		
 		result.efficientTransferData = new SendDatapointData();
 		result.efficientTransferData.values = new HashMap<>();
+		result.efficientTransferData.strings = new HashMap<>();
 		for(Entry<Datapoint, String> send: datapointsToSendM.entrySet()) {
 			SendDatapointDataPlus sdpPlus = sendDatapointData(send.getKey(), send.getValue(), forceSendAllValues);
 			if(sdpPlus.value != null)
 				result.efficientTransferData.values.put(send.getValue(), sdpPlus.value);
+			if(sdpPlus.strVal != null)
+				result.efficientTransferData.strings.put(send.getValue(), sdpPlus.strVal);
 		}
 		return result;
 	}

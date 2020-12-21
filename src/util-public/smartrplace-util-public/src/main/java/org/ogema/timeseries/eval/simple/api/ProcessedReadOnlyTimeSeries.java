@@ -258,5 +258,34 @@ logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDa
 			result += "/"+knownEndUpdateInterval/60000+"min";
 		return result;
 	}
+	
+	/** Set back knownEnd. This should be used if the values shall be re-calculated from a certain time.<br>
+	 * TODO: This method is NOT Thread-safe
+	 * 
+	 * @param newKnownEnd
+	 * @param force if true it is possible to set knownEnd to a later time. This means that for the increased intervals
+	 * 		no calculations will be performed, which usually is not intended
+	 * @return true if knownEnd was set to newKnownEnd
+	 */
+	public boolean resetKnownEnd(long newKnownEnd, boolean force) {
+		if(knownEnd < newKnownEnd && (!force))
+			return false;
+		knownEnd = newKnownEnd;
+		return true;
+	}
 
+	/** Delete all values and recalculate everything
+	 * 
+	 * @param reCalcUntil if not null a recalculation from zero until this time will be triggered immediately, otherwise on the
+	 * 		next call to getValues
+	 * @return
+	 */
+	public void reset(Long reCalcUntil) {
+		knownStart = -1;
+		knownEnd = 0;
+		values = null;
+		if(reCalcUntil != null) {
+			getValues(0, reCalcUntil);
+		}
+	}
 }
