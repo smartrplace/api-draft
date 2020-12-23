@@ -7,6 +7,7 @@ import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 
@@ -23,6 +24,10 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 	 */
 	protected abstract List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start,
 			long end, AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2);
+	
+	/** change startTime and endTime of parameter if necessary*/
+	protected abstract void alignUpdateIntervalFromSource(DpUpdated updateInterval);
+		
 	//protected TimeSeriesNameProvider nameProvider() {return null;}
 	//protected abstract AggregationMode getMode(String tsLabel);
 	protected final String labelPostfix;
@@ -60,6 +65,11 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 						@Override
 						protected long getCurrentTime() {
 							return dpService.getFrameworkTime();
+						}
+						
+						@Override
+						protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
+							TimeseriesSetProcSingleToSingle.this.alignUpdateIntervalFromSource(updateInterval);
 						}
 					};
 				}

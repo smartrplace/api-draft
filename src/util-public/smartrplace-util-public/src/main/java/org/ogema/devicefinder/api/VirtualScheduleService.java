@@ -20,8 +20,12 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resourcelist.ResourceListHelper;
 
 /** Management for schedules that are copies of memory timeseries usually operated for virtual sensors and
- * similar KPIs
- *
+ * similar KPIs<br>
+ * Currently this is used to notify all schedules registered in the management that the referenceMeteringTime changed.
+ * This is done via the method {@link #resetAll()}. This means all data in the time series is marked for recalculation
+ * and all ViaHeartbeatSchdules providers (sending datapoints, not schedules) are marked for "resend all". It also
+ * updates values in local "mirror schedules" to the datapoints, which is currently not used as we just use sending data
+ * to remote schedules.
  */
 public class VirtualScheduleService {
 	/** List of schedules governed by a datapoint. Note that it is possible that one

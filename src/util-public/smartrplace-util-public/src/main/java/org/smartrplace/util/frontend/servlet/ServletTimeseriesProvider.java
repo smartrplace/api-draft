@@ -13,6 +13,7 @@ import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.devicefinder.api.Datapoint;
 import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
@@ -33,6 +34,9 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	protected final UserServletParamData pData;
 	protected final Long startTime;
 	protected final long endTime;
+	
+	/** Set this to get notifications, only relevant if WriteMode==ANY*/
+	public Datapoint datapointForChangeNotification = null;
 	
 	//Overwrite if POST shall not always be accepted
 	public boolean acceptPOST(String user, String key, String value) {return true;}
@@ -244,6 +248,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			JSONObject in = new JSONObject(value);
 			if(in.has("values")) {
 				JSONArray values = in.getJSONArray("values");
+				long firstTs = Long.MAX_VALUE;
+				long lastTs = -1;
 				for(int i=0; i<values.length(); i++) {
 					JSONObject jval = values.getJSONObject(i);
 					long tsloc = jval.getLong("timestamp");
@@ -253,12 +259,23 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 							long startDay = AbsoluteTimeHelper.getIntervalStart(tsloc, AbsoluteTiming.DAY);
 							long endDay = AbsoluteTimeHelper.addIntervalsFromAlignedTime(startDay, 1, AbsoluteTiming.DAY);
 							sched.deleteValues(startDay, endDay);
-						} else
+							if(datapointForChangeNotification != null)
+								datapointForChangeNotification.notifyTimeseriesChange(startDay, endDay);
+						} else {
 							sched.deleteValues(tsloc, tsloc+1);
+							if(datapointForChangeNotification != null)
+								datapointForChangeNotification.notifyTimeseriesChange(tsloc, tsloc+1);
+						}
 						continue;
 					}
 					sched.addValue(tsloc, new FloatValue(val));
+					if(tsloc < firstTs)
+						firstTs = tsloc;
+					if(tsloc > lastTs)
+						lastTs = tsloc;
 				}
+				if(lastTs > 0 && datapointForChangeNotification != null)
+					datapointForChangeNotification.notifyTimeseriesChange(firstTs, lastTs);
 				return;
 			}
 			long ts = in.getLong("timestamp");

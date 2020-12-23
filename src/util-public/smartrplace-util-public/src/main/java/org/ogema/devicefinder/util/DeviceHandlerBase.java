@@ -87,7 +87,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		return listener.getAllPatterns();
 	}
 	
-	protected static Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result, DatapointService dpService) {
+	public static Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result, DatapointService dpService) {
 		if(res.isActive()) {
 			Datapoint dp = dpService.getDataPointStandard(res);
 			result.add(dp);

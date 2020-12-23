@@ -1,6 +1,11 @@
 package org.ogema.devicefinder.util;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.logging.OgemaLogger;
@@ -16,6 +21,8 @@ import org.ogema.devicefinder.api.DatapointInfoProvider;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.DpConnection;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.api.OGEMADriverPropertyAccess;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
@@ -24,6 +31,7 @@ import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.frontend.servlet.UserServletUtil;
@@ -524,5 +532,90 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	@Override
 	public String toString() {
 		return "DP:"+location;
+	}
+
+	protected final LinkedList<DpUpdated> updates = new LinkedList<>();
+	
+	@Override
+	public void notifyTimeseriesChange(long startTime, long endTime) {
+		long now = dpService.getFrameworkTime();
+		
+		//if the datapoint is marked for sending to a remote schedule, notify here
+		//TODO: Currently we only can resend entire datapoint time series
+		ViaHeartbeatSchedules sprov = (ViaHeartbeatSchedules)this.getParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM);
+		if(sprov != null) {
+			sprov.resendAllOnNextOccasion();
+		}
+		
+		if(!updates.isEmpty()) {
+			DpUpdated last = updates.getLast();
+			if(startTime <= last.end && endTime >= last.start) {
+				//overlapping
+				last.start = Math.min(startTime, last.start);
+				last.end = Math.max(endTime, last.end);
+				last.updateTime = now;
+				return;
+			}
+		}
+		DpUpdated upd = new DpUpdated();
+		upd.start = startTime;
+		upd.end = endTime;
+		upd.updateTime = now;
+		updates.add(upd);
+		//Simple solution against a memory leak
+		if(updates.size() > 20) {
+			updates.removeFirst();
+		}
+	}
+
+	@Override
+	public List<DpUpdated> getIntervalsChanged(long since) {
+		if(updates.isEmpty())
+			return Collections.emptyList();
+		Iterator<DpUpdated> it = updates.descendingIterator();
+		LinkedList<DpUpdated> result = new LinkedList<>();
+		boolean foundChangeBeforeSince = false;
+		while(it.hasNext()) {
+			DpUpdated upd = it.next();
+			if(upd.updateTime >= since) {
+				result.addFirst(upd);
+			} else {
+				foundChangeBeforeSince = true;
+				break;
+			}
+		}
+		if(!foundChangeBeforeSince) {
+			DpUpdated upd = new DpUpdated();
+			upd.start = 0;
+			upd.end = Long.MAX_VALUE;
+			upd.updateTime = updates.getLast().updateTime;
+			return Arrays.asList(new DpUpdated[] {upd});
+		}
+		return result ;
+	}
+
+	@Override
+	public DpUpdated getSingleIntervalChanged(long since) {
+		if(updates.isEmpty())
+			return null;
+		List<DpUpdated> intvs = getIntervalsChanged(since);
+		if(intvs.isEmpty())
+			return null;
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		DpUpdated result = getStartEndForUpdList((List)intvs);
+		return result;
+	}
+	
+	public static DpUpdated getStartEndForUpdList(List<DpGap> toUpdate) {
+		DpUpdated result = new DpUpdated();
+		result.start = toUpdate.get(0).start;
+		result.end = toUpdate.get(0).end;
+		for(DpGap intv: toUpdate) {
+			if(intv.start < result.start)
+				result.start = intv.start;
+			if(intv.end > result.end)
+				result.end = intv.end;
+		}
+		return result;
 	}
 }

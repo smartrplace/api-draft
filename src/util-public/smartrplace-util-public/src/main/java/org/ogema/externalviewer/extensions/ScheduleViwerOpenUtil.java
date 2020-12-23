@@ -9,6 +9,7 @@ import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 
 import de.iwes.timeseries.eval.api.TimeSeriesData;
 import de.iwes.widgets.api.widgets.OgemaWidget;
+import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.reswidget.scheduleviewer.api.ScheduleViewerConfiguration;
 import de.iwes.widgets.reswidget.scheduleviewer.api.ScheduleViewerConfigurationBuilder;
@@ -63,4 +64,41 @@ public class ScheduleViwerOpenUtil {
 		return schedOpenButtonEval;
 	}
 
+	public static ScheduleViewerOpenButton getScheduleViewerOpenButton(WidgetPage<?> page, String widgetId,
+			String text, final SchedOpenDataProvider provider,
+			final DefaultScheduleViewerConfigurationProviderExtended scheduleViewerExpertProvider) {
+		ScheduleViewerOpenButtonEval schedOpenButtonEval = new ScheduleViewerOpenButtonEval(page, widgetId, text,
+				scheduleViewerExpertProvider.getConfigurationProviderId(),
+				scheduleViewerExpertProvider) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected ScheduleViewerConfiguration getViewerConfiguration(long startTime, long endTime,
+					List<Collection<TimeSeriesFilter>> programs) {
+				final ScheduleViewerConfiguration viewerConfiguration =
+						ScheduleViewerConfigurationBuilder.newBuilder().setPrograms(programs).
+						setStartTime(startTime).setEndTime(endTime).setShowManipulator(true).
+						setShowIndividualConfigBtn(false).setShowPlotTypeSelector(true).
+						setShowManipulator(false).build();
+					return viewerConfiguration;
+			}
+
+			@Override
+			protected List<TimeSeriesData> getTimeseries(OgemaHttpRequest req) {
+				return provider.getData(req);
+			}
+
+			@Override
+			protected String getEvaluationProviderId(OgemaHttpRequest req) {
+				return fixedEvalProviderId;
+			}
+
+			@Override
+			protected IntervalConfiguration getITVConfiguration(OgemaHttpRequest req) {
+				return provider.getITVConfiguration();
+			}
+		};
+		schedOpenButtonEval.setNameProvider(null);
+		return schedOpenButtonEval;
+	}
 }

@@ -1,6 +1,7 @@
 package org.ogema.timeseries.eval.simple.mon;
 
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 
 public class TimeseriesSetProcSum extends TimeseriesSetProcMultiToSingle {
 	
@@ -20,5 +21,8 @@ public class TimeseriesSetProcSum extends TimeseriesSetProcMultiToSingle {
 		}
 		return result;
 	}
+	
+	@Override
+	protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {}
 
 }

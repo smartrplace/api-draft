@@ -1,8 +1,11 @@
 package org.ogema.devicefinder.api;
 
+import java.util.List;
+
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.widgets.configuration.service.OGEMAConfigurationProvider;
 import org.smartrplace.apps.hw.install.dpres.SensorDeviceDpRes;
@@ -142,4 +145,22 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	/** Shall provide a {@link SingleValueResource} object in a server/superior environment*/
 	public static final String MIRROR_RESOURCE_PARAM = "MIRROR_RESOURCE";
 	public static final String HEARTBEAT_STRING_PROVIDER_PARAM = "HEARTBEAT_STRING_PROVIDER";
+	
+	/** Only relevant for volatile datapoints with a timeseries that is also changed for
+	 * the past. Note that we do not send notifications for upates behind the last datapoint. This also means
+	 * that we consider the 15 minutes before the last reading to a timeseries to be generally volatile,
+	 * no notifications can be expected for this time.<br>
+	 * Note: Regarding blocking of time series during recalculations see ProcessedReadOnlyTimeSeries.
+	 * @param startTime of interval changed
+	 * @param endTime of interval changed
+	 */
+	void notifyTimeseriesChange(long startTime, long endTime);
+	List<DpUpdated> getIntervalsChanged(long since);
+	/** Get information when the time series was updated for the last time and the first start time
+	 * end last end time of all updates since the time requested. 
+	 * 
+	 * @param since
+	 * @return null if no updates occured since time requested
+	 */
+	DpUpdated getSingleIntervalChanged(long since);
 }

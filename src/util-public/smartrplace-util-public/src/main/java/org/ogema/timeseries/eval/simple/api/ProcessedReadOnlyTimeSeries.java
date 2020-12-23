@@ -1,13 +1,20 @@
 package org.ogema.timeseries.eval.simple.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
+import org.ogema.devicefinder.util.DatapointImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +33,13 @@ import de.iwes.util.format.StringFormatHelper;
  * some time at the result currently calculated or somewhere shortly behind unaligned, but before the next aligned result that may
  * be requested by the upper level evaluation in the next step. Then the previous aligned interval result is calculated once again
  * together with the new result. If the base input is flowing in via data logging then this behavior may make sense as the last
- * aligned aggregated value is updated all the time until the next aligned interval begins.*/
+ * aligned aggregated value is updated all the time until the next aligned interval begins.<br>
+ * Access synchronization: The getValues method should not be processed for the same object of type {@link ProcessedReadOnlyTimeSeries}
+ * twice in parallel as this would trigger a double recalculation and setting the known limits would be quite unpredictable. This
+ * requires that the implementation of updateValues does not read the time series again via getValues. It could read via
+ * {@link #getValuesWithoutUpdate(long, long)}, but this is without update, of course. We have implemented this with
+ * a ReentrantLock. For the proc and cons of ReentrantLock see the table in https://www.geeksforgeeks.org/lock-framework-vs-thread-synchronization-in-java/.
+ * */
 public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries {
 	
 	protected abstract List<SampledValue> updateValues(long start, long end);
@@ -59,6 +72,11 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		this(interpolationMode, TimeProcUtil.HOUR_MILLIS*2);
 	}
 	
+	private final Lock updateLock = new ReentrantLock();
+	/** Set this to get notifications, only relevant if WriteMode==ANY*/
+	public Datapoint datapointForChangeNotification = null;
+	
+	
 	/** Constructor
 	 * 
 	 * @param interpolationMode currently only InterpolationMode.NONE is supported
@@ -69,10 +87,17 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		this.interpolationMode = interpolationMode;
 		this.knownEndUpdateInterval = knownEndUpdateInterval;
 		this.creationTime = getCurrentTime();
+		this.intervalToUpdate.start = -1;
 	}
 
 	@Override
 	public List<SampledValue> getValues(long startTime, long endTime) {
+		boolean isFree = updateLock.tryLock();
+		if(!isFree) {
+			System.out.println("Waiting for lock in "+this.toString()+"...");
+			updateLock.lock();
+		}
+		try {
 		if(knownEndUpdateInterval != null) {
 			long now = getCurrentTime();
 			if(now - lastKnownEndUpdate > knownEndUpdateInterval) {
@@ -80,18 +105,47 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 				lastKnownEndUpdate = now;
 			}
 		}
-		if(knownStart < 0) {
+		List<DpGap> toUpdate = getIntervalsToUpdate(endTime);
+		for(DpGap intv: toUpdate) {
+			if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
+				values = updateValues(startTime, endTime);
+				isOwnList = false;
+			} else {
+				List<SampledValue> prevVals = getValuesWithoutUpdate(intv.start, intv.end);
+				List<SampledValue> newVals = updateValues(intv.start, intv.end);
+				if(!isOwnList) {
+					List<SampledValue> concat = new ArrayList<SampledValue>(values);
+					concat.removeAll(prevVals);
+					concat.addAll(newVals);
+					values = concat;
+					isOwnList = true;					
+				} else {
+					values.removeAll(prevVals);
+					values.addAll(newVals);					
+				}
+				addValues(newVals);
+			}
+			if(intv.start < 0 || intv.end > knownEnd)
+				knownEnd = intv.end;
+			if(intv.start < 0 || intv.start < knownStart)
+				knownStart = intv.start;
+		}
+		if(!toUpdate.isEmpty() && datapointForChangeNotification != null) {
+			DpUpdated updTotal = DatapointImpl.getStartEndForUpdList(toUpdate);
+			datapointForChangeNotification.notifyTimeseriesChange(updTotal.start, updTotal.end);
+		}
+		if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
 			values = updateValues(startTime, endTime);
 			isOwnList = false;
 			knownStart = startTime;
 			knownEnd = endTime;
 			updateValueLimits();
-		} else if(startTime < knownStart && endTime > knownEnd) {
+		/*} else if(startTime < knownStart && endTime > knownEnd) {
 			values = updateValues(startTime, endTime);
 			isOwnList = false;
 			knownStart = startTime;
 			knownEnd = endTime;			
-			updateValueLimits();
+			updateValueLimits();*/
 		} else if(startTime < knownStart) {
 			List<SampledValue> newVals = updateValues(startTime, knownStart);
 			List<SampledValue> concat = new ArrayList<SampledValue>(newVals);
@@ -104,7 +158,8 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd)+" endTime:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(endTime));
 			List<SampledValue> newVals = updateValues(knownEnd, endTime);
 logger.error("Found new vals:"+values.size());
-			if(isOwnList) {
+			addValues(newVals);
+			/*if(isOwnList) {
 				try {
 					values.addAll(newVals);
 				} catch(UnsupportedOperationException e) {
@@ -118,11 +173,18 @@ logger.error("Found new vals:"+values.size());
 				concat.addAll(newVals);
 				values = concat;
 				isOwnList = true;
-			}
+			}*/
 			knownEnd = endTime;			
 			updateValueLimits();
 		} else
 logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd));
+		} finally {
+			updateLock.unlock();
+		}
+		return getValuesWithoutUpdate(startTime, endTime);
+	}
+
+	protected List<SampledValue> getValuesWithoutUpdate(long startTime, long endTime) {
 		if(startTime > lastValueInList)
 			return Collections.emptyList();
 		if(endTime < firstValueInList)
@@ -153,9 +215,27 @@ logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDa
 		if(fromIndex > toIndex)
 			return Collections.emptyList();
 		List<SampledValue> result = values.subList(fromIndex, toIndex+1);
-		return result;
+		return result;		
 	}
-
+	
+	protected void addValues(List<SampledValue> newVals) {
+		if(isOwnList) {
+			try {
+				values.addAll(newVals);
+			} catch(UnsupportedOperationException e) {
+				//TODO: Should not occur
+				List<SampledValue> concat = new ArrayList<SampledValue>(values);
+				concat.addAll(newVals);
+				values = concat;
+			}
+		} else {
+			List<SampledValue> concat = new ArrayList<SampledValue>(values);
+			concat.addAll(newVals);
+			values = concat;
+			isOwnList = true;
+		}		
+	}
+	
 	protected void updateValueLimits() {
 		if(!values.isEmpty()) {
 			firstValueInList = values.get(0).getTimestamp();
@@ -286,6 +366,43 @@ logger.error("No new values in PROT1 knownEnd:"+StringFormatHelper.getFullTimeDa
 		values = null;
 		if(reCalcUntil != null) {
 			getValues(0, reCalcUntil);
+		}
+	}
+	
+	private final DpGap intervalToUpdate = new DpGap();
+	
+	/** TODO: In the future separate updateIntervals should be stored and returned in
+	 * {@link #getIntervalsToUpdate(long)}
+	 * @param newInterval
+	 * @return
+	 */
+	public DpGap addIntervalToUpdate(DpGap newInterval) {
+		synchronized (intervalToUpdate) {
+			if(intervalToUpdate.start < 0) {
+				intervalToUpdate.start = newInterval.start;
+				intervalToUpdate.end = newInterval.end;
+			} else {
+				if(newInterval.start < intervalToUpdate.start)
+					intervalToUpdate.start = newInterval.start;
+				if(newInterval.end > intervalToUpdate.end)
+					intervalToUpdate.end = newInterval.end;
+			}
+			return intervalToUpdate;
+		}
+	}
+	
+	/** Get all gaps to be filled since last call of this method. The intervals should not be overlapping
+	 * as we do not test on this here - this would lead to a double re-calculation.*/
+	protected List<DpGap> getIntervalsToUpdate(long now) {
+		synchronized (intervalToUpdate) {
+			if(intervalToUpdate.start < 0)
+				return Collections.emptyList();
+			DpGap inResult = new DpGap();
+			inResult.start = intervalToUpdate.start;
+			inResult.end = intervalToUpdate.end;
+			List<DpGap> result = Arrays.asList(new DpGap[] {inResult});
+			intervalToUpdate.start = -1;
+			return result ;			
 		}
 	}
 }

@@ -100,4 +100,7 @@ public interface DatapointGroup extends LabelledItem {
 	/** Values for {@link DatapointGroup#getType()}*/
 	public static final String DEVICE = "DEVICE";
 	public static final String DEVICE_TYPE = "DEVICE_TYPE";
+	
+	/** Special group names*/
+	public static final String GATEWAY_KPIS = "gwKPIs";
 }

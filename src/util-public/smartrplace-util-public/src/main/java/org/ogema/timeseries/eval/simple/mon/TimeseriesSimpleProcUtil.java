@@ -18,6 +18,7 @@ import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.AggregationModeProvider;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
@@ -27,6 +28,7 @@ import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
 
 import de.iwes.timeseries.eval.api.TimeSeriesData;
+import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 
 public class TimeseriesSimpleProcUtil {
@@ -74,6 +76,9 @@ public class TimeseriesSimpleProcUtil {
 				ref.referenceTime = refRes.getValue();
 				return TimeSeriesServlet.getMeterFromConsumption(timeSeries, start, end, ref, mode);						
 			}
+
+			@Override
+			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {}
 		};
 		knownProcessors.put(TimeProcUtil.METER_EVAL, meterProc);
 		
@@ -85,6 +90,12 @@ public class TimeseriesSimpleProcUtil {
 				List<SampledValue> result = TimeSeriesServlet.getDayValues(timeSeries, start, end, mode,
 						newTs2.getInputDp()!=null?newTs2.getInputDp().getScale():null);
 				return result;
+			}
+
+			@Override
+			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
+				updateInterval.start = AbsoluteTimeHelper.getIntervalStart(updateInterval.start, AbsoluteTiming.DAY);
+				updateInterval.end = AbsoluteTimeHelper.getNextStepTime(updateInterval.end, AbsoluteTiming.DAY)-1;				
 			}
 		};
 		knownProcessors.put(TimeProcUtil.PER_DAY_EVAL, dayProc);
@@ -98,9 +109,51 @@ public class TimeseriesSimpleProcUtil {
 						newTs2.getInputDp()!=null?newTs2.getInputDp().getScale():null, false, AbsoluteTiming.HOUR);
 				return result;
 			}
+
+			@Override
+			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
+				updateInterval.start = AbsoluteTimeHelper.getIntervalStart(updateInterval.start, AbsoluteTiming.HOUR);
+				updateInterval.end = AbsoluteTimeHelper.getNextStepTime(updateInterval.end, AbsoluteTiming.HOUR)-1;				
+			}
 		};
 		knownProcessors.put(TimeProcUtil.PER_HOUR_EVAL, hourProc);
 		
+		TimeseriesSetProcessor monthProc = new TimeseriesSetProcSingleToSingle("_perMonth") {
+			
+			@Override
+			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
+					AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2) {
+				List<SampledValue> result = TimeSeriesServlet.getDayValues(timeSeries, start, end, mode,
+						newTs2.getInputDp()!=null?newTs2.getInputDp().getScale():null, false, AbsoluteTiming.MONTH);
+				return result;
+			}
+
+			@Override
+			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
+				updateInterval.start = AbsoluteTimeHelper.getIntervalStart(updateInterval.start, AbsoluteTiming.MONTH);
+				updateInterval.end = AbsoluteTimeHelper.getNextStepTime(updateInterval.end, AbsoluteTiming.MONTH)-1;				
+			}
+		};
+		knownProcessors.put(TimeProcUtil.PER_MONTH_EVAL, hourProc);
+		
+		TimeseriesSetProcessor yearProc = new TimeseriesSetProcSingleToSingle("_perYear") {
+			
+			@Override
+			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
+					AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2) {
+				List<SampledValue> result = TimeSeriesServlet.getDayValues(timeSeries, start, end, mode,
+						newTs2.getInputDp()!=null?newTs2.getInputDp().getScale():null, false, AbsoluteTiming.YEAR);
+				return result;
+			}
+			
+			@Override
+			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
+				updateInterval.start = AbsoluteTimeHelper.getIntervalStart(updateInterval.start, AbsoluteTiming.YEAR);
+				updateInterval.end = AbsoluteTimeHelper.getNextStepTime(updateInterval.end, AbsoluteTiming.YEAR)-1;				
+			}
+		};
+		knownProcessors.put(TimeProcUtil.PER_YEAR_EVAL, hourProc);
+
 		TimeseriesSetProcessor sumProc = new TimeseriesSetProcessor() {
 			
 			@Override
@@ -138,6 +191,44 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Hourproc", 1, null, null);
 			}
 		};
 		knownProcessors.put(TimeProcUtil.SUM_PER_HOUR_EVAL, sumProcHour);
+
+		TimeseriesSetProcessor sumProcMonth = new TimeseriesSetProcessor() {
+			
+			@Override
+			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
+TimeProcPrint.printTimeSeriesSet(input, "IN(0):Monthproc", 1, null, null);
+				List<Datapoint> result1 = monthProc.getResultSeries(input, dpService);
+				TimeseriesSetProcessor sumProc = new TimeseriesSetProcSum("total_sum_month", AbsoluteTiming.MONTH) {
+					@Override
+					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
+						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Monthproc", 1, null, null);
+						TimeProcPrint.printFirstElements(resultLoc, "--RT-OUT(1):Total_Sum_month");
+					}
+				};
+				List<Datapoint> result = sumProc.getResultSeries(result1, dpService);
+				return result;
+			}
+		};
+		knownProcessors.put(TimeProcUtil.SUM_PER_MONTH_EVAL, sumProcMonth);
+
+		TimeseriesSetProcessor sumProcYear = new TimeseriesSetProcessor() {
+			
+			@Override
+			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
+TimeProcPrint.printTimeSeriesSet(input, "IN(0):Yearproc", 1, null, null);
+				List<Datapoint> result1 = yearProc.getResultSeries(input, dpService);
+				TimeseriesSetProcessor sumProc = new TimeseriesSetProcSum("total_sum_year", AbsoluteTiming.YEAR) {
+					@Override
+					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
+						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Yearproc", 1, null, null);
+						TimeProcPrint.printFirstElements(resultLoc, "--RT-OUT(1):Total_Sum_year");
+					}
+				};
+				List<Datapoint> result = sumProc.getResultSeries(result1, dpService);
+				return result;
+			}
+		};
+		knownProcessors.put(TimeProcUtil.SUM_PER_YEAR_EVAL, sumProcYear);
 
 		TimeseriesSetProcessor dayPerRoomProc = new TimeseriesSetProcessor() {
 			
@@ -214,6 +305,17 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Hourproc", 1, null, null);
 		return null;
 	}
 	
+	/** For processing of two or more aligned time series that are not interchangeable like difference, divison,...*/
+	public Datapoint processArgs(String tsProcessRequest, Datapoint... dp) {
+		TimeseriesSetProcessor proc = getProcessor(tsProcessRequest);
+		if(proc == null)
+			throw new IllegalArgumentException("Unknown timeseries processor: "+tsProcessRequest);
+		List<Datapoint> resultTs = proc.getResultSeries(Arrays.asList(dp), dpService);
+		if(resultTs != null && !resultTs.isEmpty())
+			return resultTs.get(0);
+		return null;
+	}
+
 	public List<Datapoint> processSingleToMulti(String tsProcessRequest, Datapoint dp) {
 		List<Datapoint> result = new ArrayList<>();
 		TimeseriesSetProcessor proc = getProcessor(tsProcessRequest);

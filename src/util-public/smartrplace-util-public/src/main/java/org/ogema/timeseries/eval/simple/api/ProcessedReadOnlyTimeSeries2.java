@@ -10,6 +10,7 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
@@ -45,6 +46,10 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	 */
 	protected abstract List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start, long end,
 			AggregationMode mode);
+	
+	/** change startTime and endTime of parameter if necessary*/
+	protected abstract void alignUpdateIntervalFromSource(DpUpdated updateInterval);
+	
 	protected String getLabelPostfix() {return "";}
 	/** The result is appended to the id of the input time series to create the output datapoint location*/
 	protected String getLocationPostifx() {return getLabelPostfix();}
@@ -52,6 +57,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	//final protected MonitoringController controller;
 	final protected TimeSeriesDataImpl tsdi;
 	private final Datapoint dpInput;
+	private List<Datapoint> dpInputListForIntervalChange = null;
 	
 	/** only relevant if dp == null*/
 	final protected TimeSeriesNameProvider nameProvider;
@@ -68,6 +74,25 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 		return lastTimestampInSource;
 	}
 
+	long lastGetValues;
+	
+	@Override
+	public List<SampledValue> getValues(long startTime, long endTime) {
+		if(dpInputListForIntervalChange != null) for(Datapoint dp: dpInputListForIntervalChange) {
+			DpUpdated changed = dp.getSingleIntervalChanged(lastGetValues);
+			if(changed != null) {
+				addIntervalToUpdate(changed);
+			}			
+		} else {
+			DpUpdated changed = dpInput.getSingleIntervalChanged(lastGetValues);
+			if(changed != null) {
+				addIntervalToUpdate(changed);
+			}
+		}
+		lastGetValues = getCurrentTime();
+		return super.getValues(startTime, endTime);
+	}
+	
 	/*public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
 			MonitoringController controller) {
 		this(tsdi, nameProvider, getMode(controller, tsdi.label(null)));
@@ -77,8 +102,8 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 		this(tsdi, nameProvider, mode, null);
 	}
 	public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
-			AggregationMode mode, Datapoint dp) {
-		this(tsdi, nameProvider, mode, dp, !Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"));
+			AggregationMode mode, Datapoint dpInput) {
+		this(tsdi, nameProvider, mode, dpInput, !Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"));
 		
 	}
 	/**
@@ -101,8 +126,8 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 		this.setUpdateLastTimestampInSourceOnEveryCall(updateLastTimestampInSourceOnEveryCall);
 	}
 
-	public ProcessedReadOnlyTimeSeries2(Datapoint dp) {
-		this(dp.getTimeSeriesDataImpl(null), null, dp.info().getAggregationMode(), dp);
+	public ProcessedReadOnlyTimeSeries2(Datapoint dpInput) {
+		this(dpInput.getTimeSeriesDataImpl(null), null, dpInput.info().getAggregationMode(), dpInput);
 	}
 	
 	/*static AggregationMode getMode(MonitoringController controller, String label) {
@@ -115,6 +140,8 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 
 	@Override
 	protected List<SampledValue> updateValues(long start, long end) {
+if(tsdi == null)
+System.out.println("XXCXX");
 		ReadOnlyTimeSeries ts = tsdi.getTimeSeries();
 		if(firstTimestampInSource == null) {
 			SampledValue sv = ts.getNextValue(0);
@@ -199,6 +226,7 @@ logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLa
 		DPUtil.copyExistingDataRoomDevice(getInputDp(), result);
 		result.info().setAggregationMode(AggregationMode.Consumption2Meter);
 		result.info().setInterpolationMode(InterpolationMode.NONE);
+		datapointForChangeNotification = result;
 		return result ;
 	}
 	public Datapoint getInputDp() {
@@ -206,6 +234,8 @@ logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLa
 	}
 	
 	public static String getDpLocation(Datapoint dpSource, String locationPostfix) {
+if(dpSource == null || dpSource.getLocation() == null || locationPostfix == null)
+System.out.println(dpSource.getLocation());			
 		return dpSource.getLocation()+locationPostfix;
 	}
 	/** See constructor documentation*/
