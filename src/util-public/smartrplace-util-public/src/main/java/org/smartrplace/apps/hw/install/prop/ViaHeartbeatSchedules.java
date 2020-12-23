@@ -6,8 +6,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.FloatValue;
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.schedule.Schedule;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.devicefinder.api.Datapoint;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvider;
 import org.smartrplace.util.frontend.servlet.ServletTimeseriesProvider;
 
@@ -70,10 +73,10 @@ public class ViaHeartbeatSchedules implements StringProvider {
 			}
 			JSONArray arr = json.getJSONArray("values");
 			int len = arr.length();
+			float val = -999;
 			for(int i=0; i<len; i++) {
 				JSONObject in = arr.getJSONObject(i);
 				long ts;
-				float val;
 				if(in.has("x")) {
 					ts = in.getLong("x");
 					val = (float)(in.getDouble("y"));					
@@ -85,7 +88,18 @@ public class ViaHeartbeatSchedules implements StringProvider {
 				}
 				sched.addValue(ts, new FloatValue(val));
 			}
-			
+			if(len > 0) {
+				Resource parent = sched.getParent();
+				if(parent != null && (parent instanceof FloatResource))
+					((FloatResource)parent).setValue(val);
+			}
 		}
+	}
+	
+	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2Schedule(Datapoint dp) {
+		ViaHeartbeatSchedules schedProv = new ViaHeartbeatSchedules(dp.getTimeSeries());
+		// Both datapoints can be addressed via heartbeat and will return the same data
+		dp.setParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM, schedProv);
+		return schedProv;
 	}
 }
