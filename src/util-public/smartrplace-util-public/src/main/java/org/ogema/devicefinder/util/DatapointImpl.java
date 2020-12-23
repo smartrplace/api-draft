@@ -435,7 +435,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	public TimeSeriesDataImpl getTimeSeriesDataImpl(OgemaLocale locale) {
 		ReadOnlyTimeSeries ts = getTimeSeries();
 		if(ts != null) {
-			String label = label(locale);
+			String label = label(null);
 			return new TimeSeriesDataImpl(ts, label, label, info().getInterpolationMode());
 		}
 		return null;

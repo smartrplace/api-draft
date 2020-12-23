@@ -312,7 +312,9 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 
 		String location = inputSingle.dpIn.getLocation()+"";
 		Datapoint newtsdi = TimeseriesSetProcSingleToSingle.getOrUpdateTsDp(location, inputSingle.provider, dpService);
-		
+		String label = resultLabel();
+		if(label != null)
+			newtsdi.setLabelDefault(label);
 		/*DatapointImpl dpIn = new DatapointImpl(inputSingle, resultLoction(input));
 		ProcessedReadOnlyTimeSeries2 newTs2 = new ProcessedReadOnlyTimeSeries2(dpIn) {
 			@Override

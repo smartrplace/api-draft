@@ -34,7 +34,9 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 	
 	@Override
 	public boolean setLabelDefault(String label) {
-		this.labelDefault = label;	
+		this.labelDefault = label;
+		if(labels.get(OgemaLocale.ENGLISH) == null)
+			labels.put(OgemaLocale.ENGLISH, label);
 		return true;
 	}
 
