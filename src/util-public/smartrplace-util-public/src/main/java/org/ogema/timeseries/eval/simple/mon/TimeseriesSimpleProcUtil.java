@@ -138,7 +138,7 @@ public class TimeseriesSimpleProcUtil {
 				updateInterval.end = AbsoluteTimeHelper.getNextStepTime(updateInterval.end, AbsoluteTiming.MONTH)-1;				
 			}
 		};
-		knownProcessors.put(TimeProcUtil.PER_MONTH_EVAL, hourProc);
+		knownProcessors.put(TimeProcUtil.PER_MONTH_EVAL, monthProc);
 		
 		TimeseriesSetProcessor yearProc = new TimeseriesSetProcSingleToSingle("_perYear") {
 			
@@ -156,7 +156,7 @@ public class TimeseriesSimpleProcUtil {
 				updateInterval.end = AbsoluteTimeHelper.getNextStepTime(updateInterval.end, AbsoluteTiming.YEAR)-1;				
 			}
 		};
-		knownProcessors.put(TimeProcUtil.PER_YEAR_EVAL, hourProc);
+		knownProcessors.put(TimeProcUtil.PER_YEAR_EVAL, yearProc);
 
 		TimeseriesSetProcessor sumProc = new TimeseriesSetProcessor() {
 			
