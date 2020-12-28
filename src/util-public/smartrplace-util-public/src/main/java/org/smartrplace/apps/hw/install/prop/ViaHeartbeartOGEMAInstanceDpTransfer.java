@@ -306,12 +306,12 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			ViaHeartbeatRemoteTransferList tlist = new ViaHeartbeatRemoteTransferList();
 			tlist.datapointsFromCreatorToAcceptor = new HashMap<>();
 			for(Entry<Datapoint, String> dp: datapointsToSendM.entrySet()) {
-				String rawId = dp.getKey().id();
+				String rawId = getLocationOrAlias(dp.getKey()); //.id();
 				tlist.datapointsFromCreatorToAcceptor.put(dp.getValue(), rawId);
 			}
 			tlist.datapointsFromAccptorToCreator = new HashMap<>();
 			for(Entry<String, Datapoint> dp: datapointsToRecvM.entrySet()) {
-				String rawId = dp.getValue().id();
+				String rawId = getLocationOrAlias(dp.getValue()); //.id();
 				tlist.datapointsFromAccptorToCreator.put(dp.getKey(), rawId);
 			}
 			
@@ -337,6 +337,17 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 				result.efficientTransferData.strings.put(send.getValue(), sdpPlus.strVal);
 		}
 		return result;
+	}
+	
+	protected String getLocationOrAlias(Datapoint dp) {
+		Object prov = dp.getParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM);
+		if(prov != null && (prov instanceof StringProvider)) {
+			StringProvider sprov = (StringProvider) prov;
+			String result = sprov.getAlias();
+			if(result != null)
+				return result;
+		}
+		return dp.id();
 	}
 	
 	protected Datapoint getDatapointForRemoteRequest(String dpIdFromRemote,

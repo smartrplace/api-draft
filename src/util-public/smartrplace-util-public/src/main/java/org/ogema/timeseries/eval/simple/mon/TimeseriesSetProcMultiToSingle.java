@@ -39,7 +39,19 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 	
 	/** change startTime and endTime of parameter if necessary*/
 	protected abstract void alignUpdateIntervalFromSource(DpUpdated updateInterval);
-		
+	
+	/** Update mode regarding interval propagation and regarding singleInput.<br>
+	 * Note that from mode 2 on any change in the input data triggers a recalculation of the output data<br>
+	 * !! Note also that this is set for the entire processor, so usually for your instance of {@link TimeseriesSimpleProcUtil} !!
+	 * 
+	 * 0: Do not generate a result time series if input is empty, no updates
+	 *  1: Update only at the end
+	 *  2: Update exactly for any input change interval
+	 *  3: Update for any input change onwards completely
+	 *  4: Update completely if any input has a change 
+	 */
+	public int updateMode;
+	
 	public static class GetInputSingleResult {
 		public DatapointImpl dpIn;
 		public ProcTsProvider provider;
@@ -65,7 +77,9 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 	protected GetInputSingleResult getInputSingle(List<Datapoint> input, DatapointService dpService) {
 		GetInputSingleResult result = new GetInputSingleResult();
 		result.maxData = updateParametersInputSingle(null, input, dpService);
-				
+		if(result.maxData == null) {
+			return null;
+		}
 		/*for(Datapoint tsd: input) {
 			ReadOnlyTimeSeries ts = tsd.getTimeSeries();
 			SampledValue svStart = ts.getNextValue(0);
@@ -87,6 +101,7 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 		//TODO: We assume that startTS and endTS overlap. If not we might have to use more timeseries intermediately
 		result.firstStartTSEnd = result.firstStartTs.getPreviousValue(Long.MAX_VALUE).getTimestamp();*/
 		ProcessedReadOnlyTimeSeries inputSingle = new ProcessedReadOnlyTimeSeries(InterpolationMode.NONE) {
+			protected long lastGetValues = 0;
 			
 			@Override
 			protected List<SampledValue> updateValues(long start, long end) {
@@ -105,6 +120,38 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 				resultLoc.addAll(maxData.lastEndTsFinal.getValues(maxData.firstStartTSEnd, end));
 				return resultLoc;
 			}
+			
+			@Override
+			public List<SampledValue> getValues(long startTime, long endTime) {
+				long now = getCurrentTime();
+				if(updateMode == 4) {
+					for(Datapoint dp: input) {
+						DpUpdated changed = dp.getSingleIntervalChanged(lastGetValues);
+						if(changed != null) {
+							DpUpdated all = DatapointImpl.getAllInterval(changed.updateTime);
+							addIntervalToUpdate(all);
+							result.maxData = updateParametersInputSingle(null, input, dpService);
+							break;
+						}
+					}
+				}
+				else if(updateMode >= 2) {
+					boolean foundChange = true;
+					for(Datapoint dp: input) {
+						DpUpdated changed = dp.getSingleIntervalChanged(lastGetValues);
+						if(changed != null) {
+							if((updateMode == 3) && (changed.end < now))
+								changed.end = now;
+							addIntervalToUpdate(changed);
+							foundChange = true;
+						}
+					}
+					if(foundChange)
+						result.maxData = updateParametersInputSingle(null, input, dpService);
+				}
+				lastGetValues = now;
+				return super.getValues(startTime, endTime);
+			} 
 			
 			@Override
 			protected long getCurrentTime() {
@@ -136,8 +183,11 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 		result.firstStartTsFinal = result.firstStartTs;
 		result.lastEndTsFinal = result.lastEndTs;
 
-		if(result.firstStartTs == null)
+		if(result.firstStartTs == null) {
+			if(updateMode == 0)
+				return null;
 			return result; //return null //return Collections.emptyList()
+		}
 		//TODO: We assume that startTS and endTS overlap. If not we might have to use more timeseries intermediately
 		result.firstStartTSEnd = result.firstStartTs.getPreviousValue(Long.MAX_VALUE).getTimestamp();
 		return result;

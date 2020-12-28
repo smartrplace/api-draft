@@ -146,6 +146,10 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	public static final String MIRROR_RESOURCE_PARAM = "MIRROR_RESOURCE";
 	public static final String HEARTBEAT_STRING_PROVIDER_PARAM = "HEARTBEAT_STRING_PROVIDER";
 	
+	public static final String ALIAS_MAINMETER_DAILYCONSUMPTION = "mainMeterTotalConsumptionDaily";
+	public static final String ALIAS_MAINMETER_MONTHLYCONSUMPTION = "mainMeterTotalConsumptionMonthly";
+	public static final String ALIAS_MAINMETER_YEARLYCONSUMPTION = "mainMeterTotalConsumptionYearly";
+	
 	/** Only relevant for volatile datapoints with a timeseries that is also changed for
 	 * the past. Note that we do not send notifications for upates behind the last datapoint. This also means
 	 * that we consider the 15 minutes before the last reading to a timeseries to be generally volatile,

@@ -49,6 +49,10 @@ public class TimeseriesSimpleProcUtil {
 	//Better use this from DatapointService?
 	
 	public TimeseriesSimpleProcUtil(ApplicationManager appMan, DatapointService dpService) {
+		this(appMan, dpService, 0);
+	}
+	public TimeseriesSimpleProcUtil(ApplicationManager appMan, DatapointService dpService,
+			int updateMode) {
 		this.appMan = appMan;
 		this.dpService = dpService;
 		
@@ -160,13 +164,14 @@ public class TimeseriesSimpleProcUtil {
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 TimeProcPrint.printTimeSeriesSet(input, "IN(0):Dayproc", 1, null, null);
 				List<Datapoint> result1 = dayProc.getResultSeries(input, dpService);
-				TimeseriesSetProcessor sumProc = new TimeseriesSetProcSum("total_sum") {
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum") {
 					@Override
 					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
 						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Dayproc", 1, null, null);
 						TimeProcPrint.printFirstElements(resultLoc, "--RT-OUT(1):Total_Sum");
 					}
 				};
+				sumProc.updateMode = updateMode;
 				List<Datapoint> result = sumProc.getResultSeries(result1, dpService);
 				return result;
 			}
@@ -179,7 +184,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Dayproc", 1, null, null);
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 TimeProcPrint.printTimeSeriesSet(input, "IN(0):Hourproc", 1, null, null);
 				List<Datapoint> result1 = hourProc.getResultSeries(input, dpService);
-				TimeseriesSetProcessor sumProc = new TimeseriesSetProcSum("total_sum_hour", AbsoluteTiming.HOUR) {
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_hour", AbsoluteTiming.HOUR) {
 					@Override
 					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
 						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Hourproc", 1, null, null);
@@ -187,6 +192,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Hourproc", 1, null, null);
 					}
 				};
 				List<Datapoint> result = sumProc.getResultSeries(result1, dpService);
+				sumProc.updateMode = updateMode;
 				return result;
 			}
 		};
@@ -198,7 +204,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Hourproc", 1, null, null);
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 TimeProcPrint.printTimeSeriesSet(input, "IN(0):Monthproc", 1, null, null);
 				List<Datapoint> result1 = monthProc.getResultSeries(input, dpService);
-				TimeseriesSetProcessor sumProc = new TimeseriesSetProcSum("total_sum_month", AbsoluteTiming.MONTH) {
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_month", AbsoluteTiming.MONTH) {
 					@Override
 					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
 						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Monthproc", 1, null, null);
@@ -206,6 +212,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Monthproc", 1, null, null);
 					}
 				};
 				List<Datapoint> result = sumProc.getResultSeries(result1, dpService);
+				sumProc.updateMode = updateMode;
 				return result;
 			}
 		};
@@ -217,7 +224,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Monthproc", 1, null, null);
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 TimeProcPrint.printTimeSeriesSet(input, "IN(0):Yearproc", 1, null, null);
 				List<Datapoint> result1 = yearProc.getResultSeries(input, dpService);
-				TimeseriesSetProcessor sumProc = new TimeseriesSetProcSum("total_sum_year", AbsoluteTiming.YEAR) {
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_year", AbsoluteTiming.YEAR) {
 					@Override
 					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
 						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Yearproc", 1, null, null);
@@ -225,6 +232,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Yearproc", 1, null, null);
 					}
 				};
 				List<Datapoint> result = sumProc.getResultSeries(result1, dpService);
+				sumProc.updateMode = updateMode;
 				return result;
 			}
 		};
@@ -253,7 +261,8 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Yearproc", 1, null, null);
 					roomList.add(tsd);
 				}
 				for(Entry<String, List<Datapoint>> roomData: sortedbyRoom.entrySet()) {
-					TimeseriesSetProcessor sumProc = new TimeseriesSetProcSum(roomData.getKey()+"_sum");
+					TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum(roomData.getKey()+"_sum");
+					sumProc.updateMode = updateMode;
 					List<Datapoint> resultLoc = sumProc.getResultSeries(roomData.getValue(), dpService);
 					if(!roomData.getValue().isEmpty()) {
 						DPRoom room = roomData.getValue().get(0).getRoom();

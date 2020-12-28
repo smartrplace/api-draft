@@ -22,6 +22,7 @@ public class ViaHeartbeatInfoProvider extends DatapointInfoProviderImpl {
 		void received(String strValue, long now);
 		String getStringToSend(long now);
 		boolean hasNewValue(long now);
+		String getAlias();
 	}
 	private StringProvider strProv;
 	//private Schedule sched;

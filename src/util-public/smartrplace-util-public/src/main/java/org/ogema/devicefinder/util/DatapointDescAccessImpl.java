@@ -108,5 +108,11 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 			labelDefault = label;
 		return true;
 	}
+	
+	@Override
+	public boolean addAlias(String alias) {
+		aliases.add(alias);
+		return true;
+	}
 
 }

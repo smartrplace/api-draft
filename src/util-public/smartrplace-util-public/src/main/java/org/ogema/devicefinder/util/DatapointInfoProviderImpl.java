@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.util;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointInfo;
@@ -72,4 +73,8 @@ public abstract class DatapointInfoProviderImpl implements DatapointInfoProvider
 		return false;
 	}
 
+	@Override
+	public Set<String> getAliases() {
+		return null;
+	}
 }

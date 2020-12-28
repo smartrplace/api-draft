@@ -5,7 +5,9 @@ import org.smartrplace.util.format.WidgetHelper;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointDesc;
@@ -22,6 +24,7 @@ public class DatapointDescImpl implements DatapointDesc {
 	/** If this type name is set it will be used in priority to the {@link GaRoDataType} name of the datapoint*/
 	protected Map<OgemaLocale, String> typeName = new HashMap<>();
 	protected String labelDefault;
+	protected Set<String> aliases = new HashSet<>();
 	protected Map<OgemaLocale, String> labels = new HashMap<>();
 	protected DPRoom dpRoom = null;
 	protected DatapointInfo consumptionInfo = null;
@@ -116,5 +119,10 @@ public class DatapointDescImpl implements DatapointDesc {
 	@Override
 	public ScalingProvider getScale() {
 		return scale;
+	}
+
+	@Override
+	public Set<String> getAliases() {
+		return Collections.unmodifiableSet(aliases);
 	}
 }

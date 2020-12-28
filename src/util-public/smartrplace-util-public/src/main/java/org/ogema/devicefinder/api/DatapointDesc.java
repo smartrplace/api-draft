@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.api;
 
 import java.util.Map;
+import java.util.Set;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
@@ -20,6 +21,9 @@ public interface DatapointDesc extends LabelledItem {
 	 * @return
 	 */
 	String labelDefault();
+	
+	/** See {@link DatapointDescAccess#addAlias(String)}*/
+	Set<String> getAliases();
 	
 	/** If labels if all languages shall be used e.g. for the generation of labels of a dependent
 	 * Datapoint then all labels are needed

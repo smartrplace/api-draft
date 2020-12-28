@@ -33,13 +33,20 @@ public class DatapointGroupImpl implements DatapointGroup {
 
 	@Override
 	public String label(OgemaLocale locale) {
-		return labels.get(locale);
+		String result = labels.get(locale);
+		if(result != null)
+			return result;
+		result = labels.get(OgemaLocale.ENGLISH);
+		if(result != null)
+			return result;
+		result = labels.get(null);
+		if(result != null)
+			return result;
+		return "DPGroup_"+id;
 	}
 
 	@Override
 	public void setLabel(OgemaLocale locale, String label) {
-if(label.contains("NRI-SSB"))
-System.out.println("Group Location:"+id());
 		labels.put(locale, label);
 	}
 

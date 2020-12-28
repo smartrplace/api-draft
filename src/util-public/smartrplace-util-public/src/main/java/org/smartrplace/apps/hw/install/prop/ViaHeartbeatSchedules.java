@@ -1,6 +1,7 @@
 package org.smartrplace.apps.hw.install.prop;
 
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,9 +20,11 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	protected final ReadOnlyTimeSeries rot;
 	protected boolean doClean = false;
 	protected long lastValueSent = -1;
+	protected final String alias;
 
-	public ViaHeartbeatSchedules(ReadOnlyTimeSeries rot) {
+	public ViaHeartbeatSchedules(ReadOnlyTimeSeries rot, String alias) {
 		this.rot = rot;
+		this.alias = alias;
 	}
 
 	@Override
@@ -58,8 +61,8 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	public static class ViaHeartbeatSchedulesWrite extends ViaHeartbeatSchedules {
 		protected final Schedule sched;
 		
-		public ViaHeartbeatSchedulesWrite(Schedule sched) {
-			super(sched);
+		public ViaHeartbeatSchedulesWrite(Schedule sched, String alias) {
+			super(sched, alias);
 			this.sched = sched;
 		}
 		
@@ -97,9 +100,18 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	}
 	
 	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2Schedule(Datapoint dp) {
-		ViaHeartbeatSchedules schedProv = new ViaHeartbeatSchedules(dp.getTimeSeries());
+		Set<String> als = dp.getAliases();
+		return registerDatapointForHeartbeatDp2Schedule(dp, als.isEmpty()?null:als.iterator().next());
+	}
+	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2Schedule(Datapoint dp, String alias) {
+		ViaHeartbeatSchedules schedProv = new ViaHeartbeatSchedules(dp.getTimeSeries(), alias);
 		// Both datapoints can be addressed via heartbeat and will return the same data
 		dp.setParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM, schedProv);
 		return schedProv;
+	}
+
+	@Override
+	public String getAlias() {
+		return alias;
 	}
 }

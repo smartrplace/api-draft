@@ -57,7 +57,6 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	//final protected MonitoringController controller;
 	final protected TimeSeriesDataImpl tsdi;
 	private final Datapoint dpInput;
-	private List<Datapoint> dpInputListForIntervalChange = null;
 	
 	/** only relevant if dp == null*/
 	final protected TimeSeriesNameProvider nameProvider;
@@ -74,20 +73,13 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 		return lastTimestampInSource;
 	}
 
-	long lastGetValues;
+	protected long lastGetValues = 0;
 	
 	@Override
 	public List<SampledValue> getValues(long startTime, long endTime) {
-		if(dpInputListForIntervalChange != null) for(Datapoint dp: dpInputListForIntervalChange) {
-			DpUpdated changed = dp.getSingleIntervalChanged(lastGetValues);
-			if(changed != null) {
-				addIntervalToUpdate(changed);
-			}			
-		} else {
-			DpUpdated changed = dpInput.getSingleIntervalChanged(lastGetValues);
-			if(changed != null) {
-				addIntervalToUpdate(changed);
-			}
+		DpUpdated changed = dpInput.getSingleIntervalChanged(lastGetValues);
+		if(changed != null) {
+			addIntervalToUpdate(changed);
 		}
 		lastGetValues = getCurrentTime();
 		return super.getValues(startTime, endTime);

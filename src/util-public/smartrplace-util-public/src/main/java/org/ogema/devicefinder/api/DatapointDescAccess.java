@@ -30,6 +30,14 @@ public interface DatapointDescAccess extends DatapointDesc {
 	 */
 	boolean setLabelDefault(String label);
 	
+	/** Via an alias a datapoint can be accessed like via the location. Aliases are usually
+	 * Strings that represent a certain functionality like "mainMeterTotalConsumptionDaily". See the constants
+	 * defined in class {@link Datapoint} for standard aliases.
+	 * @param alias
+	 * @return
+	 */
+	boolean addAlias(String alias);
+	
 	/** See {@link #setDefaultLabel(String)}
 	 * 
 	 * @param label

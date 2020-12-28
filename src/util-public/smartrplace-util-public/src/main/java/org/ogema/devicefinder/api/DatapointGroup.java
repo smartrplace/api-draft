@@ -75,7 +75,7 @@ public interface DatapointGroup extends LabelledItem {
 	public static String[] getGroupIdAndGwForDp(String groupId, String localGwName) {
 		String[] els = groupId.split("::");
 		if(els.length == 1)
-			return new String[] {groupId, LOCAL_SHORT_NAME};
+			return new String[] {groupId, localGwName};
 		if(els.length == 2)
 			return new String[]{els[1], els[0]};
 		throw new IllegalStateException("GroupId cannot be split into gateway and local id: "+groupId);

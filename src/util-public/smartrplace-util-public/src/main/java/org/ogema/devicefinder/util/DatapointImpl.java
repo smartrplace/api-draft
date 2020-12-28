@@ -585,10 +585,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			}
 		}
 		if(!foundChangeBeforeSince) {
-			DpUpdated upd = new DpUpdated();
-			upd.start = 0;
-			upd.end = Long.MAX_VALUE;
-			upd.updateTime = updates.getLast().updateTime;
+			DpUpdated upd = getAllInterval(updates.getLast().updateTime);
 			return Arrays.asList(new DpUpdated[] {upd});
 		}
 		return result ;
@@ -604,6 +601,14 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		DpUpdated result = getStartEndForUpdList((List)intvs);
 		return result;
+	}
+	
+	public static DpUpdated getAllInterval(long updateTime) {
+		DpUpdated upd = new DpUpdated();
+		upd.start = 0;
+		upd.end = Long.MAX_VALUE;
+		upd.updateTime = updateTime;
+		return upd;
 	}
 	
 	public static DpUpdated getStartEndForUpdList(List<DpGap> toUpdate) {
