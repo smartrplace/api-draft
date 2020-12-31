@@ -1,6 +1,8 @@
 package org.smartrplace.apps.hw.install.prop;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -32,6 +34,22 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	public Long getAutoStructureUpdateRate() {
 		return autoStructureUpdateRate;
 	}
+	
+	//Process requests to datapoints that do not yet exist when the request is received
+	//Usually only relevant for datapoints not representing a SingleValueResource
+	// up to now only used if connectingAsClient
+	private static class OpenDpRequest {
+		final String key;
+		final String dpIdFromRemote;
+		final boolean isToSend;
+		public OpenDpRequest(String key, String value, boolean isToSend) {
+			this.key = key;
+			this.dpIdFromRemote = value;
+			this.isToSend = isToSend;
+		}
+	}
+	/** dpIdFromRemote -> object*/
+	private Map<String, OpenDpRequest> openDpRequests = new HashMap<>();
 	
 	protected final DatapointService dpService;
 	protected final ResourceAccess resAcc;
@@ -236,6 +254,17 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		public String configJsonToSend;
 	}
 	
+	protected void processDpFromCreatorToAcceptor(Datapoint dp, String key) {
+		//We cannot put into knownDatapoint directly for the updateByDpGroups that is
+		//initiated by updateTransferRegistration later, but this should have the same effect
+		datapointsToRecvM.put(key, dp);
+		ViaHeartbeatUtil.registerForTansferViaHeartbeatRecv(dp, commPartnerId, dpService);		
+	}
+	protected void processDpFromAcceptorToCreator(Datapoint dp, String key) {
+		datapointsToSendM.put(dp, key);
+		ViaHeartbeatUtil.registerForTansferViaHeartbeatSend(dp, commPartnerId, dpService);
+	}
+	
 	/** To be called by heartbeat to process data received*/
 	public void processRemoteData(Map<String, Float> dataReceived, Map<String, String> dataReceivedString,
 			String configJsonReceived, boolean connectingAsClient) {
@@ -251,21 +280,43 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 				if(tlist.datapointsFromCreatorToAcceptor != null && (tlist.isStructureRequestStatus < 2)) {
 					for(Entry<String, String> dpl: tlist.datapointsFromCreatorToAcceptor.entrySet()) {
 						Datapoint dp = getDatapointForRemoteRequest(dpl.getValue(), connectingAsClient, dpService);
+						if(dp == null) {
+							openDpRequests.put(dpl.getValue(), new OpenDpRequest(dpl.getKey(), dpl.getValue(), false));
+							continue;
+						}
+						processDpFromCreatorToAcceptor(dp, dpl.getKey());
 						//We cannot put into knownDatapoint directly for the updateByDpGroups that is
-						//initiated by pdateTransferRegistration later, but this should have the same effect
-						datapointsToRecvM.put(dpl.getKey(), dp);
-						ViaHeartbeatUtil.registerForTansferViaHeartbeatRecv(dp, commPartnerId, dpService);
+						//initiated by updateTransferRegistration later, but this should have the same effect
+						//datapointsToRecvM.put(dpl.getKey(), dp);
+						//ViaHeartbeatUtil.registerForTansferViaHeartbeatRecv(dp, commPartnerId, dpService);
 					}
 				}
 				if(tlist.datapointsFromAccptorToCreator != null && (tlist.isStructureRequestStatus < 2)) {
 					for(Entry<String, String> dpl: tlist.datapointsFromAccptorToCreator.entrySet()) {
 						Datapoint dp = getDatapointForRemoteRequest(dpl.getValue(), connectingAsClient, dpService);
-						datapointsToSendM.put(dp, dpl.getKey());
-						ViaHeartbeatUtil.registerForTansferViaHeartbeatSend(dp, commPartnerId, dpService);
+						if(dp == null) {
+							openDpRequests.put(dpl.getValue(), new OpenDpRequest(dpl.getKey(), dpl.getValue(), true));
+							continue;
+						}
+						processDpFromAcceptorToCreator(dp, dpl.getKey());
+						//datapointsToSendM.put(dp, dpl.getKey());
+						//ViaHeartbeatUtil.registerForTansferViaHeartbeatSend(dp, commPartnerId, dpService);
 					}
 				}
 				allValueUpdatePending = true;
 				//ViaHeartbeatUtil.updateTransferRegistration(commPartnerId, this, dpService, connectingAsClient);
+			} else  {
+				List<OpenDpRequest> all = new ArrayList<>(openDpRequests.values());
+				for(OpenDpRequest openReq: all) {
+					Datapoint dp = getDatapointForRemoteRequest(openReq.dpIdFromRemote, this.connectingAsClient, dpService);
+					if(dp == null) {
+						continue;
+					}
+					if(openReq.isToSend)
+						processDpFromAcceptorToCreator(dp, openReq.key);
+					else
+						processDpFromCreatorToAcceptor(dp, openReq.key);
+				}
 			}
 		} //else
 //System.out.println("   Received Structure update tlist == null");			
@@ -369,8 +420,14 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 				if(dpRes != null && dpRes instanceof ValueResource)
 					dp = dpService.getDataPointStandard((ValueResource)dpRes);
 			} catch(Exception e) {}
-			if(dp == null)
-				dp = dpService.getDataPointStandard(dpls[0]);
+			if(dp == null) {
+				//dp = dpService.getDataPointStandard(dpls[0]);
+				dp = dpService.getDataPointAsIs(dpls[0]);
+				if(dp == null) {
+					return null;
+				}
+			}
+			openDpRequests.remove(dpIdFromRemote);
 		} else
 			dp = dpService.getDataPointStandard(dpls[0], commPartnerId);
 		return dp;

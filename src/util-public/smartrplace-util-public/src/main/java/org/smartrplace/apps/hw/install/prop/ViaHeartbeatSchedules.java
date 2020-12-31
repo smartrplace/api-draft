@@ -12,8 +12,11 @@ import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvider;
 import org.smartrplace.util.frontend.servlet.ServletTimeseriesProvider;
+
+import de.iwes.util.format.StringFormatHelper;
 
 /** Basic version is just for reading*/
 public class ViaHeartbeatSchedules implements StringProvider {
@@ -36,6 +39,8 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	public String getStringToSend(long now) {
 		JSONObject json = new JSONObject();
 		List<SampledValue> vals = rot.getValues(lastValueSent+1);
+//if(rot instanceof ProcessedReadOnlyTimeSeries2 && ((ProcessedReadOnlyTimeSeries2)rot).getInputDp().id().startsWith("EnergyServerReadings_ESE/ESE_location_39")) //39/connection/energyDaily/reading"))
+//System.out.println("vals#:"+vals.size()+" lastValueSent:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueSent));
 		JSONArray arr = ServletTimeseriesProvider.smapledValuesToJson(vals, null, null, true, false, true);
 		if(!vals.isEmpty())
 			lastValueSent = vals.get(vals.size()-1).getTimestamp();
