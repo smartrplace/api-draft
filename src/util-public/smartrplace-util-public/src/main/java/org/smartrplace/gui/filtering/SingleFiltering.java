@@ -399,4 +399,13 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 		List<T> alist = getDestinationList(selected);
 		return alist.contains(object);
 	}
+	
+	@Override
+	public GenericFilterOption<A> getSelectedItem(OgemaHttpRequest req) {
+		GenericFilterOption<A> result = super.getSelectedItem(req);
+		if(result != null)
+			return result;
+		onGET(req);
+		return super.getSelectedItem(req);
+	}
 }

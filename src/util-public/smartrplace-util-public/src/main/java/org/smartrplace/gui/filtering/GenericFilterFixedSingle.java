@@ -2,6 +2,8 @@ package org.smartrplace.gui.filtering;
 
 import java.util.Map;
 
+import org.ogema.internationalization.util.LocaleHelper;
+
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 
@@ -14,6 +16,10 @@ public class GenericFilterFixedSingle<A> extends GenericFilterBase<A> {
 		value = object;
 	}
 	
+	public GenericFilterFixedSingle(A object, String optionLabel) {
+		this(object, LocaleHelper.getLabelMap(optionLabel));
+	}
+
 	@Override
 	public boolean isInSelection(A object, OgemaHttpRequest req) {
 		return value.equals(object);
