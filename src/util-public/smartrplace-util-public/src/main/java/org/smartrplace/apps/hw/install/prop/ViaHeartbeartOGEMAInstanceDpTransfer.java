@@ -322,7 +322,15 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 //System.out.println("   Received Structure update tlist == null");			
 			
 		if(dataReceived != null) for(Entry<String, Float> recv: dataReceived.entrySet()) {
-			receiveDatapointData(recv.getKey(), recv.getValue());
+			try {
+				receiveDatapointData(recv.getKey(), recv.getValue());
+			} catch(Exception e) {
+				if(connectingAsClient)
+					logger.error("Could not process value received on "+recv.getKey()+" value:"+recv.getValue());
+				else
+					logger.error("Could not process value received from "+commPartnerId+" on "+recv.getKey()+" value:"+recv.getValue());
+				e.printStackTrace();
+			}
 		}
 		long now = dpService.getFrameworkTime();
 		if(dataReceivedString != null) for(Entry<String, String> recv: dataReceivedString.entrySet()) {
