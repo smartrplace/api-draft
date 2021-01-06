@@ -129,7 +129,7 @@ public abstract class UserServletTest extends HttpServlet {
     	
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
-    	getUserServlet().doPost(req, resp);
+    	getUserServlet().doPost(req, resp, user);
     	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
         resp.addHeader("Access-Control-Allow-Headers", "*");

@@ -3,10 +3,12 @@ package org.smartrplace.util.frontend.servlet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -174,15 +176,20 @@ public class UserServlet extends HttpServlet {
 	}
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user)
 			throws ServletException, IOException {
+		Map<String, String[]> paramMap = getParamMap(req);
+		doGet(req, resp, user, paramMap);
+	}
+	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, Map<String, String[]> paramMap)
+			throws ServletException, IOException {
 System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(req));
 		//String object = req.getParameter("object");
-		String timeStr = req.getParameter("time");
-		String returnStruct = req.getParameter("structure");
+		String timeStr = UserServlet.getParameter("time", paramMap);
+		String returnStruct = UserServlet.getParameter("structure", paramMap);
 		//if(user == null) return;
-		String pageId1 = req.getParameter("page");
+		String pageId1 = UserServlet.getParameter("page", paramMap);
 		List<String> pageList = null;
 		if(pageId1 == null) {
-			String pageIds = req.getParameter("pages");
+			String pageIds = UserServlet.getParameter("pages", paramMap);
 			if(pageIds != null)
 				pageList = StringFormatHelper.getListFromString(pageIds);
 			else
@@ -192,8 +199,7 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			pageList = new ArrayList<>();
 			pageList.add(pageId1);
 		}
-		String pollStr = req.getParameter("poll");
-		Map<String, String[]> paramMap = getParamMap(req);
+		String pollStr = UserServlet.getParameter("poll", paramMap);
 		
 		JSONVarrRes result;
 		if(pageList.isEmpty())
@@ -509,6 +515,26 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		String timeStr = req.getParameter("time");
 		Map<String, String[]> paramMap = getParamMap(req);
 		
+		String fullURL = HttpUtils.getRequestURL(req).toString();
+		int idx = fullURL.indexOf("/userdata/");
+		String[] subURL;
+		if(idx >= 0)
+			subURL = fullURL.substring(idx+"/userdata/".length()).split("/");
+		else {
+			idx =  fullURL.indexOf("/userdatatest/");
+			if(idx >= 0)
+				subURL = fullURL.substring(idx+"/userdatatest/".length()).split("/");
+			else
+				subURL = null;
+		}
+		if(subURL != null && subURL.length > 1) {
+			for(idx=0; idx<subURL.length-1; idx+=2) {
+				String paramName = subURL[idx];
+				String param = subURL[idx+1];
+				addParameter(paramName, param, paramMap);
+			}
+		}
+		
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = req.getReader();
 		int status;
@@ -526,6 +552,32 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 
 		try {
 			JSONObject result = new JSONObject(request);
+			JSONObject params = result.optJSONObject("params");
+			if(params != null) {
+				boolean isGET = true;
+				Map<String, Object> it = params.toMap();
+				for(Entry<String, Object> el: it.entrySet()) {
+					if(el.getValue() instanceof Collection) {
+						@SuppressWarnings("unchecked")
+						Iterator<Object> subit = ((Collection<Object>)el.getValue()).iterator();
+						//List<String> paramvals = new ArrayList<>();
+						while(subit.hasNext()) {
+							Object subel = subit.next();
+							addParameter(el.getKey(), subel.toString(), paramMap);
+							//paramvals.add(subel.toString());
+						}
+					} else
+						addParameter(el.getKey(), el.getValue().toString(), paramMap);
+					if(el.getKey().equals("getData") && (el.getValue()!=null && "false".equals(el.getValue().toString())))
+						isGET = true;
+				}
+				if(isGET) {
+					if(getParameter("structure", paramMap) == null)
+						addParameter("structure", "toparray", paramMap);
+					doGet(req, resp, user, paramMap);
+					return;
+				}
+			}
 			postJSON(user, result, pageMap, timeStr, paramMap);
 			//Map<String, ServletValueProvider> userMap = postData.get(user);
 			//for(String key: result.keySet()) {
@@ -665,5 +717,16 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		if(result == null)
 			return defaultLocale;
 		return result;
+	}
+	
+	public static void addParameter(String paramName, String param, Map<String, String[]> paramMap) {
+		String[] subMap = paramMap.get(paramName);
+		if(subMap == null) {
+			paramMap.put(paramName, new String[] {param});
+		} else {
+			List<String> newList = new ArrayList<String>(Arrays.asList(subMap));
+			newList.add(param);
+			paramMap.put(paramName, newList.toArray(new String[0]));
+		}		
 	}
 }

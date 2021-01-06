@@ -112,6 +112,7 @@ public class UserServletUtil {
 	public static <T extends PhysicalElement> T getObject(String objectId, List<T> allObjects) {
 		for(T resource: allObjects) {
 			if(resource.name().getValue().equals(objectId)) return resource;
+			if(resource.getSubResource("name", StringResource.class).getValue().equals(objectId)) return resource;
 			if(resource.getLocation().equals(objectId)) return resource;
 		}
 		return null;
