@@ -14,8 +14,8 @@ import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
  * 
  * @author dnestle
  *
- * @param <A>
- * @param <G> type of groups in first dropdown
+ * @param <A> attribute type for which the filtering shall take place
+ * @param <G> type of groups of A in first dropdown
  * @param <T>
  */
 public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T> {
@@ -25,8 +25,9 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 	//protected abstract List<G> getAllGroups(OgemaHttpRequest req);
 	//protected abstract List<A> elementsInGroup(G group, OgemaHttpRequest req);
 	protected abstract List<GenericFilterOption<A>> getOptionsDynamic(G group, OgemaHttpRequest req);
+	
 	protected abstract List<GenericFilterFixedGroup<A, G>> getGroupOptionsDynamic();
-	protected abstract GenericFilterFixedGroup<A, G> getGroupOptionDynamic(G group);
+	//protected abstract GenericFilterFixedGroup<A, G> getGroupOptionDynamic(G group);
 	protected abstract List<G> getGroups(A object);
 	protected abstract boolean isGroupEqual(G group1, G group2);
 	
@@ -43,12 +44,16 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 
 	public DualFiltering2Steps(WidgetPage<?> page, String id, OptionSavingMode saveOptionMode, long optionSetUpdateRate,
 			boolean addAllOption) {
-		super(page, id, saveOptionMode, 1, addAllOption);
+		this(page, id, saveOptionMode, optionSetUpdateRate, true, addAllOption);
+	}
+	public DualFiltering2Steps(WidgetPage<?> page, String id, OptionSavingMode saveOptionMode, long optionSetUpdateRate,
+			boolean addAllOptionFirstDrop, boolean addAllOptionSecondDrop) {
+		super(page, id, saveOptionMode, 1, addAllOptionSecondDrop);
 		if(saveOptionMode == OptionSavingMode.PER_USER)
 			throw new UnsupportedOperationException("PER_USER not supported for DualFiltering2Steps");
 		//FIXME: For now we add the all option to the first dropdown always. This should be configurable in the future,
 		//maybe also dynamically to detect whether this leads to too large dropdowns
-		firstDropDown = new SingleFilteringGroupBased<A, G, A>(page, id+"_first", saveOptionMode, optionSetUpdateRate, true) {
+		firstDropDown = new SingleFilteringGroupBased<A, G, A>(page, id+"_first", saveOptionMode, optionSetUpdateRate, addAllOptionFirstDrop) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -79,7 +84,7 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 					List<GenericFilterFixedGroup<A, G>> all = (getGroupOptionsDynamic());
 					List<GenericFilterOption<A>> result = new ArrayList<>();
 					for(GenericFilterFixedGroup<A, G> a: all) {
-						GenericFilterFixedGroup<A, G> opt = getGroupOptionDynamic(a.getGroup());
+						//GenericFilterFixedGroup<A, G> opt = getGroupOptionDynamic(a.getGroup());
 						List<GenericFilterOption<A>> secondSel = DualFiltering2Steps.this.getOptionsDynamic(a.getGroup(), req);
 						if(secondSel == null || secondSel.isEmpty() || secondSel.get(0) == DualFiltering2Steps.this.NONE_OPTION)
 							continue;
@@ -155,5 +160,12 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 				return isInSelectionObjectInGroup(object, ((GenericFilterFixedGroup<A, G>)groupFilterSelected).getGroup());
 			}
 		};
+	}
+	
+	@SuppressWarnings("unchecked")
+	//TODO: Does not work yet
+	public G getSelectedGroup(OgemaHttpRequest req) {
+		GenericFilterOption<A> groupFilterSelected = getSelectedItem(req);
+		return ((GenericFilterFixedGroup<A, G>)groupFilterSelected).getGroup();
 	}
 }
