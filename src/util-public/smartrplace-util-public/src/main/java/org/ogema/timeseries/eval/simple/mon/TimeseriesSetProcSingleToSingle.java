@@ -44,8 +44,6 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 	public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 		List<Datapoint> result = new ArrayList<>();
 		for(Datapoint tsdi: input) {
-			//if(nameProvider() != null)
-			//	tsdi.setLabel(nameProvider().getShortNameForTypeI(tsdi.getGaroDataType(), tsdi.getTimeSeriesDataImpl()));
 			String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
 			ProcTsProvider provider = new ProcTsProvider() {
 				
@@ -75,35 +73,6 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 				}
 			};
 			Datapoint newtsdi = getOrUpdateTsDp(location, provider , dpService);
-			
-			/*ProcessedReadOnlyTimeSeries2 newTs2 = null;
-			Datapoint newtsdi = null;
-			if(dpService != null) {
-				String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
-				newtsdi = dpService.getDataPointStandard(location);
-				ReadOnlyTimeSeries dpts = newtsdi.getTimeSeries();
-				if((dpts != null) && (dpts instanceof ProcessedReadOnlyTimeSeries2))
-					newTs2 = (ProcessedReadOnlyTimeSeries2) dpts; 
-			}
-			if(newTs2 == null) {
-				newTs2 = new ProcessedReadOnlyTimeSeries2(tsdi) {
-					@Override
-					protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
-							long end, AggregationMode mode) {
-						return calculateValues(timeSeries, start, end, mode, this);						
-					}
-					@Override
-					protected String getLabelPostfix() {
-						return labelPostfix;
-					}
-					
-					@Override
-					protected long getCurrentTime() {
-						return dpService.getFrameworkTime();
-					}
-				}; 
-				newtsdi = newTs2.getResultSeriesDP(dpService);
-			}*/
 			result.add(newtsdi);
 		}
 		return result;

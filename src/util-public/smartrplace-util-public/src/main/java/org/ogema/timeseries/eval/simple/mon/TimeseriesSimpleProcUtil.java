@@ -1,7 +1,6 @@
 package org.ogema.timeseries.eval.simple.mon;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,42 +18,22 @@ import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
-import org.ogema.devicefinder.util.AggregationModeProvider;
-import org.ogema.devicefinder.util.DPUtil;
-import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
 
-import de.iwes.timeseries.eval.api.TimeSeriesData;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 
-public class TimeseriesSimpleProcUtil {
-	protected final Map<String, TimeseriesSetProcessor> knownProcessors = new HashMap<>();
-	public TimeseriesSetProcessor getProcessor(String procID) {
-		return knownProcessors.get(procID);
-	}
-	
-	//protected TimeSeriesNameProvider nameProvider() {return null;}
-	//protected abstract AggregationMode getMode(String tsLabel);
-	protected final ApplicationManager appMan;
-	public final DatapointService dpService;
-	
-	// This is from the MonitoringController API definition. Maybe this should be revised anyways.
-	//protected abstract List<String> getAllRooms(OgemaLocale locale);
-	//protected String getRoomLabel(String resLocation, OgemaLocale locale);
-	
-	//Better use this from DatapointService?
+public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
 	
 	public TimeseriesSimpleProcUtil(ApplicationManager appMan, DatapointService dpService) {
 		this(appMan, dpService, 0);
 	}
 	public TimeseriesSimpleProcUtil(ApplicationManager appMan, DatapointService dpService,
 			int updateMode) {
-		this.appMan = appMan;
-		this.dpService = dpService;
+		super(appMan, dpService);
 		
 		TimeseriesSetProcessor meterProc = new TimeseriesSetProcSingleToSingle("_vm") {
 			
@@ -280,65 +259,5 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Yearproc", 1, null, null);
 		};
 
 		knownProcessors.put(TimeProcUtil.SUM_PER_DAY_PER_ROOM_EVAL, dayPerRoomProc);
-	}
-	public List<Datapoint> process(String tsProcessRequest, List<Datapoint> input) {
-		TimeseriesSetProcessor proc = knownProcessors.get(tsProcessRequest);
-		if(proc == null)
-			throw new IllegalArgumentException("Unknown timeseries processor: "+tsProcessRequest);
-		return proc.getResultSeries(input, dpService);
-	}
-	
-	/** Regarding calculation notes see {@link TimeseriesSetProcMultiToSingle}
-	 * 
-	 * @param tsProcessRequest
-	 * @param input
-	 * @return
-	 */
-	public Datapoint processMultiToSingle(String tsProcessRequest, List<Datapoint> input) {
-		TimeseriesSetProcessor proc = knownProcessors.get(tsProcessRequest);
-		if(proc == null)
-			throw new IllegalArgumentException("Unknown timeseries processor: "+tsProcessRequest);
-		List<Datapoint> resultTs = proc.getResultSeries(input, dpService);
-		if(resultTs != null && !resultTs.isEmpty())
-			return resultTs.get(0);
-		return null;
-	}
-	
-	public Datapoint processSingle(String tsProcessRequest, Datapoint dp) {
-		TimeseriesSetProcessor proc = getProcessor(tsProcessRequest);
-		if(proc == null)
-			throw new IllegalArgumentException("Unknown timeseries processor: "+tsProcessRequest);
-		List<Datapoint> resultTs = proc.getResultSeries(Arrays.asList(new Datapoint[] {dp}), dpService);
-		if(resultTs != null && !resultTs.isEmpty())
-			return resultTs.get(0);
-		return null;
-	}
-	
-	/** For processing of two or more aligned time series that are not interchangeable like difference, divison,...*/
-	public Datapoint processArgs(String tsProcessRequest, Datapoint... dp) {
-		TimeseriesSetProcessor proc = getProcessor(tsProcessRequest);
-		if(proc == null)
-			throw new IllegalArgumentException("Unknown timeseries processor: "+tsProcessRequest);
-		List<Datapoint> resultTs = proc.getResultSeries(Arrays.asList(dp), dpService);
-		if(resultTs != null && !resultTs.isEmpty())
-			return resultTs.get(0);
-		return null;
-	}
-
-	public List<Datapoint> processSingleToMulti(String tsProcessRequest, Datapoint dp) {
-		List<Datapoint> result = new ArrayList<>();
-		TimeseriesSetProcessor proc = getProcessor(tsProcessRequest);
-		if(proc == null)
-			throw new IllegalArgumentException("Unknown timeseries processor: "+tsProcessRequest);
-		List<Datapoint> resultTs = proc.getResultSeries(Arrays.asList(new Datapoint[] {dp}), dpService);
-		if(resultTs != null && !resultTs.isEmpty())
-			result.addAll(resultTs);
-		
-		return result;
-	}
-
-	public List<TimeSeriesData> processTSD(String tsProcessRequest, List<TimeSeriesData> input,
-			TimeSeriesNameProvider nameProvider, AggregationModeProvider aggProv) {
-		return DPUtil.getTSList(process(tsProcessRequest, DPUtil.getDPList(input, nameProvider, aggProv)), null);
 	}
 }

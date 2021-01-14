@@ -92,6 +92,8 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 
 	@Override
 	public List<SampledValue> getValues(long startTime, long endTime) {
+		if(startTime < 0)
+			startTime = 0;
 		boolean isFree = updateLock.tryLock();
 		if(!isFree) {
 			System.out.println("Waiting for lock in "+this.toString()+"...");
@@ -260,6 +262,8 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 
 	@Override
 	public SampledValue getNextValue(long time) {
+		if(time < 0)
+			time = 0;
 		List<SampledValue> asList = getValues(time, Long.MAX_VALUE);
 		if(asList.isEmpty())
 			return null;
@@ -269,6 +273,8 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 
 	@Override
 	public SampledValue getPreviousValue(long time) {
+		if(time < 0)
+			time = 0;
 		List<SampledValue> asList = getValues(0, time);
 		if(asList.isEmpty())
 			return null;

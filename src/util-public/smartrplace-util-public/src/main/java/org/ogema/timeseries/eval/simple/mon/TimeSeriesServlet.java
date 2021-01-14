@@ -500,4 +500,68 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		return sum;
 	}
 
+	public static List<SampledValue> getGaps(ReadOnlyTimeSeries timeSeries, long start, long end, long maxGapSize) {
+		List<SampledValue> input = timeSeries.getValues(start, end+1);
+		List<SampledValue> result = new ArrayList<>();
+		SampledValue lastVal = null;
+		if(input.isEmpty() && ((end-start) > maxGapSize)) {
+			result.add(new SampledValue(new FloatValue((float)((double)(end-start)/TimeProcUtil.MINUTE_MILLIS)), start, Quality.GOOD));
+			return result;
+		}
+		for(SampledValue sv: input) {
+			if(lastVal == null)
+				lastVal = sv;
+			else {
+				long gap = sv.getTimestamp() - lastVal.getTimestamp();
+				if(gap > maxGapSize)
+					result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), lastVal.getTimestamp(), Quality.GOOD));
+				lastVal = sv;
+			}
+		}
+		return result;
+	}
+
+	public static List<SampledValue> getOutValues(ReadOnlyTimeSeries timeSeries, long start, long end, float lowerLimit,
+			float upperLimit, long maxOutTime) {
+		List<SampledValue> input = timeSeries.getValues(start, end+1);
+		List<SampledValue> result = new ArrayList<>();
+		long lastValidTime = -1;
+		boolean hasViolation = false;
+		for(SampledValue sv: input) {
+			float val = sv.getValue().getFloatValue();
+			if(lastValidTime < 0) {
+				if(isViolated(val, lowerLimit, upperLimit)) {
+						lastValidTime = start;
+						hasViolation = true;
+				} else
+					lastValidTime = sv.getTimestamp();
+			} else {
+				if(isViolated(val, lowerLimit, upperLimit)) {
+					if(!hasViolation)
+						hasViolation = true;
+				} else {
+					if(hasViolation) {
+						//Violation ends
+						hasViolation = false;
+						long gap = sv.getTimestamp() - lastValidTime;
+						result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), lastValidTime, Quality.GOOD));
+					}
+					lastValidTime = sv.getTimestamp();
+				}
+			}
+		}
+		if(hasViolation) {
+			//Violation ends
+			hasViolation = false;
+			long gap = end - lastValidTime;
+			result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), lastValidTime, Quality.GOOD));
+		}
+		return result;
+	}
+	
+	public static boolean isViolated(float value, float lower, float upper) {
+		if(value < lower) return true;
+		if(value > upper) return true;
+		return false;
+	}	
 }

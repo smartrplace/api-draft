@@ -18,16 +18,31 @@ public class TimeProcUtil {
 	public static final long YEAR_MILLIS = (long)(365.25*HOUR_MILLIS);
 
 	public static final String PER_DAY_EVAL = "DAY";
+	public static final String PER_DAY_SUFFIX = "_proTag";
 	public static final String PER_HOUR_EVAL = "HOUR";
+	public static final String PER_HOUR_SUFFIX = "_proStunde";
 	public static final String PER_MONTH_EVAL = "MONTH";
+	public static final String PER_MONTH_SUFFIX = "_perMonth";
 	public static final String PER_YEAR_EVAL = "YEAR";
+	public static final String PER_YEAR_SUFFIX = "_perYear";
 	public static final String SUM_PER_DAY_EVAL = "SUM_PER_DAY";
+	public static final String SUM_PER_DAY_SUFFIX = "_total_sum";
 	public static final String SUM_PER_HOUR_EVAL = "SUM_PER_HOUR";
+	public static final String SUM_PER_HOUR_SUFFIX = "_total_sum_hour";
 	public static final String SUM_PER_MONTH_EVAL = "SUM_PER_MONTH";
+	public static final String SUM_PER_MONTH_SUFFIX = "_total_sum_month";
 	public static final String SUM_PER_YEAR_EVAL = "SUM_PER_YEAR";
+	public static final String SUM_PER_YEAR_SUFFIX = "_total_sum_year";
 	public static final String SUM_PER_DAY_PER_ROOM_EVAL = "DAY_PER_ROOM";
+	public static final String SUM_PER_DAY_PER_ROOM_SUFFIX = "_sum";
 
 	public static final String METER_EVAL = "METER";
+	public static final String METER_SUFFIX = "_vm";
+	
+	/** Known suffixes from applications*/
+	public static final String ALARM_GAP_SUFFIX = "_gap";
+	public static final String ALARM_OUTVALUE_SUFFIX = "_outvalue";
+	
 	public static TimeResource getDefaultMeteringReferenceResource(ResourceAccess resAcc ) {
 		TimeResource refRes = null;
 		if(!Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.suppress_legacy_meteringreference"))
