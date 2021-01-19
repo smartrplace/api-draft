@@ -1,5 +1,7 @@
 package org.ogema.devicefinder.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
@@ -27,6 +30,8 @@ import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.DoorWindowSensor;
+import org.ogema.model.sensors.EnergyAccumulatedSensor;
+import org.ogema.model.sensors.VolumeAccumulatedSensor;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -338,7 +343,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static String getDeviceStdName(Resource model) {
 		//switch(typeClassName) {
 		Class<? extends Resource> resType = model.getResourceType();
-		return getDeviceStdName(resType.getName(), model.getLocation());
+		return getDeviceStdName(resType.getName(), model.getLocation(), getSubResInfo(model.getSubResources(false)));
 		/*if(DoorWindowSensor.class.isAssignableFrom(resType))
 			return "WindowSens";
 		if(Thermostat.class.isAssignableFrom(resType))
@@ -355,13 +360,39 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return "PVPlant";
 		return resType.getSimpleName();*/
 	}
-	public static String getDeviceStdName(String resType, String resourceLocation) {
+	public static class SubResourceInfo {
+		String resourceName;
+		String resType;
+		public SubResourceInfo(String resourceName, String resType) {
+			this.resourceName = resourceName;
+			this.resType = resType;
+		}
+	}
+	public static List<SubResourceInfo> getSubResInfo(Resource parent) {
+		return getSubResInfo(parent.getSubResources(false));
+	}
+	public static List<SubResourceInfo> getSubResInfo(Collection<Resource> ress) {
+		List<SubResourceInfo> result = new ArrayList<>();
+		for(Resource res: ress) {
+			result.add(new SubResourceInfo(res.getName(), res.getResourceType().getName()));
+		}
+		return result ;
+	}
+	/** Get device standard name
+	 * 
+	 * @param resType
+	 * @param resourceLocation
+	 * @param subResources may be null, but then device may not be identified correctly. Information on
+	 * 		direct sub resources of device (non-recursive)
+	 * @return
+	 */
+	public static String getDeviceStdName(String resType, String resourceLocation, List<SubResourceInfo> subResources) {
 		if(DoorWindowSensor.class.getName().equals(resType))
 			return "WindowSens";
 		if(Thermostat.class.getName().equals(resType))
 			return "Thermostat";
 		if(SensorDevice.class.getName().equals(resType))
-			return getSensorDeviceStdName(resourceLocation);
+			return getSensorDeviceStdName(resourceLocation, subResources);
 		if(SingleSwitchBox.class.getName().equals(resType))
 			return "SwitchBox";
 		if(ElectricityConnectionBox.class.getName().equals(resType))
@@ -418,27 +449,20 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return null;
 	}
 	
-	/*public static String getSensorDeviceStdName(SensorDevice model) {
-		// If more types of SensorDevices are supported in the future add detection here
-		if(isTempHumSens(model))
-			return "TempHumSens";
-		return "SensorDevice";
-	}
-	public static boolean isTempHumSens(SensorDevice model) {
-		if(model.getLocation().toLowerCase().startsWith("homematic"))
-			return true;
-		//for(Sensor sens: model.getSubResources(Sensor.class, false)) {
-		//	if(sens instanceof TemperatureSensor || sens instanceof HumiditySensor)
-		//		return true;
-		//}
-		return false;
-	}*/
-	public static String getSensorDeviceStdName(String resourceLocation) {
+	/////////////////////////////////////////////
+	// SensorDevice Handling
+	/////////////////////////////////////////////
+	
+	public static String getSensorDeviceStdName(String resourceLocation, List<SubResourceInfo> subResources) {
 		// If more types of SensorDevices are supported in the future add detection here
 		if(isTempHumSens(resourceLocation))
 			return "TempHumSens";
 		if(isDimmerSensorDevice(resourceLocation))
 			return "smartDimmer";
+		if(isSmartProtectDevice(resourceLocation))
+			return "smartProtectionDevice";
+		if(isGasEnergyCamDevice(resourceLocation, subResources))
+			return "EnergyCam";
 		return "SensorDevice";
 	}
 	public static boolean isTempHumSens(String resourceLocation) {
@@ -450,12 +474,81 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		//}
 		return false;
 	}
-
 	public static boolean isDimmerSensorDevice(String resourceLocation) {
 		if(resourceLocation.toLowerCase().startsWith("vekin"))
 			return true;
 		return false;
 	}
+	public static boolean isSmartProtectDevice(String resourceLocation) {
+		if(resourceLocation.toLowerCase().startsWith("livy"))
+			return true;
+		return false;
+	}
+	public static int getUnsupportedOfType(Collection<SubResourceInfo> subResources, String type) {
+		int count = 0;
+		for(SubResourceInfo srinfo: subResources) {
+			if(type != null && (!type.equals(srinfo.resType))) {
+				continue;
+			}
+			if(srinfo.resourceName.startsWith("unsupported_"))
+				count++;
+		}
+		return count;
+	}
+	public static boolean isGasEnergyCamDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if(subResources == null)
+			return false;
+		if(!resourceLocation.toLowerCase().startsWith("jmbus"))
+			return false;
+		if(isHeatMeterDevice(resourceLocation, subResources))
+			return false;
+		int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
+		if(unsup != 1)
+			return false;
+		boolean foundVolume = false;
+		for(SubResourceInfo srinfo: subResources) {
+			if(VolumeAccumulatedSensor.class.getName().equals(srinfo.resType)) {
+				foundVolume = true;
+				break;
+			}
+		}
+		return foundVolume;
+	}
+	public static boolean isWaterMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if(subResources == null)
+			return false;
+		//do not accept if subResource size fits GasEnergyCam
+		if(!resourceLocation.toLowerCase().startsWith("jmbus"))
+			return false;
+		if(isHeatMeterDevice(resourceLocation, subResources))
+			return false;
+		int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
+		if(unsup == 1)
+			return false;
+		boolean foundVolume = false;
+		for(SubResourceInfo srinfo: subResources) {
+			if(VolumeAccumulatedSensor.class.getName().equals(srinfo.resType)) {
+				foundVolume = true;
+				break;
+			}
+		}
+		return foundVolume;
+	}
+	public static boolean isHeatMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if(subResources == null)
+			return false;
+		if(!resourceLocation.toLowerCase().startsWith("jmbus"))
+			return false;
+		boolean foundEnergy = false;
+		for(SubResourceInfo srinfo: subResources) {
+			if(EnergyAccumulatedSensor.class.getName().equals(srinfo.resType)) {
+				foundEnergy = true;
+				break;
+			}
+		}
+		return foundEnergy;
+	}
+	
 	
 	/** For {@link ElectricityConnectionBox} devices*/
 	public static boolean isEnergyServerDevice(String resourceLocation) {
