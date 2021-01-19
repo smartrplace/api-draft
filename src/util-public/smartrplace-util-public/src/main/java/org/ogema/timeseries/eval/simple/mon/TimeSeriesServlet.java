@@ -505,7 +505,7 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		List<SampledValue> result = new ArrayList<>();
 		SampledValue lastVal = null;
 		if(input.isEmpty() && ((end-start) > maxGapSize)) {
-			result.add(new SampledValue(new FloatValue((float)((double)(end-start)/TimeProcUtil.MINUTE_MILLIS)), start, Quality.GOOD));
+			result.add(new SampledValue(new FloatValue((float)((double)(end-start)/TimeProcUtil.MINUTE_MILLIS)), end, Quality.GOOD));
 			return result;
 		}
 		for(SampledValue sv: input) {
@@ -514,7 +514,7 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 			else {
 				long gap = sv.getTimestamp() - lastVal.getTimestamp();
 				if(gap > maxGapSize)
-					result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), lastVal.getTimestamp(), Quality.GOOD));
+					result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), sv.getTimestamp(), Quality.GOOD));
 				lastVal = sv;
 			}
 		}
@@ -544,7 +544,7 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 						//Violation ends
 						hasViolation = false;
 						long gap = sv.getTimestamp() - lastValidTime;
-						result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), lastValidTime, Quality.GOOD));
+						result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), sv.getTimestamp(), Quality.GOOD));
 					}
 					lastValidTime = sv.getTimestamp();
 				}
@@ -552,9 +552,8 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		}
 		if(hasViolation) {
 			//Violation ends
-			hasViolation = false;
 			long gap = end - lastValidTime;
-			result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), lastValidTime, Quality.GOOD));
+			result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), end, Quality.GOOD));
 		}
 		return result;
 	}
