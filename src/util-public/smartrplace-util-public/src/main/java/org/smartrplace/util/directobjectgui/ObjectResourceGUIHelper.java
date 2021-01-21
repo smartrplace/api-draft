@@ -348,7 +348,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	 * @param row
 	 * @param gateway
 	 * @param mode 0: absolute time, 1: time in day, 2: absolute time relative to now, 3: as 2 for future,
-	 * 		4: date string (year to day), absolute time
+	 * 		4: date string (year to day), absolute time, 5: relative time in milliseconds, 6: relative time in seconds
 	 * @return
 	 */
 	private Label timeLabel(String widgetId, final TimeResource optSource, String altId, final int mode) {
@@ -379,6 +379,12 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					if(source.getValue() <= 0) time = "not set";
 					else
 						time = TimeUtils.getDateString(source.getValue());
+					break;
+				case 5:
+					time = StringFormatHelper.getFormattedValue(source.getValue());
+					break;
+				case 6:
+					time = StringFormatHelper.getFormattedValue(source.getValue()*1000);
 					break;
 				default:
 					if(source.getValue() <= 0) time = "not set";

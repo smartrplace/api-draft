@@ -455,6 +455,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static String getSensorDeviceStdName(String resourceLocation, List<SubResourceInfo> subResources) {
 		// If more types of SensorDevices are supported in the future add detection here
+		if(isWeatherStation(resourceLocation))
+			return "WeatherStation";
 		if(isTempHumSens(resourceLocation))
 			return "TempHumSens";
 		if(isDimmerSensorDevice(resourceLocation))
@@ -463,17 +465,26 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return "smartProtectionDevice";
 		if(isGasEnergyCamDevice(resourceLocation, subResources))
 			return "EnergyCam";
+		if(isHeatMeterDevice(resourceLocation, subResources))
+			return "HeatMeter";
+		if(isWaterMeterDevice(resourceLocation, subResources))
+			return "WaterMeter";
 		return "SensorDevice";
 	}
+	
 	public static boolean isTempHumSens(String resourceLocation) {
+		if(isWeatherStation(resourceLocation))
+			return false;
 		if(resourceLocation.toLowerCase().startsWith("homematic"))
 			return true;
-		//for(Sensor sens: model.getSubResources(Sensor.class, false)) {
-		//	if(sens instanceof TemperatureSensor || sens instanceof HumiditySensor)
-		//		return true;
-		//}
 		return false;
 	}
+	public static boolean isWeatherStation(String resourceLocation) {
+		if(resourceLocation.toLowerCase().startsWith("homematic") && resourceLocation.contains("HM_HM_WDS100_"))
+			return true;
+		return false;
+	}
+	
 	public static boolean isDimmerSensorDevice(String resourceLocation) {
 		if(resourceLocation.toLowerCase().startsWith("vekin"))
 			return true;
