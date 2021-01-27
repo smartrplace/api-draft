@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.ogema.core.model.Resource;
 
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.template.LabelledItem;
 
 public interface DeviceTypeProvider<T extends Resource>  extends LabelledItem {
@@ -17,7 +18,8 @@ public interface DeviceTypeProvider<T extends Resource>  extends LabelledItem {
 	 *  
 	 * @return if null then no configuration can be given by the user
 	 */
-	String getConfigDescription();
+	@Override
+	String description(OgemaLocale locale);
 	
 	/** Check configuration without actually performing the resource creation and configuration. Note that this 
 	 * does not have to be implemented by all providers
