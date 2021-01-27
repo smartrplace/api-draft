@@ -1,5 +1,6 @@
 package org.ogema.devicefinder.api;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
@@ -12,6 +13,7 @@ import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.autoconfig.api.DeviceTypeProvider;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -153,4 +155,9 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	 * for the devices are not overwritten.
 	 */
 	default String getInitVersion() {return "";}
+	
+	/** Optionally als DeviceTypeProviders can be declared*/
+	default Collection<DeviceTypeProvider<?>> getDeviceTypeProviders() {
+		return null;
+	}
 }

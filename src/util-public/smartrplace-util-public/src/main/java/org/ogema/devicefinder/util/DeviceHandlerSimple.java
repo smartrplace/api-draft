@@ -43,7 +43,7 @@ import de.iwes.widgets.html.form.label.Label;
 public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends DeviceHandlerBase<T> {
 	public static final long DEFAULT_POLL_RATE = 5000;
 	
-	private final ApplicationManagerPlus appMan;
+	protected final ApplicationManagerPlus appMan;
 	protected final DatapointService dpService;
 	protected final boolean isInRoom;
 	
@@ -115,27 +115,28 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 				final T box = (T)addNameWidget(object, vh, id, req, row, appMan);
 
 				SingleValueResource sampleSensor = getMainSensorValue(box, object);
-				Label valueLabel;
-				if(sampleSensor instanceof FloatResource)
-					valueLabel = vh.floatLabel("Value", id, (FloatResource)sampleSensor, row, "%.1f");
-				else if(sampleSensor instanceof IntegerResource)
-					valueLabel = vh.intLabel("Value", id, (IntegerResource)sampleSensor, row, 0);
-				else if(sampleSensor instanceof TimeResource)
-					valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 0);
-				else if(sampleSensor instanceof BooleanResource)
-					valueLabel = vh.booleanLabel("Value", id, (BooleanResource)sampleSensor, row, 0);
-				else
-					throw new IllegalStateException("Unsupported sensor type: "+sampleSensor.getResourceType().getName());
-				
-				Label lastContact = addLastContact(vh, id, req, row, sampleSensor);
+				if(sampleSensor != null) {
+					Label valueLabel;
+					if(sampleSensor instanceof FloatResource)
+						valueLabel = vh.floatLabel("Value", id, (FloatResource)sampleSensor, row, "%.1f");
+					else if(sampleSensor instanceof IntegerResource)
+						valueLabel = vh.intLabel("Value", id, (IntegerResource)sampleSensor, row, 0);
+					else if(sampleSensor instanceof TimeResource)
+						valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 0);
+					else if(sampleSensor instanceof BooleanResource)
+						valueLabel = vh.booleanLabel("Value", id, (BooleanResource)sampleSensor, row, 0);
+					else
+						throw new IllegalStateException("Unsupported sensor type: "+sampleSensor.getResourceType().getName());
+					Label lastContact = addLastContact(vh, id, req, row, sampleSensor);
+					
+					if(req != null) {
+						valueLabel.setPollingInterval(DEFAULT_POLL_RATE, req);
+						lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
+					}
+				}
 				
 				addMoreValueWidgets(object, box, vh, id, req, row, appMan);
 				
-				if(req != null) {
-					valueLabel.setPollingInterval(DEFAULT_POLL_RATE, req);
-					lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
-				}
-
 				if(isInRoom) {
 					Room deviceRoom = box.location().room();
 					addRoomWidget(vh, id, req, row, appMan, deviceRoom);
