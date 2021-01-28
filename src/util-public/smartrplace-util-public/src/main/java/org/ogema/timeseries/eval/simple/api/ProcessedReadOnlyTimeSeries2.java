@@ -132,8 +132,6 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 
 	@Override
 	protected List<SampledValue> updateValues(long start, long end) {
-if(tsdi == null)
-System.out.println("XXCXX");
 		ReadOnlyTimeSeries ts = tsdi.getTimeSeries();
 		if(firstTimestampInSource == null) {
 			SampledValue sv = ts.getNextValue(0);

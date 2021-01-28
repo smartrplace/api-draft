@@ -29,8 +29,23 @@ import de.iwes.util.timer.AbsoluteTiming;
 public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
 	
 	public TimeseriesSimpleProcUtil(ApplicationManager appMan, DatapointService dpService) {
-		this(appMan, dpService, 0);
+		this(appMan, dpService, 4);
 	}
+	
+	/** Setup new instance for creating timeseries
+	 * 
+	 * @param appMan
+	 * @param dpService
+	 * @param updateMode see {@link TimeseriesSetProcMultiToSingle#updateMode}:
+	 * 	 Update mode regarding interval propagation and regarding singleInput.<br>
+	 * 	 Note that from mode 2 on any change in the input data triggers a recalculation of the output data<br>
+	 * 
+	 *  0: Do not generate a result time series if input is empty, no updates
+	 *  1: Update only at the end
+	 *  2: Update exactly for any input change interval
+	 *  3: Update for any input change onwards completely
+	 *  4: Update completely if any input has a change 
+	 */
 	public TimeseriesSimpleProcUtil(ApplicationManager appMan, DatapointService dpService,
 			int updateMode) {
 		super(appMan, dpService);
