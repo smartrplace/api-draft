@@ -70,7 +70,10 @@ public abstract class UserServletTest extends HttpServlet {
 	@Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     	String user = getUser(req, resp);
-    	if(user == null) return;
+    	if(user == null) {
+    		sendError(resp);
+    		return;
+    	}
     	
     	//if(!req.getRequestURI().endsWith(SERVLET_ADDRESS)) return;
     	/*String user = checkAccessAllowedAndSendErrorToUser(req, resp);
@@ -124,7 +127,10 @@ public abstract class UserServletTest extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     	String user = getUser(req, resp);
-    	if(user == null) return;
+    	if(user == null) {
+    		sendError(resp);
+    		return;
+    	}
     	//if(!checkAccessAllowedAndSendError(req, resp)) return;
     	
     	resp.setCharacterEncoding("UTF-8");

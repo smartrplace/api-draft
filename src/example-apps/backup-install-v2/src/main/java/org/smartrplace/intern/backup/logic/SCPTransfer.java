@@ -38,6 +38,11 @@ public class SCPTransfer {
 	public static boolean collectViaSCP(SCPTransferPattern scp, ApplicationManager appMan, boolean createDateDir,
 			LocalGatewayInformation gateway, FileTransmissionTaskData externalTransmissionControl,
 			String destinationExtenstion) {
+		return collectViaSCP(scp, appMan, createDateDir, gateway, externalTransmissionControl, destinationExtenstion, false);
+	}
+	public static boolean collectViaSCP(SCPTransferPattern scp, ApplicationManager appMan, boolean createDateDir,
+			LocalGatewayInformation gateway, FileTransmissionTaskData externalTransmissionControl,
+			String destinationExtenstion, boolean zipOnly) {
 		if (appMan.getLogger().isDebugEnabled()) {
 			if(scp.collectionActions.size() > 0)
 				appMan.getLogger().debug("Perform action #"+scp.collectionActions.size()+" [1]:"+scp.collectionActions.getAllElements().get(0).getLocation());
@@ -46,7 +51,7 @@ public class SCPTransfer {
 		}
 		ActionHelper.performActionListBlocking(scp.collectionActions, 20000);
 		if (scp.pushMode.exists() && scp.pushMode.getValue()) {
-			return sendViaSCP(scp, appMan, createDateDir, gateway, externalTransmissionControl, destinationExtenstion);
+			return sendViaSCP(scp, appMan, createDateDir, gateway, externalTransmissionControl, destinationExtenstion, zipOnly);
 		}
 		Path dest = Paths.get(scp.destination.getValue());
 		DirUtils.makeSureDirExists(dest);
@@ -93,6 +98,11 @@ public class SCPTransfer {
 	public static boolean sendViaSCP(SCPTransferPattern scp, ApplicationManager appMan, boolean createDateDir,
 			LocalGatewayInformation gateway, FileTransmissionTaskData externalTransmissionControl,
 			String destinationExtenstion) {
+		return sendViaSCP(scp, appMan, createDateDir, gateway, externalTransmissionControl, destinationExtenstion, false);
+	}
+	public static boolean sendViaSCP(SCPTransferPattern scp, ApplicationManager appMan, boolean createDateDir,
+			LocalGatewayInformation gateway, FileTransmissionTaskData externalTransmissionControl,
+			String destinationExtenstion, boolean zipOnly) {
 		String dest = scp.destination.getValue();
 		if (dest.equals("///GATEWAY_ID///")) {
 			if (gateway == null)
@@ -149,6 +159,9 @@ public class SCPTransfer {
 			} else {
 				sourceToUse = Paths.get(scp.sourcePath.getValue());
 			}
+			if(zipOnly)
+				return true;
+			
 			FileTransmissionTaskData taskData;
 			//if (scp.taskData.isActive())
 			//	taskData = scp.taskData;

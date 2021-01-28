@@ -160,7 +160,7 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 	
 	protected static boolean acceptCharAsDigitPreferred(char last) {
 		//return (last>='0' && last <='9');
-		return (last <='9');
+		return (last <='9') || (last >= 'A' && last <= 'F') || (last >= 'a' && last <= 'f');
 	}
 	
 	public static int getNumberById(String str) {

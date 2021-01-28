@@ -115,11 +115,11 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 			}
 		} else {
 		*/
-			appMan.getLogger().info("Sending Backup Data configured by {}", model.getLocation());
+			appMan.getLogger().info("Preparing Backup Data configured by {}", model.getLocation());
 			if(remoteSupervision != null) {
 				remoteSupervision.lastBackupTransferTrial().setValue(appMan.getFrameworkTime());
 				success = SCPTransfer.collectViaSCP(this, appMan, true, gateway,
-						remoteSupervision.fileTransmissionTaskData(), "generalBackup");
+						remoteSupervision.fileTransmissionTaskData(), "generalBackup", Boolean.getBoolean("org.smartrplace.intern.backup.pattern.zipOnly"));
 				if(success) {
 					remoteSupervision.lastBackupTransferSuccess().setValue(appMan.getFrameworkTime());
 				} else {
