@@ -55,6 +55,10 @@ public class ServerGatewayUtil {
 			appConfigData.activate(true);
 			appMan.getLogger().debug("{} started with new config resource", name);
 		}
+		Integer initCurrentLastPart = Integer.getInteger("org.smartrplace.apps.hw.install.prop.initForDebug", null);
+		if(initCurrentLastPart != null) {
+			ValueResourceHelper.setCreate(appConfigData.currentLastVersionPart(), initCurrentLastPart);
+		}
 		return appConfigData;
     }
     

@@ -57,8 +57,8 @@ public class ActionAdminController {
      */
     private void initConfigurationResource() {
 		//TODO provide Util?
-		String configResourceDefaultName = ActionAdminConfig.class.getSimpleName().substring(0, 1).toLowerCase()+ActionAdminConfig.class.getSimpleName().substring(1);
-		final String name = appMan.getResourceManagement().getUniqueResourceName(configResourceDefaultName);
+    	final String name = ActionAdminConfig.class.getSimpleName().substring(0, 1).toLowerCase()+ActionAdminConfig.class.getSimpleName().substring(1);
+		//final String name = appMan.getResourceManagement().getUniqueResourceName(configResourceDefaultName);
 		appConfigData = appMan.getResourceAccess().getResource(name);
 		if (appConfigData != null) { // resource already exists (appears in case of non-clean start)
 			appMan.getLogger().debug("{} started with previously-existing config resource", getClass().getName());
