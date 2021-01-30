@@ -430,7 +430,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				} catch(NumberFormatException e) {}
 			}
 		}
-		if(isEnergyServerDevice(dpLocation) && dpLocation.contains("/L")) {
+		if((isEnergyServerDevice(dpLocation) || dpLocation.toLowerCase().startsWith("iota")) && dpLocation.contains("/L")) {
 			String[] els = dpLocation.split("/L", 2);
 			if(els.length == 2) {
 				int idx = els[1].indexOf("/");
