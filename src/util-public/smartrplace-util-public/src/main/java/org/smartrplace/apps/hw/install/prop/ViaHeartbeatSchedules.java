@@ -55,6 +55,8 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	@Override
 	public boolean hasNewValue(long now) {
 		SampledValue lastExisting = rot.getPreviousValue(Long.MAX_VALUE);
+		if(lastExisting == null)
+			return false;
 		return lastExisting.getTimestamp() > lastValueSent;
 	}
 	
