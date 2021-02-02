@@ -52,17 +52,22 @@ public abstract class UserServletTest extends HttpServlet {
     	if(user == null) return null;
     	//TODO: Perform mapping from REST user to natural user
     	//Perform mapping from REST user to natural user
-        if(user.equals(DEFAULT_LOGIN_USER_NAME))
+        if(user.equals(DEFAULT_LOGIN_USER_NAME)) {
         	user = req.getParameter("user");
-        else {
+        } else {
         	if(user.endsWith("_rest"))
         		user = user.substring(0, user.length()-"_rest".length());
         	else
         		user = "#REST#"+user;
         }
     	
-		if(user == null || user.startsWith("["))
-			user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+		if(user == null || user.startsWith("[")) {
+			String user1 = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+			if(user1 == null && user.startsWith("[")) {
+        		user = "master";
+			} else
+				user = user1;
+		}
     	return user;
     }
     
