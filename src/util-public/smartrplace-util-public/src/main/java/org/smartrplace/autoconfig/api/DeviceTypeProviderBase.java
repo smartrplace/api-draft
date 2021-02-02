@@ -2,6 +2,7 @@ package org.smartrplace.autoconfig.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
@@ -16,36 +17,34 @@ public abstract class DeviceTypeProviderBase<T extends Resource> implements Devi
 	protected final ApplicationManager appMan;
 	protected final String label;
 	protected final Class<T> deviceType;
-	protected final ResourceList<T> deviceList;
+	protected final String topResourceListName;
 	protected final String configPlaceholder;
 	
+	protected ResourceList<T> deviceListIfFound = null;
+
 	protected abstract String getNewResourceName(DeviceTypeConfigData<T> configData);
 	protected abstract void configureResource(DeviceTypeConfigData<T> configData);
 	protected abstract DeviceTypeConfigData<T> getKnownConfig(T device);
 
-	public DeviceTypeProviderBase(Class<T> deviceType, ResourceList<T> deviceList, ApplicationManager appMan) {
-		this(null, deviceType, deviceList, appMan);
+	public DeviceTypeProviderBase(Class<T> deviceType, String topResourceListName, ApplicationManager appMan) {
+		this(null, deviceType, topResourceListName, appMan);
 	}
-	public DeviceTypeProviderBase(String label, Class<T> deviceType, ResourceList<T> deviceList,
-			ApplicationManager appMan) {
-		this(label, deviceType, deviceList, null, appMan);
-	}
-	@SuppressWarnings("unchecked")
 	public DeviceTypeProviderBase(String label, Class<T> deviceType, String topResourceListName,
-			String configPlaceholder,
 			ApplicationManager appMan) {
-		this(label, deviceType,
-				appMan.getResourceManagement().createResource(topResourceListName, ResourceList.class),
-				configPlaceholder, appMan);
+		this(label, deviceType, topResourceListName, null, appMan);
 	}
-	public DeviceTypeProviderBase(String label, Class<T> deviceType, ResourceList<T> deviceList,
+	public DeviceTypeProviderBase(String label, Class<T> deviceType, String topResourceListName,
 			String configPlaceholder,
 			ApplicationManager appMan) {
 		this.appMan = appMan;
 		this.label = label;
 		this.deviceType = deviceType;
-		this.deviceList = deviceList;
+		this.topResourceListName = topResourceListName;
 		this.configPlaceholder = configPlaceholder;
+		
+		deviceListIfFound = appMan.getResourceAccess().getResource(topResourceListName);
+		if(deviceListIfFound != null && deviceListIfFound.size() == 0)
+			deviceListIfFound.delete();
 	}
 
 	@Override
@@ -63,6 +62,7 @@ public abstract class DeviceTypeProviderBase<T extends Resource> implements Devi
 		return deviceType;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public CreateAndConfigureResult<T> addAndConfigureDevice(
 			DeviceTypeConfigData<T> configData) {
@@ -78,10 +78,10 @@ public abstract class DeviceTypeProviderBase<T extends Resource> implements Devi
 
 		if(configData.governingResource == null) {
 			String name = getNewResourceName(configData);
-			deviceList.create();
-			if(deviceList.getElementType() == null)
-				deviceList.setElementType(deviceType);
-			configData.governingResource = deviceList.addDecorator(ResourceUtils.getValidResourceName(name), deviceType);
+			deviceListIfFound = appMan.getResourceManagement().createResource(topResourceListName, ResourceList.class);
+			if(deviceListIfFound.getElementType() == null)
+				deviceListIfFound.setElementType(deviceType);
+			configData.governingResource = deviceListIfFound.addDecorator(ResourceUtils.getValidResourceName(name), deviceType);
 		}
 		configureResource(configData);
 		configData.governingResource.activate(true);
@@ -94,7 +94,11 @@ public abstract class DeviceTypeProviderBase<T extends Resource> implements Devi
 	@Override
 	public Collection<DeviceTypeConfigData<T>> getKnownConfigs() {
 		List<DeviceTypeConfigData<T>> result = new ArrayList<>();
-		List<T> allRes = deviceList.getAllElements();
+		if(deviceListIfFound == null)
+			deviceListIfFound = appMan.getResourceAccess().getResource(topResourceListName);
+		if(deviceListIfFound == null)
+			return Collections.emptyList();
+		List<T> allRes = deviceListIfFound.getAllElements();
 		for(T con: allRes) {
 			DeviceTypeConfigData<T> config = getKnownConfig(con);
 			config.governingResource = con;
