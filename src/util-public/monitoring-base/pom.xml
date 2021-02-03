@@ -12,6 +12,7 @@
   
     
     <artifactId>monitoring-base</artifactId>
+    <version>0.9.0-SNAPSHOT</version>
     <name>Monitoring Template App</name>
     <description>Monitoring Template App</description>
     

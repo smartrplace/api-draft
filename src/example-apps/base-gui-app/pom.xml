@@ -9,6 +9,7 @@
     </parent>    
     <artifactId>base-gui-app</artifactId>
     <groupId>org.smartrplace.apps</groupId>
+    <version>0.9.0-SNAPSHOT</version>
 
     <packaging>bundle</packaging>
     <name>TODO: Add name</name>

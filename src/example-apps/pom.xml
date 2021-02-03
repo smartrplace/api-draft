@@ -9,9 +9,10 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 	
-	<groupId>org.smartrplace.apps</groupId>
+    <groupId>org.smartrplace.apps</groupId>
     <artifactId>example-apps</artifactId>
-	<name>Smartrplace API Example Apps</name>
+    <version>0.9.0-SNAPSHOT</version>
+    <name>Smartrplace API Example Apps</name>
     <packaging>pom</packaging>
 	
     <!-- Sub-projects: OGEMA Applications (in alphabetical order) -->
