@@ -15,4 +15,10 @@ public interface ArtifactoryBundle {
 	 * @return
 	 */
 	GitCommit gitCommit();
+	
+	/** Delete the bundle from the Artifactory
+	 * 
+	 * @return true if successful
+	 */
+	default boolean delete() {return false;}
 }	

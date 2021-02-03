@@ -14,6 +14,9 @@ public interface GitCommit {
 	 */
 	String committerUserName();
 	
+	/** Message of the Git commit*/
+	default String commitMessage() {return "message unknown";}
+	
 	/** Reference to the repository to which the commit belongs*/
 	GitRepository repository();
 }
