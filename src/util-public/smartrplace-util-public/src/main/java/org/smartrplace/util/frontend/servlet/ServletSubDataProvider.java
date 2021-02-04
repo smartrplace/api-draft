@@ -1,19 +1,19 @@
 package org.smartrplace.util.frontend.servlet;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartrplace.util.frontend.servlet.UserServlet.GetObjectResult;
 import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ReturnStructure;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletPageProvider;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
-/** Provides basic information for any resource. Currently implementation is only relevant for
- * SingleValueResources, but shall be extended in the future. Also POST support shall be implemented
- * in the future.
+/** Add JSON provided by ServletValueProvider into another ServletValueProvider
  */
 public class ServletSubDataProvider<T> implements ServletValueProvider {
 	final static Logger logger = LoggerFactory.getLogger(UserServlet.class);
@@ -29,11 +29,25 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 
 	protected final ReturnStructure returnStruct;
 	
+	/** 
+	 * @param provider
+	 * @param object may be null. In this case all elements provided by getAllObjects of provider are used
+	 * @param useNumericalId
+	 * @param parameters
+	 */
 	public ServletSubDataProvider(ServletPageProvider<T> provider, T object,
 			boolean useNumericalId,
 			Map<String, String[]> parameters) {
 		this(provider, object, useNumericalId, ReturnStructure.DICTIONARY, parameters);
 	}
+	/** 
+	 * 
+	 * @param provider
+	 * @param object may be null. In this case all elements provided by getAllObjects of provider are used
+	 * @param useNumericalId
+	 * @param returnStruct
+	 * @param parameters
+	 */
 	public ServletSubDataProvider(ServletPageProvider<T> provider, T object,
 			boolean useNumericalId, ReturnStructure returnStruct,
 			Map<String, String[]> parameters) {
@@ -84,17 +98,17 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 	@Override
 	public void setValue(String user, String keyMain, String value) {
 		JSONObject in = new JSONObject(value);
-		//Iterator<String> keys = in.keys();
-
-		String timeString = UserServlet.getParameter("time", parameters);
-		UserServlet.postJSON(user, in, provider, timeString, parameters);
-		/*while(keys.hasNext()) {
+		Iterator<String> keys = in.keys();
+		while(keys.hasNext()) {
 		    String key = keys.next();
 		    if (in.get(key) instanceof JSONObject) {
 				String timeString = UserServlet.getParameter("time", parameters);
-				UserServlet.postJSON(user, (JSONObject)in.get(key), provider, timeString, parameters);
-		    	//provider..setValue(user, key, value);		             
+				GetObjectResult<T> odata = UserServlet.getObjects(user, provider, key, true);
+				UserServlet.postJSON(user, (JSONObject)in.get(key), provider, timeString, parameters, odata);
 		    }
-		}*/
+		}
+		
+		//String timeString = UserServlet.getParameter("time", parameters);
+		//UserServlet.postJSON(user, in, provider, timeString, parameters);
 	}
 }

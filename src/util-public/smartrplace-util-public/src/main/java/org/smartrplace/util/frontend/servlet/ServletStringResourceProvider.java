@@ -6,6 +6,8 @@ import org.ogema.core.channelmanager.measurements.StringValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.simple.StringResource;
 
+import de.iwes.util.resource.ValueResourceHelper;
+
 public class ServletStringResourceProvider extends ServletNumProviderBase {
 	protected StringResource res;
 	
@@ -28,7 +30,7 @@ public class ServletStringResourceProvider extends ServletNumProviderBase {
 
 	@Override
 	public void setValue(String user, String key, String value) {
-		res.setValue(value);
+		ValueResourceHelper.setCreate(res, value);
 	}
 	@Override
 	protected boolean isWritable() {

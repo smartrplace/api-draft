@@ -7,6 +7,8 @@ import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.tools.resource.util.LoggingUtils;
 
+import de.iwes.util.resource.ValueResourceHelper;
+
 public class ServletIntegerResourceProvider extends ServletNumProviderBase {
 	protected IntegerResource res;
 	
@@ -39,7 +41,7 @@ public class ServletIntegerResourceProvider extends ServletNumProviderBase {
 	public void setValue(String user, String key, String value) {
 		try  {
 			int val = Integer.parseInt(value);
-			res.setValue(val);
+			ValueResourceHelper.setCreate(res, val);
 		} catch(NumberFormatException e) {
 			//do nothing
 		}

@@ -116,6 +116,8 @@ public class UserServlet extends HttpServlet {
 		/** Page may provide object based on ID. In this case data for a single object can be read via the servlet*/
 		default T getObject(String objectId) {return null;}
 		
+		default T createObject(String objectId) {return null;}
+		
 		default ReturnStructure getGETStructure() {return ReturnStructure.DICTIONARY;}
 		
 		default String getObjectId(T obj) {
@@ -288,7 +290,7 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			return res;
 		}
 
-		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap);
+		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap, false);
 		if(odata.objects == null || odata.objects.contains(null)) {
 			res.message = "In Userservlet object not found:"+odata.objectId+" Pageprov:"+pageprov.getClass().getName();
 			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
@@ -453,15 +455,30 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		public Collection<T> objects;
 		public String objectId = null;
 	}
-	protected static <T> GetObjectResult<T> getObjects(String user, ServletPageProvider<T> pageprov, Map<String, String[]> paramMap) {
+	/** 
+	 * 
+	 * @param <T>
+	 * @param user
+	 * @param pageprov
+	 * @param paramMap
+	 * @param allowToCreate usually true for POST. In this case the ServletPageProvider may create an object to write to
+	 * @return
+	 */
+	protected static <T> GetObjectResult<T> getObjects(String user, ServletPageProvider<T> pageprov, Map<String, String[]> paramMap,
+			boolean allowToCreate) {
+		String objectName = pageprov.getObjectName();
+		String objectId = null;
+		if(objectName != null)
+			objectId = UserServlet.getParameter(objectName, paramMap);
+		if(objectId == null)
+			objectId = UserServlet.getParameter("object", paramMap);
+		return getObjects(user, pageprov, objectId, allowToCreate);
+	}
+	protected static <T> GetObjectResult<T> getObjects(String user, ServletPageProvider<T> pageprov, String objectId,
+				boolean allowToCreate) {
 		GetObjectResult<T> result = new GetObjectResult<T>();
 		int numId = 0;
-		
-		String objectName = pageprov.getObjectName();
-		if(objectName != null)
-			result.objectId = UserServlet.getParameter(objectName, paramMap);
-		if(result.objectId == null)
-			result.objectId = UserServlet.getParameter("object", paramMap);
+		result.objectId = objectId;
 		if(result.objectId != null) {
 			try {
 				numId = Integer.parseInt(result.objectId);
@@ -473,9 +490,13 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 		}
 		if(result.objectId != null) {
 			T obj = pageprov.getObject(result.objectId);
-			result.objects = new ArrayList<T>();
-			result.objects.add(obj);
-			return result;
+			if(obj == null && allowToCreate)
+				obj = pageprov.createObject(result.objectId);
+			if(obj != null) {
+				result.objects = new ArrayList<T>();
+				result.objects.add(obj);
+				return result;
+			}
 		}
 		Collection<T> allObj = pageprov.getAllObjects(user);
 		for(T obj: allObj) {
@@ -625,8 +646,15 @@ System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(r
 			//String response,
 			String timeString,
 			Map<String, String[]> paramMap) {
-		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap);
-		//Collection<T> objects
+		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap, true);
+		postJSON(user, postData, pageprov, timeString, paramMap, odata);
+	}
+	protected static <T> void postJSON(String user, JSONObject postData,
+			ServletPageProvider<T> pageprov,
+			//String response,
+			String timeString,
+			Map<String, String[]> paramMap,
+			GetObjectResult<T> odata) {
 		if(odata.objects == null) return;
 		
 		paramMap.put("METHOD", new String[] {"POST"});

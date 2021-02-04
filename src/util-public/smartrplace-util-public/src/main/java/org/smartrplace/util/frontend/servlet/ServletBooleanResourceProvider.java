@@ -5,6 +5,8 @@ import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.simple.BooleanResource;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
+import de.iwes.util.resource.ValueResourceHelper;
+
 public class ServletBooleanResourceProvider implements ServletValueProvider {
 	protected BooleanResource res;
 	
@@ -21,7 +23,7 @@ public class ServletBooleanResourceProvider implements ServletValueProvider {
 	public void setValue(String user, String key, String value) {
 		try  {
 			boolean val = Boolean.parseBoolean(value);
-			res.setValue(val);
+			ValueResourceHelper.setCreate(res, val);
 		} catch(NumberFormatException e) {
 			//do nothing
 		}

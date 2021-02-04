@@ -1,11 +1,12 @@
 package org.smartrplace.util.frontend.servlet;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.StringValue;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
@@ -109,9 +110,9 @@ public class UserServletUtil {
 		return getOrAddTimeSeriesData(tsd);
 	}
 	
-	public static <T extends PhysicalElement> T getObject(String objectId, List<T> allObjects) {
+	public static <T extends Resource> T getObject(String objectId, Collection<T> allObjects) {
 		for(T resource: allObjects) {
-			if(resource.name().getValue().equals(objectId)) return resource;
+			if(resource.getName().equals(objectId)) return resource;
 			if(resource.getSubResource("name", StringResource.class).getValue().equals(objectId)) return resource;
 			if(resource.getLocation().equals(objectId)) return resource;
 		}
