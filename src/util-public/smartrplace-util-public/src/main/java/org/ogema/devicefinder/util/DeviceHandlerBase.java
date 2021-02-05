@@ -98,7 +98,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	protected static Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result,
 			String subLocation, DatapointService dpService) {
 		Datapoint dp = addDatapoint(res, result, dpService);
-		if(dp != null) {
+		if(dp != null && subLocation != null) {
 			dp.addToSubRoomLocationAtomic(null, null, subLocation, false);
 			/*synchronized(dp) {
 				String existing = dp.getSubRoomLocation(null, null);
