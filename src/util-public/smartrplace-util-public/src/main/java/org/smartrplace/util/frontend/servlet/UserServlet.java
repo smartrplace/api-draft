@@ -183,7 +183,6 @@ public class UserServlet extends HttpServlet {
 	}
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, Map<String, String[]> paramMap)
 			throws ServletException, IOException {
-System.out.println("  UserServlet: Received request: "+HttpUtils.getRequestURL(req));
 		//String object = req.getParameter("object");
 		String timeStr = UserServlet.getParameter("time", paramMap);
 		String returnStruct = UserServlet.getParameter("structure", paramMap);
