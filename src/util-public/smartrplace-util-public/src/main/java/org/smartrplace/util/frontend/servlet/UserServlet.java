@@ -373,6 +373,8 @@ public class UserServlet extends HttpServlet {
 					key = prov.getKey();
 				if(valprov.getValueMode() == ValueMode.VALUE) {
 					Value value = valprov.getValue(user, key);
+					if(value == null)
+						continue;
 					if(value instanceof ObjectValue) {
 						Object multiValObj = value.getObjectValue();
 						if(!(multiValObj instanceof MultiValue))
@@ -398,6 +400,8 @@ public class UserServlet extends HttpServlet {
 
 				} else {
 					JSONVarrRes valueF = valprov.getJSON(user, key);
+					if(valueF == null)
+						continue;
 					if(valueF.result != null) {
 						JSONObject value = valueF.result;
 						if(value.toString() == null) {
@@ -665,7 +669,7 @@ public class UserServlet extends HttpServlet {
 					throw new IllegalStateException(key+" not available for "+pageprov.toString());
 				String value;
 				try {
-					value = postData.getString(key).toString();
+					value = postData.get(key).toString();
 				} catch(JSONException e) {
 					value = postData.getJSONObject(key).toString();
 				}
@@ -678,7 +682,7 @@ public class UserServlet extends HttpServlet {
 					prov.setValue(user, keyForSetValue, value);
 				} catch(Exception e) {
 					if(odata.objectId != null)
-						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object; "+e.getMessage()+odata.objectId, e);
+						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object:"+odata.objectId+", "+e.getMessage(), e);
 					else
 						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object not provided; "+e.getMessage(), e);
 				}
