@@ -26,6 +26,15 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 	 */
 	protected abstract T setElementData(T element, JSONObject json);	
 	
+	/** If the list is written and the new content is shorter than minimum size then the list will not
+	 * be changed. This is not relevant for POSTMODE.ADDONLY
+	 * @param json data to write
+	 * @return
+	 */
+	protected int minimumSizeOfListAfterUpdate(JSONArray json) {
+		return 0;
+	}
+	
 	public enum POSTMODE {
 		/** In this mode every POST must contain the entire list with all data. The list will be
 		 * rewritten containing the new data. Existing elements will be reused, but the content may
@@ -91,6 +100,9 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 			JSONArray json = jsonobj.getJSONArray(id);
 			int len = json.length();
 			if(len < res.size()) {
+				int minSize = minimumSizeOfListAfterUpdate(json);
+				if(len < minSize)
+					return;
 				List<T> allRes = res.getAllElements();
 				for(int i=len; i<allRes.size(); i++) {
 					allRes.get(i).delete();
