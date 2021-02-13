@@ -563,7 +563,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static boolean isOpenWeatherMapBigBlue(String resourceLocation, Collection<SubResourceInfo> subResources) {
-		return resourceLocation.startsWith("BigBlueRoom");
+		return resourceLocation.startsWith("BigBlueRoom") || resourceLocation.startsWith("WeatherData");
 			
 	}
 	

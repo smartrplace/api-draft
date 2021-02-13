@@ -1026,10 +1026,13 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 
 	
 	public BooleanResourceCheckbox booleanEdit(String widgetId, String lineId, final BooleanResource source, Row row) {
+		return booleanEdit(widgetId, lineId, source, row, 0);
+	}
+	public BooleanResourceCheckbox booleanEdit(String widgetId, String lineId, final BooleanResource source, Row row, int columnSize) {
 		if(checkLineId(widgetId)) return null;
 		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		BooleanResourceCheckbox result = booleanEdit(widgetId + lineId, source, null);
-		finishRowSnippet(row, widgetId, result);	
+		finishRowSnippet(row, widgetId, result, columnSize);	
 		return result;
 	}
 	public BooleanResourceCheckbox booleanEdit(final BooleanResource source) {
