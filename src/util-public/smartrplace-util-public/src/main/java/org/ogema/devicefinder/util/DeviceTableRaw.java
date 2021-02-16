@@ -511,7 +511,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static boolean isGasEnergyCamDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		if(subResources == null)
 			return false;
-		if(!resourceLocation.toLowerCase().startsWith("jmbus"))
+		if(!(resourceLocation.toLowerCase().startsWith("jmbus")||resourceLocation.startsWith("serverMirror")))
 			return false;
 		if(isHeatMeterDevice(resourceLocation, subResources))
 			return false;
@@ -531,7 +531,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(subResources == null)
 			return false;
 		//do not accept if subResource size fits GasEnergyCam
-		if(!resourceLocation.toLowerCase().startsWith("jmbus"))
+		if((!resourceLocation.toLowerCase().startsWith("jmbus")||resourceLocation.startsWith("serverMirror")))
 			return false;
 		if(isHeatMeterDevice(resourceLocation, subResources))
 			return false;
@@ -550,7 +550,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static boolean isHeatMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		if(subResources == null)
 			return false;
-		if(!resourceLocation.toLowerCase().startsWith("jmbus"))
+		if(!(resourceLocation.toLowerCase().startsWith("jmbus")||resourceLocation.startsWith("serverMirror")))
 			return false;
 		boolean foundEnergy = false;
 		for(SubResourceInfo srinfo: subResources) {

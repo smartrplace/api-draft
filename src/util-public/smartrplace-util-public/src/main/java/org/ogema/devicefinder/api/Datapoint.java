@@ -146,6 +146,7 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	public static final String MIRROR_RESOURCE_PARAM = "MIRROR_RESOURCE";
 	public static final String HEARTBEAT_STRING_PROVIDER_PARAM = "HEARTBEAT_STRING_PROVIDER";
 	
+	public static final String ALIAS_MAINMETER_HOURLYCONSUMPTION = "mainMeterTotalConsumptionHourly";
 	public static final String ALIAS_MAINMETER_DAILYCONSUMPTION = "mainMeterTotalConsumptionDaily";
 	public static final String ALIAS_MAINMETER_MONTHLYCONSUMPTION = "mainMeterTotalConsumptionMonthly";
 	public static final String ALIAS_MAINMETER_YEARLYCONSUMPTION = "mainMeterTotalConsumptionYearly";

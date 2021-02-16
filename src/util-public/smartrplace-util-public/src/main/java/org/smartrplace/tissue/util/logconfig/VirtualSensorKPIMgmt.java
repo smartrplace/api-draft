@@ -1,22 +1,25 @@
 package org.smartrplace.tissue.util.logconfig;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
-import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.units.EnergyResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
-import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
+import org.ogema.devicefinder.util.DeviceHandlerBase;
 import org.ogema.model.connections.ElectricityConnection;
-import org.ogema.model.sensors.ElectricEnergySensor;
 import org.ogema.recordeddata.DataRecorder;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
@@ -31,13 +34,42 @@ import de.iwes.util.format.StringFormatHelper;
  * @author dnestle
  *
  */
-public class VirtualSensorKPIMgmt {
-	private final TimeseriesSimpleProcUtil util;
-	protected final DataRecorder dataRecorder;
+public abstract class VirtualSensorKPIMgmt {
+	protected final TimeseriesSimpleProcUtil tsProcUtil;
+//	protected final DataRecorder dataRecorder2;
 	private final Logger logger;
 	private final DatapointService dpService;
 	/** Source EnergyResource location -> data for accumulation*/
-	private Map<String, VirtualSensorKPIDataBase> dpData = new HashMap<>();
+	private final Map<String, VirtualSensorKPIDataBase> dpData = new HashMap<>();
+	
+	/** Set this directly to true if you want ot use dpData to get back data for a single virtual datapoint per device*/
+	public boolean singleVirtualDatapointPerDevice = false;
+	
+	/** Provide datapoint calculation
+	 * 
+	 * @param dpSource
+	 * @param energyDailyRealAgg the resource into which the result shall be written.
+	 * @param result
+	 * @return
+	 */
+	public VirtualSensorKPIDataBase getDatapointDataAccumulationSingle(Datapoint dpSource,
+			String newSubResName, Resource device,
+			Long intervalToStayBehindNow,
+			boolean registerGovernedSchedule,
+			boolean registerRemoteScheduleViaHeartbeat,
+			List<Datapoint> result) {
+		throw new IllegalStateException("Usage of method is optional, but must be implemented if used!");
+	};
+	/** Overwrite if multi-input is required: Either this or Single version may be overwritten. Usage is optional anyways.*/
+	public VirtualSensorKPIDataBase getDatapointDataAccumulation(List<Datapoint> dpSource,
+			String newSubResName, Resource device,
+			Long intervalToStayBehindNow,
+			boolean registerGovernedSchedule,
+			boolean registerRemoteScheduleViaHeartbeat,
+			List<Datapoint> result) {
+		return getDatapointDataAccumulationSingle(dpSource.get(0), newSubResName, device, intervalToStayBehindNow,
+				registerGovernedSchedule, registerRemoteScheduleViaHeartbeat, result);
+	}
 
 	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtil util, Logger logger, DatapointService dpService) {
 		this(util, null, logger, dpService);
@@ -50,39 +82,101 @@ public class VirtualSensorKPIMgmt {
 	 * @param dpService
 	 */
 	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtil util, DataRecorder dataRecorder, Logger logger, DatapointService dpService) {
-		this.util = util;
-		this.dataRecorder = dataRecorder;
+		this.tsProcUtil = util;
+//		this.dataRecorder = dataRecorder;
 		this.logger = logger;
 		this.dpService = dpService;
 	}
 	
-	public static interface VirtualDatapointSetup {
+	/*public static interface VirtualDatapointSetup {
 		/** Return {@link SingleValueResource} representing virtual sensor.
 		 * then 
 		 * @param dpSource
 		 * @param mapData
-		 * @param intervalToStayBehindNow
-		 * @param registerGovernedSchedule
 		 * @return  If null no resource is created, just a memory datapoint timeseries. In this case not the resource datapoint
 		 * 		is added added to the result, but the pure memory datapoint (both only if result != null)
 		 */
-		SingleValueResource getAndConfigureValueResource(Datapoint dpSource, VirtualSensorKPIDataBase mapData);
+		//SingleValueResource getAndConfigureValueResource(List<Datapoint> dpSource, VirtualSensorKPIDataBase mapData);		
+	//}
+	//public static interface VirtualDatapointSetupSingleInput extends VirtualDatapointSetup {
+		/** Return {@link SingleValueResource} representing virtual sensor.
+		 * then 
+		 * @param dpSource
+		 * @param mapData
+		 * @return  If null no resource is created, just a memory datapoint timeseries. In this case not the resource datapoint
+		 * 		is added added to the result, but the pure memory datapoint (both only if result != null)
+		 */
+	/*	SingleValueResource getAndConfigureValueResource(Datapoint dpSource, VirtualSensorKPIDataBase mapData);
+		
+		@Override
+		default SingleValueResource getAndConfigureValueResource(List<Datapoint> dpSource,
+				VirtualSensorKPIDataBase mapData) {
+			return getAndConfigureValueResource(dpSource==null||dpSource.isEmpty()?null:dpSource.get(0), mapData);
+		}
+	}*/
+	
+	protected abstract SingleValueResource getAndConfigureValueResourceSingle(Datapoint dpSource, VirtualSensorKPIDataBase mapData,
+			 String newSubResName, Resource device);
+	
+	protected SingleValueResource getAndConfigureValueResource(List<Datapoint> dpSource,
+			VirtualSensorKPIDataBase mapData, String newSubResName, Resource device) {
+		return getAndConfigureValueResourceSingle(dpSource==null||dpSource.isEmpty()?null:dpSource.get(0), mapData,
+				newSubResName, device);
 	}
-	public VirtualSensorKPIDataBase getDatapointData(Datapoint dpSource, VirtualDatapointSetup setupProvider,
+
+	/**
+	 * 
+	 * @param dpSource
+	 * @param setupProvider
+	 * @param intervalToStayBehindNow relevant for the VirtualScheduleRegistration regarding updates due to change of the referene time
+	 * @param registerGovernedSchedule if true a governed schedule is registered, otherwise the datapoint is just registered
+	 * 		for updates due to a change of the reference time
+	 * @param registerRemoteScheduleViaHeartbeat
+	 * @param result
+	 * @return
+	 */
+	public VirtualSensorKPIDataBase getDatapointData(Datapoint dpSource,
+			String newSubResName, Resource device,
+			//VirtualDatapointSetup setupProvider,
 			long intervalToStayBehindNow,
 			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
 			List<Datapoint> result) {
-		SingleValueResource source = (SingleValueResource) dpSource.getResource();
-		final VirtualSensorKPIDataBase mapData1 = dpData.get(source.getLocation());
-		if(mapData1 != null) synchronized (mapData1) {
-			if(result != null)
-				result.add(mapData1.resourceDp);
-			return mapData1;
+		List<Datapoint> dpSources = Arrays.asList(new Datapoint[] {dpSource});
+		return addVirtualDatapoint(dpSources, newSubResName, device, intervalToStayBehindNow, registerGovernedSchedule,
+				registerRemoteScheduleViaHeartbeat, result);
+	}
+
+	/**
+	 * 
+	 * @param dpSource the list may not be empty. The first element is used as pivot relevant for identification
+	 * @param setupProvider
+	 * @param intervalToStayBehindNow relevant for the VirtualScheduleRegistration regarding updates due to change of the referene time
+	 * @param registerGovernedSchedule if true a governed schedule is registered, otherwise the datapoint is just registered
+	 * 		for updates due to a change of the reference time
+	 * @param registerRemoteScheduleViaHeartbeat
+	 * @param result
+	 * @return
+	 */
+	public VirtualSensorKPIDataBase addVirtualDatapoint(List<Datapoint> dpSource,
+			//VirtualDatapointSetup setupProvider,
+			String newSubResName, Resource device,
+			long intervalToStayBehindNow,
+			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
+			List<Datapoint> result) {
+
+		SingleValueResource source = (SingleValueResource) dpSource.get(0).getResource();
+		if(singleVirtualDatapointPerDevice) {
+			final VirtualSensorKPIDataBase mapData1 = dpData.get(source.getLocation());
+			if(mapData1 != null) synchronized (mapData1) {
+				if(result != null)
+					result.add(mapData1.resourceDp);
+				return mapData1;
+			}
 		}
 		final VirtualSensorKPIDataBase mapData = new VirtualSensorKPIDataBase();
 		synchronized (mapData) {
 		dpData.put(source.getLocation(), mapData);
-		SingleValueResource destRes = setupProvider.getAndConfigureValueResource(dpSource, mapData);
+		SingleValueResource destRes = getAndConfigureValueResource(dpSource, mapData, newSubResName, device);
 		if(registerGovernedSchedule) {
 			dpService.virtualScheduleService().addDefaultSchedule(mapData.evalDp, intervalToStayBehindNow);
 		} else
@@ -112,44 +206,14 @@ logger.info("   Starting Accumlated full Recstor size(3):"+accTs.size());
 		}
 
 		//TODO: We should add support also for other SingleValueResourceTypes
-		if((dpSource.getResource() instanceof FloatResource) && (destRes != null || destRes instanceof FloatResource))
-			addSourceResourceListenerFloat(mapData, (FloatResource) destRes, (FloatResource) dpSource.getResource(),
-					intervalToStayBehindNow);
-		
+		for(Datapoint dp: dpSource) {
+			if((dp.getResource() instanceof FloatResource) && (destRes != null || destRes instanceof FloatResource))
+				addSourceResourceListenerFloat(mapData, (FloatResource) destRes, (FloatResource) dp.getResource(),
+						intervalToStayBehindNow);
+		}
 		return mapData;
 		}
 		
-	}
-	
-	/** TODO: This method shall be moved to an inherited class in the future
-	 * 
-	 * @param dpSource
-	 * @param energyDailyRealAgg the resource into which the result shall be written.
-	 * @param result
-	 * @return
-	 */
-	public VirtualSensorKPIDataBase getDatapointDataEnergyAccumulation(Datapoint dpSource,
-			String newSubResName, ElectricityConnection conn,
-			Long intervalToStayBehindNow,
-			boolean registerGovernedSchedule,
-			boolean registerRemoteScheduleViaHeartbeat,
-			List<Datapoint> result) {
-		VirtualSensorKPIDataBase mapData = getDatapointData(dpSource, new VirtualDatapointSetup() {
-			
-			@Override
-			public SingleValueResource getAndConfigureValueResource(Datapoint dpSource, VirtualSensorKPIDataBase mapData) {
-				EnergyResource energyDailyRealAgg = conn.getSubResource(newSubResName, ElectricEnergySensor.class).reading();
-				energyDailyRealAgg.getSubResource("unit", StringResource.class).<StringResource>create().setValue("kWh");
-				energyDailyRealAgg.getParent().activate(true);
-				
-				dpSource.info().setAggregationMode(AggregationMode.Consumption2Meter);
-				mapData.evalDp = util.processSingle(TimeProcUtil.METER_EVAL, dpSource);
-
-				return energyDailyRealAgg;
-			}
-		}, intervalToStayBehindNow>=0?intervalToStayBehindNow:15*TimeProcUtil.MINUTE_MILLIS,
-				registerGovernedSchedule, registerRemoteScheduleViaHeartbeat, result);
-		return mapData;
 	}
 	
 	/**
@@ -253,4 +317,61 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			}
 		}
 	}
+	
+	public static List<Datapoint> registerEnergySumDatapointOverSubPhases(ElectricityConnection conn, AggregationMode inputAggMode,
+			TimeseriesSimpleProcUtil util, DatapointService dpService, String startLevel) {
+		if(conn == null || (!conn.exists()))
+			return Collections.emptyList();
+		List<Datapoint> energyDailys = new ArrayList<>();
+		for(ElectricityConnection phaseConn: conn.subPhaseConnections().getAllElements()) {
+			EnergyResource inputEnergy = phaseConn.energySensor().reading();
+			DeviceHandlerBase.addDatapoint(inputEnergy, energyDailys, dpService);
+		}
+		return registerEnergySumDatapoint(energyDailys, inputAggMode, util, startLevel);
+	}
+	public static List<Datapoint> registerEnergySumDatapoint(List<Datapoint> inputEnergy, AggregationMode inputAggMode,
+			TimeseriesSimpleProcUtil util, String startLevel) {
+		if(inputAggMode != null) for(Datapoint dp: inputEnergy) {
+			if(dp != null)
+				dp.info().setAggregationMode(inputAggMode);
+		}
+		List<Datapoint> result = new ArrayList<>();
+		boolean started = false;
+		Datapoint hourlySum = null;
+		Datapoint dailySum = null;
+		Datapoint monthlySum = null;
+		Datapoint yearlySum = null;
+		if(startLevel.toLowerCase().contains("hour")) {
+			started = true;
+			hourlySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_HOUR_EVAL, inputEnergy);
+			result.add(hourlySum);
+			hourlySum.setLabelDefault("kWhHourly");
+			hourlySum.addAlias(Datapoint.ALIAS_MAINMETER_HOURLYCONSUMPTION);
+			
+		}
+		if(startLevel.toLowerCase().contains("day") || started) {
+			started = true;
+			dailySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_DAY_EVAL, inputEnergy);
+			result.add(dailySum);
+			dailySum.setLabelDefault("kWhDaily");
+			dailySum.addAlias(Datapoint.ALIAS_MAINMETER_DAILYCONSUMPTION);
+			
+		}
+		if(startLevel.toLowerCase().contains("month") || started) {
+			started = true;
+			monthlySum = util.processSingle(TimeProcUtil.PER_MONTH_EVAL, dailySum);
+			result.add(monthlySum);
+			monthlySum.setLabelDefault("kWhMonthly");
+			monthlySum.addAlias(Datapoint.ALIAS_MAINMETER_MONTHLYCONSUMPTION);
+		}
+		if(startLevel.toLowerCase().contains("year") || started) {
+			started = true;
+			yearlySum = util.processSingle(TimeProcUtil.PER_YEAR_EVAL, monthlySum);
+			result.add(yearlySum);
+			yearlySum.setLabelDefault("kWhYearly");
+			yearlySum.addAlias(Datapoint.ALIAS_MAINMETER_YEARLYCONSUMPTION);
+		}
+		return result;
+	}
+
 }

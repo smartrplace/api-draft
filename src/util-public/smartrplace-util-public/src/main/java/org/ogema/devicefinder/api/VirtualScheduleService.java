@@ -46,7 +46,7 @@ public class VirtualScheduleService {
 		this.appMan = appMan;
 	}
 
-	/**
+	/** Add a schedule to be governed by the datapoint
 	 * 
 	 * @param dp
 	 * @param sched may be null if just the datapoint shall be updated on a reset
@@ -65,6 +65,7 @@ public class VirtualScheduleService {
 		return false;
 	}
 	
+	/** Create or get a default schedule in the KPIData top level resource to be governed by the datapoint*/
 	public Schedule addDefaultSchedule(Datapoint dp, long intervalToStayBehindNow) {
 		KPIData evc = ResourceHelper.getOrCreateTopLevelResource(KPIData.class, appMan);
 		evc.ts().create();

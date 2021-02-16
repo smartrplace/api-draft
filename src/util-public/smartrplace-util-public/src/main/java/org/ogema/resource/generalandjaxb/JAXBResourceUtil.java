@@ -1,4 +1,4 @@
-package org.ogema.devicefinder.util;
+package org.ogema.resource.generalandjaxb;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,4 @@ public class JAXBResourceUtil {
 		}
 		return result ;
 	}
-
-
 }
