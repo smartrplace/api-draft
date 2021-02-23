@@ -55,8 +55,8 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	protected String getLocationPostifx() {return getLabelPostfix();}
 	
 	//final protected MonitoringController controller;
-	final protected TimeSeriesDataImpl tsdi;
-	private final Datapoint dpInput;
+	final private TimeSeriesDataImpl tsdi;
+	final private Datapoint dpInput;
 	
 	/** only relevant if dp == null*/
 	final protected TimeSeriesNameProvider nameProvider;
@@ -89,13 +89,13 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 			MonitoringController controller) {
 		this(tsdi, nameProvider, getMode(controller, tsdi.label(null)));
 	}*/
-	public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
+	public ProcessedReadOnlyTimeSeries2(TimeSeriesNameProvider nameProvider,
 			AggregationMode mode) {
-		this(tsdi, nameProvider, mode, null);
+		this(nameProvider, mode, null);
 	}
-	public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
+	public ProcessedReadOnlyTimeSeries2(TimeSeriesNameProvider nameProvider,
 			AggregationMode mode, Datapoint dpInput) {
-		this(tsdi, nameProvider, mode, dpInput, !Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"));
+		this(nameProvider, mode, dpInput, !Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"));
 		
 	}
 	/**
@@ -107,19 +107,19 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	 * @param updateLastTimestampInSourceOnEveryCall if false (default) then the input time series is only read once to determine start and end
 	 * 		otherwise the end is udpated on every call, the start is not updated, though
 	 */
-	public ProcessedReadOnlyTimeSeries2(TimeSeriesDataImpl tsdi, TimeSeriesNameProvider nameProvider,
+	public ProcessedReadOnlyTimeSeries2(TimeSeriesNameProvider nameProvider,
 			AggregationMode mode, Datapoint dpInput,
 			boolean updateLastTimestampInSourceOnEveryCall) {
 		super(InterpolationMode.NONE);
 		this.nameProvider = nameProvider;
-		this.tsdi = tsdi;
+		this.tsdi = dpInput.getTimeSeriesDataImpl(null); //tsdi;
 		this.dpInput = dpInput;
 		this.mode = mode;
 		this.setUpdateLastTimestampInSourceOnEveryCall(updateLastTimestampInSourceOnEveryCall);
 	}
 
 	public ProcessedReadOnlyTimeSeries2(Datapoint dpInput) {
-		this(dpInput.getTimeSeriesDataImpl(null), null, dpInput.info().getAggregationMode(), dpInput);
+		this(null, dpInput.info().getAggregationMode(), dpInput);
 	}
 	
 	/*static AggregationMode getMode(MonitoringController controller, String label) {
@@ -219,8 +219,19 @@ logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLa
 		datapointForChangeNotification = result;
 		return result ;
 	}
+	
+	/** The dpInput is only used to determine changes on the input time series. For the general calculation
+	 * 		tsdi is used.
+	 * 		Deprecated note as tsdi cannot be set via contructor anymore: If the constructor taking only a datapoint as input is used then tsdi is the timeseries
+	 * 		of the datapoint, but via other constructors these can be separated and dpInput does not need to be set at all.
+	 * @return
+	 */
 	public Datapoint getInputDp() {
 		return dpInput;
+	}
+	
+	public TimeSeriesDataImpl getTSDI() {
+		return tsdi;
 	}
 	
 	public static String getDpLocation(Datapoint dpSource, String locationPostfix) {

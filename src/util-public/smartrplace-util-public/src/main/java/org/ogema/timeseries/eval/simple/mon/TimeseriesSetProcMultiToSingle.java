@@ -239,7 +239,7 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 						
 						Float[] values = new Float[input.size()];
 						List<SampledValue> resultLoc = new ArrayList<>();
-						for(SampledValue svalTs: tsdi.getTimeSeries().getValues(start, end)) {
+						for(SampledValue svalTs: getTSDI().getTimeSeries().getValues(start, end)) {
 							long timestamp = svalTs.getTimestamp();
 							int idx = 0;
 							for(Datapoint dpLoc: input) {
