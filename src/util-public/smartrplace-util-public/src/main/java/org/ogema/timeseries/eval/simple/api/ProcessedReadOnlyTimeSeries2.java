@@ -220,7 +220,7 @@ logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLa
 		return result ;
 	}
 	
-	/** The dpInput is only used to determine changes on the input time series. For the general calculation
+	/** The dpInput is only used to determine changes on the input time series and potentially to provide a scale. For the general calculation
 	 * 		tsdi is used.
 	 * 		Deprecated note as tsdi cannot be set via contructor anymore: If the constructor taking only a datapoint as input is used then tsdi is the timeseries
 	 * 		of the datapoint, but via other constructors these can be separated and dpInput does not need to be set at all.

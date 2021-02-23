@@ -12,13 +12,16 @@ import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
-import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvider;
 import org.smartrplace.util.frontend.servlet.ServletTimeseriesProvider;
 
-import de.iwes.util.format.StringFormatHelper;
-
-/** Basic version is just for reading*/
+/** Basic version is just for reading, the derived class {@link ViaHeartbeatSchedulesWrite} below in this file is
+ * also for receiving data.<br>
+ * Usually only additional values are sent that are added to the schedule. If the clean flag is set in the JSON
+ * transmitted then the entire schedule is deleted before new values are written. This is triggered by calling
+ * {@link #resendAllOnNextOccasion()} on the source system. By default this occurs when the reference time is changed
+ * or when a datapoint change notification is detected in getValues or setValue (more details to be provided). This is
+ * NOT triggered on startup of a gateway.*/
 public class ViaHeartbeatSchedules implements StringProvider {
 	protected final ReadOnlyTimeSeries rot;
 	protected boolean doClean = false;

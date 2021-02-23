@@ -179,6 +179,7 @@ public class UserServlet extends HttpServlet {
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user)
 			throws ServletException, IOException {
 		Map<String, String[]> paramMap = getParamMap(req);
+		addParametersFromUrl(req, paramMap);
 		doGet(req, resp, user, paramMap);
 	}
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, Map<String, String[]> paramMap)
@@ -521,24 +522,7 @@ public class UserServlet extends HttpServlet {
 		return result;
 	}
 	
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		//String user = req.getParameter("user");
-		//if(user == null) return;
-		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
-		doPost(req, resp, user);
-	}		
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user)
-			throws ServletException, IOException {
-
-		String pageId = req.getParameter("page");
-		if(pageId == null) pageId = stdPageId ;
-		//String object = req.getParameter("object");
-		ServletPageProvider<?> pageMap = pages.get(pageId);
-		if(pageMap == null) return;
-		String timeStr = req.getParameter("time");
-		Map<String, String[]> paramMap = getParamMap(req);
-		
+	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap) {
 		String fullURL = HttpUtils.getRequestURL(req).toString();
 		int idx = fullURL.indexOf("/userdata/");
 		String[] subURL;
@@ -557,7 +541,47 @@ public class UserServlet extends HttpServlet {
 				String param = subURL[idx+1];
 				addParameter(paramName, param, paramMap);
 			}
+		}		
+	}
+	
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//String user = req.getParameter("user");
+		//if(user == null) return;
+		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+		doPost(req, resp, user);
+	}		
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user)
+			throws ServletException, IOException {
+
+		String pageId = req.getParameter("page");
+		if(pageId == null) pageId = stdPageId ;
+		//String object = req.getParameter("object");
+		ServletPageProvider<?> pageMap = pages.get(pageId);
+		if(pageMap == null) return;
+		String timeStr = req.getParameter("time");
+		Map<String, String[]> paramMap = getParamMap(req);
+		
+		addParametersFromUrl(req, paramMap);
+		/*String fullURL = HttpUtils.getRequestURL(req).toString();
+		int idx = fullURL.indexOf("/userdata/");
+		String[] subURL;
+		if(idx >= 0)
+			subURL = fullURL.substring(idx+"/userdata/".length()).split("/");
+		else {
+			idx =  fullURL.indexOf("/userdatatest/");
+			if(idx >= 0)
+				subURL = fullURL.substring(idx+"/userdatatest/".length()).split("/");
+			else
+				subURL = null;
 		}
+		if(subURL != null && subURL.length > 1) {
+			for(idx=0; idx<subURL.length-1; idx+=2) {
+				String paramName = subURL[idx];
+				String param = subURL[idx+1];
+				addParameter(paramName, param, paramMap);
+			}
+		}*/
 		
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = req.getReader();
