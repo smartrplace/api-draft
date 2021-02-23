@@ -8,7 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ogema.accesscontrol.RestAccess;
+import org.ogema.accesscontrol.RestAccess.LoginViaNaturalUserChecker;
+import org.ogema.core.model.ResourceList;
+import org.ogema.model.user.NaturalPerson;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
+
+import de.iwes.util.resourcelist.ResourceListHelper;
 
 /** Core class to provide testing variants for servlets based on widgets pages. This servlet
  * does only provide relevant information in the HTTP response when the property 
@@ -26,6 +31,9 @@ public abstract class UserServletTest extends HttpServlet {
 	protected String getPropertyToCheck() {
 		return "org.smartrplace.apps.heatcontrol.servlet.istestinstance";
 	}
+	
+	/** Set this from external to enable checking for users allowing mobile access*/
+	public static ResourceList<NaturalPerson> userData = null;
 	
 //	private static final Logger logger = LoggerFactory.getLogger(RecordedDataServlet.class);
     private static final long serialVersionUID = 1L;
@@ -57,8 +65,8 @@ public abstract class UserServletTest extends HttpServlet {
         } else {
         	if(user.endsWith("_rest"))
         		user = user.substring(0, user.length()-"_rest".length());
-        	else
-        		user = "#REST#"+user;
+        	//else
+        	//	user = "#REST#"+user;
         }
     	
 		if(user == null || user.startsWith("[")) {
@@ -197,7 +205,20 @@ public abstract class UserServletTest extends HttpServlet {
     		return null;
     	}
     	try {
-    		String userName = restAcc.authenticateToUser(req, resp, false);
+    		final String userName;
+    		if(userData != null)
+    			userName = restAcc.authenticateToUser(req, resp, false, new LoginViaNaturalUserChecker() {
+					
+					@Override
+					public boolean isLoginViaNaturalUserAllowed(String userName) {
+						NaturalPerson ud = ResourceListHelper.getNamedElementFlex(userName, userData);
+						if(ud != null && ud.restAccessEnabled().getValue())
+							return true;
+						return false;
+					}
+				});
+    		else
+    			userName = restAcc.authenticateToUser(req, resp, false);
  			if(userName == null) {
  				if(isTest)
  					return DEFAULT_LOGIN_USER_NAME;

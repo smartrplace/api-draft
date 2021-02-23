@@ -144,6 +144,10 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	
 	/** Shall provide a {@link SingleValueResource} object in a server/superior environment*/
 	public static final String MIRROR_RESOURCE_PARAM = "MIRROR_RESOURCE";
+	/** If true then the MIRROR_RESOURCE is activated and containing the logged data. The remote datapoint does not need
+	 * to be processed and displayed in most user applications. Can also be applied to groups.
+	 */
+	public static final String MIRROR_RESOURCE_ISMASKED_PARAM = "MIRROR_RESOURCE_ISMASKING";
 	public static final String HEARTBEAT_STRING_PROVIDER_PARAM = "HEARTBEAT_STRING_PROVIDER";
 	
 	public static final String ALIAS_MAINMETER_HOURLYCONSUMPTION = "mainMeterTotalConsumptionHourly";

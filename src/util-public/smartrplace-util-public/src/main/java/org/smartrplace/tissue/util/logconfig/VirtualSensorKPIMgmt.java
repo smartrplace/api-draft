@@ -177,6 +177,8 @@ public abstract class VirtualSensorKPIMgmt {
 		synchronized (mapData) {
 		dpData.put(source.getLocation(), mapData);
 		SingleValueResource destRes = getAndConfigureValueResource(dpSource, mapData, newSubResName, device);
+		if(mapData.evalDp == null)
+			return null;
 		if(registerGovernedSchedule) {
 			dpService.virtualScheduleService().addDefaultSchedule(mapData.evalDp, intervalToStayBehindNow);
 		} else
@@ -344,6 +346,11 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 		if(startLevel.toLowerCase().contains("hour")) {
 			started = true;
 			hourlySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_HOUR_EVAL, inputEnergy);
+			if(hourlySum == null) {
+				System.out.println("    !!!! WARNING: No hourly sum for inputSize:"+inputEnergy.size()+ "First:"+
+						(inputEnergy.isEmpty()?"--":inputEnergy.get(0).getLocation()));
+				return Collections.emptyList();
+			}
 			result.add(hourlySum);
 			hourlySum.setLabelDefault("kWhHourly");
 			hourlySum.addAlias(Datapoint.ALIAS_MAINMETER_HOURLYCONSUMPTION);
@@ -352,6 +359,11 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 		if(startLevel.toLowerCase().contains("day") || started) {
 			started = true;
 			dailySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_DAY_EVAL, inputEnergy);
+			if(dailySum == null) {
+				System.out.println("    !!!! WARNING: No daily sum for inputSize:"+inputEnergy.size()+ "First:"+
+						(inputEnergy.isEmpty()?"--":inputEnergy.get(0).getLocation()));
+				return Collections.emptyList();
+			}
 			result.add(dailySum);
 			dailySum.setLabelDefault("kWhDaily");
 			dailySum.addAlias(Datapoint.ALIAS_MAINMETER_DAILYCONSUMPTION);

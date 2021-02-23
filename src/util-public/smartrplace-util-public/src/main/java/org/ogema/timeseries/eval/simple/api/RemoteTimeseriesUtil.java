@@ -9,6 +9,11 @@ public class RemoteTimeseriesUtil {
 	public static String[] getGatewayLocationForMirror(SingleValueResource sres) {
 		return getGatewayLocationForMirror(sres.getLocation());
 	}
+	/** Return remote location for a location in the serverMirror resource structure
+	 * 
+	 * @param mirrorResourceLocation
+	 * @return [0]: gatewayId, [1]: remote location or local location if the location is not in serverMirror
+	 */
 	public static String[] getGatewayLocationForMirror(String mirrorResourceLocation) {
 		String gwId;
 		String location;
@@ -23,6 +28,12 @@ public class RemoteTimeseriesUtil {
 		return new String[] {gwId, location};
 	}
 	
+	/** Get remote slotsDB datapoint corresponding to a mirror resource
+	 * 
+	 * @param sres
+	 * @param dpService
+	 * @return corresponding remote datapoint. If sres is not in the serverMirror structure then a local datapoint is returned
+	 */
 	public static Datapoint getRemoteDpForMirrorExisting(SingleValueResource sres, DatapointService dpService) {
 		String[] gwLoc = getGatewayLocationForMirror(sres);
 		if(gwLoc[0].equals("Local"))
