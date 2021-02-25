@@ -29,7 +29,9 @@ import de.iwes.util.resource.ResourceHelper;
  * NOT triggered on startup of a gateway.*/
 public class ViaHeartbeatSchedules implements StringProvider {
 	protected final ReadOnlyTimeSeries rot;
-	protected boolean doClean = false;
+	
+	/** On initial schedule sending we reset data on server*/
+	protected boolean doClean = true;
 	protected long lastValueSent = -1;
 	protected long lastValueUpdateSent = -1;
 	protected long lastClean = -1;
