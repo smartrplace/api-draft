@@ -16,6 +16,7 @@ import org.ogema.core.model.units.EnergyResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.util.DeviceHandlerBase;
@@ -322,6 +323,10 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 	
 	public static List<Datapoint> registerEnergySumDatapointOverSubPhases(ElectricityConnection conn, AggregationMode inputAggMode,
 			TimeseriesSimpleProcUtil util, DatapointService dpService, String startLevel) {
+		return registerEnergySumDatapointOverSubPhases(conn, inputAggMode, util, dpService, startLevel, false);
+	}
+	public static List<Datapoint> registerEnergySumDatapointOverSubPhases(ElectricityConnection conn, AggregationMode inputAggMode,
+			TimeseriesSimpleProcUtil util, DatapointService dpService, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter) {
 		if(conn == null || (!conn.exists()))
 			return Collections.emptyList();
 		List<Datapoint> energyDailys = new ArrayList<>();
@@ -329,10 +334,23 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			EnergyResource inputEnergy = phaseConn.energySensor().reading();
 			DeviceHandlerBase.addDatapoint(inputEnergy, energyDailys, dpService);
 		}
-		return registerEnergySumDatapoint(energyDailys, inputAggMode, util, startLevel);
+		return registerEnergySumDatapoint(energyDailys, inputAggMode, util, startLevel, registerForTransferViaHeartbeatAsMainMeter,
+				registerForTransferViaHeartbeatAsMainMeter?dpService:null);
 	}
+	/**
+	 * 
+	 * @param inputEnergy
+	 * @param inputAggMode
+	 * @param util
+	 * @param startLevel
+	 * @param registerForTransferViaHeartbeatAsMainMeter if true the results are registered for sending via heartbeat. This
+	 * 		is also implies that main meter aliases are registered
+	 * @param dpService only relevant if registerForTransfer is true, otherwise may be null
+	 * @return
+	 */
 	public static List<Datapoint> registerEnergySumDatapoint(List<Datapoint> inputEnergy, AggregationMode inputAggMode,
-			TimeseriesSimpleProcUtil util, String startLevel) {
+			TimeseriesSimpleProcUtil util, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter,
+			DatapointService dpService) {
 		if(inputAggMode != null) for(Datapoint dp: inputEnergy) {
 			if(dp != null)
 				dp.info().setAggregationMode(inputAggMode);
@@ -353,7 +371,8 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			}
 			result.add(hourlySum);
 			hourlySum.setLabelDefault("kWhHourly");
-			hourlySum.addAlias(Datapoint.ALIAS_MAINMETER_HOURLYCONSUMPTION);
+			if(registerForTransferViaHeartbeatAsMainMeter)
+				hourlySum.addAlias(Datapoint.ALIAS_MAINMETER_HOURLYCONSUMPTION);
 			
 		}
 		if(startLevel.toLowerCase().contains("day") || started) {
@@ -366,7 +385,8 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			}
 			result.add(dailySum);
 			dailySum.setLabelDefault("kWhDaily");
-			dailySum.addAlias(Datapoint.ALIAS_MAINMETER_DAILYCONSUMPTION);
+			if(registerForTransferViaHeartbeatAsMainMeter)
+				dailySum.addAlias(Datapoint.ALIAS_MAINMETER_DAILYCONSUMPTION);
 			
 		}
 		if(startLevel.toLowerCase().contains("month") || started) {
@@ -374,16 +394,29 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			monthlySum = util.processSingle(TimeProcUtil.PER_MONTH_EVAL, dailySum);
 			result.add(monthlySum);
 			monthlySum.setLabelDefault("kWhMonthly");
-			monthlySum.addAlias(Datapoint.ALIAS_MAINMETER_MONTHLYCONSUMPTION);
+			if(registerForTransferViaHeartbeatAsMainMeter)
+				monthlySum.addAlias(Datapoint.ALIAS_MAINMETER_MONTHLYCONSUMPTION);
 		}
 		if(startLevel.toLowerCase().contains("year") || started) {
 			started = true;
 			yearlySum = util.processSingle(TimeProcUtil.PER_YEAR_EVAL, monthlySum);
 			result.add(yearlySum);
 			yearlySum.setLabelDefault("kWhYearly");
-			yearlySum.addAlias(Datapoint.ALIAS_MAINMETER_YEARLYCONSUMPTION);
+			if(registerForTransferViaHeartbeatAsMainMeter)
+				yearlySum.addAlias(Datapoint.ALIAS_MAINMETER_YEARLYCONSUMPTION);
 		}
+		if(!registerForTransferViaHeartbeatAsMainMeter)
+			return result;
+		
+		DatapointGroup dpgKpi = dpService.getGroup(DatapointGroup.GATEWAY_KPIS);
+		dpgKpi.addDatapoint(dailySum);
+		dpgKpi.addDatapoint(monthlySum);
+		dpgKpi.addDatapoint(yearlySum);
+		dpgKpi.setType("GATEWAY_KPIs");
+		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(dailySum);
+		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(monthlySum);
+		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(yearlySum);
+
 		return result;
 	}
-
 }
