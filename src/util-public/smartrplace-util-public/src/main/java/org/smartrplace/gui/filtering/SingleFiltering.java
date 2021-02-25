@@ -317,7 +317,7 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 	
 	protected GenericFilterOption<A> getFilterOption(String englishLabel) {
 		for(GenericFilterOption<A> item: filteringOptions) {
-			if(LocaleHelper.getLabel(item.optionLabel(), null).equals(preSelectionGeneralEnglish)) {
+			if(LocaleHelper.getLabel(item.optionLabel(), null).equals(englishLabel)) {
 				return item;
 			}
 		}

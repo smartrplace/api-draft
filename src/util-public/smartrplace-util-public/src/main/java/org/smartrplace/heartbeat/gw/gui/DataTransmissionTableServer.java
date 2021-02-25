@@ -38,6 +38,8 @@ public abstract class DataTransmissionTableServer extends DataTransmissionTable 
 		GenericFilterOption<String> selected = gwSelection.getSelectedItem(req);
 		if(selected == gwSelection.NONE_OPTION)
 			return null;
+		if(selected == gwSelection.getAllOption(req))
+			return null;
 		String gw = ((GenericFilterFixedSingle<String>)selected).getValue();
 		return getHbMan(gw);
 	}
@@ -46,7 +48,7 @@ public abstract class DataTransmissionTableServer extends DataTransmissionTable 
 	public void addWidgetsAboveTable() {
 		super.addWidgetsAboveTable();
 		gwSelection = new SingleFilteringDirect<String>(page, "gwSelection",
-				OptionSavingMode.PER_USER, 10000, false) {
+				OptionSavingMode.PER_USER, 10000, true) {
 
 			@Override
 			protected List<GenericFilterOption<String>> getOptionsDynamic(OgemaHttpRequest req) {
@@ -63,6 +65,7 @@ public abstract class DataTransmissionTableServer extends DataTransmissionTable 
 				return appMan.getFrameworkTime();
 			}
 		};
+		gwSelection.registerDependentWidget(mainTable);
 		StaticTable topTable = new StaticTable(1, 4);
 		Button logButton = getLogControlButton();
 		topTable.setContent(0, 1, logButton);
