@@ -23,6 +23,15 @@ public class ViaHeartbeatInfoProvider extends DatapointInfoProviderImpl {
 		String getStringToSend(long now);
 		boolean hasNewValue(long now);
 		String getAlias();
+		
+		//just for debugging
+		long getLastValueWritten();
+		default long getLastRecvTime() {
+			return -2;
+		}
+		long getLastUpdateSent();
+		long getLastClean();
+		void resendAllOnNextOccasion();
 	}
 	private StringProvider strProv;
 	//private Schedule sched;
@@ -132,5 +141,18 @@ public class ViaHeartbeatInfoProvider extends DatapointInfoProviderImpl {
 
 	public void setStrProv(StringProvider strProv) {
 		this.strProv = strProv;
+	}
+
+	//just for debugging
+	public long getLastValueWritten() {
+		if(sres != null)
+			return sres.getLastUpdateTime();
+		return lastValueWritten;
+	}
+	public long getLastRecvTime() {
+		return lastValueReceiveTime;
+	}
+	public long getLastUpdateSent() {
+		return lastValueUpdateSent;
 	}
 }

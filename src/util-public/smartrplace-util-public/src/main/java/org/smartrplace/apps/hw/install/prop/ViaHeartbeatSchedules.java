@@ -12,8 +12,13 @@ import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
+import org.ogema.tools.resource.util.TimeSeriesUtils;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvider;
 import org.smartrplace.util.frontend.servlet.ServletTimeseriesProvider;
+
+import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.resource.ResourceHelper;
 
 /** Basic version is just for reading, the derived class {@link ViaHeartbeatSchedulesWrite} below in this file is
  * also for receiving data.<br>
@@ -26,6 +31,8 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	protected final ReadOnlyTimeSeries rot;
 	protected boolean doClean = false;
 	protected long lastValueSent = -1;
+	protected long lastValueUpdateSent = -1;
+	protected long lastClean = -1;
 	protected final String alias;
 
 	public ViaHeartbeatSchedules(ReadOnlyTimeSeries rot, String alias) {
@@ -45,12 +52,16 @@ public class ViaHeartbeatSchedules implements StringProvider {
 //if(rot instanceof ProcessedReadOnlyTimeSeries2 && ((ProcessedReadOnlyTimeSeries2)rot).getInputDp().id().startsWith("EnergyServerReadings_ESE/ESE_location_39")) //39/connection/energyDaily/reading"))
 //System.out.println("vals#:"+vals.size()+" lastValueSent:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueSent));
 		JSONArray arr = ServletTimeseriesProvider.smapledValuesToJson(vals, null, null, true, false, true);
-		if(!vals.isEmpty())
+		if(!vals.isEmpty()) {
 			lastValueSent = vals.get(vals.size()-1).getTimestamp();
+			lastValueUpdateSent = now;
+		}
 		json.put("values", arr);
 		if(doClean) {
 			json.put("clean", doClean);
 			doClean = false;
+			lastClean = now;
+			System.out.println("Sending clean for schedule "+alias!=null?alias:TimeProcPrint.getTimeseriesName(rot, true));
 		}
 		return json.toString();
 	}
@@ -70,6 +81,7 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	
 	public static class ViaHeartbeatSchedulesWrite extends ViaHeartbeatSchedules {
 		protected final Schedule sched;
+		protected long lastValueReceiveTime = -1;
 		
 		public ViaHeartbeatSchedulesWrite(Schedule sched, String alias) {
 			super(sched, alias);
@@ -81,8 +93,11 @@ public class ViaHeartbeatSchedules implements StringProvider {
 			JSONObject json = new JSONObject(strValue);
 			if(json.has("clean")) {
 				boolean doClean = json.getBoolean("clean");
-				if(doClean)
+				if(doClean) {
 					sched.deleteValues();
+					System.out.println("Received clean for schedule "+alias!=null?alias:TimeProcPrint.getTimeseriesName(rot, true));
+					lastClean = now;
+				}
 			}
 			JSONArray arr = json.getJSONArray("values");
 			int len = arr.length();
@@ -105,7 +120,13 @@ public class ViaHeartbeatSchedules implements StringProvider {
 				Resource parent = sched.getParent();
 				if(parent != null && (parent instanceof FloatResource))
 					((FloatResource)parent).setValue(val);
+				lastValueReceiveTime = now;
 			}
+		}
+
+		//just for debugging
+		public long getLastRecvTime() {
+			return lastValueReceiveTime;
 		}
 	}
 	
@@ -124,4 +145,17 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	public String getAlias() {
 		return alias;
 	}
+	
+	//just for debugging
+	public long getLastValueWritten() {
+		return lastValueSent;
+	}
+	public long getLastUpdateSent() {
+		return lastValueUpdateSent;
+	}
+
+	@Override
+	public long getLastClean() {
+		return lastClean;
+	}	
 }

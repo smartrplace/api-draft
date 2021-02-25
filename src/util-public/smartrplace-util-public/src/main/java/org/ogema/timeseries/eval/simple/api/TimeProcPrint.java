@@ -120,13 +120,23 @@ public class TimeProcPrint {
 	}
 	
 	static int counter = 0;
-	protected static String getName(ReadOnlyTimeSeries ts) {
-		String name;
+	public static String getTimeseriesName(ReadOnlyTimeSeries ts, boolean forceName) {
 		if(ts instanceof Schedule)
+			return ((Schedule)ts).getLocation();
+		else if(ts instanceof RecordedData)
+			return ((RecordedData)ts).getPath();
+		if(forceName)
+			return ts.getClass().getSimpleName()+"("+ts.size()+")";
+		return null;
+	}
+	protected static String getName(ReadOnlyTimeSeries ts) {
+		String name = getTimeseriesName(ts, false);
+		/*if(ts instanceof Schedule)
 			name = ((Schedule)ts).getLocation();
 		else if(ts instanceof RecordedData)
 			name = ((RecordedData)ts).getPath();
-		else 
+		else*/
+		if(name == null)
 			name = "TS2Plot_"+counter;
 		counter ++;
 		return name;

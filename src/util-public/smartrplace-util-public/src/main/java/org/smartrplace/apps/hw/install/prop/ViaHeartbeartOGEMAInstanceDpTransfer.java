@@ -54,6 +54,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	protected final DatapointService dpService;
 	protected final ResourceAccess resAcc;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+	public boolean forceConsoleLogging = false;
 	
 	/** If false then list is for receiving datapoints. This means that the transfer ID
 	 * is set and is created by the remote partner*/
@@ -343,7 +344,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			}
 			Object prov = dp.getParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM);
 			if(prov == null || (!(prov instanceof StringProvider))) {
-				logger.warn("No StringProvider for a String received on transferId: "+transferId);
+				logger.warn("No StringProvider for a String received from "+ commPartnerId +" on transferId: "+transferId);
 				return;
 			}
 			((StringProvider)prov).received(recv.getValue(), now);
@@ -447,6 +448,13 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 
 	public Map<Datapoint, String> getDatapointsToSendM() {
 		return datapointsToSendM;
+	}
+
+	//just for debugging
+	public ViaHeartbeatInfoProvider getInfoProvider(Datapoint dp) {
+		//Map<Datapoint, ViaHeartbeatInfoProvider> infoProviders;
+		ViaHeartbeatInfoProvider result = infoProvidersM.get(dp);
+		return result;
 	}
 
 }
