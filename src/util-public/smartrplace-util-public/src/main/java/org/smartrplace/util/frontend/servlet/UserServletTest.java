@@ -72,7 +72,7 @@ public abstract class UserServletTest extends HttpServlet {
     	
 		if(user == null || user.startsWith("[")) {
 			String user1 = GUIUtilHelper.getUserLoggedInBase(req.getSession());
-			if(user1 == null && user.startsWith("[")) {
+			if(user1 == null && (user == null || user.startsWith("["))) {
         		user = "master";
 			} else
 				user = user1;
