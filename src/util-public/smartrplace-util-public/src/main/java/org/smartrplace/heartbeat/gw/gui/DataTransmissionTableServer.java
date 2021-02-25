@@ -48,7 +48,7 @@ public abstract class DataTransmissionTableServer extends DataTransmissionTable 
 	public void addWidgetsAboveTable() {
 		super.addWidgetsAboveTable();
 		gwSelection = new SingleFilteringDirect<String>(page, "gwSelection",
-				OptionSavingMode.PER_USER, 10000, true) {
+				OptionSavingMode.PER_USER, 10000, false) {
 
 			@Override
 			protected List<GenericFilterOption<String>> getOptionsDynamic(OgemaHttpRequest req) {
