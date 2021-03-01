@@ -25,6 +25,9 @@ public abstract class TimeseriesSetProcSingleToSingleArg<T> extends TimeseriesSe
 	public TimeseriesSetProcSingleToSingleArg(String labelPostfix) {
 		super(labelPostfix);
 	}
+	public TimeseriesSetProcSingleToSingleArg(String labelPostfix, Integer absoluteTiming) {
+		super(labelPostfix, absoluteTiming);
+	}
 
 	@Override
 	public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService, T params) {

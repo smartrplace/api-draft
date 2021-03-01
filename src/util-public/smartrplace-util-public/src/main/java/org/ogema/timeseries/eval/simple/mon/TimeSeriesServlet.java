@@ -345,7 +345,7 @@ log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-"
 							timeSeries, startCurrentDay, nextDayStart)*MILLIJOULE_TO_KWH); // /TimeProcUtil.HOUR_MILLIS);
 					break;
 				case Consumption2Meter:
-					double counter = getPartialConsumptionValue(timeSeries, start, true);
+					double counter = 0; //getPartialConsumptionValue(timeSeries, startCurrentDay, true);
 					List<SampledValue> svList = timeSeries.getValues(startCurrentDay, nextDayStart);
 					for(SampledValue sv: svList) {
 						counter += sv.getValue().getFloatValue();

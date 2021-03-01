@@ -80,7 +80,7 @@ public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
 		};
 		knownProcessors.put(TimeProcUtil.METER_EVAL, meterProc);
 		
-		TimeseriesSetProcessor dayProc = new TimeseriesSetProcSingleToSingle("_proTag") {
+		TimeseriesSetProcessor dayProc = new TimeseriesSetProcSingleToSingle("_proTag", AbsoluteTiming.DAY) {
 			
 			@Override
 			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
@@ -98,7 +98,7 @@ public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
 		};
 		knownProcessors.put(TimeProcUtil.PER_DAY_EVAL, dayProc);
 		
-		TimeseriesSetProcessor hourProc = new TimeseriesSetProcSingleToSingle("_proStunde") {
+		TimeseriesSetProcessor hourProc = new TimeseriesSetProcSingleToSingle("_proStunde", AbsoluteTiming.HOUR) {
 			
 			@Override
 			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
@@ -116,7 +116,7 @@ public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
 		};
 		knownProcessors.put(TimeProcUtil.PER_HOUR_EVAL, hourProc);
 		
-		TimeseriesSetProcessor monthProc = new TimeseriesSetProcSingleToSingle("_perMonth") {
+		TimeseriesSetProcessor monthProc = new TimeseriesSetProcSingleToSingle("_perMonth", AbsoluteTiming.MONTH) {
 			
 			@Override
 			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
@@ -134,7 +134,7 @@ public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
 		};
 		knownProcessors.put(TimeProcUtil.PER_MONTH_EVAL, monthProc);
 		
-		TimeseriesSetProcessor yearProc = new TimeseriesSetProcSingleToSingle("_perYear") {
+		TimeseriesSetProcessor yearProc = new TimeseriesSetProcSingleToSingle("_perYear", AbsoluteTiming.YEAR) {
 			
 			@Override
 			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,

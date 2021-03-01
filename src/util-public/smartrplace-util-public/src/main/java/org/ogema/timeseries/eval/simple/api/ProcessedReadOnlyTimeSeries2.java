@@ -66,6 +66,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	
 	private Long firstTimestampInSource = null;
 	private Long lastTimestampInSource = null;
+	/** For {@link ProcessedReadOnlyTimeSeries2} this is always true*/
 	private boolean updateLastTimestampInSourceOnEveryCall;
 	public Long getTimeStampInSourceInternal(boolean first) {
 		if(first)

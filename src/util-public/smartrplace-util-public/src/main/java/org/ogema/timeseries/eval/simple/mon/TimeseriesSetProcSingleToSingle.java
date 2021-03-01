@@ -1,17 +1,22 @@
 package org.ogema.timeseries.eval.simple.mon;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 
+import de.iwes.util.timer.AbsoluteTimeHelper;
+
 public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetProcessor {
+	protected final Integer absoluteTiming;
 	/** Perform calculation on a certain input series.
 	 * 
 	 * @param timeSeries input time series
@@ -38,7 +43,11 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 	}
 	
 	public TimeseriesSetProcSingleToSingle(String labelPostfix) {
+		this(labelPostfix, null);
+	}
+	public TimeseriesSetProcSingleToSingle(String labelPostfix, Integer absoluteTiming) {
 		this.labelPostfix = labelPostfix;
+		this.absoluteTiming = absoluteTiming;
 	}
 	@Override
 	public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
@@ -68,6 +77,22 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 						@Override
 						protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
 							TimeseriesSetProcSingleToSingle.this.alignUpdateIntervalFromSource(updateInterval);
+						}
+						@Override
+						protected List<DpGap> getIntervalsToUpdate(long endTime) {
+							if(absoluteTiming == null)
+								return super.getIntervalsToUpdate(endTime);
+							ReadOnlyTimeSeries ts = tsdi.getTimeSeries();
+							SampledValue sv = ts.getPreviousValue(Long.MAX_VALUE);
+							Long lastTsInSource = getTimeStampInSourceInternal(false);
+							if(sv == null || (lastTsInSource != null && sv.getTimestamp() <= lastTsInSource))
+								return null;
+							DpGap inResult = new DpGap();
+							inResult.start = AbsoluteTimeHelper.getIntervalStart(endTime, absoluteTiming);
+							inResult.end = endTime;
+							List<DpGap> result = Arrays.asList(new DpGap[] {inResult});
+							return result ;			
+							
 						}
 					};
 				}

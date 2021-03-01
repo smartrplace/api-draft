@@ -108,7 +108,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			}
 		}
 		List<DpGap> toUpdate = getIntervalsToUpdate(endTime);
-		for(DpGap intv: toUpdate) {
+		if(toUpdate != null) for(DpGap intv: toUpdate) {
 			if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
 				values = updateValues(startTime, endTime);
 				isOwnList = false;
@@ -123,7 +123,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 					isOwnList = true;					
 				} else {
 					values.removeAll(prevVals);
-					values.addAll(newVals);					
+					values.addAll(newVals);
 				}
 				addValues(newVals);
 			}
@@ -132,7 +132,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			if(intv.start < 0 || intv.start < knownStart)
 				knownStart = intv.start;
 		}
-		if(!toUpdate.isEmpty() && datapointForChangeNotification != null) {
+		if((toUpdate != null) && (!toUpdate.isEmpty()) && (datapointForChangeNotification != null)) {
 			DpUpdated updTotal = DatapointImpl.getStartEndForUpdList(toUpdate);
 			datapointForChangeNotification.notifyTimeseriesChange(updTotal.start, updTotal.end);
 		}
@@ -150,9 +150,11 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			updateValueLimits();*/
 		} else if(startTime < knownStart) {
 			List<SampledValue> newVals = updateValues(startTime, knownStart);
-			List<SampledValue> concat = new ArrayList<SampledValue>(newVals);
-			concat.addAll(values);
+			//List<SampledValue> concat = new ArrayList<SampledValue>(newVals);
+			//concat.addAll(values);
+			List<SampledValue> concat = new ArrayList<SampledValue>(values);
 			values = concat;
+			values.addAll(newVals);
 			isOwnList = true;
 			knownStart = startTime;			
 			updateValueLimits();
@@ -191,10 +193,10 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		if(endTime < firstValueInList)
 			return Collections.emptyList();
 		if(startTime <= firstValueInList && endTime >= lastValueInList) {
-			return values;
+			return new ArrayList<SampledValue>(values);
 		}
 		if(values.isEmpty())
-			return values;
+			return Collections.emptyList();
 		int fromIndex = -1;
 		int toIndex = -1;
 		for(int i=0; i<values.size(); i++) {
@@ -397,8 +399,11 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	}
 	
 	/** Get all gaps to be filled since last call of this method. The intervals should not be overlapping
-	 * as we do not test on this here - this would lead to a double re-calculation.*/
-	protected List<DpGap> getIntervalsToUpdate(long now) {
+	 * as we do not test on this here - this would lead to a double re-calculation.<br>
+	 * NOTE: All values that shall be replaced MUST be overwritten using this method. Do not
+	 * try to overwrite a value just providing the same time stamp again via {@link #updateValues(long, long)}
+	 * as this will just add two entries for the same time stamp or lead to badly ordered time stamps.*/
+	protected List<DpGap> getIntervalsToUpdate(long endTime) {
 		synchronized (intervalToUpdate) {
 			if(intervalToUpdate.start < 0)
 				return Collections.emptyList();
