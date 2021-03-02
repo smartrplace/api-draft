@@ -12,6 +12,7 @@ import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
+import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
 
@@ -62,6 +63,8 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 						@Override
 						protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
 								long end, AggregationMode mode) {
+SampledValue sv = timeSeries.getPreviousValue(Long.MAX_VALUE);
+if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()+" lastInput:"+((sv!=null)?TimeProcPrint.getFullTime(sv.getTimestamp()):"no sv"));
 							return calculateValues(timeSeries, start, end, mode, this);						
 						}
 						@Override
@@ -83,14 +86,22 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 							if(absoluteTiming == null)
 								return super.getIntervalsToUpdate(startTime, endTime);
 							ReadOnlyTimeSeries ts = tsdi.getTimeSeries();
-							SampledValue sv = ts.getPreviousValue(Long.MAX_VALUE);
 							Long lastTsInSource = getTimeStampInSourceInternal(false);
-							if(sv == null || (lastTsInSource != null && sv.getTimestamp() <= lastTsInSource))
+							SampledValue sv;
+							if(lastTsInSource != null) {
+								sv = ts.getNextValue(lastTsInSource+1);
+							} else {
+								sv = ts.getPreviousValue(Long.MAX_VALUE);
+							}
+							if(sv == null || (lastTsInSource != null && sv.getTimestamp() <= lastTsInSource)) {
+if(Boolean.getBoolean("evaldebug")) System.out.println("last/new val in "+dpLabel()+" is no update:"+((sv!=null)?TimeProcPrint.getFullTime(sv.getTimestamp()):"no sv")+" last:"+((lastTsInSource!=null)?TimeProcPrint.getFullTime(lastTsInSource):"no last"));
 								return null;
+							}
 							DpGap inResult = new DpGap();
 							inResult.start = AbsoluteTimeHelper.getIntervalStart(sv.getTimestamp(), absoluteTiming);
 							inResult.end = sv.getTimestamp();
 							List<DpGap> result = Arrays.asList(new DpGap[] {inResult});
+if(Boolean.getBoolean("evaldebug")) System.out.println("new val in "+dpLabel()+" at:"+TimeProcPrint.getFullTime(sv.getTimestamp()));
 							return result ;			
 							
 						}

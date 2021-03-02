@@ -18,6 +18,7 @@ import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
+import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcSingleToSingle.ProcTsProvider;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
@@ -52,6 +53,12 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 	 */
 	public int updateMode;
 	
+	protected final Integer absoluteTiming;
+
+	/** Currently we assume that two input time series cover the entire range and that one of them always covers the start
+	 * and the other always covers the end. The two time series may not be available at the time of the result timeseries
+	 * creation, but once they are set they are not changed anymore.
+	 */
 	public static class GetInputSingleResult {
 		public DatapointImpl dpIn;
 		public ProcTsProvider provider;
@@ -60,15 +67,17 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 	}
 	public static class GetInputSingleMax {
 		long firstStart = Long.MAX_VALUE;
+		//just a helper to find firstStartTsFinal
 		ReadOnlyTimeSeries firstStartTs = null;
 		long lastEnd = 0;
+		//just a helper to find lastEndTsFinal
 		ReadOnlyTimeSeries lastEndTs = null;
 		long firstStartTSEnd;
 		ReadOnlyTimeSeries firstStartTsFinal;
 		ReadOnlyTimeSeries lastEndTsFinal;
 	}
 	
-	/** Overwrite if the leadin input single time series shall not cover the maximum range of input
+	/** Overwrite if the leading input single time series shall not cover the maximum range of input
 	 * data, but e.g. only the areas where all input time series have values
 	 * @param input
 	 * @param dpService
@@ -80,31 +89,13 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 		if(result.maxData == null) {
 			return null;
 		}
-		/*for(Datapoint tsd: input) {
-			ReadOnlyTimeSeries ts = tsd.getTimeSeries();
-			SampledValue svStart = ts.getNextValue(0);
-			SampledValue svEnd = ts.getPreviousValue(Long.MAX_VALUE);
-			if((svStart != null) && (svStart.getTimestamp() < result.firstStart)) {
-				result.firstStart = svStart.getTimestamp();
-				result.firstStartTs = ts;
-			}
-			if((svEnd != null) && (svEnd.getTimestamp() > result.lastEnd)) {
-				result.lastEnd = svEnd.getTimestamp();
-				result.lastEndTs = ts;
-			}
-		}
-		ReadOnlyTimeSeries firstStartTsFinal = result.firstStartTs;
-		ReadOnlyTimeSeries lastEndTsFinal = result.lastEndTs;
 
-		if(result.firstStartTs == null)
-			return null;
-		//TODO: We assume that startTS and endTS overlap. If not we might have to use more timeseries intermediately
-		result.firstStartTSEnd = result.firstStartTs.getPreviousValue(Long.MAX_VALUE).getTimestamp();*/
-		ProcessedReadOnlyTimeSeries inputSingle = new ProcessedReadOnlyTimeSeries(InterpolationMode.NONE) {
+		ProcessedReadOnlyTimeSeries inputSingle = new ProcessedReadOnlyTimeSeries(InterpolationMode.NONE, absoluteTiming) {
 			protected long lastGetValues = 0;
 			
 			@Override
 			protected List<SampledValue> updateValues(long start, long end) {
+if(Boolean.getBoolean("evaldebug")) System.out.println("updateValues(2) for  "+dpLabel()+" "+TimeProcPrint.getFullTime(start)+" : "+TimeProcPrint.getFullTime(end));
 				//TODO: Now we stop this search as soon as we found the timeseries once. With volatile
 				//timeseries we might have to update this later on again.
 				if(result.maxData.firstStartTs == null)
@@ -112,12 +103,17 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 				if(result.maxData.firstStartTs == null)
 					return Collections.emptyList();
 				GetInputSingleMax maxData = result.maxData;
-				if(end <= maxData.firstStartTSEnd)
+				if(end <= maxData.firstStartTSEnd) {
+if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLabel()+" based on firstStartTs:"+TimeProcPrint.getTimeseriesName(maxData.firstStartTsFinal, true));
 					return maxData.firstStartTsFinal.getValues(start, end);
-				if(start >= maxData.firstStartTSEnd)
+				}
+				if(start >= maxData.firstStartTSEnd) {
+if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLabel()+" based on lastEndTs:"+TimeProcPrint.getTimeseriesName(maxData.lastEndTsFinal, true));
 					return maxData.lastEndTsFinal.getValues(start, end);
+				}
 				List<SampledValue> resultLoc = new ArrayList<>(maxData.firstStartTsFinal.getValues(start, maxData.firstStartTSEnd));
 				resultLoc.addAll(maxData.lastEndTsFinal.getValues(maxData.firstStartTSEnd, end));
+if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLabel()+" based on firstStartTs:"+TimeProcPrint.getTimeseriesName(maxData.firstStartTsFinal, true)+" and lastEndTs:"+TimeProcPrint.getTimeseriesName(maxData.lastEndTsFinal, true));
 				return resultLoc;
 			}
 			
@@ -152,6 +148,11 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 				lastGetValues = now;
 				return super.getValues(startTime, endTime);
 			} 
+			
+			@Override
+			protected String dpLabel() {
+				return "InpSingleLead_"+((resultSeriesStore!=null)?resultSeriesStore.dpLabel():"?");
+			}
 			
 			@Override
 			protected long getCurrentTime() {
@@ -208,18 +209,29 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 	}
 	
 	protected final String label;
-	protected final int intervalType;
+	//protected final int intervalType2;
 	private final long TEST_SHIFT;
 	
 	public TimeseriesSetProcMultiToSingle(String resultlabel) {
 		this(resultlabel, AbsoluteTiming.DAY);
 	}
 	public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType) {
+		this(resultlabel, intervalType, null);
+	}
+	/**
+	 * 
+	 * @param resultlabel
+	 * @param intervalType relevant for test shift only
+	 * @param absoluteTiming if set then knownEnd will be reset to beginning of interval always
+	 */
+	public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType, Integer absoluteTiming) {
 		this.label = resultlabel;
-		this.intervalType = intervalType;
+		//this.intervalType = intervalType;
+		this.absoluteTiming = absoluteTiming;
 		TEST_SHIFT = (long) (0.9*AbsoluteTimeHelper.getStandardInterval(intervalType)); //TimeProcUtil.DAY_MILLIS-2*TimeProcUtil.HOUR_MILLIS;
 	}
 
+	protected ProcessedReadOnlyTimeSeries2 resultSeriesStore = null;
 	@Override
 	public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 		List<Datapoint> result = new ArrayList<>();
@@ -231,11 +243,12 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 			
 			@Override
 			public ProcessedReadOnlyTimeSeries2 getTimeseries(Datapoint newtsdi) {
-				return new ProcessedReadOnlyTimeSeries2(inputSingle.dpIn) {
+				resultSeriesStore = new ProcessedReadOnlyTimeSeries2(inputSingle.dpIn, absoluteTiming) {
 					@Override
 					protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
 							long end, AggregationMode mode) {
-						long startTime = dpService.getFrameworkTime();
+if(Boolean.getBoolean("evaldebug")) System.out.println("Starting aggregation for "+getShortId());
+						long startOfCalc = dpService.getFrameworkTime();
 						
 						Float[] values = new Float[input.size()];
 						List<SampledValue> resultLoc = new ArrayList<>();
@@ -259,9 +272,9 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 						}
 						debugCalculationResult(input, resultLoc);
 						
-						long endTime =  dpService.getFrameworkTime();
+						long endOfCalc =  dpService.getFrameworkTime();
 //TODO: These values could be logged to check evaluation performance
-System.out.println("Calculation of "+getShortId()+" took "+(endTime-startTime)+" msec");
+System.out.println("Calculation of "+getShortId()+" took "+(endOfCalc-startOfCalc)+" msec");
 						return resultLoc;
 					}
 					
@@ -275,6 +288,7 @@ System.out.println("Calculation of "+getShortId()+" took "+(endTime-startTime)+"
 						TimeseriesSetProcMultiToSingle.this.alignUpdateIntervalFromSource(updateInterval);
 					}
 				};
+				return resultSeriesStore;
 			}
 		};
 

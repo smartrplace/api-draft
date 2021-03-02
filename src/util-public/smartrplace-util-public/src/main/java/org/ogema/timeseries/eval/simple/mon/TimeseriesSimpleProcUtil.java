@@ -22,7 +22,7 @@ import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 
-public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
+public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase { 
 	
 	public TimeseriesSimpleProcUtil(ApplicationManager appMan, DatapointService dpService) {
 		this(appMan, dpService, 4);
@@ -154,7 +154,7 @@ public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 TimeProcPrint.printTimeSeriesSet(input, "IN(0):Dayproc", 1, null, null);
 				List<Datapoint> result1 = dayProc.getResultSeries(input, dpService);
-				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum") {
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum", AbsoluteTiming.DAY, (updateMode>0)?AbsoluteTiming.DAY:null) {
 					@Override
 					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
 						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Dayproc", 1, null, null);
@@ -174,7 +174,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Dayproc", 1, null, null);
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 TimeProcPrint.printTimeSeriesSet(input, "IN(0):Hourproc", 1, null, null);
 				List<Datapoint> result1 = hourProc.getResultSeries(input, dpService);
-				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_hour", AbsoluteTiming.HOUR) {
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_hour", AbsoluteTiming.HOUR, (updateMode>0)?AbsoluteTiming.HOUR:null) {
 					@Override
 					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
 						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Hourproc", 1, null, null);
@@ -194,7 +194,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Hourproc", 1, null, null);
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 TimeProcPrint.printTimeSeriesSet(input, "IN(0):Monthproc", 1, null, null);
 				List<Datapoint> result1 = monthProc.getResultSeries(input, dpService);
-				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_month", AbsoluteTiming.MONTH) {
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_month", AbsoluteTiming.MONTH, (updateMode>0)?AbsoluteTiming.MONTH:null) {
 					@Override
 					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
 						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Monthproc", 1, null, null);
@@ -214,7 +214,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Monthproc", 1, null, null);
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 TimeProcPrint.printTimeSeriesSet(input, "IN(0):Yearproc", 1, null, null);
 				List<Datapoint> result1 = yearProc.getResultSeries(input, dpService);
-				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_year", AbsoluteTiming.YEAR) {
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_year", AbsoluteTiming.YEAR, (updateMode>0)?AbsoluteTiming.YEAR:null) {
 					@Override
 					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
 						TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):Yearproc", 1, null, null);
@@ -251,7 +251,7 @@ TimeProcPrint.printTimeSeriesSet(input, "IN(0):Yearproc", 1, null, null);
 					roomList.add(tsd);
 				}
 				for(Entry<String, List<Datapoint>> roomData: sortedbyRoom.entrySet()) {
-					TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum(roomData.getKey()+"_sum");
+					TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum(roomData.getKey()+"_sum", AbsoluteTiming.DAY, (updateMode>0)?AbsoluteTiming.DAY:null);
 					sumProc.updateMode = updateMode;
 					List<Datapoint> resultLoc = sumProc.getResultSeries(roomData.getValue(), dpService);
 					if(!roomData.getValue().isEmpty()) {

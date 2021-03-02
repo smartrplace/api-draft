@@ -255,4 +255,23 @@ public class TimeProcPrint {
 		}
 		return result;
 	}
+	
+	public static String getSummary(List<SampledValue> values) {
+		String result = "["+values.size()+"]";
+		if(!values.isEmpty()) {
+			result += "-"+getFullTime(values.get(0).getTimestamp())+":"+
+					getFullTime(values.get(values.size()-1).getTimestamp());
+		}
+		return result;
+	}
+	
+	public static String getFullTime(long ts) {
+		if(ts < 0)
+			return "--"+ts;
+		if(ts == 0)
+			return " 0000";
+		if(ts > (Long.MAX_VALUE-10))
+			return "LONG_MAX";
+		return StringFormatHelper.getFullTimeDateInLocalTimeZone(ts);
+	}
 }

@@ -2,6 +2,8 @@ package org.ogema.timeseries.eval.simple.api;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.recordeddata.RecordedData;
@@ -99,6 +101,11 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 		this(nameProvider, mode, dpInput, !Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"));
 		
 	}
+	public ProcessedReadOnlyTimeSeries2(TimeSeriesNameProvider nameProvider,
+			AggregationMode mode, Datapoint dpInput,
+			boolean updateLastTimestampInSourceOnEveryCall) {
+		this(nameProvider, mode, dpInput, updateLastTimestampInSourceOnEveryCall, null);
+	}
 	/**
 	 * 
 	 * @param tsdi
@@ -110,8 +117,9 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	 */
 	public ProcessedReadOnlyTimeSeries2(TimeSeriesNameProvider nameProvider,
 			AggregationMode mode, Datapoint dpInput,
-			boolean updateLastTimestampInSourceOnEveryCall) {
-		super(InterpolationMode.NONE);
+			boolean updateLastTimestampInSourceOnEveryCall,
+			Integer absoluteTiming) {
+		super(InterpolationMode.NONE, absoluteTiming);
 		this.nameProvider = nameProvider;
 		this.tsdi = dpInput.getTimeSeriesDataImpl(null); //tsdi;
 		this.dpInput = dpInput;
@@ -121,6 +129,10 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 
 	public ProcessedReadOnlyTimeSeries2(Datapoint dpInput) {
 		this(null, dpInput.info().getAggregationMode(), dpInput);
+	}
+	public ProcessedReadOnlyTimeSeries2(Datapoint dpInput, Integer absoluteTiming) {
+		this(null, dpInput.info().getAggregationMode(), dpInput,
+				!Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"), absoluteTiming);
 	}
 	
 	/*static AggregationMode getMode(MonitoringController controller, String label) {
@@ -133,6 +145,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 
 	@Override
 	protected List<SampledValue> updateValues(long start, long end) {
+if(Boolean.getBoolean("evaldebug")) System.out.println("updateValues for  "+dpLabel()+" "+TimeProcPrint.getFullTime(start)+" : "+TimeProcPrint.getFullTime(end));
 		ReadOnlyTimeSeries ts = tsdi.getTimeSeries();
 		if(firstTimestampInSource == null) {
 			SampledValue sv = ts.getNextValue(0);
@@ -145,19 +158,23 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 			SampledValue sv = ts.getPreviousValue(Long.MAX_VALUE);
 			if(sv != null) {
 				lastTimestampInSource = sv.getTimestamp();
-logger.info("Found last input time stamp:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastTimestampInSource));
+logger.info("Found last input time stamp:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastTimestampInSource)+" for "+dpLabel());
 if(ts instanceof RecordedData) {
 	RecordedData rec = (RecordedData) ts;
 	logger.info("Read from "+rec.getPath());
 } else
-	logger.info("Read from no-RecordedData values: "+ts.toString());
+	logger.info("Read from no-RecordedData values: "+dpLabel());
 			} else if(lastTimestampInSource == null)
 				return Collections.emptyList();
 		}
-		if(end < firstTimestampInSource)
+		if(end < firstTimestampInSource) {
+if(Boolean.getBoolean("evaldebug")) System.out.println("end < firstTimestampInSource for  "+dpLabel()+" firstTsInS:"+TimeProcPrint.getFullTime(firstTimestampInSource));
 			return Collections.emptyList();
-		if(start > lastTimestampInSource)
+		}
+		if(start > lastTimestampInSource) {
+if(Boolean.getBoolean("evaldebug")) System.out.println("start > lastTimestampInSource for  "+dpLabel()+" lastsInS:"+TimeProcPrint.getFullTime(lastTimestampInSource));
 			return Collections.emptyList();
+		}
 		if(end > lastTimestampInSource)
 			end = lastTimestampInSource;
 		if(start < firstTimestampInSource)
@@ -168,6 +185,20 @@ logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLa
 		return getResultValues(ts, start, end+1, mode);
 	}
 
+	@Override
+	public String dpLabel() {
+		if(datapointForChangeNotification != null) {
+			String loc = datapointForChangeNotification.getLocation();
+			Matcher matcher = Pattern.compile("\\d+").matcher(loc);
+			matcher.find();
+			String num = matcher.group();
+			if(num != null)
+				return datapointForChangeNotification.label(null)+"_"+num;
+			return datapointForChangeNotification.label(null);
+		}
+		return getShortId();
+	}
+	
 	public String getShortId() {
 		return getShortId(tsdi, nameProvider, getInputDp());
 	}

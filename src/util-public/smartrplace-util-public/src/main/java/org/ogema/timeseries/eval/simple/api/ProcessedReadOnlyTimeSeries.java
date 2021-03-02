@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.timer.AbsoluteTimeHelper;
 
 /** Implementation for {@link ReadOnlyTimeSeries} that is based on some input provided via {@link #updateValues(long, long)}.
  * The class requests any unknown values from the implementation via this method. It assumes that for a given interval all values
@@ -47,6 +48,10 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	/** Only relevant if updateFinalValue is active (default is every two hours)*/
 	protected abstract long getCurrentTime();
 
+	protected String dpLabel() {
+		return getClass().getSimpleName();
+	};
+	
 	private List<SampledValue> values = null;
 	//For Debugging only!
 	public List<SampledValue> getCurrentValues() {
@@ -61,6 +66,8 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 
 	final Long knownEndUpdateInterval;
 	long lastKnownEndUpdate = -1;
+	//If this is set then the known
+	final Integer absoluteTiming; 
 	
 	protected final long creationTime;
 	
@@ -68,30 +75,38 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	
 	final static protected Logger logger = LoggerFactory.getLogger("ProcessedReadOnlyTimeSeries");
 
-	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode) {
-		this(interpolationMode, TimeProcUtil.HOUR_MILLIS*2);
-	}
-	
 	private final Lock updateLock = new ReentrantLock();
 	/** Set this to get notifications, only relevant if WriteMode==ANY*/
 	public Datapoint datapointForChangeNotification = null;
 	
 	
+	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode) {
+		this(interpolationMode, null);
+	}
+	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode, Integer absoluteTiming) {
+		this(interpolationMode, 1000*Long.getLong("org.ogema.timeseries.eval.simple.api.knownIntervalUpdate", 7200), absoluteTiming);
+	}
+		
 	/** Constructor
 	 * 
 	 * @param interpolationMode currently only InterpolationMode.NONE is supported
 	 * @param knownEndUpdateInterval if not null this specifys a duration after which the interval for which the time series
-	 * 		values are assumed to be known is reset to the current time
+	 * 		values are assumed to be known is reset to lastKnownEndUpdate. If absoluteInterval is set then it will
+	 * 		even be set back to the beginning of the interval of lastKnownEndUpdate
 	 */
-	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode, Long knownEndUpdateInterval) {
+	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode, Long knownEndUpdateInterval,
+			Integer absoluteTiming) {
 		this.interpolationMode = interpolationMode;
 		this.knownEndUpdateInterval = knownEndUpdateInterval;
+		this.absoluteTiming = absoluteTiming;
 		this.creationTime = getCurrentTime();
 		this.intervalToUpdate.start = -1;
 	}
 
 	@Override
 	public List<SampledValue> getValues(long startTime, long endTime) {
+if(Boolean.getBoolean("evaldebug")) System.out.println("getValues for  "+dpLabel()+" "+TimeProcPrint.getFullTime(startTime)+" : "+TimeProcPrint.getFullTime(endTime));
+
 		if(startTime < 0)
 			startTime = 0;
 		boolean isFree = updateLock.tryLock();
@@ -103,7 +118,10 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		if(knownEndUpdateInterval != null) {
 			long now = getCurrentTime();
 			if(now - lastKnownEndUpdate > knownEndUpdateInterval) {
-				knownEnd = lastKnownEndUpdate;
+				if(absoluteTiming != null)
+					knownEnd = AbsoluteTimeHelper.getIntervalStart(lastKnownEndUpdate, absoluteTiming)-1;
+				else
+					knownEnd = lastKnownEndUpdate;
 				lastKnownEndUpdate = now;
 			}
 		}
@@ -111,10 +129,12 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		if(toUpdate != null) for(DpGap intv: toUpdate) {
 			if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
 				values = updateValues(startTime, endTime);
+if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals1:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
 				isOwnList = false;
 			} else {
 				List<SampledValue> prevVals = getValuesWithoutUpdate(intv.start, intv.end);
 				List<SampledValue> newVals = updateValues(intv.start, intv.end);
+if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals2:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 				if(!isOwnList) {
 					List<SampledValue> concat = new ArrayList<SampledValue>(values);
 					concat.removeAll(prevVals);
@@ -138,54 +158,32 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		}
 		if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
 			values = updateValues(startTime, endTime);
+if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals3:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
 			isOwnList = false;
 			knownStart = startTime;
 			knownEnd = endTime;
 			updateValueLimits();
-		/*} else if(startTime < knownStart && endTime > knownEnd) {
-			values = updateValues(startTime, endTime);
-			isOwnList = false;
-			knownStart = startTime;
-			knownEnd = endTime;			
-			updateValueLimits();*/
 		} else if(startTime < knownStart) {
 			List<SampledValue> newVals = updateValues(startTime, knownStart);
+if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals4:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 			addValues(newVals);
-			//List<SampledValue> concat = new ArrayList<SampledValue>(newVals);
-			//concat.addAll(values);
-			/*List<SampledValue> concat = new ArrayList<SampledValue>(values);
-			values = concat;
-			values.addAll(newVals);
-			isOwnList = true;*/
 			knownStart = startTime;	
 			updateValueLimits();
 		} else if(endTime > knownEnd) {
 //logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd)+" endTime:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(endTime));
 			List<SampledValue> newVals = updateValues(knownEnd, endTime);
+if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals5:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 //logger.error("Found new vals:"+values.size());
 			addValues(newVals);
-			/*if(isOwnList) {
-				try {
-					values.addAll(newVals);
-				} catch(UnsupportedOperationException e) {
-					//TODO: Should not occur
-					List<SampledValue> concat = new ArrayList<SampledValue>(values);
-					concat.addAll(newVals);
-					values = concat;
-				}
-			} else {
-				List<SampledValue> concat = new ArrayList<SampledValue>(values);
-				concat.addAll(newVals);
-				values = concat;
-				isOwnList = true;
-			}*/
 			knownEnd = endTime;			
 			updateValueLimits();
 		}
 		} finally {
 			updateLock.unlock();
 		}
-		return getValuesWithoutUpdate(startTime, endTime);
+		List<SampledValue> result = getValuesWithoutUpdate(startTime, endTime);
+if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size()+" vals for "+dpLabel()+" "+TimeProcPrint.getFullTime(startTime)+" : "+TimeProcPrint.getFullTime(endTime));
+		return result;
 	}
 
 	protected List<SampledValue> getValuesWithoutUpdate(long startTime, long endTime) {
