@@ -33,6 +33,6 @@ public interface InstalledAppsSelector {
 	public <T extends Resource> void startSimulation(DeviceHandlerProvider<T> tableProvider, T device);
 	//ApplicationManager getAppManForSimulationStart();
 	
-	void addWidgetsExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+	void addWidgetsExpert(DeviceHandlerProvider<?> tableProvider, InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan);
 }

@@ -21,7 +21,7 @@ import java.util.List;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.schedule.Schedule;
-import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.recordeddata.RecordedDataConfiguration;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.model.prototypes.PhysicalElement;
@@ -84,9 +84,9 @@ public class LogConfigSP {
 	}
 
 	/** Copied from EnergyServerImport class*/
-    public static RecordedDataStorage getRecordedData(FloatResource res,
+    public static RecordedDataStorage getRecordedData(SingleValueResource sres,
     		DataRecorder dataRecorder, Logger logger) {
-        String id = res.getLocation();
+        String id = sres.getLocation();
         RecordedDataStorage rds = dataRecorder.getRecordedDataStorage(id);
         if (rds == null) {
             RecordedDataConfiguration configuration = new RecordedDataConfiguration();
@@ -173,6 +173,10 @@ public class LogConfigSP {
     	return null;
     }
     
+    public static void storeData(List<SampledValue> toInsert, SingleValueResource sres, DataRecorder dataRecorder) {
+		RecordedDataStorage recStor = LogConfigSP.getRecordedData(sres, dataRecorder, null);
+		storeData(toInsert, recStor);   	
+    }
     /** rot must either be of type Schedule or RecordedDataStorage*/
     public static void storeData(List<SampledValue> toInsert,  ReadOnlyTimeSeries rot) {
     	if(rot instanceof Schedule) {

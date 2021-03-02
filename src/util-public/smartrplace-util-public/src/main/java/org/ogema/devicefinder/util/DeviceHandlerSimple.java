@@ -77,6 +77,17 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	 * 		a feedback or status value of an actor or most relevant configuration value
 	 */
 	protected abstract SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration);
+	
+	/** Additional widgets for the standard table can be added here. To add widgets for the expert table,
+	 * overwrite the method {@link #addMoreWidgetsExpert(InstallAppDevice, Resource, ObjectResourceGUIHelper, String, OgemaHttpRequest, Row, ApplicationManager)}
+	 * @param object
+	 * @param device
+	 * @param vh
+	 * @param id
+	 * @param req
+	 * @param row
+	 * @param appMan
+	 */
 	protected void addMoreValueWidgets(InstallAppDevice object, T device, ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {}
 	
@@ -145,7 +156,7 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 				addInstallationStatus(object, vh, id, req, row);
 				addComment(object, vh, id, req, row);
 
-				appSelector.addWidgetsExpert(object, vh, id, req, row, appMan);
+				appSelector.addWidgetsExpert(DeviceHandlerSimple.this, object, vh, id, req, row, appMan);
 			}
 			
 			@Override

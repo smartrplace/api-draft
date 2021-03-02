@@ -13,8 +13,11 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.FloatValue;
 import org.ogema.core.channelmanager.measurements.Quality;
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.schedule.Schedule;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DatapointDesc.ScalingProvider;
@@ -30,6 +33,7 @@ import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
@@ -220,6 +224,40 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		Float value;
 		long timestamp;
 	}
+	
+	public static MeterReference getDefaultMeteringReference(ReadOnlyTimeSeries timeSeries, Long defaultTime, ApplicationManager appMan) {
+		MeterReference ref = new MeterReference();
+		ref.referenceMeterValue = 0;
+		if(timeSeries instanceof RecordedData) {
+			Resource parent = appMan.getResourceAccess().getResource(((RecordedData)timeSeries).getPath());
+			if(parent != null) {
+				FloatResource refVal = parent.getSubResource("refTimeCounter", FloatResource.class);
+				if(refVal.exists())
+					ref.referenceMeterValue = refVal.getValue();
+				else {
+					Resource device = ResourceHelper.getFirstParentOfType(parent, "org.smartrplace.iotawatt.ogema.resources.IotaWattElectricityConnection");
+					if(device != null) {
+						refVal = device.getSubResource("refTimeCounter", FloatResource.class);
+						if(refVal.exists())
+							ref.referenceMeterValue = refVal.getValue();
+					}
+				}
+			}
+		}
+		TimeResource refRes = TimeProcUtil.getDefaultMeteringReferenceResource(appMan.getResourceAccess());
+		if(!refRes.exists()) {
+			refRes.create();
+			if(defaultTime == null)
+				defaultTime = Long.getLong("org.ogema.timeseries.eval.simple.api.meteringreferencetime");
+			if(defaultTime != null)
+				refRes.setValue(defaultTime);
+			else
+				refRes.setValue(appMan.getFrameworkTime());
+			refRes.activate(false);
+		}
+		ref.referenceTime = refRes.getValue();
+		return ref;
+	}
 	/** Calculate a virtual meter series that has the same counter value at a reference point as another
 	 * real meter so that the further consumption trend can be compared directly
 	 * Note: Currently this method only supports interpolation
@@ -243,40 +281,27 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			long startLoc;
 			long endLoc;
 			if(ref.referenceTime > start) {
-				startLoc = start;
+				if(mode == AggregationMode.Power2Meter) {
+					SampledValue sv = timeSeries.getNextValue(0);
+					if(sv == null)
+						return Collections.emptyList();
+					startLoc = start = sv.getTimestamp();
+				} else
+					startLoc = start;
 				endLoc = ref.referenceTime;
 			} else {
 				startLoc = ref.referenceTime;
 				endLoc = start;			
 			}
 			double counter = aggregateValuesForMeter(timeSeries, mode, startLoc, endLoc, prevVal, null, 0);
-log.info("Calculated ref from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+
-		" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(endLoc)+" found: "+counter);
-			/*if(mode == AggregationMode.Consumption2Meter)
-				counter = getPartialConsumptionValue(timeSeries, startLoc, true);
-			else
-				counter = 0;
-			final List<SampledValue> svList;
-			svList = timeSeries.getValues(startLoc, endLoc);
-			for(SampledValue sv: svList) {
-				if(mode == AggregationMode.Power2Meter)
-					counter += getPowerStep(prevVal, sv, startLoc);
-				else
-					counter += sv.getValue().getFloatValue();
-			}
-			if(mode == AggregationMode.Power2Meter)
-				counter += getFinalPowerStep(prevVal, endLoc);
-			else
-				counter += getPartialConsumptionValue(timeSeries, endLoc, false);*/
 			if(ref.referenceTime > start)
 				myRefValue = counter;
 			else
 				myRefValue = -counter;
 			delta = ref.referenceMeterValue - myRefValue;
-log.info("Aggregating from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(start)+
-		" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(end));
+			if(mode == AggregationMode.Power2Meter && (ref.referenceTime > start))
+				prevVal = new Power2MeterPrevValues();
 			aggregateValuesForMeter(timeSeries, mode, start, end, prevVal, result, delta);
-log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-":""+result.get(result.size()-1).getValue().getFloatValue())+" delta:"+delta+" myRefValue:"+myRefValue);
 			return result;
 		} else {
 			myRefValue = TimeProcUtil.getInterpolatedValue(timeSeries, ref.referenceTime);
@@ -285,22 +310,8 @@ log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-"
 			return Collections.emptyList();
 		delta = ref.referenceMeterValue - myRefValue;
 		double counter = 0;
-		//if(mode == AggregationMode.Consumption2Meter) {
-		//	counter = getPartialConsumptionValue(timeSeries, start, true);
-		//}
-		//Float prevValue = null;
 		List<SampledValue> tsInput = timeSeries.getValues(start, end);
 		for(SampledValue sv: tsInput) {
-			/*if(mode == AggregationMode.Consumption2Meter)
-				counter += sv.getValue().getFloatValue();
-			else if(mode == AggregationMode.Power2Meter) {
-				if(prevValue != null) {
-					counter += (prevValue * (sv.getTimestamp() - prevTime));
-					prevTime = sv.getTimestamp();
-				} else
-					prevTime = start;
-				prevValue = sv.getValue().getFloatValue();
-			} else*/
 			counter = sv.getValue().getFloatValue();
 			result.add(new SampledValue(new FloatValue((float) (counter+delta)), sv.getTimestamp(), sv.getQuality()));
 		}
@@ -409,10 +420,10 @@ log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-"
 	 * 		integration
 	 * @return
 	 */
-	protected static float getPowerStep(Power2MeterPrevValues internalVals, SampledValue sv, long evalStart) {
-		float result;
+	protected static double getPowerStep(Power2MeterPrevValues internalVals, SampledValue sv, long evalStart) {
+		double result;
 		if(internalVals.value != null) {
-			result = (internalVals.value * (sv.getTimestamp() - internalVals.timestamp));
+			result = (internalVals.value * (sv.getTimestamp() - internalVals.timestamp)) * MILLIJOULE_TO_KWH;
 			internalVals.timestamp = sv.getTimestamp();
 		} else {
 			result = 0;
@@ -421,10 +432,10 @@ log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-"
 		internalVals.value = sv.getValue().getFloatValue();
 		return result;
 	}
-	protected static float getFinalPowerStep(Power2MeterPrevValues internalVals, long evalEnd) {
-		float result;
+	protected static double getFinalPowerStep(Power2MeterPrevValues internalVals, long evalEnd) {
+		double result;
 		if(internalVals.value != null) {
-			result = (internalVals.value * (evalEnd - internalVals.timestamp));
+			result = (internalVals.value * (evalEnd - internalVals.timestamp)) * MILLIJOULE_TO_KWH;
 		} else {
 			result = 0;
 		}
@@ -448,7 +459,7 @@ log.info("MeterFromCon:  #:"+result.size()+"  Last value:"+(result.isEmpty()?"-"
 			else
 				firstTs = svFirst.getTimestamp();
 			if(svBefore != null && (!Float.isNaN(svBefore.getValue().getFloatValue())))
-				counter = svBefore.getValue().getFloatValue()*(firstTs - startLoc);
+				counter = svBefore.getValue().getFloatValue()*(firstTs - startLoc) * MILLIJOULE_TO_KWH;
 			else
 				counter = 0;
 		}
@@ -474,14 +485,15 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 				log.warn("NAN for agg from"+timeSeries.toString()+" at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc));
 		}
 		if(mode == AggregationMode.Power2Meter) {
-			counter += getFinalPowerStep(prevVal, endLoc);
+			SampledValue firstValueBehind = timeSeries.getNextValue(endLoc);
+			if(firstValueBehind != null)
+				counter += getFinalPowerStep(prevVal, endLoc);
 			if(result != null)
 				result.add(new SampledValue(new FloatValue((float) (counter+delta)), prevVal.timestamp, Quality.GOOD));
-			else
-				counter += getPartialConsumptionValue(timeSeries, endLoc, false);
 			if(Double.isNaN(counter))
 				log.warn("NAN for agg from"+timeSeries.toString()+" at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc));
-		}
+		} else if(result == null)
+			counter += getPartialConsumptionValue(timeSeries, endLoc, false);
 		return counter;
 	}
 	

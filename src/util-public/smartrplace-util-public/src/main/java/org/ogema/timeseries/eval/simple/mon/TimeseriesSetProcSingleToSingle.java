@@ -79,17 +79,17 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 							TimeseriesSetProcSingleToSingle.this.alignUpdateIntervalFromSource(updateInterval);
 						}
 						@Override
-						protected List<DpGap> getIntervalsToUpdate(long endTime) {
+						protected List<DpGap> getIntervalsToUpdate(long startTime, long endTime) {
 							if(absoluteTiming == null)
-								return super.getIntervalsToUpdate(endTime);
+								return super.getIntervalsToUpdate(startTime, endTime);
 							ReadOnlyTimeSeries ts = tsdi.getTimeSeries();
 							SampledValue sv = ts.getPreviousValue(Long.MAX_VALUE);
 							Long lastTsInSource = getTimeStampInSourceInternal(false);
 							if(sv == null || (lastTsInSource != null && sv.getTimestamp() <= lastTsInSource))
 								return null;
 							DpGap inResult = new DpGap();
-							inResult.start = AbsoluteTimeHelper.getIntervalStart(endTime, absoluteTiming);
-							inResult.end = endTime;
+							inResult.start = AbsoluteTimeHelper.getIntervalStart(sv.getTimestamp(), absoluteTiming);
+							inResult.end = sv.getTimestamp();
 							List<DpGap> result = Arrays.asList(new DpGap[] {inResult});
 							return result ;			
 							

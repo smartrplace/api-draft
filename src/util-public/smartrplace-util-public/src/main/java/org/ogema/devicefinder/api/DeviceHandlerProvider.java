@@ -14,10 +14,13 @@ import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.autoconfig.api.DeviceTypeProvider;
+import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
+import de.iwes.widgets.html.complextable.RowTemplate.Row;
 
 /** Implement this service to add another device table to the hardware installation app and to provide
  * everything to provide device information for device and application configuration.<br>
@@ -160,4 +163,8 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	default Collection<DeviceTypeProvider<?>> getDeviceTypeProviders() {
 		return null;
 	}
+	
+	default void addMoreWidgetsExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh,
+			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {};
+
 }

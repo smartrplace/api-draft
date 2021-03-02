@@ -107,7 +107,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 				lastKnownEndUpdate = now;
 			}
 		}
-		List<DpGap> toUpdate = getIntervalsToUpdate(endTime);
+		List<DpGap> toUpdate = getIntervalsToUpdate(startTime, endTime);
 		if(toUpdate != null) for(DpGap intv: toUpdate) {
 			if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
 				values = updateValues(startTime, endTime);
@@ -125,7 +125,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 					values.removeAll(prevVals);
 					values.addAll(newVals);
 				}
-				addValues(newVals);
+				//addValues(newVals);
 			}
 			if(intv.start < 0 || intv.end > knownEnd)
 				knownEnd = intv.end;
@@ -150,13 +150,14 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			updateValueLimits();*/
 		} else if(startTime < knownStart) {
 			List<SampledValue> newVals = updateValues(startTime, knownStart);
+			addValues(newVals);
 			//List<SampledValue> concat = new ArrayList<SampledValue>(newVals);
 			//concat.addAll(values);
-			List<SampledValue> concat = new ArrayList<SampledValue>(values);
+			/*List<SampledValue> concat = new ArrayList<SampledValue>(values);
 			values = concat;
 			values.addAll(newVals);
-			isOwnList = true;
-			knownStart = startTime;			
+			isOwnList = true;*/
+			knownStart = startTime;	
 			updateValueLimits();
 		} else if(endTime > knownEnd) {
 //logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd)+" endTime:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(endTime));
@@ -192,7 +193,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			return Collections.emptyList();
 		if(endTime < firstValueInList)
 			return Collections.emptyList();
-		if(startTime <= firstValueInList && endTime >= lastValueInList) {
+		if(startTime <= firstValueInList && endTime > lastValueInList) {
 			return new ArrayList<SampledValue>(values);
 		}
 		if(values.isEmpty())
@@ -206,11 +207,11 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 			}
 		}
 		if(fromIndex < 0)
-			throw new IllegalStateException("Should not occur!");
+			throw new IllegalStateException("Should not occur! startTime requested:"+startTime+" lastValueInList:"+lastValueInList);
 		if(endTime == startTime)
 			toIndex = fromIndex;
 		else for(int i=values.size()-1; i>=fromIndex; i--) {
-			if(values.get(i).getTimestamp() <= endTime) {
+			if(values.get(i).getTimestamp() < endTime) {
 				toIndex = i;
 				break;
 			}
@@ -222,17 +223,33 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	}
 	
 	protected void addValues(List<SampledValue> newVals) {
+		List<SampledValue> existing = null;
+		if(!newVals.isEmpty()) {
+			long newFirst = newVals.get(0).getTimestamp();
+			long newLast = newVals.get(newVals.size()-1).getTimestamp();
+			List<SampledValue> existingLoc = getValuesWithoutUpdate(newFirst, newLast);
+			if(!existingLoc.isEmpty()) {
+				logger.error("   !!!! Overwriting values without registration in getIntervalsToUpdate !!!");
+				existing = existingLoc;
+			}
+		}		
 		if(isOwnList) {
 			try {
+				if(existing != null)
+					values.removeAll(existing);
 				values.addAll(newVals);
 			} catch(UnsupportedOperationException e) {
 				//TODO: Should not occur
 				List<SampledValue> concat = new ArrayList<SampledValue>(values);
+				if(existing != null)
+					concat.removeAll(existing);
 				concat.addAll(newVals);
 				values = concat;
 			}
 		} else {
 			List<SampledValue> concat = new ArrayList<SampledValue>(values);
+			if(existing != null)
+				concat.removeAll(existing);
 			concat.addAll(newVals);
 			values = concat;
 			isOwnList = true;
@@ -403,7 +420,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	 * NOTE: All values that shall be replaced MUST be overwritten using this method. Do not
 	 * try to overwrite a value just providing the same time stamp again via {@link #updateValues(long, long)}
 	 * as this will just add two entries for the same time stamp or lead to badly ordered time stamps.*/
-	protected List<DpGap> getIntervalsToUpdate(long endTime) {
+	protected List<DpGap> getIntervalsToUpdate(long startTime, long endTime) {
 		synchronized (intervalToUpdate) {
 			if(intervalToUpdate.start < 0)
 				return Collections.emptyList();
