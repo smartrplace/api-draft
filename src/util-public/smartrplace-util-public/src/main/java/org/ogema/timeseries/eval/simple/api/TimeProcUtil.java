@@ -1,5 +1,7 @@
 package org.ogema.timeseries.eval.simple.api;
 
+import java.util.List;
+
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
@@ -109,5 +111,17 @@ public class TimeProcUtil {
 		return (float) interpolateTsValue(svBefore.getTimestamp(), svNext.getTimestamp(),
 				timestamp,
 				svBefore.getValue().getFloatValue(), svNext.getValue().getFloatValue());
+	}
+	
+	public static Integer getAbsoluteTiming(List<Datapoint> input) {
+		for(Datapoint dp: input) {
+			ReadOnlyTimeSeries ts = dp.getTimeSeries();
+			if(ts != null && (ts instanceof ProcessedReadOnlyTimeSeries)) {
+				ProcessedReadOnlyTimeSeries pts = (ProcessedReadOnlyTimeSeries) ts;
+				if(pts.absoluteTiming != null)
+					return pts.absoluteTiming;
+			}
+		}
+		return null;
 	}
 }

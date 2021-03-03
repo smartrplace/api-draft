@@ -201,7 +201,7 @@ logger.info("   Starting Accumlated full Recstor size(3):"+accTs.size());
 			result.add(mapData.evalDp);
 		
 		if(registerRemoteScheduleViaHeartbeat) {
-			ViaHeartbeatSchedules schedProv = ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(mapData.evalDp, null);
+			ViaHeartbeatSchedules schedProv = ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(mapData.evalDp, null, mapData.absoluteTiming);
 			//ViaHeartbeatSchedules schedProv = new ViaHeartbeatSchedules(accTs);
 			// Both datapoints can be addressed via heartbeat and will return the same data
 			//mapData.evalDp.setParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM, schedProv);
