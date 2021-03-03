@@ -15,26 +15,62 @@ import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.DatapointImpl;
+import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
+import de.iwes.util.timer.AbsoluteTiming;
 
 /** Implementation for {@link ReadOnlyTimeSeries} that is based on some input provided via {@link #updateValues(long, long)}.
- * The class requests any unknown values from the implementation via this method. It assumes that for a given interval all values
- * in the interval are returned on the first request and that the values in the interval do not change. An exception are intervals
- * that go beyond the current time (see next Section on knownEndUpdateInterval on this).<br>
+ * The class requests any unknown values from the implementation via this method. In in standard
+ * operation it assumes that for a given interval all values in the interval are returned on the first request
+ * and that the values in the interval do not change. The class has been extended, though, to take care of changes in input
+ * already processed:<br>
+ *  * By setting knownEndUpdateInterval intervals that go beyond the current time or that range into
+ *    a current aligned interval (like the current day) are reprocessed regularly (see next Section on  on this).<br>
+ *  * By providing data in {@link #addIntervalToUpdate(DpGap)} or overwriting {@link #getIntervalsToUpdate(long, long)}
+ *    intervals can be provided that need recalculation e.g. because of manual input<br>
  * Note that if knownEndUpdateInterval is null the limits of values provided via updateValues and the data within intervals that have been
  * requested before are NOT updated later on. If the interval is set then after the interval is finished the 
  * knownEnd is reset to the time of the last update meaning that it is assumed that everything behind this last
  * update is unknown.<br>
- * TODO: If the result is aligned and the full input data is available from the beginning the calculation may be not very efficient. When one
- * aligend result is calculated taking into account all input data until the next aligned interval then knownEnd may be set to
+ * In practice the caching mechanism can lead to several problems. It is still decisive to be able to process a
+ * larger quantity of input data. If you set knownEndUpdateInterval to a very short time (e.g. 10 seconds) and
+ * absoluteTiming to AbsoluteTiming.ANY_RANGE then almost no caching should take place anymore (to be tested).<br>
+ * <br>
+ * Debugging:<br>
+ * Especially the page with TS-ANY Datapoints is important to see the current status of datapoints for which
+ * timeseries are calculated via this evaluation. To track the call stacks of the evaluation you should enable
+ * the property "evaldebug", which leads to console outputs with a label usually identifiying the time series
+ * that is processed at this point. If the result is written into slotsDB then take care of
+ * Debugging issues with Virtual SlotsDB Data.
+ * <br>
+ * Background with Open Issues:<br>
+ * TODO 1: Currently for all data provided via {@link #updateValues(long, long)} is checked whether the result overlaps
+ * with existing data and any existing data in the range is deleted if this is the case. This avoids that the internal
+ * list of SampledValues ({@link #values}) gets unordered etc. In some cases this may not be necessary and very
+ * resource-costly, but in most typical cases this is the intended behavior.<br>
+ * TODO 2: The caching management is especially critical for {@link TimeseriesSetProcMultiToSingle}
+ * that take several time series as input, oftentimes ProcessedReadOnlyTimeSeries themselves. Currently
+ * we operate all such time series in updateMode=4, which means that any reported change in the input
+ * data will lead to a complete recalculation. In online operation this is usually no problem and a
+ * reasonable trade-off to manage the caching issues, but in offline evaluation or in larger settings
+ * this may need a change. For input time series that do not generate a note on their datapoint when 
+ * data changes it is still an issue to make sure that any new data is taken care of (now usually by the
+ * absoluteTiming parameter).<br> 
+ * TODO 3: If the result is aligned and the full input data is available from the beginning the calculation may be
+ * not very efficient. When on aligend result is calculated taking into account all input data until
+ * the next aligned interval then knownEnd may be set to
  * some time at the result currently calculated or somewhere shortly behind unaligned, but before the next aligned result that may
  * be requested by the upper level evaluation in the next step. Then the previous aligned interval result is calculated once again
  * together with the new result. If the base input is flowing in via data logging then this behavior may make sense as the last
- * aligned aggregated value is updated all the time until the next aligned interval begins.<br>
+ * aligned aggregated value is updated all the time until the next aligned interval begins. NOTE that in many cases
+ * this is not an issue as the entire time range is usually calculated e.g. when the size method is called. For
+ * large offline evaluations this issue has to be considered, though.<br>
+ * <br>
+ * Background information:<br>
  * Access synchronization: The getValues method should not be processed for the same object of type {@link ProcessedReadOnlyTimeSeries}
  * twice in parallel as this would trigger a double recalculation and setting the known limits would be quite unpredictable. This
  * requires that the implementation of updateValues does not read the time series again via getValues. It could read via
@@ -118,9 +154,12 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("getValues for  "+dpLabel
 		if(knownEndUpdateInterval != null) {
 			long now = getCurrentTime();
 			if(now - lastKnownEndUpdate > knownEndUpdateInterval) {
-				if(absoluteTiming != null)
-					knownEnd = AbsoluteTimeHelper.getIntervalStart(lastKnownEndUpdate, absoluteTiming)-1;
-				else
+				if(absoluteTiming != null) {
+					if(absoluteTiming == AbsoluteTiming.ANY_RANGE) {
+						reset(null);
+					} else
+						knownEnd = AbsoluteTimeHelper.getIntervalStart(lastKnownEndUpdate, absoluteTiming)-1;
+				} else
 					knownEnd = lastKnownEndUpdate;
 				lastKnownEndUpdate = now;
 			}
@@ -227,7 +266,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 			long newLast = newVals.get(newVals.size()-1).getTimestamp();
 			List<SampledValue> existingLoc = getValuesWithoutUpdate(newFirst, newLast);
 			if(!existingLoc.isEmpty()) {
-				logger.error("   !!!! Overwriting values without registration in getIntervalsToUpdate !!!");
+if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for "+dpLabel()+" without registration in getIntervalsToUpdate - now accepted");
 				existing = existingLoc;
 			}
 		}		

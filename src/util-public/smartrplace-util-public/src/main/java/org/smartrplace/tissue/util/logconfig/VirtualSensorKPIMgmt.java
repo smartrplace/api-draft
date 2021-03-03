@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
 
 import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.timer.AbsoluteTiming;
 
 /** Management of Virtual sensors for a certain application
  * 
@@ -200,7 +201,7 @@ logger.info("   Starting Accumlated full Recstor size(3):"+accTs.size());
 			result.add(mapData.evalDp);
 		
 		if(registerRemoteScheduleViaHeartbeat) {
-			ViaHeartbeatSchedules schedProv = ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(mapData.evalDp);
+			ViaHeartbeatSchedules schedProv = ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(mapData.evalDp, null);
 			//ViaHeartbeatSchedules schedProv = new ViaHeartbeatSchedules(accTs);
 			// Both datapoints can be addressed via heartbeat and will return the same data
 			//mapData.evalDp.setParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM, schedProv);
@@ -413,9 +414,9 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 		dpgKpi.addDatapoint(monthlySum);
 		dpgKpi.addDatapoint(yearlySum);
 		dpgKpi.setType("GATEWAY_KPIs");
-		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(dailySum);
-		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(monthlySum);
-		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(yearlySum);
+		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(dailySum, AbsoluteTiming.DAY);
+		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(monthlySum, AbsoluteTiming.MONTH);
+		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(yearlySum, AbsoluteTiming.YEAR);
 
 		return result;
 	}

@@ -1,5 +1,6 @@
 package org.smartrplace.apps.hw.install.prop;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -13,12 +14,10 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
-import org.ogema.tools.resource.util.TimeSeriesUtils;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvider;
 import org.smartrplace.util.frontend.servlet.ServletTimeseriesProvider;
 
-import de.iwes.util.format.StringFormatHelper;
-import de.iwes.util.resource.ResourceHelper;
+import de.iwes.util.timer.AbsoluteTimeHelper;
 
 /** Basic version is just for reading, the derived class {@link ViaHeartbeatSchedulesWrite} below in this file is
  * also for receiving data.<br>
@@ -34,12 +33,16 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	protected boolean doClean = true;
 	protected long lastValueSent = -1;
 	protected long lastValueUpdateSent = -1;
+	protected final Integer absoluteTiming;
+	protected Double lastValueFloat = null;
+	
 	protected long lastClean = -1;
 	protected final String alias;
 
-	public ViaHeartbeatSchedules(ReadOnlyTimeSeries rot, String alias) {
+	public ViaHeartbeatSchedules(ReadOnlyTimeSeries rot, String alias, Integer absoluteTiming) {
 		this.rot = rot;
 		this.alias = alias;
+		this.absoluteTiming = absoluteTiming;
 	}
 
 	@Override
@@ -50,13 +53,26 @@ public class ViaHeartbeatSchedules implements StringProvider {
 	@Override
 	public String getStringToSend(long now) {
 		JSONObject json = new JSONObject();
-		List<SampledValue> vals = rot.getValues(lastValueSent+1);
+		long newTime;
+		if(absoluteTiming != null)
+			newTime = AbsoluteTimeHelper.getIntervalStart(lastValueSent, absoluteTiming);
+		else
+			newTime = lastValueSent+1;
+		List<SampledValue> vals = rot.getValues(newTime);
+		if((absoluteTiming != null) && vals.size() == 1) {
+			SampledValue sv = vals.get(0);
+			if(sv.getTimestamp() == lastValueSent && (sv.getValue().getDoubleValue() == lastValueFloat))
+				vals = Collections.emptyList();
+		}
 //if(rot instanceof ProcessedReadOnlyTimeSeries2 && ((ProcessedReadOnlyTimeSeries2)rot).getInputDp().id().startsWith("EnergyServerReadings_ESE/ESE_location_39")) //39/connection/energyDaily/reading"))
 //System.out.println("vals#:"+vals.size()+" lastValueSent:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueSent));
 		JSONArray arr = ServletTimeseriesProvider.smapledValuesToJson(vals, null, null, true, false, true);
 		if(!vals.isEmpty()) {
-			lastValueSent = vals.get(vals.size()-1).getTimestamp();
+			SampledValue sv = vals.get(vals.size()-1);
+			lastValueSent = sv.getTimestamp();
 			lastValueUpdateSent = now;
+			if(absoluteTiming != null)
+				lastValueFloat = sv.getValue().getDoubleValue();
 		}
 		json.put("values", arr);
 		if(doClean) {
@@ -73,6 +89,8 @@ public class ViaHeartbeatSchedules implements StringProvider {
 		SampledValue lastExisting = rot.getPreviousValue(Long.MAX_VALUE);
 		if(lastExisting == null)
 			return false;
+		if(absoluteTiming != null)
+			return  lastExisting.getTimestamp() >= AbsoluteTimeHelper.getIntervalStart(lastValueSent, absoluteTiming);
 		return lastExisting.getTimestamp() > lastValueSent;
 	}
 	
@@ -86,7 +104,7 @@ public class ViaHeartbeatSchedules implements StringProvider {
 		protected long lastValueReceiveTime = -1;
 		
 		public ViaHeartbeatSchedulesWrite(Schedule sched, String alias) {
-			super(sched, alias);
+			super(sched, alias, null);
 			this.sched = sched;
 		}
 		
@@ -132,12 +150,12 @@ public class ViaHeartbeatSchedules implements StringProvider {
 		}
 	}
 	
-	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2Schedule(Datapoint dp) {
+	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2Schedule(Datapoint dp, Integer absoluteTiming) {
 		Set<String> als = dp.getAliases();
-		return registerDatapointForHeartbeatDp2Schedule(dp, als.isEmpty()?null:als.iterator().next());
+		return registerDatapointForHeartbeatDp2Schedule(dp, als.isEmpty()?null:als.iterator().next(), absoluteTiming);
 	}
-	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2Schedule(Datapoint dp, String alias) {
-		ViaHeartbeatSchedules schedProv = new ViaHeartbeatSchedules(dp.getTimeSeries(), alias);
+	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2Schedule(Datapoint dp, String alias, Integer absoluteTiming) {
+		ViaHeartbeatSchedules schedProv = new ViaHeartbeatSchedules(dp.getTimeSeries(), alias, absoluteTiming);
 		// Both datapoints can be addressed via heartbeat and will return the same data
 		dp.setParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM, schedProv);
 		return schedProv;

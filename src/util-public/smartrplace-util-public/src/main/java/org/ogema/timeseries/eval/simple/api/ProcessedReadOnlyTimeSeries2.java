@@ -27,6 +27,8 @@ import de.iwes.util.format.StringFormatHelper;
  * time stamp. The result values are requested via {@link #getResultValues(ReadOnlyTimeSeries, long, long, AggregationMode).
  * Further input series may be taken into account by the implementation, but the timestamps must be provided by
  * the input time series.<br>
+ * Note that the class is also used to provide results when several input SampledValues are aggregated into
+ * one result SampledValue. This usually requires to overwrite some methods.<br>
  * This implementation also provides a resulting TimeSeriesDataImpl and a resulting Datapoint. The label for the
  * new timeseries is created based on #getShortId() and #getLabelPostfix()<br>
  * It is very important to understand that calls to #getResultValues(ReadOnlyTimeSeries, long, long, AggregationMode) and
