@@ -89,7 +89,7 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	 * @param appMan
 	 */
 	protected void addMoreValueWidgets(InstallAppDevice object, T device, ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh,
-			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {}
+			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan, Alert alert) {}
 	
 	/** See {@link DeviceHandlerProvider#getDatapoints(InstallAppDevice, DatapointService)}.
 	 * Note that you should call {@link #addDatapoint(SingleValueResource, java.util.List)} for each datapoint. This
@@ -146,7 +146,7 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 					}
 				}
 				
-				addMoreValueWidgets(object, box, vh, id, req, row, appMan);
+				addMoreValueWidgets(object, box, vh, id, req, row, appMan, alert);
 				
 				if(isInRoom) {
 					Room deviceRoom = box.location().room();

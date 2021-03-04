@@ -34,6 +34,7 @@ import org.ogema.model.sensors.EnergyAccumulatedSensor;
 import org.ogema.model.sensors.VolumeAccumulatedSensor;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
+import org.ogema.virtual.device.config.VirtualThermostatConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -572,6 +573,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(resourceLocation.startsWith("EnergyServerReadings_ESE/ESE_"))
 			return true;
 		return false;
+	}
+	
+	public static boolean isVirtualThermostat(Resource model) {
+		return !(model.getSubResources(VirtualThermostatConfig.class, false).isEmpty());
 	}
 	
 	/** 
