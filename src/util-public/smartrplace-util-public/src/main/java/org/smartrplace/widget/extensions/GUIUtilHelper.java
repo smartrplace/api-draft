@@ -26,8 +26,13 @@ import org.ogema.accesscontrol.Constants;
 import org.ogema.accesscontrol.SessionAuth;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.ResourceList;
+import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.model.user.NaturalPerson;
 import org.ogema.tools.resource.util.ResourceUtils;
 
+import de.iwes.util.resource.ValueResourceHelper;
+import de.iwes.util.resourcelist.ResourceListHelper;
 import de.iwes.widgets.api.widgets.WidgetApp;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -69,6 +74,35 @@ public class GUIUtilHelper {
 		return valuesToSet;
 	}
 	
+	public static NaturalPerson getUserData(String userName, ResourceAccess ra) {
+		ResourceList<NaturalPerson> userData = ra.getResource("userAdminData/userData");
+		NaturalPerson ud = ResourceListHelper.getNamedElementFlex(userName, userData);
+		return ud;
+	}
+	
+	public static String getRealName(String userName, ResourceAccess ra) {
+		NaturalPerson ud = getUserData(userName, ra);
+		if(ud == null)
+			return null;
+		if(ud.firstName().isActive() && ud.lastName().isActive())
+			return ud.firstName().getValue()+" "+ud.lastName().getValue();
+		if(ud.userName().isActive())
+			return ud.userName().getValue();
+		if(ud.firstName().isActive())
+			return ud.firstName().getValue();
+		if(ud.lastName().isActive())
+			return ud.lastName().getValue();
+		return null;
+	}
+	
+	public static NaturalPerson setRealName(String userName, ResourceAccess ra) {
+		NaturalPerson ud = getUserData(userName, ra);
+		if(ud == null)
+			return null;
+		ValueResourceHelper.setCreate(ud.userName(), userName);
+		return ud;
+	}
+
 	/*public static void registerStyleSheet(String cssFileName, String baseURL, WidgetApp wApp,
 			ApplicationManager appMan) {
 		final String stylesheet_URL = baseURL + "/"+ cssFileName;
