@@ -23,7 +23,12 @@ public abstract class DeviceTypeProviderBase<T extends Resource> implements Devi
 	protected ResourceList<T> deviceListIfFound = null;
 
 	protected abstract String getNewResourceName(DeviceTypeConfigData<T> configData);
-	protected abstract void configureResource(DeviceTypeConfigData<T> configData);
+	/**
+	 * 
+	 * @param configData
+	 * @return null on success or error message
+	 */
+	protected abstract String configureResource(DeviceTypeConfigData<T> configData);
 	protected abstract DeviceTypeConfigData<T> getKnownConfig(T device);
 
 	public DeviceTypeProviderBase(Class<T> deviceType, String topResourceListName, ApplicationManager appMan) {
@@ -83,7 +88,7 @@ public abstract class DeviceTypeProviderBase<T extends Resource> implements Devi
 				deviceListIfFound.setElementType(deviceType);
 			configData.governingResource = deviceListIfFound.addDecorator(ResourceUtils.getValidResourceName(name), deviceType);
 		}
-		configureResource(configData);
+		String message = configureResource(configData);
 		configData.governingResource.activate(true);
 		
 		result.resultConfig = configData;
