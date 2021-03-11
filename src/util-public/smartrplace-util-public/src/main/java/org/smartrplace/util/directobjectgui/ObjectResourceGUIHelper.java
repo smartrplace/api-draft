@@ -148,7 +148,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					myLabel.setText(text, req);
 				} else {
 					StringResource source = getResource(sva, req, null);
-					if ((source == null)||(!source.isActive())) {
+					if ((source == null)||(!source.exists())) {
 						myLabel.setText("n.a.", req);
 						return;
 					}

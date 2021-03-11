@@ -89,11 +89,16 @@ public abstract class DeviceTypeProviderBase<T extends Resource> implements Devi
 			configData.governingResource = deviceListIfFound.addDecorator(ResourceUtils.getValidResourceName(name), deviceType);
 		}
 		String message = configureResource(configData);
+		if(message != null) {
+			result.resultMessage = message;
+			result.resultConfig = configData;
+			return result;
+		}
 		configData.governingResource.activate(true);
 		
 		result.resultConfig = configData;
 		result.resultMessage = "Created device on "+configData.governingResource.getLocation();
-		return result ;
+		return result;
 	}
 
 	@Override
