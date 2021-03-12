@@ -26,6 +26,8 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.util.directresourcegui.KnownWidgetHolder;
 import org.smartrplace.util.format.WidgetHelper;
 
+import com.fasterxml.jackson.core.PrettyPrinter;
+
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -91,15 +93,16 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	//protected ObjectResourceGUIHelper<T, R> vhGlobal;
 	protected final boolean registerDependentWidgets;
 	
-	protected final ClosingPopup<T> popMore1;
-	protected final KnownWidgetHolder<T> knownWidgets;
-	protected final Alert alert;
+	protected ClosingPopup<T> popMore1;
+	protected KnownWidgetHolder<T> knownWidgets;
+	protected Alert alert;
 	protected final boolean isAlertNew;
 	protected final ApplicationManager appMan;
 	protected final ApplicationManagerMinimal appManMin;
 	protected final T initSampleObject;
 	protected final T headerObject;
 	protected long retardationOnGET = 0;
+	protected boolean preBuildDone = false;
 	
 	public ObjectGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			T initSampleObject) {
@@ -146,14 +149,20 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		this.initSampleObject = initSampleObject;
 		this.registerDependentWidgets = registerDependentWidgets;
 		headerObject = getHeaderObject();
+		this.alert = alert;
+		isAlertNew = (alert == null);
 		
+		if(autoBuildPage) triggerPageBuild();
+	}
+	
+	public void prePageBuild() {
 		//init all widgets
 		if(alert == null) {
 			this.alert = new Alert(page, WidgetHelper.getValidWidgetId("alert"+pid()), "");
-			isAlertNew = true;
-		} else {
-			this.alert = alert;
-			isAlertNew = false;
+			//isAlertNew = true;
+		//} else {
+		//	this.alert = alert;
+			//isAlertNew = false;
 		}		
 		knownWidgets = new KnownWidgetHolder<T>(page, WidgetHelper.getValidWidgetId("knownWidgets"+pid()));
 		page.append(knownWidgets);
@@ -166,13 +175,14 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 				if(item == null) return;
 			}
 		};
-		if(autoBuildPage) triggerPageBuild();
+		page.append(popMore1);
+		preBuildDone = true;
 	}
 	
 	public void triggerPageBuild() {
-
-		page.append(popMore1);
-
+		if(!preBuildDone)
+			prePageBuild();
+		
 		mainTableRowTemplate = new ObjectGUITableTemplate<T, R>(
 				new ObjectGUITableTemplate.ObjectTableProvider<T>() {
 

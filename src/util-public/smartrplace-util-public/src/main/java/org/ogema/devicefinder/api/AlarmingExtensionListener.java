@@ -6,6 +6,10 @@ import org.ogema.model.extended.alarming.AlarmConfiguration;
 /** A listener object created via an AlarmingExtension for a certain {@link SingleValueResource}.
  * Note that the alarming must implement the information whether the alarm is active or not itself
  * including the generation of the information of a release.<br>
+ * The standard value limit / no-value alarming is still active for the respective SingleValueResource.
+ * If no such alarms shall be generated then the settings should be made accordingly. If the alarm
+ * is disabled, then all AlarmingExtensionListeners registered via AlarmingExtensions for the
+ * resource are also not active anymore (tbc).<br>
  * The standard value limit alarming is implemented in AlarmValueListenerBasic#resourceChanged, which
  * can be used as a reference. A retard for alarm generation is implemented there by the framework and
  * does not need to be implemented by the alarming itself.<br>

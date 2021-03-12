@@ -1,17 +1,26 @@
 package org.ogema.devicefinder.api;
 
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
+import org.ogema.model.locations.Room;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.widgets.api.messaging.MessagePriority;
 import de.iwes.widgets.template.LabelledItem;
 
 /** An alarming extension defines an additional alarming evaluation that can be applied
- * to any {@link SingleValueResource}. For implementation information see {@link AlarmingExtensionListener}.
+ * to any {@link SingleValueResource}. AlarmingExtensions can have two different functions, which
+ * can be combined in principal, but usually only of them is used:<br>
+ * - Provision of an alternative {@link AlarmingExtensionListener}, check there for details. Gets notifications on all new
+ * values, cannot stop/change the standard value limit/no-value alarm, separate listener object for each SingleValueResource<br>
+ * - Generation of alarming groups. Gets notifications on new standard alarms, can stop them to create own alarms,
+ * common object receives notifications for all alarms
  * 
- * Note that we currently implement to functionalities that are usually separated here: Generation of additional
- * base alarms and generation of AlarmOngoingGroups
- *
+ * TODO: The registration mechanism for value listeners for group/room/gateway alarming via {@link #onStartAlarming()} could have an explicit API
+ * method to make this task easier and more transparent for developers. Maybe it would make more sense to let
+ * such alarming evaluations register their own {@link ResourceValueListener}s themselves anyways, then we do not
+ * need any additional API.<br>
  */
 public interface AlarmingExtension extends LabelledItem {
 	/** The method shall be able to handle a null argument asking whether the extension
@@ -20,12 +29,22 @@ public interface AlarmingExtension extends LabelledItem {
 	 * @return
 	 */
 	boolean offerInGeneralAlarmingConfiguration(AlarmConfiguration ac);
+	default boolean offerInDeviceConfiguration(InstallAppDevice device) {return false;}
+	default boolean offerInRoomConfiguration(Room room) {return false;}
+	default boolean offerInGatewayConfiguration(String gwId) {return false;}
 	
+	/** Provide listener for a certain SingleValueResource. This is only called for
+	 * alarming configurations for which the extension is registered via {@link AlarmConfiguration#alarmingExtensions()}.
+	 * Registration can be done manualle via GUI if {@link #offerInGeneralAlarmingConfiguration(AlarmConfiguration)}
+	 * is true for the AlarmConfiguration or could be done by the extension itself in {@link #onStartAlarming()}*/
 	AlarmingExtensionListener getListener(SingleValueResource res, AlarmConfiguration ac);
 	
 	/** Called when alarming is started. The extension may define an own timer here that
-	 * shall be closed on stop. This can be used to perform actions when no alarm occur*/
-	default void onStartAlarming() {}
+	 * shall be closed on stop. This can be used to perform actions when no alarm occurs. Also
+	 * registration for {@link AlarmingExtensionListener}s via {@link AlarmConfiguration#alarmingExtensions()} could
+	 * be done here.
+	 * @param baseAlarm can be used to send alarms e.g. based on timer*/
+	default void onStartAlarming(BaseAlarmI baseAlarm) {}
 
 	/** Called when alarming is stopped*/
 	default void onStopAlarming() {}
@@ -36,17 +55,30 @@ public interface AlarmingExtension extends LabelledItem {
 	default boolean getAlarmNotifications( ) {return false;}
 	
 	public static class AlarmNotificationResult {
-		//public List<AlarmOngoingGroup> newGroups;
-		//public List<AlarmOngoingGroup> changedGroups;
-		//public List<AlarmOngoingGroup> finishedGroups;
 		/** If true the alarm shall be generated into a message by the framework directly.
 		 * Otherwise the {@link AlarmingExtension} will generate one or more messages for
-		 * the groups affected
+		 * the groups affected via {@link BaseAlarm#sendMessage(String, String, MessagePriority)}
 		 */
 		public boolean sendAlarmDirectly;
 	}
 	
-	public static abstract class BaseAlarm {
+	public enum MessageDestination {
+		PROVIDER_FIRST,
+		CUSTOMER_FIRST,
+		BOTH_IMMEDIATELY
+	}
+	public static interface BaseAlarmI {
+		/** Send out message via AlarmingManager
+		 * 
+		 * @param title
+		 * @param message
+		 * @param prio
+		 * @param md if null default or the setting of the alarming config of the {@link SingleValueResource} is
+		 * 		used if such is available in context
+		 */
+		void sendMessage(String title, String message, MessagePriority prio, MessageDestination md);		
+	}
+	public static abstract class BaseAlarm implements BaseAlarmI {
 		public AlarmConfiguration ac;
 		public String title;
 		public String message;
@@ -55,7 +87,8 @@ public interface AlarmingExtension extends LabelledItem {
 		public boolean isNoValueAlarm;
 		public boolean isRelease;
 		
-		public abstract void sendMessage(String title, String message, MessagePriority prio);
+		//@Override
+		//public abstract void sendMessage(String title, String message, MessagePriority prio, MessageDestination md);
 	}
 	
 	/** Notification on a new alarm generated by another extension*/
