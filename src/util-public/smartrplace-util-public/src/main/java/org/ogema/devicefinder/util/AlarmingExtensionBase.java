@@ -7,6 +7,7 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.api.AlarmingExtension;
 import org.ogema.devicefinder.api.AlarmingExtensionListener;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
+import org.ogema.model.extended.alarming.AlarmGroupData;
 import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 
 public abstract class AlarmingExtensionBase implements AlarmingExtension {
@@ -56,6 +57,9 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 		//supervision for last data received
 		public long lastTimeOfNewData = -1;
 		public long maxIntervalBetweenNewValues;
+
+		public AlarmGroupData knownDeviceFault = null;		
+		public long lastMessageTime = -1;
 	}
 
 	protected class AlarmExtListenerBase implements AlarmingExtensionListener {
