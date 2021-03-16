@@ -46,6 +46,7 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
+	public final String servletSubUrl;
 
 	/** Management of timeseriesIDs*/
 	public static final Map<String, TimeSeriesDataImpl> knownTS = new HashMap<>();
@@ -158,7 +159,21 @@ public class UserServlet extends HttpServlet {
 	final protected Map<String, ServletPageProvider<?>> pages = new HashMap<>();
 	protected String stdPageId = null;
 	
+	public UserServlet(String servletPath) {
+		if(servletPath == null)
+			this.servletSubUrl = null;
+		else {
+			int endidx = servletPath.endsWith("*")?endidx=servletPath.length()-1:servletPath.length();
+			if(servletPath.startsWith("/apiweb"))
+				this.servletSubUrl = servletPath.substring("/apiweb".length(), endidx);
+			else if(servletPath.startsWith("/apimobile"))
+				this.servletSubUrl = servletPath.substring("/apimobile".length(), endidx);
+			else
+				this.servletSubUrl = null;
+		}
+	}
 	public UserServlet() {
+		this(null);
 	}
 
 	public void addPage(String pageId, ServletPageProvider<?> prov) {
@@ -522,7 +537,30 @@ public class UserServlet extends HttpServlet {
 		return result;
 	}
 	
+	/** SubUrl must end on '/' */
+	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap, String servletSubUrl) {
+		String fullURL = HttpUtils.getRequestURL(req).toString();
+		int idx = fullURL.indexOf(servletSubUrl);
+		String[] subURL;
+		if(idx >= 0)
+			subURL = fullURL.substring(idx+servletSubUrl.length()).split("/");
+		else {
+			return;
+		}
+		if(subURL != null && subURL.length > 1) {
+			for(idx=0; idx<subURL.length-1; idx+=2) {
+				String paramName = subURL[idx];
+				String param = subURL[idx+1];
+				addParameter(paramName, param, paramMap);
+			}
+		}		
+	}
+
 	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap) {
+		if(this.servletSubUrl != null) {
+			addParametersFromUrl(req, paramMap, this.servletSubUrl);
+			return;
+		}
 		String fullURL = HttpUtils.getRequestURL(req).toString();
 		int idx = fullURL.indexOf("/userdata/");
 		String[] subURL;
@@ -563,25 +601,6 @@ public class UserServlet extends HttpServlet {
 		Map<String, String[]> paramMap = getParamMap(req);
 		
 		addParametersFromUrl(req, paramMap);
-		/*String fullURL = HttpUtils.getRequestURL(req).toString();
-		int idx = fullURL.indexOf("/userdata/");
-		String[] subURL;
-		if(idx >= 0)
-			subURL = fullURL.substring(idx+"/userdata/".length()).split("/");
-		else {
-			idx =  fullURL.indexOf("/userdatatest/");
-			if(idx >= 0)
-				subURL = fullURL.substring(idx+"/userdatatest/".length()).split("/");
-			else
-				subURL = null;
-		}
-		if(subURL != null && subURL.length > 1) {
-			for(idx=0; idx<subURL.length-1; idx+=2) {
-				String paramName = subURL[idx];
-				String param = subURL[idx+1];
-				addParameter(paramName, param, paramMap);
-			}
-		}*/
 		
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = req.getReader();

@@ -193,9 +193,11 @@ logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLa
 			String loc = datapointForChangeNotification.getLocation();
 			Matcher matcher = Pattern.compile("\\d+").matcher(loc);
 			matcher.find();
-			String num = matcher.group();
-			if(num != null)
-				return datapointForChangeNotification.label(null)+"_"+num;
+			try {
+				String num = matcher.group();
+				if(num != null)
+					return datapointForChangeNotification.label(null)+"_"+num;
+			} catch(IllegalStateException e) {}
 			return datapointForChangeNotification.label(null);
 		}
 		return getShortId();

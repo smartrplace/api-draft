@@ -35,6 +35,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	protected final Long startTime;
 	protected final long endTime;
 	
+	//set from outside if necessary
+	public String unit = null;
+	public String align = null;
+	
 	/** Set this to get notifications, only relevant if WriteMode==ANY*/
 	public Datapoint datapointForChangeNotification = null;
 	
@@ -139,6 +143,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			
 			JSONVarrRes realResult = new JSONVarrRes();
 			realResult.result = json;
+			if(unit != null)
+				json.put("unit", unit);
+			if(align != null)
+				json.put("align", align);
 			return realResult;
 		} else
 			vals = timeSeries.getValues(startEnd[0], startEnd[1]);
@@ -151,6 +159,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		}
 		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
 				structList, shortXY, pData.suppressNan));
+		if(unit != null)
+			json.put("unit", unit);
+		if(align != null)
+			json.put("align", align);
 
 		JSONVarrRes realResult = new JSONVarrRes();
 		realResult.result = json;
