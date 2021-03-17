@@ -1,9 +1,9 @@
 package org.ogema.devicefinder.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -534,7 +534,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		return "DP:"+location;
 	}
 
-	protected final LinkedList<DpUpdated> updates = new LinkedList<>();
+	protected final ArrayList<DpUpdated> updates = new ArrayList<>();
 	
 	@Override
 	public void notifyTimeseriesChange(long startTime, long endTime) {
@@ -548,7 +548,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		}
 		
 		if(!updates.isEmpty()) {
-			DpUpdated last = updates.getLast();
+			DpUpdated last = updates.get(updates.size()-1); //.getLast();
 			if(startTime <= last.end && endTime >= last.start) {
 				//overlapping
 				last.start = Math.min(startTime, last.start);
@@ -563,8 +563,11 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		upd.updateTime = now;
 		updates.add(upd);
 		//Simple solution against a memory leak
-		if(updates.size() > 20) {
-			updates.removeFirst();
+		//if(updates.size() > 20) {
+		//	updates.removeFirst();
+		//}
+		if(updates.size() > 30) {
+			updates.subList(updates.size()-20, updates.size()-1).clear();
 		}
 	}
 
@@ -572,20 +575,22 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	public List<DpUpdated> getIntervalsChanged(long since) {
 		if(updates.isEmpty())
 			return Collections.emptyList();
-		Iterator<DpUpdated> it = updates.descendingIterator();
+		/*Iterator<DpUpdated> it = updates.descendingIterator();
+		while(it.hasNext()) {
+			DpUpdated upd = it.next();*/
 		LinkedList<DpUpdated> result = new LinkedList<>();
 		boolean foundChangeBeforeSince = false;
-		while(it.hasNext()) {
-			DpUpdated upd = it.next();
+		for(int idx=updates.size()-1; idx>=0; idx--) {
+			DpUpdated upd = updates.get(idx); //.descendingIterator();
 			if(upd.updateTime >= since) {
 				result.addFirst(upd);
 			} else {
 				foundChangeBeforeSince = true;
 				break;
-			}
+			}			
 		}
 		if(!foundChangeBeforeSince) {
-			DpUpdated upd = getAllInterval(updates.getLast().updateTime);
+			DpUpdated upd = getAllInterval(updates.get(updates.size()-1).updateTime);
 			return Arrays.asList(new DpUpdated[] {upd});
 		}
 		return result ;

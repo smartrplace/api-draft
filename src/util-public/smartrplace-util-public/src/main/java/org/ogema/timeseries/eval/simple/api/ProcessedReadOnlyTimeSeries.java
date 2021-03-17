@@ -171,10 +171,11 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("getValues for  "+dpLabel
 if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals1:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
 				isOwnList = false;
 			} else {
-				List<SampledValue> prevVals = getValuesWithoutUpdate(intv.start, intv.end);
+				//List<SampledValue> prevVals = getValuesWithoutUpdate(intv.start, intv.end);
 				List<SampledValue> newVals = updateValues(intv.start, intv.end);
 if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals2:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
-				if(!isOwnList) {
+				addValues(newVals);
+				/*if(!isOwnList) {
 					List<SampledValue> concat = new ArrayList<SampledValue>(values);
 					concat.removeAll(prevVals);
 					concat.addAll(newVals);
@@ -183,8 +184,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals2:  "+d
 				} else {
 					values.removeAll(prevVals);
 					values.addAll(newVals);
-				}
-				//addValues(newVals);
+				}*/
 			}
 			if(intv.start < 0 || intv.end > knownEnd)
 				knownEnd = intv.end;
@@ -207,7 +207,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals3:  "+d
 if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals4:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 			addValues(newVals);
 			knownStart = startTime;	
-			updateValueLimits();
+			//updateValueLimits();
 		} else if(endTime > knownEnd) {
 //logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd)+" endTime:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(endTime));
 			List<SampledValue> newVals = updateValues(knownEnd, endTime);
@@ -215,7 +215,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals5:  "+d
 //logger.error("Found new vals:"+values.size());
 			addValues(newVals);
 			knownEnd = endTime;			
-			updateValueLimits();
+			//updateValueLimits();
 		}
 		} finally {
 			updateLock.unlock();
@@ -260,37 +260,67 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	}
 	
 	protected void addValues(List<SampledValue> newVals) {
+		if(newVals.isEmpty())
+			return;
 		List<SampledValue> existing = null;
-		if(!newVals.isEmpty()) {
-			long newFirst = newVals.get(0).getTimestamp();
-			long newLast = newVals.get(newVals.size()-1).getTimestamp();
-			List<SampledValue> existingLoc = getValuesWithoutUpdate(newFirst, newLast);
-			if(!existingLoc.isEmpty()) {
+		long newFirst = newVals.get(0).getTimestamp();
+		long newLast = newVals.get(newVals.size()-1).getTimestamp();
+		List<SampledValue> existingLoc = getValuesWithoutUpdate(newFirst, newLast);
+		if(!existingLoc.isEmpty()) {
 if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for "+dpLabel()+" without registration in getIntervalsToUpdate - now accepted");
-				existing = existingLoc;
-			}
-		}		
+			existing = existingLoc;
+		}
 		if(isOwnList) {
 			try {
 				if(existing != null)
 					values.removeAll(existing);
-				values.addAll(newVals);
+				//values.addAll(newVals);
+				insertNewValues(newVals, newFirst);
 			} catch(UnsupportedOperationException e) {
 				//TODO: Should not occur
 				List<SampledValue> concat = new ArrayList<SampledValue>(values);
 				if(existing != null)
 					concat.removeAll(existing);
-				concat.addAll(newVals);
 				values = concat;
+				insertNewValues(newVals, newFirst);
 			}
 		} else {
 			List<SampledValue> concat = new ArrayList<SampledValue>(values);
 			if(existing != null)
 				concat.removeAll(existing);
-			concat.addAll(newVals);
+			//concat.addAll(newVals);
 			values = concat;
+			insertNewValues(newVals, newFirst);
 			isOwnList = true;
-		}		
+		}
+		updateValueLimits();
+	}
+	
+	protected void insertNewValues(List<SampledValue> newVals, long newFirst) {
+		if(values.isEmpty()) {
+			values.addAll(newVals);
+			return;
+		}
+		long lastInList = values.get(values.size()-1).getTimestamp();
+		if(newFirst < lastInList) {
+			//we have to insert at the right position
+			int idx = values.size()-2;
+			while(idx >= 0) {
+				if(newFirst > values.get(idx).getTimestamp()) {
+					break;
+				}
+				idx--;
+			}
+			List<SampledValue> concat;
+			if(idx>=0)
+				concat = new ArrayList<>(values.subList(0, idx));
+			else
+				concat = new ArrayList<>();
+			concat.addAll(newVals);
+			concat.addAll(values.subList(idx, values.size()));
+			values = concat;
+		} else
+			values.addAll(newVals);
 	}
 	
 	protected void updateValueLimits() {
@@ -466,7 +496,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for
 			inResult.end = intervalToUpdate.end;
 			List<DpGap> result = Arrays.asList(new DpGap[] {inResult});
 			intervalToUpdate.start = -1;
-			return result ;			
+			return result;			
 		}
 	}
 }

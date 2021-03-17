@@ -160,7 +160,9 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLa
 			}
 		};
 		
-		result.dpIn = new DatapointImpl(inputSingle, resultLoction(input));
+		String tsSingleResLoc = resultLoction(input)+"_SgInp";
+		result.dpIn = (DatapointImpl) dpService.getDataPointStandard(tsSingleResLoc); //new DatapointImpl(inputSingle, resultLoction(input));
+		result.dpIn.setTimeSeries(inputSingle);
 		result.provider = null; //use default
 		return result;
 	}
@@ -292,7 +294,7 @@ System.out.println("Calculation of "+getShortId()+" took "+(endOfCalc-startOfCal
 			}
 		};
 
-		String location = inputSingle.dpIn.getLocation()+"";
+		String location = resultLoction(input); //getinputSingle.dpIn.getLocation()+"";
 		Datapoint newtsdi = TimeseriesSetProcSingleToSingle.getOrUpdateTsDp(location, inputSingle.provider, dpService);
 		String label = resultLabel();
 		if(label != null)

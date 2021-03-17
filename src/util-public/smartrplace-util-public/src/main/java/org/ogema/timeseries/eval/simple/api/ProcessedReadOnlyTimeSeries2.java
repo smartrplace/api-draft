@@ -231,24 +231,32 @@ logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLa
 	//public DatapointImpl getResultSeriesDP() {
 	//	return getResultSeriesDP(null);
 	//}
-	public DatapointImpl getResultSeriesDP(DatapointService dpService) {
+	public DatapointImpl getResultSeriesDP(DatapointService dpService, String location) {
+		DatapointImpl result;
+		if(location != null) {
+			result = (DatapointImpl) dpService.getDataPointStandard(location);
+		} else {
+			String tsLocationOrBaseId;
+			if(getInputDp() != null) {
+				tsLocationOrBaseId = getDpLocation(getInputDp(), getLabelPostfix()); //getDp().getLocation()+getLocationPostifx();
+			} else {
+				tsLocationOrBaseId = tsdi.id()+getLocationPostifx();
+			}
+			if(dpService == null)
+				throw new IllegalStateException("Operation without DatapointService not supported anymore(2)!");
+				//result = new DatapointImpl(this, tsLocationOrBaseId, label, false);
+			else {
+				result = (DatapointImpl) dpService.getDataPointStandard(tsLocationOrBaseId);
+			}
+		}
 		String label;
-		String tsLocationOrBaseId;
 		if(getInputDp() != null) {
 			label = getInputDp().label(null)+getLabelPostfix();
-			tsLocationOrBaseId = getDpLocation(getInputDp(), getLabelPostfix()); //getDp().getLocation()+getLocationPostifx();
 		} else {
 			label = getShortId()+getLabelPostfix();
-			tsLocationOrBaseId = tsdi.id()+getLocationPostifx();
 		}
-		DatapointImpl result;
-		if(dpService == null)
-			result = new DatapointImpl(this, tsLocationOrBaseId, label, false);
-		else {
-			result = (DatapointImpl) dpService.getDataPointStandard(tsLocationOrBaseId);
-			result.setTimeSeries(this, false);
-			result.setLabel(label, null);
-		}
+		result.setLabel(label, null);
+		result.setTimeSeries(this, false);
 		DPUtil.copyExistingDataRoomDevice(getInputDp(), result);
 		result.info().setAggregationMode(AggregationMode.Consumption2Meter);
 		result.info().setInterpolationMode(InterpolationMode.NONE);

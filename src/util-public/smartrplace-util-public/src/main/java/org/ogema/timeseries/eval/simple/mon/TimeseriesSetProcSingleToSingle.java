@@ -85,6 +85,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()
 						protected List<DpGap> getIntervalsToUpdate(long startTime, long endTime) {
 							if(absoluteTiming == null)
 								return super.getIntervalsToUpdate(startTime, endTime);
+							List<DpGap> result = new ArrayList<>(super.getIntervalsToUpdate(startTime, endTime));
 							ReadOnlyTimeSeries ts = tsdi.getTimeSeries();
 							Long lastTsInSource = getTimeStampInSourceInternal(false);
 							SampledValue sv;
@@ -95,12 +96,13 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()
 							}
 							if(sv == null || (lastTsInSource != null && sv.getTimestamp() <= lastTsInSource)) {
 if(Boolean.getBoolean("evaldebug")) System.out.println("last/new val in "+dpLabel()+" is no update:"+((sv!=null)?TimeProcPrint.getFullTime(sv.getTimestamp()):"no sv")+" last:"+((lastTsInSource!=null)?TimeProcPrint.getFullTime(lastTsInSource):"no last"));
-								return null;
+								return result;
 							}
 							DpGap inResult = new DpGap();
 							inResult.start = AbsoluteTimeHelper.getIntervalStart(sv.getTimestamp(), absoluteTiming);
 							inResult.end = sv.getTimestamp();
-							List<DpGap> result = Arrays.asList(new DpGap[] {inResult});
+							//List<DpGap> result = Arrays.asList(new DpGap[] {inResult});
+							result.add(inResult);
 if(Boolean.getBoolean("evaldebug")) System.out.println("new val in "+dpLabel()+" at:"+TimeProcPrint.getFullTime(sv.getTimestamp()));
 							return result ;			
 							
@@ -135,10 +137,11 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("new val in "+dpLabel()+"
 			ReadOnlyTimeSeries dpts = newtsdi.getTimeSeries();
 			if((dpts != null) && (dpts instanceof ProcessedReadOnlyTimeSeries2))
 				newTs2 = (ProcessedReadOnlyTimeSeries2) dpts; 
-		}
+		} else
+			throw new IllegalStateException("Operation without DatapointService not supported anymore!");
 		if(newTs2 == null) {
 			newTs2 = provider.getTimeseries(newtsdi);
-			newtsdi = newTs2.getResultSeriesDP(dpService);
+			newtsdi = newTs2.getResultSeriesDP(dpService, resultLocation);
 		}
 		return newtsdi;
 	}
