@@ -127,7 +127,7 @@ public abstract class UserServletTest extends HttpServlet {
 		Enumeration auth5 = req.getHeaders("User-Agent");
 		Enumeration auth6 = req.getHeaders("Accept");*/
         try{
-    		getUserServlet().doGet(req, resp, user);
+    		getUserServlet().doGet(req, resp, user, true);
     	} catch(NullPointerException e) {
     		throw new IllegalStateException("Error for req:"+javax.servlet.http.HttpUtils.getRequestURL(req), e);
     	}
@@ -149,7 +149,7 @@ public abstract class UserServletTest extends HttpServlet {
     	
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
-    	getUserServlet().doPost(req, resp, user);
+    	getUserServlet().doPost(req, resp, user, true);
     	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
         resp.addHeader("Access-Control-Allow-Headers", "*");

@@ -46,6 +46,7 @@ import de.iwes.util.timer.AbsoluteTiming;
 public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl> {
 	public static final long ACCEPTED_PREVIOUS_VALUE_DISTANCE_FOR_DAY_EVAL = TimeProcUtil.HOUR_MILLIS*12;
 	public static final double MILLIJOULE_TO_KWH = 0.001/TimeProcUtil.HOUR_MILLIS;
+	public static final float JOULE_TO_KWH = (float) (1.0/TimeProcUtil.HOUR_MILLIS);
 	
 	Map<String, ReadOnlyTimeSeries> knownSpecialTs = new HashMap<>();
 	protected final ApplicationManager appMan;

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.channelmanager.measurements.BooleanValue;
 import org.ogema.core.channelmanager.measurements.DoubleValue;
 import org.ogema.core.channelmanager.measurements.FloatValue;
@@ -32,13 +33,17 @@ import org.ogema.core.channelmanager.measurements.StringValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
 import org.ogema.tools.resource.util.ResourceUtils;
+import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartrplace.gateway.device.GatewayDevice;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider.ValueMode;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.resource.ResourceHelper;
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 /** Core class to provide servlets based on widgets pages
@@ -47,6 +52,9 @@ public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
 	public final String servletSubUrl;
+	
+	/** May be null*/
+	private final ApplicationManagerPlus appManPlus;
 
 	/** Management of timeseriesIDs*/
 	public static final Map<String, TimeSeriesDataImpl> knownTS = new HashMap<>();
@@ -159,7 +167,8 @@ public class UserServlet extends HttpServlet {
 	final protected Map<String, ServletPageProvider<?>> pages = new HashMap<>();
 	protected String stdPageId = null;
 	
-	public UserServlet(String servletPath) {
+	public UserServlet(String servletPath, ApplicationManagerPlus appManPlus) {
+		this.appManPlus = appManPlus;
 		if(servletPath == null)
 			this.servletSubUrl = null;
 		else {
@@ -173,7 +182,7 @@ public class UserServlet extends HttpServlet {
 		}
 	}
 	public UserServlet() {
-		this(null);
+		this(null, null);
 	}
 
 	public void addPage(String pageId, ServletPageProvider<?> prov) {
@@ -189,17 +198,18 @@ public class UserServlet extends HttpServlet {
 		//String user = req.getParameter("user");
 		//if(user == null || user.startsWith("["))
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
-		doGet(req, resp, user);
+		doGet(req, resp, user, false);
 	}
-	void doGet(HttpServletRequest req, HttpServletResponse resp, String user)
+	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
 		Map<String, String[]> paramMap = getParamMap(req);
 		addParametersFromUrl(req, paramMap);
-		doGet(req, resp, user, paramMap);
+		doGet(req, resp, user, paramMap, isMobile);
 	}
-	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, Map<String, String[]> paramMap)
+	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, Map<String, String[]> paramMap, boolean isMobile)
 			throws ServletException, IOException {
 		//String object = req.getParameter("object");
+		
 		String timeStr = UserServlet.getParameter("time", paramMap);
 		String returnStruct = UserServlet.getParameter("structure", paramMap);
 		//if(user == null) return;
@@ -224,6 +234,8 @@ public class UserServlet extends HttpServlet {
 		else if(pageList.size() == 1) {
 			ServletPageProvider<?> pageMap = pages.get(pageList.get(0));
 			result = getJSON(user, pollStr, timeStr, pageMap, returnStruct, paramMap);			
+
+			incrementAccessCounter(pageList.get(0), isMobile);			
 		} else {
 			result = new JSONVarrRes();
 			result.result = new JSONObject();
@@ -234,6 +246,8 @@ public class UserServlet extends HttpServlet {
 					result.result.put(pageId, resultSub.result);
 				else
 					result.result.put(pageId, resultSub.resultArr);
+
+				incrementAccessCounter(pageId, isMobile);				
 			}
 		}
 		resp.addHeader("content-type", "application/json;charset=utf-8");
@@ -587,9 +601,9 @@ public class UserServlet extends HttpServlet {
 		//String user = req.getParameter("user");
 		//if(user == null) return;
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
-		doPost(req, resp, user);
+		doPost(req, resp, user, false);
 	}		
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user)
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
 
 		String pageId = req.getParameter("page");
@@ -641,7 +655,7 @@ public class UserServlet extends HttpServlet {
 				if(isGET) {
 					if(getParameter("structure", paramMap) == null)
 						addParameter("structure", "toparray", paramMap);
-					doGet(req, resp, user, paramMap);
+					doGet(req, resp, user, paramMap, isMobile);
 					return;
 				}
 			}
@@ -802,5 +816,29 @@ public class UserServlet extends HttpServlet {
 			newList.add(param);
 			paramMap.put(paramName, newList.toArray(new String[0]));
 		}		
+	}
+	
+	static GatewayDevice gatewayData = null;
+	Map<String, Long> lastAccess = new HashMap<>();
+	public static long API_ACCESS_AGGREGATION_TIME = 30000;
+	protected void incrementAccessCounter(String method, boolean isMobile) {
+		if(gatewayData == null) {
+			if(appManPlus == null)
+				return;
+			gatewayData = ResourceHelper.getLocalDevice(appManPlus.appMan());
+			if(gatewayData == null)
+				return;
+		}
+		long now;
+		if(appManPlus != null)
+			now = appManPlus.getFrameworkTime();
+		else
+			now = System.currentTimeMillis();
+		Long last = lastAccess.get(method);
+		if(last != null && (now - last < API_ACCESS_AGGREGATION_TIME))
+			return;
+		int idx = ValueResourceUtils.appendValueIfUniqueIndex(gatewayData.apiMethods(), method, true);
+		ValueResourceHelper.setCreate(gatewayData.apiMethodAccess(), isMobile?(idx+0.5f):idx);
+		lastAccess.put(method, now);
 	}
 }
