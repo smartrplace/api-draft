@@ -166,9 +166,15 @@ public abstract class VirtualSensorKPIMgmt {
 			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
 			List<Datapoint> result) {
 
-		SingleValueResource source = (SingleValueResource) dpSource.get(0).getResource();
+		String sourceLocation;
+		//TODO: We should be able to just use dpSource.getLocation, but to change as little as possible we do it like this
+		SingleValueResource sourceX = (SingleValueResource) dpSource.get(0).getResource();
+		if(sourceX != null)
+			sourceLocation = sourceX.getLocation();
+		else
+			sourceLocation = dpSource.get(0).getLocation();
 		if(singleVirtualDatapointPerDevice) {
-			final VirtualSensorKPIDataBase mapData1 = dpData.get(source.getLocation());
+			final VirtualSensorKPIDataBase mapData1 = dpData.get(sourceLocation);
 			if(mapData1 != null) synchronized (mapData1) {
 				if(result != null)
 					result.add(mapData1.resourceDp);
@@ -177,7 +183,7 @@ public abstract class VirtualSensorKPIMgmt {
 		}
 		final VirtualSensorKPIDataBase mapData = new VirtualSensorKPIDataBase();
 		synchronized (mapData) {
-		dpData.put(source.getLocation(), mapData);
+		dpData.put(sourceLocation, mapData);
 		SingleValueResource destRes = getAndConfigureValueResource(dpSource, mapData, newSubResName, device);
 		if(mapData.evalDp == null)
 			return null;
