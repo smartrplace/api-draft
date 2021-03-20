@@ -73,8 +73,8 @@ public class TimeProcPrint {
 			goodAv.nonZeroNum = sizeNZSum/countTs;
 		}
 		String tsNum = getTsNum(tsdlist.size(), countNonNullNaN, countWithRoom);
-		System.out.println("--TSSet:"+setName+"["+((nonImplCount>0)?tsNum+"!!NonImpl:"+nonImplCount:tsNum)+"]::"
-				+ "AvSize"+getGoodString(goodAv)+"  Max:"+getGoodStringInt(maxGood)+"/"+maxName+"  Min:"+minSize+"/"+minName);
+if(Boolean.getBoolean("evaldebug")) System.out.println("--TSSet:"+setName+"["+((nonImplCount>0)?tsNum+"!!NonImpl:"+nonImplCount:tsNum)+"]::"
++ "AvSize"+getGoodString(goodAv)+"  Max:"+getGoodStringInt(maxGood)+"/"+maxName+"  Min:"+minSize+"/"+minName);
 		for(Datapoint tsd: listsToPrint) {
 			printFirstElements(tsd.getTimeSeries(), startTime, endTime);
 		}

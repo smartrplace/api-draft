@@ -181,7 +181,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("start > lastTimestampInS
 			end = lastTimestampInSource;
 		if(start < firstTimestampInSource)
 			start = firstTimestampInSource;
-logger.error("Starting getResultValues for PROT:"+getInputDp().label(null)+getLabelPostfix()+" from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(start)+
+logger.info("Starting getResultValues for PROT:"+getInputDp().label(null)+getLabelPostfix()+" from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(start)+
 		" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(end+1));
 		//we want end inclusive, so we have to add 1
 		return getResultValues(ts, start, end+1, mode);
