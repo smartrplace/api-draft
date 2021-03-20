@@ -181,6 +181,9 @@ public class UserServlet extends HttpServlet {
 				this.servletSubUrl = null;
 		}
 	}
+	public UserServlet(ApplicationManagerPlus appManPlus) {
+		this(null, appManPlus);
+	}
 	public UserServlet() {
 		this(null, null);
 	}
@@ -562,7 +565,14 @@ public class UserServlet extends HttpServlet {
 			return;
 		}
 		if(subURL != null && subURL.length > 1) {
-			for(idx=0; idx<subURL.length-1; idx+=2) {
+			int startIdx;
+			String page = subURL[0];
+			if(pages.containsKey(page)) {
+				addParameter("page", page, paramMap);
+				startIdx = 1;
+			} else
+				startIdx = 0;
+			for(idx=startIdx; idx<subURL.length-1; idx+=2) {
 				String paramName = subURL[idx];
 				String param = subURL[idx+1];
 				addParameter(paramName, param, paramMap);
@@ -606,15 +616,15 @@ public class UserServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
 
+		Map<String, String[]> paramMap = getParamMap(req);
+		addParametersFromUrl(req, paramMap);
+
 		String pageId = req.getParameter("page");
 		if(pageId == null) pageId = stdPageId ;
 		//String object = req.getParameter("object");
-		ServletPageProvider<?> pageMap = pages.get(pageId);
+		final ServletPageProvider<?> pageMap = pages.get(pageId);
 		if(pageMap == null) return;
 		String timeStr = req.getParameter("time");
-		Map<String, String[]> paramMap = getParamMap(req);
-		
-		addParametersFromUrl(req, paramMap);
 		
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = req.getReader();
@@ -821,7 +831,7 @@ public class UserServlet extends HttpServlet {
 	static GatewayDevice gatewayData = null;
 	Map<String, Long> lastAccess = new HashMap<>();
 	public static long API_ACCESS_AGGREGATION_TIME = 30000;
-	protected void incrementAccessCounter(String method, boolean isMobile) {
+	protected void incrementAccessCounter(String methodIn, boolean isMobile) {
 		if(gatewayData == null) {
 			if(appManPlus == null)
 				return;
@@ -834,6 +844,11 @@ public class UserServlet extends HttpServlet {
 			now = appManPlus.getFrameworkTime();
 		else
 			now = System.currentTimeMillis();
+		String method;
+		if(servletSubUrl != null)
+			method = servletSubUrl+"-"+methodIn;
+		else
+			method = methodIn;
 		Long last = lastAccess.get(method);
 		if(last != null && (now - last < API_ACCESS_AGGREGATION_TIME))
 			return;

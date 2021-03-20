@@ -317,7 +317,10 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for
 			else
 				concat = new ArrayList<>();
 			concat.addAll(newVals);
-			concat.addAll(values.subList(idx, values.size()));
+			if(idx >= 0)
+				concat.addAll(values.subList(idx, values.size()));
+			else
+				concat.addAll(values);
 			values = concat;
 		} else
 			values.addAll(newVals);
