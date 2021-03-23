@@ -576,4 +576,28 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		if(value > upper) return true;
 		return false;
 	}	
+	
+	public static List<SampledValue> getSensReact(ReadOnlyTimeSeries setpReq, ReadOnlyTimeSeries setpFb, long start, long end, long maxReactTime) {
+		List<SampledValue> req = setpReq.getValues(start, end+1);
+		//List<SampledValue> fb = setpFb.getValues(start, end+1);
+		List<SampledValue> result = new ArrayList<>();
+		//SampledValue lastVal = null;
+		//if(input.isEmpty() && ((end-start) > maxGapSize)) {
+		//	result.add(new SampledValue(new FloatValue((float)((double)(end-start)/TimeProcUtil.MINUTE_MILLIS)), end, Quality.GOOD));
+		//	return result;
+		//}
+		for(SampledValue sv: req) {
+			SampledValue fbVal = setpFb.getNextValue(sv.getTimestamp());
+			if(fbVal == null) {
+				long gap = end - sv.getTimestamp();
+				if(gap > maxReactTime)
+					result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), sv.getTimestamp(), Quality.GOOD));
+				break;
+			}
+			long gap = fbVal.getTimestamp() - sv.getTimestamp();
+			if(gap > maxReactTime)
+				result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), sv.getTimestamp(), Quality.GOOD));
+		}
+		return result;
+	}
 }

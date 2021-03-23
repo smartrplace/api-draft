@@ -44,6 +44,7 @@ public class TimeProcUtil {
 	/** Known suffixes from applications*/
 	public static final String ALARM_GAP_SUFFIX = "_gap";
 	public static final String ALARM_OUTVALUE_SUFFIX = "_outvalue";
+	public static final String ALARM_SETPREACT_SUFFIX = "_setpreact";
 	
 	public static TimeResource getDefaultMeteringReferenceResource(ResourceAccess resAcc ) {
 		TimeResource refRes = null;
@@ -123,5 +124,26 @@ public class TimeProcUtil {
 			}
 		}
 		return null;
+	}
+	
+	public static Float getMaxValue(Datapoint dp, long start, long end) {
+		if(dp == null)
+			return null;
+		ReadOnlyTimeSeries ts = dp.getTimeSeries();
+		if(ts == null)
+			return null;
+		return getMaxValue(ts, start, end);
+	}
+	public static Float getMaxValue(ReadOnlyTimeSeries ts, long start, long end) {
+		List<SampledValue> svs = ts.getValues(start, end);
+		Float max = null;
+		for(SampledValue sv: svs) {
+			float val = sv.getValue().getFloatValue();
+			if(Float.isNaN(val))
+				continue;	
+			if(max == null || val > max)
+				max = val;
+		}
+		return max;
 	}
 }

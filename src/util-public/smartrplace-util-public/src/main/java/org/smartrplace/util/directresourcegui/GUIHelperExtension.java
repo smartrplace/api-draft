@@ -22,6 +22,7 @@ import org.ogema.core.model.simple.StringResource;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.util.resource.OGEMAResourceCopyHelper;
+import de.iwes.util.resourcelist.ResourceListHelper;
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
@@ -67,14 +68,27 @@ public class GUIHelperExtension {
 			ResourceList<T> objectList, T object, OgemaWidget mainTable,
 			String id, Alert alert, Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req,
 			ApplicationManager appMan) {
+		return addCopyButton(objectList, object, mainTable, id, alert, row, vh, req, appMan, null);
+	}
+	public static <T extends Resource> Button addCopyButton(
+			ResourceList<T> objectList, T object, OgemaWidget mainTable,
+			String id, Alert alert, Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req,
+			ApplicationManager appMan,
+			Class<? extends T> typeToCreate) {
 		if(req != null) {
 			Button copyButton = new Button(mainTable, "copyButton_"+id, "copy", req) {
 				private static final long serialVersionUID = 1L;
 				@Override
 				public void onPOSTComplete(String data, OgemaHttpRequest req) {
 					if(object.isActive()) {
-						T newCat = OGEMAResourceCopyHelper.copySubResourceIntoResourceList(objectList, object, appMan,
-								false);
+						final T newCat;
+						if(typeToCreate != null) {
+							String name = ResourceListHelper.getUniqueNameForNewElement(objectList);
+							newCat = objectList.getSubResource(name, typeToCreate);
+							OGEMAResourceCopyHelper.copySubResourceIntoDestination(newCat, object, appMan, false);
+						} else
+							newCat = OGEMAResourceCopyHelper.copySubResourceIntoResourceList(objectList, object, appMan,
+									false);
 						newCat.getSubResource("name", StringResource.class).setValue(
 								"CopyOf_"+object.getSubResource("name", StringResource.class).getValue());
 					} else {
