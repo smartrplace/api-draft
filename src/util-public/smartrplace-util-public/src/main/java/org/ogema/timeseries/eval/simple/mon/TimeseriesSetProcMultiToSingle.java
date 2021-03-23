@@ -276,7 +276,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Starting aggregation for
 						
 						long endOfCalc =  dpService.getFrameworkTime();
 //TODO: These values could be logged to check evaluation performance
-if(Boolean.getBoolean("evaldebug")) System.out.println("Calculation of "+getShortId()+" took "+(endOfCalc-startOfCalc)+" msec");
+if(Boolean.getBoolean("evaldebug0")||Boolean.getBoolean("evaldebug")) System.out.println("Calculation of "+getShortId()+" took "+(endOfCalc-startOfCalc)+" msec");
 						return resultLoc;
 					}
 					

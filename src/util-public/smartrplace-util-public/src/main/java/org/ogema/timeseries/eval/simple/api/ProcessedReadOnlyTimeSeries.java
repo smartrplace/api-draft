@@ -147,8 +147,10 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("getValues for  "+dpLabel
 			startTime = 0;
 		boolean isFree = updateLock.tryLock();
 		if(!isFree) {
-			System.out.println("Waiting for lock in "+this.toString()+"...");
+			System.out.println("Waiting for lock for "+dpLabel()+"...");
+			long startWait = getCurrentTime();
 			updateLock.lock();
+			System.out.println("Acquired lock for "+dpLabel()+" after "+(getCreationTime() - startWait)+" msec.");			
 		}
 		try {
 		if(knownEndUpdateInterval != null) {

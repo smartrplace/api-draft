@@ -31,7 +31,10 @@ import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 
-/** Management of Virtual sensors for a certain application
+/** Management of Virtual sensors for a certain application<br>
+ * Note that virtual sensors are created with resources, but time series are only stored as memory time series. Only
+ * when transferred via heartbeat then schedules are created on the server side. Evaluations and alarming relying on
+ * historical data should access this via the datapoint to also get time series for virtual datapoints.
  * 
  * @author dnestle
  *
