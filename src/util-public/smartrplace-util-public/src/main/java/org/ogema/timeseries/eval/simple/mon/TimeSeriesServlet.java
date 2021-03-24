@@ -588,6 +588,9 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		//}
 		for(SampledValue sv: req) {
 			SampledValue fbVal = setpFb.getNextValue(sv.getTimestamp());
+			while((fbVal != null) && (Math.abs(sv.getValue().getFloatValue() - fbVal.getValue().getFloatValue()) > 0.1f)) {
+				fbVal = setpFb.getNextValue(fbVal.getTimestamp()+1);
+			}
 			if(fbVal == null) {
 				long gap = end - sv.getTimestamp();
 				if(gap > maxReactTime)
@@ -599,5 +602,29 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 				result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), sv.getTimestamp(), Quality.GOOD));
 		}
 		return result;
+	}
+
+	public static List<SampledValue> getValueChanges(ReadOnlyTimeSeries timeSeries, long start, long end,
+			Float minChange, boolean addFirstNonNaNValue) {
+		List<SampledValue> input = timeSeries.getValues(start, end+1);
+		List<SampledValue> result = new ArrayList<>();
+		Float lastVal = null;
+		for(SampledValue sv: input) {
+			if(lastVal == null || Float.isNaN(lastVal)) {
+				lastVal = sv.getValue().getFloatValue();
+				if(addFirstNonNaNValue && (!Float.isNaN(lastVal)))
+					result.add(sv);
+			} else {
+				float newVal = sv.getValue().getFloatValue();
+				if(Float.isNaN(newVal))
+					continue;
+				if(newVal != lastVal && (minChange == null || (Math.abs(newVal - lastVal) > minChange))) {
+					result.add(sv);
+				}
+				lastVal = newVal;
+			}
+		}
+		return result;
+
 	}
 }

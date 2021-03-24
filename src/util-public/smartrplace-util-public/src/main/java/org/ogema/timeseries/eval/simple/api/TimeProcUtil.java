@@ -45,6 +45,7 @@ public class TimeProcUtil {
 	public static final String ALARM_GAP_SUFFIX = "_gap";
 	public static final String ALARM_OUTVALUE_SUFFIX = "_outvalue";
 	public static final String ALARM_SETPREACT_SUFFIX = "_setpreact";
+	public static final String ALARM_VALCHANGED_SUFFIX = "_valchanged";
 	
 	public static TimeResource getDefaultMeteringReferenceResource(ResourceAccess resAcc ) {
 		TimeResource refRes = null;
