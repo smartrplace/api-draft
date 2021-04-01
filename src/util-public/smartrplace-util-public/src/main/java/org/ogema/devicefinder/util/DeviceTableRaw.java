@@ -11,7 +11,6 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
-import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.model.units.VoltageResource;
@@ -184,7 +183,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		vh.stringEdit("Comment", id, object.installationComment(), row, alert);
 	}
 	
-	private static Map<Room, String> roomsToSet = new HashMap<>();
+	public static Map<Room, String> roomsToSet = new HashMap<>();
 	private static long lastUpdate = -1;
 	protected void addRoomWidget(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
@@ -216,13 +215,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		vh.stringEdit("Location", id, object.installationLocation(), row, alert);
 	}
 	
-	protected IntegerResource addRSSI(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
+	/*protected IntegerResource addRSSI(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row) {
 		IntegerResource source = ResourceHelper.getSubResourceOfSibbling(object.device().getLocationResource(),
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
 		vh.intLabel("RSSI", id, source, row, 0);
 		return source;
-	}
+	}*/
 		
 	protected Label addBattery(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
@@ -478,6 +477,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static boolean isTempHumSens(String resourceLocation) {
 		if(isWeatherStation(resourceLocation))
 			return false;
+		if(resourceLocation.contains("maintenanceChannelReadings"))
+			return false;
 		if(resourceLocation.toLowerCase().startsWith("homematic"))
 			return true;
 		return false;
@@ -579,6 +580,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return !(model.getSubResources(VirtualThermostatConfig.class, false).isEmpty());
 	}
 	
+	public static boolean isWallThermostat(String resourceLocation) {
+		if(resourceLocation.contains("HM_HmIP_WTH_2"))
+			return true;
+		if(resourceLocation.contains("HM_HM_TC_IT_WM_W_EU"))
+			return true;
+		return false;
+	}
+
 	/** 
 	 * 
 	 * @param object

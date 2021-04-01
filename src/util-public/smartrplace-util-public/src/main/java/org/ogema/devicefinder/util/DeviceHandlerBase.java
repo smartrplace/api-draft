@@ -22,7 +22,9 @@ import org.ogema.devicefinder.api.DriverPropertySuccessHandler;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.devicefinder.api.PatternListenerExtended;
+import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.prototypes.PhysicalElement;
+import org.ogema.model.sensors.GenericBinarySensor;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -130,15 +132,26 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	
 	public Collection<Datapoint> addtStatusDatapointsHomematic(PhysicalElement dev, DatapointService dpService,
 			List<Datapoint> result) {
+		return addtStatusDatapointsHomematic(dev, dpService, result, true);
+	}
+	public Collection<Datapoint> addtStatusDatapointsHomematic(PhysicalElement dev, DatapointService dpService,
+			List<Datapoint> result, boolean hasBattery) {
 		dev = dev.getLocationResource();
-		VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
-		if(batteryVoltage != null)
-			addDatapoint(batteryVoltage, result, dpService);
-		BooleanResource batteryStatus = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "batteryLow", BooleanResource.class);
-		if(batteryStatus != null && batteryStatus.exists())
-			addDatapoint(batteryStatus, result, dpService);
+		if(hasBattery) {
+			VoltageResource batVolt = dev.getSubResource("battery", ElectricityStorage.class).internalVoltage().reading();
+			if(batVolt.isActive())
+				result.add(dpService.getDataPointStandard(batVolt));
+			else {
+				VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(dev,
+						"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
+				if(batteryVoltage != null)
+					addDatapoint(batteryVoltage, result, dpService);
+			}
+			BooleanResource batteryStatus = ResourceHelper.getSubResourceOfSibbling(dev,
+					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "batteryLow", BooleanResource.class);
+			if(batteryStatus != null && batteryStatus.exists())
+				addDatapoint(batteryStatus, result, dpService);
+		}
 		BooleanResource comDisturbed = ResourceHelper.getSubResourceOfSibbling(dev,
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "communicationStatus/communicationDisturbed", BooleanResource.class);
 		if(comDisturbed != null && comDisturbed.exists())
@@ -151,6 +164,10 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiPeer", IntegerResource.class);
 		if(rssiPeer != null && rssiPeer.exists())
 			addDatapoint(rssiPeer, result, dpService);
+		GenericBinarySensor dutyCycle = ResourceHelper.getSubResourceOfSibbling(dev,
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "dutyCycle", GenericBinarySensor.class);
+		if(dutyCycle != null && dutyCycle.reading().exists())
+			addDatapoint(dutyCycle.reading(), result, dpService);
 		return result;
 	}
 
