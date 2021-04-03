@@ -31,4 +31,12 @@ public abstract class SingleFilteringDirect<T> extends SingleFiltering<T, T> {
 
 	@Override
 	protected abstract List<GenericFilterOption<T>> getOptionsDynamic(OgemaHttpRequest req);
+	
+	public T getSelectedItemDirect(OgemaHttpRequest req) {
+		GenericFilterOption<T> option = getSelectedItem(req);
+		if(option instanceof GenericFilterFixedSingle)
+			return ((GenericFilterFixedSingle<T>)option).getValue();
+		else
+			return null;
+	}
 }
