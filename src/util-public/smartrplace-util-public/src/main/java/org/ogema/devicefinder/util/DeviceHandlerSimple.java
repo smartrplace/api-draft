@@ -102,7 +102,7 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	protected abstract Collection<Datapoint> getDatapoints(T device, InstallAppDevice deviceConfiguration);
 	
 	/** Set title of table listing the devices processed by the DeviceHandlerProvider*/
-	protected abstract String getTableTitle();
+	public abstract String getTableTitle();
 	
 	/** The value and last contact labels are polled. You can adapt the poll rate here*/
 	protected long getLabelPollRate() {
@@ -170,7 +170,7 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 			}
 
 			@Override
-			protected String getTableTitle() {
+			public String getTableTitle() {
 				return DeviceHandlerSimple.this.getTableTitle();
 			}
 		};
@@ -206,6 +206,9 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	 */
 	protected Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result) {
 		return super.addDatapoint(res, result, dpService);
+	}
+	protected Datapoint addDatapoint(SingleValueResource res, String subLocation, List<Datapoint> result) {
+		return super.addDatapoint(res, result, subLocation, dpService);
 	}
 	
 	/** Doubled from {@link DeviceTableRaw}

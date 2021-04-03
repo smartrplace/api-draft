@@ -86,7 +86,7 @@ public abstract class DeviceTablePageFragmentRaw<T, R extends Resource> extends 
 	}
 
 	@Override
-	protected String getTableTitle() {
+	public String getTableTitle() {
 		// TODO Auto-generated method stub
 		return null;
 	}
