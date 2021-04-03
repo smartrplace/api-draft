@@ -66,7 +66,7 @@ public class ViaHeartbeatSchedules implements StringProvider {
 		}
 //if(rot instanceof ProcessedReadOnlyTimeSeries2 && ((ProcessedReadOnlyTimeSeries2)rot).getInputDp().id().startsWith("EnergyServerReadings_ESE/ESE_location_39")) //39/connection/energyDaily/reading"))
 //System.out.println("vals#:"+vals.size()+" lastValueSent:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueSent));
-		JSONArray arr = ServletTimeseriesProvider.smapledValuesToJson(vals, null, null, true, false, true);
+		JSONArray arr = ServletTimeseriesProvider.smapledValuesToJson(vals, null, null, true, false, true, null, null);
 		if(!vals.isEmpty()) {
 			SampledValue sv = vals.get(vals.size()-1);
 			lastValueSent = sv.getTimestamp();

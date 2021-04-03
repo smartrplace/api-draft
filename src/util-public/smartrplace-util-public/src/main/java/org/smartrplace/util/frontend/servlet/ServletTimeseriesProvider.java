@@ -39,6 +39,12 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	public String unit = null;
 	public String align = null;
 	
+	//First factor, then offset are applied to gateway values on reading (GET)
+	//On write a reverse transformation is applied, but not tested yet
+	//Does not work if evaluationMode != null
+	public Float factor = null;
+	public Float offset = null;
+	
 	/** Set this to get notifications, only relevant if WriteMode==ANY*/
 	public Datapoint datapointForChangeNotification = null;
 	
@@ -158,7 +164,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				structList = true;
 		}
 		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
-				structList, shortXY, pData.suppressNan));
+				structList, shortXY, pData.suppressNan, factor, offset));
 		if(unit != null)
 			json.put("unit", unit);
 		if(align != null)
@@ -327,6 +333,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			}
 			if(doDelete)
 				return;
+			if(offset != null)
+				val = val - offset;
+			if(factor != null)
+				val = factor/val;
 			sched.addValue(ts, new FloatValue(val));
 		} catch(NumberFormatException e) {
 			//do nothing
@@ -362,7 +372,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 * @return JSON to be returned as value of the object result
 	 */
 	public static JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
-			boolean structureList, boolean shortXY, boolean suppressNaN) {
+			boolean structureList, boolean shortXY, boolean suppressNaN, Float factor, Float offset) {
 		if(valueDist != null && mode != DownSamplingMode.MINMAX)
 			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
 		JSONArray result = new JSONArray();
@@ -374,6 +384,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			LinkedHashMap<Long, Float> svMap = new LinkedHashMap<>();
 			Float fval = UserServletUtil.getJSONValue(sv.getValue().getFloatValue());
 			if(fval != null) {
+				if(factor != null)
+					fval = factor*fval;
+				if(offset != null)
+					fval = fval+offset;
 				if(valueDist != null) {
 					long tsNow = sv.getTimestamp();
 					processMinMaxDownSampling(data , tsNow, valueDist, fval, svMap);
