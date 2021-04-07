@@ -2,6 +2,8 @@ package org.ogema.accessadmin.api;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
@@ -150,4 +152,7 @@ public interface UserPermissionService {
 		public List<String> addPerms = null;
 	}
 	UserStatusResult getUserStatus(String userName);
+	
+	public boolean hasExtendedView(HttpSession session);
+	public boolean hasExtendedView(String user);
 }

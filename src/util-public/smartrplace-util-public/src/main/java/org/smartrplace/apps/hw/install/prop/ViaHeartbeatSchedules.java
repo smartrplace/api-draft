@@ -13,8 +13,10 @@ import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvider;
+import org.smartrplace.tissue.util.logconfig.VirtualSensorKPIMgmt;
 import org.smartrplace.util.frontend.servlet.ServletTimeseriesProvider;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
@@ -150,6 +152,35 @@ public class ViaHeartbeatSchedules implements StringProvider {
 		}
 	}
 	
+	/** Call this method on gateway for KPI datapoints with schedule transfer that are identified
+	 * via alias 
+	 * @param dp
+	 * @param absoluteTiming
+	 * @param alias
+	 * @param label
+	 * @return
+	 */
+	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2ScheduleWithAlias(
+			Datapoint dp, Integer absoluteTiming,
+			String alias, String label,
+			DatapointGroup dpGroup) {
+		if(label != null)
+			dp.setLabelDefault(label);
+		dp.addAlias(alias);
+		
+		if(dpGroup != null)
+			dpGroup.addDatapoint(dp);	
+		return registerDatapointForHeartbeatDp2Schedule(dp, alias, absoluteTiming);
+	}
+	/** Call this method on the gateway for all datapoints for which schedule transfer shall be enabled
+	 * from gateway to server. For special versions see:<br>
+	 * - {@link #registerDatapointForHeartbeatDp2ScheduleWithAlias(Datapoint, Integer, String, String, DatapointGroup)}
+	 * - {@link VirtualSensorKPIMgmt#registerEnergySumDatapoint(List, org.ogema.devicefinder.api.DatapointInfo.AggregationMode, org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtil, String, boolean, org.ogema.devicefinder.api.DatapointService)}
+	 * - to register Virtual device sensors that are not identified via alias but by their full path call this directly
+	 * @param dp
+	 * @param absoluteTiming
+	 * @return
+	 */
 	public static ViaHeartbeatSchedules registerDatapointForHeartbeatDp2Schedule(Datapoint dp, Integer absoluteTiming) {
 		Set<String> als = dp.getAliases();
 		return registerDatapointForHeartbeatDp2Schedule(dp, als.isEmpty()?null:als.iterator().next(), absoluteTiming);

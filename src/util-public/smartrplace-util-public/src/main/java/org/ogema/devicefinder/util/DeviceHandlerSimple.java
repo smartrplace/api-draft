@@ -24,6 +24,7 @@ import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
@@ -226,5 +227,10 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 		} else
 			vh.registerHeaderEntry(columnLabel);
 		return null;
+	}
+	
+	@Override
+	public String label(OgemaLocale locale) {
+		return getTableTitle();
 	}
 }
