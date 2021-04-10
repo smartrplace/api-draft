@@ -586,9 +586,14 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		//	result.add(new SampledValue(new FloatValue((float)((double)(end-start)/TimeProcUtil.MINUTE_MILLIS)), end, Quality.GOOD));
 		//	return result;
 		//}
+		int idxNext = 1;
+		int idx = 0;
+		NextReqValResult nextDiffResult = null;
 		for(SampledValue sv: req) {
 			SampledValue fbVal = setpFb.getNextValue(sv.getTimestamp());
-			while((fbVal != null) && (Math.abs(sv.getValue().getFloatValue() - fbVal.getValue().getFloatValue()) > 0.1f)) {
+			nextDiffResult = getNextReqDiffVal(sv, req, idx);
+			while((fbVal != null) && (Math.abs(sv.getValue().getFloatValue() - fbVal.getValue().getFloatValue()) > 0.1f) &&
+					((nextDiffResult.svNext == null) || (fbVal.getTimestamp() < nextDiffResult.svNext.getTimestamp())) ) {
 				fbVal = setpFb.getNextValue(fbVal.getTimestamp()+1);
 			}
 			if(fbVal == null) {
@@ -600,10 +605,37 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 			long gap = fbVal.getTimestamp() - sv.getTimestamp();
 			if(gap > maxReactTime)
 				result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), sv.getTimestamp(), Quality.GOOD));
+			idx++;
+			if(idxNext >= idx)
+				idxNext++;
 		}
 		return result;
 	}
 
+	protected static class NextReqValResult {
+		SampledValue svNext;
+		int idx;
+	}
+	/** Get next setpoint request with a different value requested. From this point on we accept any feedback as we cannot 
+	 * expect to receive the original value anymore
+	 * @param sv
+	 * @param req
+	 * @param idx
+	 * @return
+	 */
+	protected static NextReqValResult getNextReqDiffVal(SampledValue sv, List<SampledValue> req, int idx) {
+		NextReqValResult result = new NextReqValResult();
+		result.idx = idx+1;
+		while(result.idx < req.size()) {
+			result.svNext = req.get(result.idx);
+			if(Math.abs(sv.getValue().getFloatValue() - result.svNext.getValue().getFloatValue()) > 0.1f) {
+				return result;
+			}
+		}
+		result.svNext = null;
+		return result ;
+	}
+	
 	public static List<SampledValue> getValueChanges(ReadOnlyTimeSeries timeSeries, long start, long end,
 			Float minChange, boolean addFirstNonNaNValue) {
 		List<SampledValue> input = timeSeries.getValues(start, end+1);
