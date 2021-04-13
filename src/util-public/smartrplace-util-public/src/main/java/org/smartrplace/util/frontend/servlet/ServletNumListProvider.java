@@ -27,7 +27,7 @@ public class ServletNumListProvider<T> implements ServletValueProvider {
 	
 	@Override
 	public JSONVarrRes getJSON(String user, String key) {
-		JSONObject result = new JSONObject();
+		//JSONObject result = new JSONObject();
 		JSONArray arr = new JSONArray();
 		for(T obj: floatVal) {
 			if(obj == null) {
@@ -48,11 +48,12 @@ public class ServletNumListProvider<T> implements ServletValueProvider {
 			else
 				arr.put(obj.toString());
 		}
-		result.put("value", arr);
+		//result.put("value", arr);
 		
 		//TODO: Also support to return array
 		JSONVarrRes realResult = new JSONVarrRes();
-		realResult.result = result;
+		//realResult.result = result;
+		realResult.resultArr = arr;
 		return realResult;
 	}
 	
