@@ -81,6 +81,10 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 	}
 	
 	@Override
+	/** Create backup via entry in collectionAction, then 
+	 * Zip content of folder sourcePath (dafault: data/semabox_01/extBackup/ )
+	 * and depending on zipOnly property also send to server (or just perform zipping)
+	 */
 	public void performAction() {
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 

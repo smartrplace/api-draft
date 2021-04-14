@@ -27,6 +27,8 @@ import org.smartrplace.util.file.ApacheFileAdditions;
 import de.iwes.util.format.StringFormatHelper;
 
 public class SCPTransfer {
+	public static final long MAX_RESOURCE_BACKUP_DURATION = 900000; //20000;
+
 	/**
 	 * 
 	 * @param scp
@@ -49,7 +51,7 @@ public class SCPTransfer {
 			else
 				appMan.getLogger().debug("No actions found in "+scp.collectionActions.getLocation());
 		}
-		ActionHelper.performActionListBlocking(scp.collectionActions, 20000);
+		ActionHelper.performActionListBlocking(scp.collectionActions, MAX_RESOURCE_BACKUP_DURATION);
 		if (scp.pushMode.exists() && scp.pushMode.getValue()) {
 			return sendViaSCP(scp, appMan, createDateDir, gateway, externalTransmissionControl, destinationExtenstion, zipOnly);
 		}
