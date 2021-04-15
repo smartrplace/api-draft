@@ -430,7 +430,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				} catch(NumberFormatException e) {}
 			}
 		}
-		if((isEnergyServerDevice(dpLocation) || dpLocation.toLowerCase().startsWith("iota")) && dpLocation.contains("/L")) {
+		if((isEnergyServerDevice(dpLocation) || dpLocation.toLowerCase().startsWith("iota") || dpLocation.toLowerCase().startsWith("elmeterspm2x"))
+				&& dpLocation.contains("/L")) {
 			String[] els = dpLocation.split("/L", 2);
 			if(els.length == 2) {
 				int idx = els[1].indexOf("/");
@@ -443,6 +444,21 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 					int num = Integer.parseInt(nums);
 					return "L"+num;
 				} catch(NumberFormatException e) {}
+			}
+			
+		}
+		if(dpLocation.toLowerCase().startsWith("elmeterspm2x")
+				&& dpLocation.contains("/connection/voltageSensor")) {
+			String[] els = dpLocation.split("/connection/voltageSensor", 2);
+			if(els.length == 2) {
+				int idx = els[1].indexOf("/");
+				String nums;
+				if(idx >= 0) {
+					nums = els[1].substring(0, idx);
+				} else
+					nums = els[1];
+				if(nums.length()>0 && nums.length()<4)
+					return "L_"+nums;
 			}
 			
 		}
