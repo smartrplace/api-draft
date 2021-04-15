@@ -75,4 +75,13 @@ public class ServerGatewayUtil {
 		}
     	return gw;
     }
+    
+    public static String getGatewayBaseUrl(GatewayData gwd) {
+    	if(gwd.guiLink().isActive() && (!gwd.guiLink().getValue().isEmpty()))
+    		return gwd.guiLink().getValue();
+    	String customer = gwd.customer().getValue();
+    	if(customer != null && !customer.isEmpty())
+    		return "https://"+customer+".smartrplace.de";
+    	return null;
+    }
 }

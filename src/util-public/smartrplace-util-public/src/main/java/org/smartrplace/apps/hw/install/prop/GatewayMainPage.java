@@ -47,7 +47,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 
 	@Override
 	protected String getHeader(OgemaLocale locale) {
-		return Boolean.getBoolean("org.smartrplace.system.guiappstore.gui.gatewayperbuildingunit")?"Building Unit Overview":"Gateway Overview";
+		return Boolean.getBoolean("org.smartrplace.system.guiappstore.gui.gatewayperbuildingunit")?"Building Unit Overview":"Gateways Overview";
 	}
 	
 	@Override

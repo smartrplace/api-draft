@@ -19,6 +19,7 @@ import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
+import org.ogema.model.extended.alarming.AlarmGroupData;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -284,6 +285,35 @@ public class AlarmingConfigUtil {
 		return dp;
 	}
 	
+	/** 0: number of Knis not assigned or assigned to other, [1]: assigned to operation, [2]: development, [3]: customer,
+	 * more indeces may be defined by AlarmGroupData.USER_ROLES*/
+	public static int[] getKnownIssues(ResourceAccess resAcc) {
+		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
+		int[] result = new int[AlarmGroupData.USER_ROLES.length];
+		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
+			AlarmGroupData kni = dev.knownFault();
+			if(!kni.isActive())
+				continue;
+			if(!kni.acceptedByUser().exists()) {
+				result[0] ++;
+				continue;
+			}
+			String role = kni.acceptedByUser().getValue();
+			boolean found = false;
+			for(int idx=0; idx<AlarmGroupData.USER_ROLES.length; idx++) {
+				if(role.equals(AlarmGroupData.USER_ROLES[idx])) {
+					result[idx] ++;
+					found = true;
+					break;
+				}
+			}
+			if(!found) {
+				result[0] ++;
+			}
+		}
+		return result;
+	}
+
 	public static int[] getActiveAlarms(ResourceAccess resAcc) {
 		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
 		int[] result = new int[] {0,0};

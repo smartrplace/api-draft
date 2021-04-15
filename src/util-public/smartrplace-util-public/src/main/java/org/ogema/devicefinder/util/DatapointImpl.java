@@ -511,7 +511,6 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		return false;
 	}
 	
-
 	@Override
 	public Object getParameter(String id) {
 		return parameters.get(id);
