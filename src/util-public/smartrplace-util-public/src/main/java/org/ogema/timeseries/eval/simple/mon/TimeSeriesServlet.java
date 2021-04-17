@@ -27,6 +27,7 @@ import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 import org.smartrplace.util.frontend.servlet.ServletNumProvider;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletPageProvider;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
@@ -44,6 +45,8 @@ import de.iwes.util.timer.AbsoluteTiming;
  *
  */
 public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl> {
+	public static PerformanceLog tsServletLog;
+
 	public static final long ACCEPTED_PREVIOUS_VALUE_DISTANCE_FOR_DAY_EVAL = TimeProcUtil.HOUR_MILLIS*12;
 	public static final double MILLIJOULE_TO_KWH = 0.001/TimeProcUtil.HOUR_MILLIS;
 	public static final float JOULE_TO_KWH = (float) (1.0/TimeProcUtil.HOUR_MILLIS);
@@ -337,6 +340,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			prevCounter = 0;
 		}*/
 		List<SampledValue> result = new ArrayList<>();
+//long startCalc = System.currentTimeMillis();
 		while(nextDayStart <= end) {
 			long startCurrentDay = nextDayStart;
 			nextDayStart = AbsoluteTimeHelper.addIntervalsFromAlignedTime(nextDayStart, 1, intervalType);
@@ -374,6 +378,9 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				result.add(new SampledValue(new FloatValue(scale.getStdVal(newDayVal, startCurrentDay)), startCurrentDay, Quality.GOOD));
 			else
 				result.add(new SampledValue(new FloatValue(newDayVal), startCurrentDay, Quality.GOOD));
+//long endCalc = System.currentTimeMillis();
+//if(tsServletLog != null) tsServletLog.logEvent(endCalc-startCalc, "Calculation of DAY+"+StringFormatHelper.getDateInLocalTimeZone(startCurrentDay)+"  took");
+//startCalc = endCalc;
 		}
 		return result;
 	}

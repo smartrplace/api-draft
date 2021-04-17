@@ -7,11 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.util.AggregationModeProvider;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
+import org.smartrplace.gateway.device.GatewayDevice;
+import org.smartrplace.tissue.util.logconfig.PerformanceLog;
+import org.smartrplace.tissue.util.logconfig.PerformanceLog.GwSubResProvider;
 
 import de.iwes.timeseries.eval.api.TimeSeriesData;
 
@@ -28,6 +34,84 @@ public abstract class TimeseriesSimpleProcUtilBase {
 		this.appMan = appMan;
 		this.dpService = dpService;
 		
+		TimeseriesSetProcMultiToSingle.tsSingleLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle.class.getName()+"_TSI",
+				new GwSubResProvider() {
+					
+					@Override
+					public FloatResource getEventResource(GatewayDevice device) {
+						return device.pstMultiToSingleEvents();
+					}
+					
+					@Override
+					public FloatResource getCounterResource(GatewayDevice device) {
+						return device.pstMultiToSingleCounter();
+					}
+				});
+		TimeseriesSetProcMultiToSingle.aggregateLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle.class.getName()+"_AGG",
+				new GwSubResProvider() {
+					
+					@Override
+					public FloatResource getEventResource(GatewayDevice device) {
+						return device.pstMultiToSingleAggregations();
+					}
+					@Override
+					public FloatResource getCounterResource(GatewayDevice device) {
+						return device.pstMultiToSingleAggregationsCounter();
+					}
+				});
+
+		ProcessedReadOnlyTimeSeries.lockLog = PerformanceLog.getInstance(true, appMan, ProcessedReadOnlyTimeSeries.class.getName()+"_LCK",
+				new GwSubResProvider() {
+					
+					@Override
+					public FloatResource getEventResource(GatewayDevice device) {
+						return device.pstBlockingSingeEvents();
+					}
+					
+					@Override
+					public FloatResource getCounterResource(GatewayDevice device) {
+						return device.pstBlockingCounter();
+					}
+				});
+		ProcessedReadOnlyTimeSeries.subTsBuildLog = PerformanceLog.getInstance(true, appMan, ProcessedReadOnlyTimeSeries.class.getName()+"_SUB",
+				new GwSubResProvider() {
+					
+					@Override
+					public FloatResource getEventResource(GatewayDevice device) {
+						return device.pstSubTsBuild();
+					}
+					
+					@Override
+					public FloatResource getCounterResource(GatewayDevice device) {
+						return device.pstSubTsBuildCounter();
+					}
+				});
+		ProcessedReadOnlyTimeSeries2.uv2Log = PerformanceLog.getInstance(true, appMan, ProcessedReadOnlyTimeSeries2.class.getName()+"_UV2",
+				new GwSubResProvider() {
+					
+					@Override
+					public FloatResource getEventResource(GatewayDevice device) {
+						return device.pstUpdateValuesPS2();
+					}
+					
+					@Override
+					public FloatResource getCounterResource(GatewayDevice device) {
+						return device.pstUpdateValuesPS2Counter();
+					}
+				});
+		TimeSeriesServlet.tsServletLog = PerformanceLog.getInstance(true, appMan, TimeSeriesServlet.class.getName()+"_TSS",
+				new GwSubResProvider() {
+					
+					@Override
+					public FloatResource getEventResource(GatewayDevice device) {
+						return device.pstTSServlet();
+					}
+					
+					@Override
+					public FloatResource getCounterResource(GatewayDevice device) {
+						return device.pstTSServletCounter();
+					}
+				});
 	}
 	public List<Datapoint> process(String tsProcessRequest, List<Datapoint> input) {
 		TimeseriesSetProcessor proc = knownProcessors.get(tsProcessRequest);

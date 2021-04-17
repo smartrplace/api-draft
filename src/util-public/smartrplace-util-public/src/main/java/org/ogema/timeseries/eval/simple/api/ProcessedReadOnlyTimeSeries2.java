@@ -16,6 +16,7 @@ import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
+import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 
 import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
@@ -40,6 +41,8 @@ import de.iwes.util.format.StringFormatHelper;
  */
 public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTimeSeries {
 	
+	public static PerformanceLog uv2Log;
+
 	/** This method is called to obtain the calculated values. The method may be called again for the same
 	 * time stamps.
 	 * @param timeSeries
@@ -147,7 +150,8 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 
 	@Override
 	protected List<SampledValue> updateValues(long start, long end) {
-if(Boolean.getBoolean("evaldebug")) System.out.println("updateValues for  "+dpLabel()+" "+TimeProcPrint.getFullTime(start)+" : "+TimeProcPrint.getFullTime(end));
+long startCalc = getCurrentTime();
+		if(Boolean.getBoolean("evaldebug")) System.out.println("updateValues for  "+dpLabel()+" "+TimeProcPrint.getFullTime(start)+" : "+TimeProcPrint.getFullTime(end));
 		ReadOnlyTimeSeries ts = tsdi.getTimeSeries();
 		if(firstTimestampInSource == null) {
 			SampledValue sv = ts.getNextValue(0);
@@ -157,24 +161,28 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("updateValues for  "+dpLa
 				return Collections.emptyList();
 		}
 		if(lastTimestampInSource == null || updateLastTimestampInSourceOnEveryCall) {
+long startCalc2 = getCurrentTime();
+if(uv2Log != null) uv2Log.logEvent(startCalc2-startCalc, "Calculation of INI "+getShortId()+" took");
 			SampledValue sv = ts.getPreviousValue(Long.MAX_VALUE);
 			if(sv != null) {
 				lastTimestampInSource = sv.getTimestamp();
-logger.info("Found last input time stamp:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastTimestampInSource)+" for "+dpLabel());
-if(ts instanceof RecordedData) {
-	RecordedData rec = (RecordedData) ts;
-	logger.info("Read from "+rec.getPath());
-} else
-	logger.info("Read from no-RecordedData values: "+dpLabel());
+				logger.info("Found last input time stamp:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastTimestampInSource)+" for "+dpLabel());
+				if(ts instanceof RecordedData) {
+					RecordedData rec = (RecordedData) ts;
+					logger.info("Read from "+rec.getPath());
+				} else
+					logger.info("Read from no-RecordedData values: "+dpLabel());
+long endCalc2 = getCurrentTime();
+if(uv2Log != null) uv2Log.logEvent(endCalc2-startCalc2, "Calculation of RED "+getShortId()+" took");
 			} else if(lastTimestampInSource == null)
 				return Collections.emptyList();
 		}
 		if(end < firstTimestampInSource) {
-if(Boolean.getBoolean("evaldebug")) System.out.println("end < firstTimestampInSource for  "+dpLabel()+" firstTsInS:"+TimeProcPrint.getFullTime(firstTimestampInSource));
+			if(Boolean.getBoolean("evaldebug")) System.out.println("end < firstTimestampInSource for  "+dpLabel()+" firstTsInS:"+TimeProcPrint.getFullTime(firstTimestampInSource));
 			return Collections.emptyList();
 		}
 		if(start > lastTimestampInSource) {
-if(Boolean.getBoolean("evaldebug")) System.out.println("start > lastTimestampInSource for  "+dpLabel()+" lastsInS:"+TimeProcPrint.getFullTime(lastTimestampInSource));
+			if(Boolean.getBoolean("evaldebug")) System.out.println("start > lastTimestampInSource for  "+dpLabel()+" lastsInS:"+TimeProcPrint.getFullTime(lastTimestampInSource));
 			return Collections.emptyList();
 		}
 		if(end > lastTimestampInSource)
@@ -184,7 +192,12 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("start > lastTimestampInS
 logger.info("Starting getResultValues for PROT:"+getInputDp().label(null)+getLabelPostfix()+" from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(start)+
 		" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(end+1));
 		//we want end inclusive, so we have to add 1
-		return getResultValues(ts, start, end+1, mode);
+long startCalc3 = getCurrentTime();
+		List<SampledValue> result = getResultValues(ts, start, end+1, mode);
+long endCalc = getCurrentTime();
+if(uv2Log != null) uv2Log.logEvent(endCalc-startCalc3, "Calculation of REV "+getShortId()+" took");
+if(uv2Log != null) uv2Log.logEvent(endCalc-startCalc, "Calculation of UV2 "+getShortId()+" took");
+		return result;
 	}
 
 	@Override

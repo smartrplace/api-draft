@@ -20,6 +20,7 @@ import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcSingleToSingle.ProcTsProvider;
+import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
@@ -36,6 +37,9 @@ import de.iwes.util.timer.AbsoluteTiming;
  * set at least label(null) or label(ENGLISH).*/
 public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetProcessor {
 
+	public static PerformanceLog tsSingleLog;
+	public static PerformanceLog aggregateLog;
+	
 	protected abstract float aggregateValues(Float[] values, long timestamp, AggregationMode mode);
 	
 	/** change startTime and endTime of parameter if necessary*/
@@ -249,12 +253,16 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLa
 					@Override
 					protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
 							long end, AggregationMode mode) {
+long startOfAgg = dpService.getFrameworkTime();
 if(Boolean.getBoolean("evaldebug")) System.out.println("Starting aggregation for "+getShortId());
 						long startOfCalc = dpService.getFrameworkTime();
 						
 						Float[] values = new Float[input.size()];
 						List<SampledValue> resultLoc = new ArrayList<>();
-						for(SampledValue svalTs: getTSDI().getTimeSeries().getValues(start, end)) {
+						List<SampledValue> vals = getTSDI().getTimeSeries().getValues(start, end);
+long endOfAgg1 =  dpService.getFrameworkTime();
+if(aggregateLog != null) aggregateLog.logEvent(endOfAgg1-startOfAgg, "Calculation of AG1 "+getShortId()+" took");
+						for(SampledValue svalTs: vals) {
 							long timestamp = svalTs.getTimestamp();
 							int idx = 0;
 							for(Datapoint dpLoc: input) {
@@ -269,14 +277,19 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Starting aggregation for
 									values[idx] = svLoc.getValue().getFloatValue();
 								idx++;
 							}
+long startOfAgg2 = dpService.getFrameworkTime();
 							float val = aggregateValues(values, timestamp, mode);
+long endOfAgg =  dpService.getFrameworkTime();
+if(aggregateLog != null) aggregateLog.logEvent(endOfAgg-startOfAgg2, "Calculation of AG2 "+getShortId()+" took");
+if(aggregateLog != null) aggregateLog.logEvent(endOfAgg-startOfAgg, "Calculation of AGG "+getShortId()+" took");
 							resultLoc.add(new SampledValue(new FloatValue(val), timestamp, Quality.GOOD));
 						}
 						debugCalculationResult(input, resultLoc);
 						
 						long endOfCalc =  dpService.getFrameworkTime();
 //TODO: These values could be logged to check evaluation performance
-if(Boolean.getBoolean("evaldebug0")||Boolean.getBoolean("evaldebug")) System.out.println("Calculation of "+getShortId()+" took "+(endOfCalc-startOfCalc)+" msec");
+if(tsSingleLog != null) tsSingleLog.logEvent((endOfCalc-startOfCalc), "Calculation of TSI "+getShortId()+" took");
+
 						return resultLoc;
 					}
 					

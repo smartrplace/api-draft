@@ -18,6 +18,7 @@ import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
@@ -78,6 +79,9 @@ import de.iwes.util.timer.AbsoluteTiming;
  * a ReentrantLock. For the proc and cons of ReentrantLock see the table in https://www.geeksforgeeks.org/lock-framework-vs-thread-synchronization-in-java/.
  * */
 public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries {
+	
+	public static PerformanceLog lockLog;
+	public static PerformanceLog subTsBuildLog;
 	
 	protected abstract List<SampledValue> updateValues(long start, long end);
 	
@@ -147,11 +151,14 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("getValues for  "+dpLabel
 			startTime = 0;
 		boolean isFree = updateLock.tryLock();
 		if(!isFree) {
-			System.out.println("Waiting for lock for "+dpLabel()+"...");
+			//System.out.println("Waiting for lock for "+dpLabel()+"...");
 			long startWait = getCurrentTime();
 			updateLock.lock();
-			System.out.println("Acquired lock for "+dpLabel()+" after "+(getCreationTime() - startWait)+" msec.");			
+			//System.out.println("Acquired lock for "+dpLabel()+" after "+(getCreationTime() - startWait)+" msec.");			
+			long endOfAgg =  getCurrentTime();
+if(lockLog != null) lockLog.logEvent((endOfAgg-startWait), "Acquired lock for "+dpLabel()+" after");
 		}
+		List<DpGap> toUpdate = null;
 		try {
 		if(knownEndUpdateInterval != null) {
 			long now = getCurrentTime();
@@ -166,36 +173,23 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("getValues for  "+dpLabel
 				lastKnownEndUpdate = now;
 			}
 		}
-		List<DpGap> toUpdate = getIntervalsToUpdate(startTime, endTime);
+		toUpdate = getIntervalsToUpdate(startTime, endTime);
 		if(toUpdate != null) for(DpGap intv: toUpdate) {
 			if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
-				values = updateValues(startTime, endTime);
-if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals1:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
-				isOwnList = false;
+				continue;
+				//values = updateValues(startTime, endTime);
+//if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals1:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
+				//isOwnList = false;
 			} else {
 				//List<SampledValue> prevVals = getValuesWithoutUpdate(intv.start, intv.end);
 				List<SampledValue> newVals = updateValues(intv.start, intv.end);
 if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals2:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 				addValues(newVals);
-				/*if(!isOwnList) {
-					List<SampledValue> concat = new ArrayList<SampledValue>(values);
-					concat.removeAll(prevVals);
-					concat.addAll(newVals);
-					values = concat;
-					isOwnList = true;					
-				} else {
-					values.removeAll(prevVals);
-					values.addAll(newVals);
-				}*/
 			}
 			if(intv.start < 0 || intv.end > knownEnd)
 				knownEnd = intv.end;
 			if(intv.start < 0 || intv.start < knownStart)
 				knownStart = intv.start;
-		}
-		if((toUpdate != null) && (!toUpdate.isEmpty()) && (datapointForChangeNotification != null)) {
-			DpUpdated updTotal = DatapointImpl.getStartEndForUpdList(toUpdate);
-			datapointForChangeNotification.notifyTimeseriesChange(updTotal.start, updTotal.end);
 		}
 		if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
 			values = updateValues(startTime, endTime);
@@ -223,6 +217,10 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals5:  "+d
 			updateLock.unlock();
 		}
 		List<SampledValue> result = getValuesWithoutUpdate(startTime, endTime);
+		if((toUpdate != null) && (!toUpdate.isEmpty()) && (datapointForChangeNotification != null)) {
+			DpUpdated updTotal = DatapointImpl.getStartEndForUpdList(toUpdate);
+			datapointForChangeNotification.notifyTimeseriesChange(updTotal.start, updTotal.end);
+		}
 if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size()+" vals for "+dpLabel()+" "+TimeProcPrint.getFullTime(startTime)+" : "+TimeProcPrint.getFullTime(endTime));
 		return result;
 	}
@@ -237,6 +235,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 		}
 		if(values.isEmpty())
 			return Collections.emptyList();
+long startCalc =  getCurrentTime();
 		int fromIndex = -1;
 		int toIndex = -1;
 		for(int i=0; i<values.size(); i++) {
@@ -258,12 +257,15 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 		if(fromIndex > toIndex)
 			return Collections.emptyList();
 		List<SampledValue> result = values.subList(fromIndex, toIndex+1);
+		long endOfAgg =  getCurrentTime();
+if(subTsBuildLog != null) subTsBuildLog.logEvent((endOfAgg-startCalc), "Calculation of SUB "+dpLabel()+" took");
 		return result;		
 	}
 	
 	protected void addValues(List<SampledValue> newVals) {
 		if(newVals.isEmpty())
 			return;
+long startCalc =  getCurrentTime();
 		List<SampledValue> existing = null;
 		long newFirst = newVals.get(0).getTimestamp();
 		long newLast = newVals.get(newVals.size()-1).getTimestamp();
@@ -296,6 +298,8 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for
 			isOwnList = true;
 		}
 		updateValueLimits();
+long endCalc =  getCurrentTime();
+if(subTsBuildLog != null) subTsBuildLog.logEvent((endCalc-startCalc), "Calculation of ADD "+dpLabel()+" took");
 	}
 	
 	protected void insertNewValues(List<SampledValue> newVals, long newFirst) {
