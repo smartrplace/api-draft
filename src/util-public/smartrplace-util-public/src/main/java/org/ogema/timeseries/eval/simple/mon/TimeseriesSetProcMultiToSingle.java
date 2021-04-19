@@ -58,6 +58,8 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 	public int updateMode;
 	
 	protected final Integer absoluteTiming;
+	
+	protected final Long minIntervalForReCalc;
 
 	/** Currently we assume that two input time series cover the entire range and that one of them always covers the start
 	 * and the other always covers the end. The two time series may not be available at the time of the result timeseries
@@ -94,7 +96,7 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 			return null;
 		}
 
-		ProcessedReadOnlyTimeSeries inputSingle = new ProcessedReadOnlyTimeSeries(InterpolationMode.NONE, absoluteTiming) {
+		ProcessedReadOnlyTimeSeries inputSingle = new ProcessedReadOnlyTimeSeries(InterpolationMode.NONE, absoluteTiming, minIntervalForReCalc) {
 			protected long lastGetValues = 0;
 			
 			@Override
@@ -231,9 +233,14 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLa
 	 * @param absoluteTiming if set then knownEnd will be reset to beginning of interval always
 	 */
 	public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType, Integer absoluteTiming) {
+		this(resultlabel, intervalType, absoluteTiming, null);
+	}
+	public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType, Integer absoluteTiming,
+			Long minIntervalForReCalc) {
 		this.label = resultlabel;
 		//this.intervalType = intervalType;
 		this.absoluteTiming = absoluteTiming;
+		this.minIntervalForReCalc = minIntervalForReCalc;
 		TEST_SHIFT = (long) (0.9*AbsoluteTimeHelper.getStandardInterval(intervalType)); //TimeProcUtil.DAY_MILLIS-2*TimeProcUtil.HOUR_MILLIS;
 	}
 
@@ -249,7 +256,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLa
 			
 			@Override
 			public ProcessedReadOnlyTimeSeries2 getTimeseries(Datapoint newtsdi) {
-				resultSeriesStore = new ProcessedReadOnlyTimeSeries2(inputSingle.dpIn, absoluteTiming) {
+				resultSeriesStore = new ProcessedReadOnlyTimeSeries2(inputSingle.dpIn, absoluteTiming, minIntervalForReCalc) {
 					@Override
 					protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
 							long end, AggregationMode mode) {

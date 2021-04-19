@@ -147,4 +147,18 @@ public class TimeProcUtil {
 		}
 		return max;
 	}
+	
+	public static boolean checkConsistency(List<SampledValue> values, String label) {
+		long prevTime = 0;
+		int idx = 0;
+		for(SampledValue val: values) {
+			if(val.getTimestamp() <= prevTime) {
+				System.out.println("  !!!!! WARNING:: timeseries order error at idx:"+idx+" for "+(label!=null?label:"(unknown)"));
+				return false;
+			}
+			prevTime = val.getTimestamp();
+			idx++;
+		}
+		return true;
+	}
 }

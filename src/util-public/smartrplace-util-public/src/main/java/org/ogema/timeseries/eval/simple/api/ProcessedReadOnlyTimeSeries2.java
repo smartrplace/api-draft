@@ -109,7 +109,7 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	public ProcessedReadOnlyTimeSeries2(TimeSeriesNameProvider nameProvider,
 			AggregationMode mode, Datapoint dpInput,
 			boolean updateLastTimestampInSourceOnEveryCall) {
-		this(nameProvider, mode, dpInput, updateLastTimestampInSourceOnEveryCall, null);
+		this(nameProvider, mode, dpInput, updateLastTimestampInSourceOnEveryCall, null, null);
 	}
 	/**
 	 * 
@@ -123,8 +123,9 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	public ProcessedReadOnlyTimeSeries2(TimeSeriesNameProvider nameProvider,
 			AggregationMode mode, Datapoint dpInput,
 			boolean updateLastTimestampInSourceOnEveryCall,
-			Integer absoluteTiming) {
-		super(InterpolationMode.NONE, absoluteTiming);
+			Integer absoluteTiming,
+			Long minIntervalForReCalc) {
+		super(InterpolationMode.NONE, absoluteTiming, minIntervalForReCalc);
 		this.nameProvider = nameProvider;
 		this.tsdi = dpInput.getTimeSeriesDataImpl(null); //tsdi;
 		this.dpInput = dpInput;
@@ -135,9 +136,10 @@ public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTime
 	public ProcessedReadOnlyTimeSeries2(Datapoint dpInput) {
 		this(null, dpInput.info().getAggregationMode(), dpInput);
 	}
-	public ProcessedReadOnlyTimeSeries2(Datapoint dpInput, Integer absoluteTiming) {
+	public ProcessedReadOnlyTimeSeries2(Datapoint dpInput, Integer absoluteTiming, Long minIntervalForReCalc) {
 		this(null, dpInput.info().getAggregationMode(), dpInput,
-				!Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"), absoluteTiming);
+				!Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"), absoluteTiming,
+				minIntervalForReCalc);
 	}
 	
 	/*static AggregationMode getMode(MonitoringController controller, String label) {

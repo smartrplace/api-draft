@@ -84,6 +84,9 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	public static PerformanceLog subTsBuildLog;
 	
 	protected abstract List<SampledValue> updateValues(long start, long end);
+	private List<SampledValue> updateValues2(long start, long end, long now) {
+		return updateValues(start, end);
+	}
 	
 	/** Only relevant if updateFinalValue is active (default is every two hours)*/
 	protected abstract long getCurrentTime();
@@ -105,8 +108,14 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	private boolean isOwnList = false;
 
 	final Long knownEndUpdateInterval;
+	final Long intervalsToUpdateProcessingInterval;
+	final Long minIntervalForReCalc;
 	long lastKnownEndUpdate = -1;
-	//If this is set then the known
+	long lastIntervalToUpdateProc = -1;
+	long lastReCalc = -1;
+	
+	/** User for the update when knownEndUpdateInterval is triggered
+	 */
 	final Integer absoluteTiming; 
 	
 	protected final long creationTime;
@@ -121,12 +130,22 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	
 	
 	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode) {
-		this(interpolationMode, null);
+		this(interpolationMode, null, null);
 	}
 	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode, Integer absoluteTiming) {
-		this(interpolationMode, 1000*Long.getLong("org.ogema.timeseries.eval.simple.api.knownIntervalUpdate", 7200), absoluteTiming);
+		this(interpolationMode, absoluteTiming, null);
+	}
+	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode, Integer absoluteTiming, Long minIntervalForReCalc) {
+		this(interpolationMode, 1000*Long.getLong("org.ogema.timeseries.eval.simple.api.knownIntervalUpdate", 7200),
+				1000*Long.getLong("org.ogema.timeseries.eval.simple.api.intervalsToUpdateProcessingInterval", 1),
+				minIntervalForReCalc, absoluteTiming);
 	}
 		
+	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode,
+			Long knownEndUpdateInterval, Long intervalsToUpdateProcessingInterval,
+			Integer absoluteTiming) {
+		this(interpolationMode, knownEndUpdateInterval, intervalsToUpdateProcessingInterval, null, absoluteTiming);
+	}
 	/** Constructor
 	 * 
 	 * @param interpolationMode currently only InterpolationMode.NONE is supported
@@ -134,11 +153,14 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	 * 		values are assumed to be known is reset to lastKnownEndUpdate. If absoluteInterval is set then it will
 	 * 		even be set back to the beginning of the interval of lastKnownEndUpdate
 	 */
-	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode, Long knownEndUpdateInterval,
+	public ProcessedReadOnlyTimeSeries(InterpolationMode interpolationMode,
+			Long knownEndUpdateInterval, Long intervalsToUpdateProcessingInterval, Long minIntervalForReCalc,
 			Integer absoluteTiming) {
 		this.interpolationMode = interpolationMode;
 		this.knownEndUpdateInterval = knownEndUpdateInterval;
+		this.minIntervalForReCalc = minIntervalForReCalc;
 		this.absoluteTiming = absoluteTiming;
+		this.intervalsToUpdateProcessingInterval = intervalsToUpdateProcessingInterval;
 		this.creationTime = getCurrentTime();
 		this.intervalToUpdate.start = -1;
 	}
@@ -160,8 +182,11 @@ if(lockLog != null) lockLog.logEvent((endOfAgg-startWait), "Acquired lock for "+
 		}
 		List<DpGap> toUpdate = null;
 		try {
+		long now = getCurrentTime();
+		if(minIntervalForReCalc != null && ((now - lastReCalc) < minIntervalForReCalc))
+			return getValuesWithoutUpdate(startTime, endTime);
+		lastReCalc = now;
 		if(knownEndUpdateInterval != null) {
-			long now = getCurrentTime();
 			if(now - lastKnownEndUpdate > knownEndUpdateInterval) {
 				if(absoluteTiming != null) {
 					if(absoluteTiming == AbsoluteTiming.ANY_RANGE) {
@@ -173,40 +198,43 @@ if(lockLog != null) lockLog.logEvent((endOfAgg-startWait), "Acquired lock for "+
 				lastKnownEndUpdate = now;
 			}
 		}
-		toUpdate = getIntervalsToUpdate(startTime, endTime);
-		if(toUpdate != null) for(DpGap intv: toUpdate) {
-			if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
-				continue;
-				//values = updateValues(startTime, endTime);
-//if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals1:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
-				//isOwnList = false;
-			} else {
-				//List<SampledValue> prevVals = getValuesWithoutUpdate(intv.start, intv.end);
-				List<SampledValue> newVals = updateValues(intv.start, intv.end);
-if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals2:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
-				addValues(newVals);
+		if((now - lastIntervalToUpdateProc) > intervalsToUpdateProcessingInterval) {
+			toUpdate = getIntervalsToUpdate(startTime, endTime);
+			if(toUpdate != null) for(DpGap intv: toUpdate) {
+				if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
+					continue;
+					//values = updateValues(startTime, endTime);
+	//if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals1:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
+					//isOwnList = false;
+				} else {
+					//List<SampledValue> prevVals = getValuesWithoutUpdate(intv.start, intv.end);
+					List<SampledValue> newVals = updateValues2(intv.start, intv.end, now);
+	if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals2:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
+					addValues(newVals);
+				}
+				if(intv.start < 0 || intv.end > knownEnd)
+					knownEnd = intv.end;
+				if(intv.start < 0 || intv.start < knownStart)
+					knownStart = intv.start;
 			}
-			if(intv.start < 0 || intv.end > knownEnd)
-				knownEnd = intv.end;
-			if(intv.start < 0 || intv.start < knownStart)
-				knownStart = intv.start;
+			lastIntervalToUpdateProc = now;
 		}
 		if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
-			values = updateValues(startTime, endTime);
+			values = updateValues2(startTime, endTime, now);
 if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals3:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
 			isOwnList = false;
 			knownStart = startTime;
 			knownEnd = endTime;
 			updateValueLimits();
 		} else if(startTime < knownStart) {
-			List<SampledValue> newVals = updateValues(startTime, knownStart);
+			List<SampledValue> newVals = updateValues2(startTime, knownStart, now);
 if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals4:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 			addValues(newVals);
 			knownStart = startTime;	
 			//updateValueLimits();
 		} else if(endTime > knownEnd) {
 //logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd)+" endTime:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(endTime));
-			List<SampledValue> newVals = updateValues(knownEnd, endTime);
+			List<SampledValue> newVals = updateValues2(knownEnd, endTime, now);
 if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals5:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 //logger.error("Found new vals:"+values.size());
 			addValues(newVals);
@@ -265,14 +293,22 @@ if(subTsBuildLog != null) subTsBuildLog.logEvent((endOfAgg-startCalc), "Calculat
 	protected void addValues(List<SampledValue> newVals) {
 		if(newVals.isEmpty())
 			return;
+if(dpLabel().contains("NRI-PowerMeterEnergy_proTag") && newVals.get(newVals.size()-1).getTimestamp() > 1618594430000l)
+	System.out.println("  DEBUGGINBG addValues:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(newVals.get(newVals.size()-1).getTimestamp()));
 long startCalc =  getCurrentTime();
+		if(Boolean.getBoolean("evaldebug")) {
+			TimeProcUtil.checkConsistency(newVals, "NEW::"+dpLabel());
+		}
 		List<SampledValue> existing = null;
 		long newFirst = newVals.get(0).getTimestamp();
 		long newLast = newVals.get(newVals.size()-1).getTimestamp();
-		List<SampledValue> existingLoc = getValuesWithoutUpdate(newFirst, newLast);
+		List<SampledValue> existingLoc = getValuesWithoutUpdate(newFirst, newLast+1);
 		if(!existingLoc.isEmpty()) {
 if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for "+dpLabel()+" without registration in getIntervalsToUpdate - now accepted");
 			existing = existingLoc;
+		}
+		if(Boolean.getBoolean("evaldebug")) {
+			TimeProcUtil.checkConsistency(values, "PRE::"+dpLabel());
 		}
 		if(isOwnList) {
 			try {
@@ -308,9 +344,10 @@ if(subTsBuildLog != null) subTsBuildLog.logEvent((endCalc-startCalc), "Calculati
 			return;
 		}
 		long lastInList = values.get(values.size()-1).getTimestamp();
+		int idx = -999;
 		if(newFirst < lastInList) {
 			//we have to insert at the right position
-			int idx = values.size()-2;
+			idx = values.size()-2;
 			while(idx >= 0) {
 				if(newFirst > values.get(idx).getTimestamp()) {
 					break;
@@ -318,18 +355,21 @@ if(subTsBuildLog != null) subTsBuildLog.logEvent((endCalc-startCalc), "Calculati
 				idx--;
 			}
 			List<SampledValue> concat;
-			if(idx>=0)
-				concat = new ArrayList<>(values.subList(0, idx));
+			if(idx >= 0)
+				concat = new ArrayList<>(values.subList(0, idx+1));
 			else
 				concat = new ArrayList<>();
 			concat.addAll(newVals);
 			if(idx >= 0)
-				concat.addAll(values.subList(idx, values.size()));
+				concat.addAll(values.subList(idx+1, values.size()));
 			else
 				concat.addAll(values);
 			values = concat;
 		} else
 			values.addAll(newVals);
+		if(Boolean.getBoolean("evaldebug")) {
+			TimeProcUtil.checkConsistency(values, "POST::"+dpLabel());
+		}
 	}
 	
 	protected void updateValueLimits() {

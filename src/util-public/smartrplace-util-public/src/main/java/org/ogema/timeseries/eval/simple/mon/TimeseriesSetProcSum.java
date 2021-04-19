@@ -14,6 +14,9 @@ public class TimeseriesSetProcSum extends TimeseriesSetProcMultiToSingle {
 	public TimeseriesSetProcSum(String label, int intervalType, Integer absoluteTiming) {
 		super(label, intervalType, absoluteTiming);
 	}
+	public TimeseriesSetProcSum(String label, int intervalType, Integer absoluteTiming, Long minIntervalForReCalc) {
+		super(label, intervalType, absoluteTiming, minIntervalForReCalc);
+	}
 
 	@Override
 	protected float aggregateValues(Float[] values, long timestamp, AggregationMode mode) {
