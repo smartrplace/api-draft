@@ -38,8 +38,14 @@ public class RemoteTimeseriesUtil {
 		String[] gwLoc = getGatewayLocationForMirror(sres);
 		if(gwLoc[0].equals("Local"))
 			return dpService.getDataPointAsIs(gwLoc[1]);
+		String[] check = gwLoc[1].split("\\$X\\$");
+		String dpLocEnd;
+		if(check.length == 2) {
+			dpLocEnd = check[1];
+		} else
+			dpLocEnd = gwLoc[1];
 		for(Datapoint dp: dpService.getAllDatapoints(gwLoc[0])) {
-			if(dp.getLocation().endsWith(gwLoc[1]))
+			if(dp.getLocation().endsWith(dpLocEnd))
 				return dp;
 		}
 		return null;
