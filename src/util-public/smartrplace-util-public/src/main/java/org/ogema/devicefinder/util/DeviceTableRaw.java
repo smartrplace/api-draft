@@ -582,9 +582,12 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static boolean isOpenWeatherMapBigBlue(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		return resourceLocation.startsWith("BigBlueRoom") || resourceLocation.startsWith("WeatherData");
-			
 	}
 	
+	public static boolean isHAPDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		return resourceLocation.contains("maintenanceChannelReadings");
+	}
+
 	/** For {@link ElectricityConnectionBox} devices*/
 	public static boolean isEnergyServerDevice(String resourceLocation) {
 		if(resourceLocation.startsWith("EnergyServerReadings_ESE/ESE_"))
