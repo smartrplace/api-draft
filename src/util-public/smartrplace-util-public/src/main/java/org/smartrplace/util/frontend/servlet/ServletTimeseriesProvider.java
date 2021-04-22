@@ -37,6 +37,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	
 	//set from outside if necessary
 	public String unit = null;
+	public String label = null;
 	public String align = null;
 	
 	//First factor, then offset are applied to gateway values on reading (GET)
@@ -153,6 +154,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				json.put("unit", unit);
 			if(align != null)
 				json.put("align", align);
+			if(label != null)
+				json.put("label", label);
 			return realResult;
 		} else
 			vals = timeSeries.getValues(startEnd[0], startEnd[1]);
@@ -169,6 +172,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			json.put("unit", unit);
 		if(align != null)
 			json.put("align", align);
+		if(label != null)
+			json.put("label", label);
 
 		JSONVarrRes realResult = new JSONVarrRes();
 		realResult.result = json;
