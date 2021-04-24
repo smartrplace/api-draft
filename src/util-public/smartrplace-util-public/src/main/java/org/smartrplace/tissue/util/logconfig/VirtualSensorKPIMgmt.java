@@ -445,12 +445,16 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 	public static void waitForCollectingGatewayServerInit(ResourceAccess resAcc) {
 		Resource mirrorList = resAcc.getResource("serverMirror");
 		IntegerResource initStatus = mirrorList.getSubResource("initStatus", IntegerResource.class);
+		int count = 0;
 		while(initStatus.isActive() && (initStatus.getValue() < 2) && Boolean.getBoolean("org.smartrplace.app.srcmon.iscollectinggateway")) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			if(count > 200)
+				System.out.println("WARNING: in waitForCollectingGatewayServerInit blocked for more than 20 seconds!");
+			count++;
 		}		
 	}
 }

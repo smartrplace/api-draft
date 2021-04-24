@@ -18,8 +18,8 @@ import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvi
 
 public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	/** Short transfer Id -> Local Datapoint*/
-	Map<String, Datapoint> datapointsToRecvM = new HashMap<>();
-	Map<Datapoint, String> datapointsToSendM = new HashMap<>();
+	private Map<String, Datapoint> datapointsToRecvM = new HashMap<>();
+	private Map<Datapoint, String> datapointsToSendM = new HashMap<>();
 	Map<Datapoint, ViaHeartbeatInfoProvider> infoProvidersM = new HashMap<>();
 	protected int lastTransferId = 0;
 	protected boolean structureUpdateToRemotePending = true;
@@ -86,16 +86,6 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		return dp;
 	}
 	public boolean receiveDatapointData(String transferId, float value) {
-		/*Datapoint dp = datapointsToRecvM.get(transferId);
-		if(dp == null) {
-			for(Entry<Datapoint, String> send: datapointsToSendM.entrySet()) {
-				if(send.getValue().equals(transferId)) {
-					dp = send.getKey();
-					datapointsToRecvM.put(transferId, dp);
-					break;
-				}
-			}
-		}*/
 		Datapoint dp = getDatapointForTransferIdReceived(transferId);
 		if(dp == null) {
 			//received information for unknown datapoint
