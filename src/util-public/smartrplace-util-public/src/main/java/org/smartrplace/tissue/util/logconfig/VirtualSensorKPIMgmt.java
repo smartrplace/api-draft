@@ -11,8 +11,10 @@ import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.units.EnergyResource;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
@@ -34,7 +36,17 @@ import de.iwes.util.timer.AbsoluteTiming;
 /** Management of Virtual sensors for a certain application<br>
  * Note that virtual sensors are created with resources, but time series are only stored as memory time series. Only
  * when transferred via heartbeat then schedules are created on the server side. Evaluations and alarming relying on
- * historical data should access this via the datapoint to also get time series for virtual datapoints.
+ * historical data should access this via the datapoint to also get time series for virtual datapoints.<br>
+ * Devices shown in Installation&Setup on the collecting gateway refer to the serverMirror sub device. Here the plots do
+ * not provide any reasonable data. You have to use the Charts app to get the real plot data of the devices from the
+ * sub gateways. TODO: This should be changed in the future.<br>
+ * Collecting Gateways calculate virtual sensors on the collecting gateway, but the slotsDB source is stored in the
+ * directory of the sub gateway. TODO: This leads to the effect that on superior e.g. a Iotawatt device is shown twice,
+ * the real slotsDB source is shown in the sub gateway device plot, the virtual sensor data is shown in the collecting
+ * gateway device plot.<br>
+ * To access the schedule content on the superior gateway you have to use the gateway KPI plots for the respective
+ * collecting gateway. There is a link in the TsAny plot page of superior, which is usually almost empty. The schedules
+ * in the resource database should be under serverMirror/<collectingGw>/gw/ as KPI.
  * 
  * @author dnestle
  *
@@ -428,5 +440,17 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 		ViaHeartbeatSchedules.registerDatapointForHeartbeatDp2Schedule(yearlySum, AbsoluteTiming.YEAR);
 
 		return result;
+	}
+	
+	public static void waitForCollectingGatewayServerInit(ResourceAccess resAcc) {
+		Resource mirrorList = resAcc.getResource("serverMirror");
+		IntegerResource initStatus = mirrorList.getSubResource("initStatus", IntegerResource.class);
+		while(initStatus.isActive() && (initStatus.getValue() < 2) && Boolean.getBoolean("org.smartrplace.app.srcmon.iscollectinggateway")) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}		
 	}
 }

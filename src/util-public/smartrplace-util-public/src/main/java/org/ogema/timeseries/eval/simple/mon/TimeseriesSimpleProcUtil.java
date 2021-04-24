@@ -116,6 +116,42 @@ public class TimeseriesSimpleProcUtil extends TimeseriesSimpleProcUtilBase {
 		};
 		knownProcessors.put(TimeProcUtil.PER_HOUR_EVAL, hourProc);
 		
+		TimeseriesSetProcessor min15Proc = new TimeseriesSetProcSingleToSingle("_per15min", AbsoluteTiming.FIFTEEN_MINUTE) {
+			
+			@Override
+			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
+					AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2) {
+				List<SampledValue> result = TimeSeriesServlet.getDayValues(timeSeries, start, end, mode,
+						newTs2.getInputDp()!=null?newTs2.getInputDp().getScale():null, false, AbsoluteTiming.FIFTEEN_MINUTE);
+				return result;
+			}
+
+			@Override
+			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
+				updateInterval.start = AbsoluteTimeHelper.getIntervalStart(updateInterval.start, AbsoluteTiming.FIFTEEN_MINUTE);
+				updateInterval.end = AbsoluteTimeHelper.getNextStepTime(updateInterval.end, AbsoluteTiming.FIFTEEN_MINUTE)-1;				
+			}
+		};
+		knownProcessors.put(TimeProcUtil.PER_15M_EVAL, min15Proc);
+
+		TimeseriesSetProcessor minuteProc = new TimeseriesSetProcSingleToSingle(TimeProcUtil.PER_MINUTE_SUFFIX, AbsoluteTiming.FIFTEEN_MINUTE) {
+			
+			@Override
+			protected List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start, long end,
+					AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2) {
+				List<SampledValue> result = TimeSeriesServlet.getDayValues(timeSeries, start, end, mode,
+						newTs2.getInputDp()!=null?newTs2.getInputDp().getScale():null, false, AbsoluteTiming.MINUTE);
+				return result;
+			}
+
+			@Override
+			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
+				updateInterval.start = AbsoluteTimeHelper.getIntervalStart(updateInterval.start, AbsoluteTiming.MINUTE);
+				updateInterval.end = AbsoluteTimeHelper.getNextStepTime(updateInterval.end, AbsoluteTiming.MINUTE)-1;				
+			}
+		};
+		knownProcessors.put(TimeProcUtil.PER_MINUTE_EVAL, minuteProc);
+		
 		TimeseriesSetProcessor monthProc = new TimeseriesSetProcSingleToSingle("_perMonth", AbsoluteTiming.MONTH) {
 			
 			@Override
@@ -191,6 +227,46 @@ if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printTimeSeriesSet(input, "IN(
 			}
 		};
 		knownProcessors.put(TimeProcUtil.SUM_PER_HOUR_EVAL, sumProcHour);
+
+		TimeseriesSetProcessor sumProc15Min = new TimeseriesSetProcessor() {
+			
+			@Override
+			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
+if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printTimeSeriesSet(input, "IN(0):15Minproc", 1, null, null);
+				List<Datapoint> result1 = min15Proc.getResultSeries(input, dpService);
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_15min", AbsoluteTiming.FIFTEEN_MINUTE, (updateMode>0)?AbsoluteTiming.FIFTEEN_MINUTE:null, minIntervalForReCalc) {
+					@Override
+					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
+						if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):15Minproc", 1, null, null);
+						if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printFirstElements(resultLoc, "--RT-OUT(1):Total_Sum_15min");
+					}
+				};
+				List<Datapoint> result = sumProc.getResultSeries(result1, dpService);
+				sumProc.updateMode = updateMode;
+				return result;
+			}
+		};
+		knownProcessors.put(TimeProcUtil.SUM_PER_15M_EVAL, sumProc15Min);
+		
+		TimeseriesSetProcessor sumProcMinute = new TimeseriesSetProcessor() {
+			
+			@Override
+			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
+if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printTimeSeriesSet(input, "IN(0):MinuteProc", 1, null, null);
+				List<Datapoint> result1 = minuteProc.getResultSeries(input, dpService);
+				TimeseriesSetProcSum sumProc = new TimeseriesSetProcSum("total_sum_minute", AbsoluteTiming.MINUTE, (updateMode>0)?AbsoluteTiming.MINUTE:null, minIntervalForReCalc) {
+					@Override
+					protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {
+						if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printTimeSeriesSet(input, "--RT-OUT/IN(2):MinuteProc", 1, null, null);
+						if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printFirstElements(resultLoc, "--RT-OUT(1):Total_Sum_minute");
+					}
+				};
+				List<Datapoint> result = sumProc.getResultSeries(result1, dpService);
+				sumProc.updateMode = updateMode;
+				return result;
+			}
+		};
+		knownProcessors.put(TimeProcUtil.SUM_PER_MINUTE_EVAL, sumProcMinute);
 
 		TimeseriesSetProcessor sumProcMonth = new TimeseriesSetProcessor() {
 			

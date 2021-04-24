@@ -22,6 +22,10 @@ public class TimeProcUtil {
 	public static final String PER_DAY_EVAL = "DAY";
 	public static final String PER_DAY_SUFFIX = "_proTag";
 	public static final String PER_HOUR_EVAL = "HOUR";
+	public static final String PER_15M_EVAL = "15Min";
+	public static final String PER_15M_SUFFIX = "_per15Min";
+	public static final String PER_MINUTE_EVAL = "MINUTE";
+	public static final String PER_MINUTE_SUFFIX = "_perMinute";
 	public static final String PER_HOUR_SUFFIX = "_proStunde";
 	public static final String PER_MONTH_EVAL = "MONTH";
 	public static final String PER_MONTH_SUFFIX = "_perMonth";
@@ -31,6 +35,10 @@ public class TimeProcUtil {
 	public static final String SUM_PER_DAY_SUFFIX = "_total_sum";
 	public static final String SUM_PER_HOUR_EVAL = "SUM_PER_HOUR";
 	public static final String SUM_PER_HOUR_SUFFIX = "_total_sum_hour";
+	public static final String SUM_PER_15M_EVAL = "SUM_PER_15MIN";
+	public static final String SUM_PER_15M_SUFFIX = "_total_sum_15min";
+	public static final String SUM_PER_MINUTE_EVAL = "SUM_PER_MINUTE";
+	public static final String SUM_PER_MINUTE_SUFFIX = "_total_sum_minute";
 	public static final String SUM_PER_MONTH_EVAL = "SUM_PER_MONTH";
 	public static final String SUM_PER_MONTH_SUFFIX = "_total_sum_month";
 	public static final String SUM_PER_YEAR_EVAL = "SUM_PER_YEAR";
