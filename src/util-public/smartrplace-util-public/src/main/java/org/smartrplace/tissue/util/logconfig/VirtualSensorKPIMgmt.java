@@ -443,10 +443,14 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 	}
 	
 	public static void waitForCollectingGatewayServerInit(ResourceAccess resAcc) {
+		if(!Boolean.getBoolean("org.smartrplace.app.srcmon.iscollectinggateway"))
+			return;
 		Resource mirrorList = resAcc.getResource("serverMirror");
+		if(mirrorList == null)
+			return;
 		IntegerResource initStatus = mirrorList.getSubResource("initStatus", IntegerResource.class);
 		int count = 0;
-		while(initStatus.isActive() && (initStatus.getValue() < 2) && Boolean.getBoolean("org.smartrplace.app.srcmon.iscollectinggateway")) {
+		while(initStatus.isActive() && (initStatus.getValue() < 2)) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
