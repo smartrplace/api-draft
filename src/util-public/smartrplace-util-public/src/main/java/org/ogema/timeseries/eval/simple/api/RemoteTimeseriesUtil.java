@@ -57,6 +57,18 @@ public class RemoteTimeseriesUtil {
 		if(gwLoc[0].equals("Local"))
 			return dpService.getDataPointStandard(gwLoc[1]);
 		
+		String[] check = gwLoc[1].split("\\$X\\$");
+		//String dpLocEnd;
+		if(check.length == 2) {
+			int idx = check[0].lastIndexOf('/');
+			if(idx >= 0)
+				gwLoc[1] = check[0].substring(0, idx+1)+check[1];
+			else
+				gwLoc[1] = check[1];
+			//dpLocEnd = check[1];
+		} //else
+			//dpLocEnd = gwLoc[1];
+
 		String fullPathPre = null;
 		if(dpg.getAllDatapoints().isEmpty())
 			fullPathPre = "";
