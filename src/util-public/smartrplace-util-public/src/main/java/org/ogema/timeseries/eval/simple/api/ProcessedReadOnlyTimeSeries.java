@@ -222,7 +222,6 @@ if(lockLog != null) lockLog.logEvent((endOfAgg-startWait), "Acquired lock for "+
 				} else {
 					//List<SampledValue> prevVals = getValuesWithoutUpdate(intv.start, intv.end);
 					List<SampledValue> newVals = updateValues2(intv.start, intv.end, now);
-	if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals2:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 					addValues(newVals);
 				}
 				if(intv.start < 0 || intv.end > knownEnd)
@@ -234,21 +233,18 @@ if(lockLog != null) lockLog.logEvent((endOfAgg-startWait), "Acquired lock for "+
 		}
 		if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
 			values = updateValues2(startTime, endTime, now);
-if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals3:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
 			isOwnList = false;
 			knownStart = startTime;
 			knownEnd = endTime;
 			updateValueLimits();
 		} else if(startTime < knownStart) {
 			List<SampledValue> newVals = updateValues2(startTime, knownStart, now);
-if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals4:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 			addValues(newVals);
 			knownStart = startTime;	
 			//updateValueLimits();
 		} else if(endTime > knownEnd) {
 //logger.error("Greater endTime PROT1 knownEnd:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(knownEnd)+" endTime:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(endTime));
 			List<SampledValue> newVals = updateValues2(knownEnd, endTime, now);
-if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals5:  "+dpLabel()+" "+TimeProcPrint.getSummary(newVals));
 //logger.error("Found new vals:"+values.size());
 			addValues(newVals);
 			knownEnd = endTime;			
@@ -262,7 +258,6 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals5:  "+d
 			DpUpdated updTotal = DatapointImpl.getStartEndForUpdList(toUpdate);
 			datapointForChangeNotification.notifyTimeseriesChange(updTotal.start, updTotal.end);
 		}
-if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size()+" vals for "+dpLabel()+" "+TimeProcPrint.getFullTime(startTime)+" : "+TimeProcPrint.getFullTime(endTime));
 		return result;
 	}
 
@@ -307,7 +302,6 @@ if(subTsBuildLog != null) subTsBuildLog.logEvent((endOfAgg-startCalc), "Calculat
 		if(newVals.isEmpty())
 			return;
 if(dpLabel().contains("NRI-PowerMeterEnergy_proTag") && newVals.get(newVals.size()-1).getTimestamp() > 1618594430000l)
-	System.out.println("  DEBUGGINBG addValues:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(newVals.get(newVals.size()-1).getTimestamp()));
 long startCalc =  getCurrentTime();
 		if(Boolean.getBoolean("evaldebug")) {
 			TimeProcUtil.checkConsistency(newVals, "NEW::"+dpLabel());
@@ -317,7 +311,6 @@ long startCalc =  getCurrentTime();
 		long newLast = newVals.get(newVals.size()-1).getTimestamp();
 		List<SampledValue> existingLoc = getValuesWithoutUpdate(newFirst, newLast+1);
 		if(!existingLoc.isEmpty()) {
-if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for "+dpLabel()+" without registration in getIntervalsToUpdate - now accepted");
 			existing = existingLoc;
 		}
 		if(Boolean.getBoolean("evaldebug")) {
