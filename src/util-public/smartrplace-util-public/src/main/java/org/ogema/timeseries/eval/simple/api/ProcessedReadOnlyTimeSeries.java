@@ -181,7 +181,6 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 
 	@Override
 	public List<SampledValue> getValues(long startTime, long endTime) {
-if(Boolean.getBoolean("evaldebug")) System.out.println("getValues for  "+dpLabel()+" "+TimeProcPrint.getFullTime(startTime)+" : "+TimeProcPrint.getFullTime(endTime));
 
 		if(startTime < 0)
 			startTime = 0;
