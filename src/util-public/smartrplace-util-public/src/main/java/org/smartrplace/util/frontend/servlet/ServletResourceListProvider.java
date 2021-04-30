@@ -24,7 +24,7 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 	 * @return irrelevant in POSTMODE REWRITE_COMPLETE_LIST. Otherwise the newly created resource shall
 	 * 		be returned here or null if the creation of a new element is not possible with the input data
 	 */
-	protected abstract T setElementData(T element, JSONObject json);	
+	protected abstract T setElementData(T element, JSONObject json, int index);	
 	
 	/** If the list is written and the new content is shorter than minimum size then the list will not
 	 * be changed. This is not relevant for POSTMODE.ADDONLY
@@ -114,7 +114,7 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 			}
 			for(int i=0; i<len; i++) {
 				List<T> allRes = res.getAllElements();
-				setElementData(allRes.get(i), (JSONObject) json.get(i));
+				setElementData(allRes.get(i), (JSONObject) json.get(i), i);
 			}
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException(e);
@@ -122,7 +122,7 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 		else if(postMode == POSTMODE.ADD_ONLY) try {
 			JSONObject jsonobj = new JSONObject(value);
 			//T newEl = 
-			setElementData(null, jsonobj);
+			setElementData(null, jsonobj, -1);
 			//if(newEl == null)
 			//	throw new IllegalArgumentException("Data not accepted for element creation!");
 		} catch(NumberFormatException e) {
