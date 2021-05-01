@@ -307,8 +307,6 @@ if(subTsBuildLog != null) subTsBuildLog.logEvent((endOfAgg-startCalc), "Calculat
 	protected void addValues(List<SampledValue> newVals) {
 		if(newVals.isEmpty())
 			return;
-if(dpLabel().contains("NRI-PowerMeterEnergy_proTag") && newVals.get(newVals.size()-1).getTimestamp() > 1618594430000l)
-	System.out.println("  DEBUGGINBG addValues:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(newVals.get(newVals.size()-1).getTimestamp()));
 long startCalc =  getCurrentTime();
 		if(Boolean.getBoolean("evaldebug")) {
 			TimeProcUtil.checkConsistency(newVals, "NEW::"+dpLabel());

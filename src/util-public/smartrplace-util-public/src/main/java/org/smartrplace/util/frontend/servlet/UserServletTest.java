@@ -213,7 +213,7 @@ public abstract class UserServletTest extends HttpServlet {
 					@Override
 					public boolean isLoginViaNaturalUserAllowed(String userName) {
 						NaturalPerson ud = ResourceListHelper.getNamedElementFlex(userName, userData);
-						if(ud != null && ud.restAccessEnabled().getValue())
+						if(ud != null && (!ud.restAccessDisabled().getValue()))
 							return true;
 						return false;
 					}
