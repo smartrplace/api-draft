@@ -475,7 +475,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return "WeatherStation";
 		if(isTempHumSens(resourceLocation))
 			return "TempHumSens";
-		if(isOpenWeatherMapBigBlue(resourceLocation, subResources))
+		if(isOpenWeatherMapSensorDevice(resourceLocation, subResources))
 			return "OpenWeatherMapSensor";
 		if(isDimmerSensorDevice(resourceLocation))
 			return "smartDimmer";
@@ -580,7 +580,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return foundEnergy;
 	}
 	
-	public static boolean isOpenWeatherMapBigBlue(String resourceLocation, Collection<SubResourceInfo> subResources) {
+	public static boolean isOpenWeatherMapSensorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		return resourceLocation.startsWith("BigBlueRoom") || resourceLocation.startsWith("WeatherData");
 	}
 	

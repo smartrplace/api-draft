@@ -10,6 +10,7 @@ import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
+import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.gateway.EvalCollection;
 import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -22,10 +23,29 @@ public class KPIResourceAccess {
 		Resource resIn = resAcc.getResource("OpenWeatherMapData/temperatureSensor/reading");
 		if(resIn != null && (resIn instanceof TemperatureResource))
 			return (TemperatureResource) resIn;
-		return null;
-		
+		return null;		
 	}
 	
+	public static Room getOpenWeatherMapRoom(ResourceAccess resAcc) {
+		Resource resIn = resAcc.getResource("OpenWeatherMapData");
+		if(resIn != null && (resIn instanceof Room))
+			return (Room) resIn;
+		return null;		
+	}
+
+	public static SensorDevice getOrCreateOpenWeatherMapSensorDevice(ApplicationManager appMan) {
+		ResourceAccess resAcc = appMan.getResourceAccess();
+		Resource resIn = resAcc.getResource("WeatherData");
+		if(resIn != null && (resIn instanceof SensorDevice))
+			return (SensorDevice) resIn;
+		Room openWRoom = getOpenWeatherMapRoom(resAcc);
+		if(openWRoom == null)
+			return null;
+		SensorDevice openWSD = appMan.getResourceManagement().createResource("WeatherData", SensorDevice.class);
+		openWSD.activate(true);
+		return openWSD;
+	}
+
 	public static List<Room> getRealRooms(ResourceAccess resAcc) {
 		List<Room> result = resAcc.getResources(Room.class);
 		List<Room> toRemove = new ArrayList<>();
