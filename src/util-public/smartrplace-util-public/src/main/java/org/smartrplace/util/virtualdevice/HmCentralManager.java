@@ -26,7 +26,7 @@ public class HmCentralManager {
 	public static long DEFAULT_EVAL_INTERVAL = 5*TimeProcUtil.MINUTE_MILLIS;
 	public static final String conditionalWritePerHour = "conditionalWritePerHour";
 	public static final String totalWritePerHour = "totalWritePerHour";
-	public static final String minimumAverageRequestDistance = "minimumAverageRequestDistance";
+	//public static final String minimumAverageRequestDistance = "minimumAverageRequestDistance";
 	
 	public static final String paramMaxDutyCycle = "maxDutyCycle";
 	public static final String paramMaxWritePerCCUperHour = "maxWritePerCCUperHour";
@@ -40,7 +40,7 @@ public class HmCentralManager {
 		public FloatResource dutyCycle = null;
 		public FloatResource conditionalWritePerHour;
 		public FloatResource totalWritePerHour;
-		public FloatResource minimumAverageRequestDistance;
+		//public FloatResource minimumAverageRequestDistance;
 	}
 	public static class SensorData {
 		TemperatureSensor sensor;
@@ -169,7 +169,7 @@ public class HmCentralManager {
 	protected void reportSetpointRequest(CCUInstance ccu) {
 		long now = appMan.getFrameworkTime();
 		if(now > nextEvalInterval) {
-			long deltaT = nextEvalInterval - now;
+			long deltaT = now - intervalStart;
 			if(ccu.totalWritePerHour != null) {
 				ValueResourceHelper.setCreate(ccu.totalWritePerHour, (float) (((double)(ccu.totalWriteCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
 			}
@@ -203,7 +203,7 @@ public class HmCentralManager {
 			cd.dutyCycle = dev.getSubResource("dutyCycle", GenericFloatSensor.class).reading();
 			cd.conditionalWritePerHour = ccu.getSubResource(conditionalWritePerHour, FloatResource.class);
 			cd.totalWritePerHour = ccu.getSubResource(totalWritePerHour, FloatResource.class);
-			cd.minimumAverageRequestDistance = ccu.getSubResource(minimumAverageRequestDistance, FloatResource.class);
+			//cd.minimumAverageRequestDistance = ccu.getSubResource(minimumAverageRequestDistance, FloatResource.class);
 			knownCCUs.put(ccu.getLocation(), cd);
 		}
 	}
