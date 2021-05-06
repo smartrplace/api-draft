@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.simple.FloatResource;
-import org.smartrplace.gateway.device.GatewayDevice;
+import org.smartrplace.gateway.device.MemoryTimeseriesPST;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
@@ -22,8 +22,8 @@ public abstract class PerformanceLog {
 	protected int zeroCounterSinceReport = 0;
 	protected final String id;
 	
-	protected abstract FloatResource getEventResource(GatewayDevice device);
-	protected FloatResource getCounterResource(GatewayDevice device) {return null;}
+	protected abstract FloatResource getEventResource(MemoryTimeseriesPST device);
+	protected FloatResource getCounterResource(MemoryTimeseriesPST device) {return null;}
 	
 	public PerformanceLog(boolean useCounter, ApplicationManager appMan, String id) {
 		this.useCounter = useCounter;
@@ -49,9 +49,13 @@ public abstract class PerformanceLog {
 			if(!Boolean.getBoolean("org.smartrplace.tissue.util.logconfig.logzero"))
 				return;
 		}
-		GatewayDevice gw = null;
+		MemoryTimeseriesPST gw = null;
 		if(singleEvent == null) {
-			gw = ResourceHelper.getLocalDevice(appMan);
+			gw = ResourceHelper.getEvalCollection(appMan).getSubResource("memoryTimeseriesPST", MemoryTimeseriesPST.class);
+			if(!gw.exists()) {
+				gw.create();
+				gw.activate(false);
+			}
 			singleEvent = getEventResource(gw);
 		}
 		ValueResourceHelper.setCreate(singleEvent, value);
@@ -69,8 +73,8 @@ public abstract class PerformanceLog {
 	
 	protected final static Map<String, PerformanceLog> knownLogs = new HashMap<>();
 	public static interface GwSubResProvider {
-		FloatResource getEventResource(GatewayDevice device);
-		default FloatResource getCounterResource(GatewayDevice device) {
+		FloatResource getEventResource(MemoryTimeseriesPST device);
+		default FloatResource getCounterResource(MemoryTimeseriesPST device) {
 			throw new IllegalStateException("If useCounter=true, then getCounterResource must be overwritten!");
 		}
 	}
@@ -81,12 +85,12 @@ public abstract class PerformanceLog {
 		result = new PerformanceLog(useCounter, appMan, key) {
 			
 			@Override
-			protected FloatResource getEventResource(GatewayDevice device) {
+			protected FloatResource getEventResource(MemoryTimeseriesPST device) {
 				return prov.getEventResource(device);
 			}
 			
 			@Override
-			protected FloatResource getCounterResource(GatewayDevice device) {
+			protected FloatResource getCounterResource(MemoryTimeseriesPST device) {
 				return prov.getCounterResource(device);
 			}
 		};

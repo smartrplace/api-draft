@@ -1,6 +1,9 @@
 package org.ogema.devicefinder.util;
 
+import java.util.Collection;
+
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
@@ -60,6 +63,16 @@ public class DpGroupUtil {
 		for(InstallAppDevice idev: hwInstall.knownDevices().getAllElements()) {
 			if(idev.device().equalsLocation(devRes))
 				return idev;
+		}
+		return null;
+	}
+	
+	public static Collection<InstallAppDevice> managedDeviceResoures(String resourceClassName, DatapointService dpService) {
+		Collection<Class<? extends Resource>> all = dpService.getManagedDeviceResoureceTypes();
+		for(Class<? extends Resource> type: all) {
+			if(type.getName().equals(resourceClassName) || type.getSimpleName().equals(resourceClassName)) {
+				return dpService.managedDeviceResoures(type);
+			}
 		}
 		return null;
 	}

@@ -15,7 +15,7 @@ import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
-import org.smartrplace.gateway.device.GatewayDevice;
+import org.smartrplace.gateway.device.MemoryTimeseriesPST;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog.GwSubResProvider;
 
@@ -38,12 +38,12 @@ public abstract class TimeseriesSimpleProcUtilBase {
 				new GwSubResProvider() {
 					
 					@Override
-					public FloatResource getEventResource(GatewayDevice device) {
+					public FloatResource getEventResource(MemoryTimeseriesPST device) {
 						return device.pstMultiToSingleEvents();
 					}
 					
 					@Override
-					public FloatResource getCounterResource(GatewayDevice device) {
+					public FloatResource getCounterResource(MemoryTimeseriesPST device) {
 						return device.pstMultiToSingleCounter();
 					}
 				});
@@ -51,11 +51,11 @@ public abstract class TimeseriesSimpleProcUtilBase {
 				new GwSubResProvider() {
 					
 					@Override
-					public FloatResource getEventResource(GatewayDevice device) {
+					public FloatResource getEventResource(MemoryTimeseriesPST device) {
 						return device.pstMultiToSingleAggregations();
 					}
 					@Override
-					public FloatResource getCounterResource(GatewayDevice device) {
+					public FloatResource getCounterResource(MemoryTimeseriesPST device) {
 						return device.pstMultiToSingleAggregationsCounter();
 					}
 				});
@@ -64,12 +64,12 @@ public abstract class TimeseriesSimpleProcUtilBase {
 				new GwSubResProvider() {
 					
 					@Override
-					public FloatResource getEventResource(GatewayDevice device) {
+					public FloatResource getEventResource(MemoryTimeseriesPST device) {
 						return device.pstBlockingSingeEvents();
 					}
 					
 					@Override
-					public FloatResource getCounterResource(GatewayDevice device) {
+					public FloatResource getCounterResource(MemoryTimeseriesPST device) {
 						return device.pstBlockingCounter();
 					}
 				});
@@ -77,12 +77,12 @@ public abstract class TimeseriesSimpleProcUtilBase {
 				new GwSubResProvider() {
 					
 					@Override
-					public FloatResource getEventResource(GatewayDevice device) {
+					public FloatResource getEventResource(MemoryTimeseriesPST device) {
 						return device.pstSubTsBuild();
 					}
 					
 					@Override
-					public FloatResource getCounterResource(GatewayDevice device) {
+					public FloatResource getCounterResource(MemoryTimeseriesPST device) {
 						return device.pstSubTsBuildCounter();
 					}
 				});
@@ -90,12 +90,12 @@ public abstract class TimeseriesSimpleProcUtilBase {
 				new GwSubResProvider() {
 					
 					@Override
-					public FloatResource getEventResource(GatewayDevice device) {
+					public FloatResource getEventResource(MemoryTimeseriesPST device) {
 						return device.pstUpdateValuesPS2();
 					}
 					
 					@Override
-					public FloatResource getCounterResource(GatewayDevice device) {
+					public FloatResource getCounterResource(MemoryTimeseriesPST device) {
 						return device.pstUpdateValuesPS2Counter();
 					}
 				});
@@ -103,12 +103,12 @@ public abstract class TimeseriesSimpleProcUtilBase {
 				new GwSubResProvider() {
 					
 					@Override
-					public FloatResource getEventResource(GatewayDevice device) {
+					public FloatResource getEventResource(MemoryTimeseriesPST device) {
 						return device.pstTSServlet();
 					}
 					
 					@Override
-					public FloatResource getCounterResource(GatewayDevice device) {
+					public FloatResource getCounterResource(MemoryTimeseriesPST device) {
 						return device.pstTSServletCounter();
 					}
 				});
