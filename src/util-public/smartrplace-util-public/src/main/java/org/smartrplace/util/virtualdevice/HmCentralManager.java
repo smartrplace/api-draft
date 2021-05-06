@@ -25,6 +25,7 @@ public class HmCentralManager {
 	public static final long CCU_UPDATE_INTERVAL = 10000;
 	public static long DEFAULT_EVAL_INTERVAL = 5*TimeProcUtil.MINUTE_MILLIS;
 	public static final String conditionalWritePerHour = "conditionalWritePerHour";
+	public static final String conditionalDropPerHour = "conditionalDropPerHour";
 	public static final String totalWritePerHour = "totalWritePerHour";
 	//public static final String minimumAverageRequestDistance = "minimumAverageRequestDistance";
 	
@@ -35,10 +36,12 @@ public class HmCentralManager {
 	public static class CCUInstance {
 		int totalWriteCount = 0;
 		int conditionalWriteCount = 0;
+		int conditionalDropCount = 0;
 		//public CCUInstance mainCCUforHAP = null;
 		InstallAppDevice device;
 		public FloatResource dutyCycle = null;
 		public FloatResource conditionalWritePerHour;
+		public FloatResource conditionalDropPerHour;
 		public FloatResource totalWritePerHour;
 		//public FloatResource minimumAverageRequestDistance;
 	}
@@ -112,13 +115,15 @@ public class HmCentralManager {
 	//TODO: Implement prioritization
 	public boolean requestSetpointWrite(TemperatureResource setp, float setpoint) {
 		SensorData sens = registerSensor(setp);
-		if(sens.ccu != null)
-			sens.ccu.conditionalWriteCount++;
 		boolean isOverload = isSensorInOverload(sens);
 		if(!isOverload) {
+			if(sens.ccu != null)
+				sens.ccu.conditionalWriteCount++;
 			sens.setpoint.setValue(setpoint);
 			return true;
 		}
+		if(sens.ccu != null)
+			sens.ccu.conditionalDropCount++;
 		return false;
 	}
 	
@@ -178,6 +183,10 @@ public class HmCentralManager {
 				ValueResourceHelper.setCreate(ccu.conditionalWritePerHour, (float) (((double)(ccu.conditionalWriteCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
 			}
 			ccu.conditionalWriteCount = 0;
+			if(ccu.conditionalDropPerHour!= null) {
+				ValueResourceHelper.setCreate(ccu.conditionalDropPerHour, (float) (((double)(ccu.conditionalDropCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
+			}
+			ccu.conditionalDropCount = 0;
 			intervalStart = nextEvalInterval;
 			nextEvalInterval += DEFAULT_EVAL_INTERVAL;
 		}
@@ -203,6 +212,7 @@ public class HmCentralManager {
 			cd.dutyCycle = dev.getSubResource("dutyCycle", GenericFloatSensor.class).reading();
 			cd.conditionalWritePerHour = ccu.getSubResource(conditionalWritePerHour, FloatResource.class);
 			cd.totalWritePerHour = ccu.getSubResource(totalWritePerHour, FloatResource.class);
+			cd.conditionalDropPerHour = ccu.getSubResource(conditionalDropPerHour, FloatResource.class);
 			//cd.minimumAverageRequestDistance = ccu.getSubResource(minimumAverageRequestDistance, FloatResource.class);
 			knownCCUs.put(ccu.getLocation(), cd);
 		}
