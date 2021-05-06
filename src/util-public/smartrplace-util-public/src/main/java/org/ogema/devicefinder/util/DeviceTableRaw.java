@@ -261,15 +261,15 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	protected AddBatteryVoltageResult addBatteryVoltage(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
 			PhysicalElement device2) {
-		if(device2.getSubResource("battery") != null) {
+		/*if(device2.getSubResource("battery") != null) {
 			ElectricityStorage bat = device2.getSubResource("battery",  ElectricityStorage.class);
 			if(bat != null && bat.internalVoltage().exists()) {
 				return new AddBatteryVoltageResult(vh.floatLabel("Battery", id, bat.internalVoltage().reading(), row, "%.1f#min:0.1"),
 						bat.internalVoltage().reading());
 			}
-		}
-		VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(device2,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
+		}*/
+		VoltageResource batteryVoltage = DeviceHandlerBase.getBatteryVoltage(device2); //ResourceHelper.getSubResourceOfSibbling(device2,
+		//		"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
 		if(batteryVoltage != null)
 			return new AddBatteryVoltageResult(vh.floatLabel("Battery", id, batteryVoltage, row, "%.1f#min:0.1"),
 					batteryVoltage);

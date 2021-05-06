@@ -134,11 +134,26 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 			List<Datapoint> result) {
 		return addtStatusDatapointsHomematic(dev, dpService, result, true);
 	}
+	
+	public static VoltageResource getBatteryVoltage(PhysicalElement dev) {
+		VoltageResource batVolt = dev.getSubResource("battery", ElectricityStorage.class).internalVoltage().reading();
+		if(batVolt != null && batVolt.isActive())
+			return batVolt;
+		else {
+			VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(dev,
+					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
+			return batteryVoltage;
+		}		
+	}
+	
 	public Collection<Datapoint> addtStatusDatapointsHomematic(PhysicalElement dev, DatapointService dpService,
 			List<Datapoint> result, boolean hasBattery) {
 		dev = dev.getLocationResource();
 		if(hasBattery) {
-			VoltageResource batVolt = dev.getSubResource("battery", ElectricityStorage.class).internalVoltage().reading();
+			VoltageResource batteryVoltage = getBatteryVoltage(dev);
+			if(batteryVoltage != null)
+				addDatapoint(batteryVoltage, result, dpService);
+			/*VoltageResource batVolt = dev.getSubResource("battery", ElectricityStorage.class).internalVoltage().reading();
 			if(batVolt.isActive())
 				result.add(dpService.getDataPointStandard(batVolt));
 			else {
@@ -146,7 +161,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 						"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
 				if(batteryVoltage != null)
 					addDatapoint(batteryVoltage, result, dpService);
-			}
+			}*/
 			BooleanResource batteryStatus = ResourceHelper.getSubResourceOfSibbling(dev,
 					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "batteryLow", BooleanResource.class);
 			if(batteryStatus != null && batteryStatus.exists())
