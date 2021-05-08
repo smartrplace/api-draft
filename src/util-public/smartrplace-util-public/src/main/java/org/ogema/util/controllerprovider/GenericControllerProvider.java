@@ -27,7 +27,7 @@ public class GenericControllerProvider<C> {
 	public GenericControllerProvider(String acceptedClassName) {
 		this.acceptedClassNames = Arrays.asList(new String[] {acceptedClassName});
 	}
-	public GenericControllerProvider(String[] acceptedClassNames) {
+	public GenericControllerProvider(String... acceptedClassNames) {
 		this.acceptedClassNames = Arrays.asList(acceptedClassNames);
 	}
 	public GenericControllerProvider(List<String> acceptedClassNames) {
