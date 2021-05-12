@@ -146,6 +146,21 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		}		
 	}
 	
+	public static IntegerResource getRSSIResource(PhysicalElement dev) {
+		IntegerResource rssiDevice = ResourceHelper.getSubResourceOfSibbling(dev.getLocationResource(),
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
+		if(rssiDevice != null && rssiDevice.exists())
+			return rssiDevice;
+		return null;
+	}
+	public static IntegerResource getRSSIPeerResource(PhysicalElement dev) {
+		IntegerResource rssiPeer = ResourceHelper.getSubResourceOfSibbling(dev.getLocationResource(),
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiPeer", IntegerResource.class);
+		if(rssiPeer != null && rssiPeer.exists())
+			return rssiPeer;
+		return null;
+	}
+	
 	public Collection<Datapoint> addtStatusDatapointsHomematic(PhysicalElement dev, DatapointService dpService,
 			List<Datapoint> result, boolean hasBattery) {
 		dev = dev.getLocationResource();
