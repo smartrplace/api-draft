@@ -173,7 +173,7 @@ public class HmCentralManager {
 	
 	protected void reportSetpointRequest(CCUInstance ccu) {
 		long now = appMan.getFrameworkTime();
-		if(now > nextEvalInterval) {
+		if(now > nextEvalInterval)  synchronized (this) {
 			long deltaT = now - intervalStart;
 			if(ccu.totalWritePerHour != null) {
 				ValueResourceHelper.setCreate(ccu.totalWritePerHour, (float) (((double)(ccu.totalWriteCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
