@@ -660,7 +660,7 @@ public class UserServlet extends HttpServlet {
 					} else
 						addParameter(el.getKey(), el.getValue().toString(), paramMap);
 					if(el.getKey().equals("getData") && (el.getValue()!=null && "false".equals(el.getValue().toString())))
-						isGET = true;
+						isGET = false;
 				}
 				if(isGET) {
 					if(getParameter("structure", paramMap) == null)

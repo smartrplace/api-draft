@@ -5,18 +5,20 @@ import org.ogema.model.sensors.TemperatureSensor;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
 public class SensorDataTemperatureDefault extends SensorDataTemperature {
-	RouterInstance ccu;
+	RouterInstance ccu = null;
 	
 	public SensorDataTemperatureDefault(TemperatureSensor sensor, SetpointControlManager<TemperatureResource> ctrl) {
 		super(sensor, ctrl);
-		this.ccu = ctrl.getCCU(sensor);
-		if(ccu == null) {
-			System.out.println("WARNING: No Default Router found for setpoint sensor:"+sensor.getLocation());
-		}
 	}
 
 	@Override
 	public RouterInstance ccu() {
+		if(ccu == null) {
+			ccu = ctrl.getCCU(sensor);
+			if(ccu == null) {
+				System.out.println("WARNING: No Default Router found for setpoint sensor:"+sensor.getLocation());
+			}
+		}
 		return ccu;
 	}
 }

@@ -14,6 +14,7 @@ public abstract class SensorDataTemperature extends SensorData {
 	ResourceValueListener<TemperatureResource> feedbackListener;
 	
 	public SensorDataTemperature(TemperatureSensor sensor, SetpointControlManager<TemperatureResource> ctrl) {
+		super(ctrl);
 		sensor = sensor.getLocationResource();
 		this.sensor = sensor;
 		this.setpoint = sensor.settings().setpoint();
@@ -44,6 +45,7 @@ public abstract class SensorDataTemperature extends SensorData {
 			}
 		};
 		this.feedback.addValueListener(feedbackListener, true);
+		ccu();
 	}
 
 	@Override

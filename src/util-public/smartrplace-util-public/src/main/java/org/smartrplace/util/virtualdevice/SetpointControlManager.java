@@ -32,7 +32,7 @@ import de.iwes.util.resource.ValueResourceHelper;
 
 public abstract class SetpointControlManager<T extends SingleValueResource> {
 	public static final long CCU_UPDATE_INTERVAL = 10000;
-	public static final long DEFAULT_EVAL_INTERVAL = 5*TimeProcUtil.MINUTE_MILLIS;
+	public static final long DEFAULT_EVAL_INTERVAL = Long.getLong("org.smartrplace.util.virtualdevice.evalinterval", 5*TimeProcUtil.MINUTE_MILLIS);
 	private static final long RESEND_TIMER_INTERVAL = 60000;
 	public static final int CONDITIONAL_PRIO = 60;
 	public static final int PRIORITY_PRIO = 90;
@@ -42,8 +42,8 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	public static final String totalWritePerHour = "totalWritePerHour";
 	public static final String conditionalWritePerHour = "conditionalWritePerHour";
 	public static final String conditionalDropPerHour = "conditionalDropPerHour";
-	public static final String priorityWritePerHour = "conditionalWritePerHour";
-	public static final String priorityDropPerHour = "conditionalDropPerHour";
+	public static final String priorityWritePerHour = "prorityWritePerHour";
+	public static final String priorityDropPerHour = "prorityDropPerHour";
 	
 	public static enum SetpointControlType {
 		/** Default types use the gateway as CCU/router*/
@@ -98,6 +98,13 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		
 		//Check feedback
 		volatile Float valueFeedbackPending = null;
+		
+		//CCU finding
+		final SetpointControlManager<TemperatureResource> ctrl;
+
+		public SensorData(SetpointControlManager<TemperatureResource> ctrl) {
+			this.ctrl = ctrl;
+		}
 	}
 	protected final ApplicationManager appMan;
 	protected final DatapointService dpService;
