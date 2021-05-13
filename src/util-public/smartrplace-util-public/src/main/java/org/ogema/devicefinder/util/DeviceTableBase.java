@@ -116,6 +116,28 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 		else return tail;
 	}
 	
+	public static boolean isHomematic(String location) {
+		return (getHomematicType(location) > 0);
+	}
+	
+	/** Types:
+	 * 0 : No homematic
+	 * 1 : via homegear
+	 * 2: via CCU classic
+	 * 3: via CCU homematicIP
+	 */
+	public static int getHomematicType(String location) {
+		String loclow = location.toLowerCase();
+		if(loclow.startsWith("homematichg"))
+			return 1;
+		if(loclow.contains("homematic") || loclow.startsWith("hm")) {
+			if(location.contains("_cc"))
+				return 2;
+			return 3;
+		}
+		return 0;
+	}
+	
 	public DynamicTable<InstallAppDevice> getMainTable() {
 		return mainTable;
 	}

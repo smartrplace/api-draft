@@ -7,10 +7,12 @@ import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.smartrplace.apps.heatcontrol.extensionapi.KnownValue;
+import org.smartrplace.util.virtualdevice.SetpointControlManager;
 
 /** Interface to be implemented by resource pattern or other access of single devices*/
 public interface TemperatureControlDev extends TemperatureControlBase {
-    public ResourcePattern getPattern();
+    @SuppressWarnings("rawtypes")
+	public ResourcePattern getPattern();
     
     public static class ThermostatPatternExtension {
     	/** keep feedbackValues and setPoint values from last 20 seconds to determine values
@@ -23,4 +25,6 @@ public interface TemperatureControlDev extends TemperatureControlBase {
     }
     
     public ThermostatPatternExtension getExtension();
+    
+	public SetpointControlManager<TemperatureResource> getSetpMan();
 }

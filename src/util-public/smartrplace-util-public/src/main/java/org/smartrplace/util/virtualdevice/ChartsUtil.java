@@ -8,6 +8,7 @@ import org.ogema.devicefinder.util.DeviceTableRaw;
 import org.ogema.devicefinder.util.DpGroupUtil;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.gateway.device.GatewayDevice;
 
 public class ChartsUtil {
 	public static Collection<InstallAppDevice> getCCUs(DatapointService dpService) {
@@ -29,4 +30,14 @@ public class ChartsUtil {
 		Collection<InstallAppDevice> result = DpGroupUtil.managedDeviceResoures("org.smartrplace.router.model.GlitNetRouter", dpService);
 		return result ;
 	}
+	
+	public static InstallAppDevice getGateway(DatapointService dpService) {
+		Collection<InstallAppDevice> result = dpService.managedDeviceResoures(GatewayDevice.class);
+		if(result.size() > 1)
+			throw new IllegalStateException("Found more than one gateway in InstalledAppDevices:"+result.size());
+		if(result.isEmpty())
+			return null;
+		return result.iterator().next();
+	}
+
 }

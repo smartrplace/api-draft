@@ -3,6 +3,7 @@ package org.smartrplace.apps.heatcontrol.extensionapi;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.IntegerResource;
@@ -16,6 +17,10 @@ import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.tools.resource.util.ResourceUtils;
+import org.smartrplace.util.virtualdevice.HmCentralManager;
+import org.smartrplace.util.virtualdevice.SetpointControlManager;
+import org.smartrplace.util.virtualdevice.SetpointControlManager.SetpointControlType;
+import org.smartrplace.util.virtualdevice.ThermostatAirconDefaultManager;
 
 public class ThermostatPattern extends ResourcePattern<Thermostat> { 
 	
@@ -102,6 +107,21 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 		trans.commit();
 		windowRecognitionMode.<ResourceList<?>> getParent().setElementType(SingleValueResource.class);
 		return true;
+	}
+	
+	private SetpointControlManager<TemperatureResource> setpMan = null;
+	public SetpointControlManager<TemperatureResource> getSetpMan() {
+		return setpMan;
+	}
+	public SetpointControlManager<TemperatureResource> getSetpMan(ApplicationManagerPlus appManPlus) {
+		if(setpMan == null) {
+			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
+			if(type == SetpointControlType.HmThermostat)
+				setpMan = HmCentralManager.getInstance(appManPlus);
+			else
+				setpMan = ThermostatAirconDefaultManager.getInstance(appManPlus);
+		}
+		return setpMan;
 	}
 	
 }

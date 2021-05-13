@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.util;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.model.Resource;
@@ -74,6 +75,6 @@ public class DpGroupUtil {
 				return dpService.managedDeviceResoures(type);
 			}
 		}
-		return null;
+		return Collections.emptyList();
 	}
 }

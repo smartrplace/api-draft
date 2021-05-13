@@ -5,14 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
-import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
-import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericFloatSensor;
+import org.ogema.model.sensors.Sensor;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -21,77 +20,48 @@ import de.iwes.util.logconfig.LogHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
-public class HmCentralManager {
-	public static final long CCU_UPDATE_INTERVAL = 10000;
-	public static long DEFAULT_EVAL_INTERVAL = 5*TimeProcUtil.MINUTE_MILLIS;
-	public static final String conditionalWritePerHour = "conditionalWritePerHour";
-	public static final String conditionalDropPerHour = "conditionalDropPerHour";
-	public static final String totalWritePerHour = "totalWritePerHour";
-	//public static final String minimumAverageRequestDistance = "minimumAverageRequestDistance";
-	
+public class HmCentralManager extends SetpointControlManager<TemperatureResource> {
+	private static final float DEFAULT_MAX_WRITE_PER_HOUR = 720;
+
 	public static final String paramMaxDutyCycle = "maxDutyCycle";
 	public static final String paramMaxWritePerCCUperHour = "maxWritePerCCUperHour";
+	public static final String dutyCycleMax = "dutyCycleMax";
 	
+	protected final Map<String, CCUInstance> knownCCUs = new HashMap<>();
+
 	//For now we cannot use HAP info as device - HAP relation is not easy to obtain. Also Controller relation is not used yet.
-	public static class CCUInstance {
-		int totalWriteCount = 0;
-		int conditionalWriteCount = 0;
-		int conditionalDropCount = 0;
-		//public CCUInstance mainCCUforHAP = null;
-		InstallAppDevice device;
+	public static class CCUInstance extends RouterInstance {
 		public FloatResource dutyCycle = null;
-		public FloatResource conditionalWritePerHour;
-		public FloatResource conditionalDropPerHour;
-		public FloatResource totalWritePerHour;
-		//public FloatResource minimumAverageRequestDistance;
+		public FloatResource dutyCycleMax = null;
+		
+		public ResourceValueListener<FloatResource> dutyCycleListener;
+		public float dutyCycleValueMax = 0;
 	}
-	public static class SensorData {
-		TemperatureSensor sensor;
-		TemperatureResource setpoint;
-		TemperatureResource feedback;
+	
+	public static class SensorDataHm extends SensorDataTemperature {
 		CCUInstance ccu;
-		ResourceValueListener<TemperatureResource> setpointListener;
 		
-		//boolean conditionalWriteDone = false;
-		
-		public SensorData(TemperatureSensor sensor, HmCentralManager ctrl) {
-			sensor = sensor.getLocationResource();
-			this.sensor = sensor;
-			this.setpoint = sensor.settings().setpoint();
-			this.feedback = sensor.deviceFeedback().setpoint();
-			this.ccu = ctrl.getCCU(sensor);
+		public SensorDataHm(TemperatureSensor sensor, HmCentralManager ctrl) {
+			super(sensor, ctrl);
+			this.ccu = (CCUInstance) ctrl.getCCU(sensor);
 			if(ccu == null) {
 				System.out.println("WARNING: No CCU found for setpoint sensor:"+sensor.getLocation());
 			}
-			this.setpointListener = new ResourceValueListener<TemperatureResource>() {
-				@Override
-				public void resourceChanged(TemperatureResource resource) {
-					if(ccu != null) {
-						ctrl.reportSetpointRequest(ccu);
-					}
-				}
-			};
-			this.setpoint.addValueListener(setpointListener, true);
+		}
+
+		@Override
+		public CCUInstance ccu() {
+			return ccu;
 		}
 	}
-	protected final ApplicationManager appMan;
-	protected final DatapointService dpService;
-	protected final Map<String, SensorData> knownSensors = new HashMap<>();
-	protected final Map<String, CCUInstance> knownCCUs = new HashMap<>();
 	
 	protected final FloatResource maxDutyCycle;
 	protected final FloatResource maxWritePerCCUperHour;
 	
-	long nextEvalInterval;
-	long intervalStart;
-		
 	private HmCentralManager(ApplicationManagerPlus appManPlus) {
-		this.appMan = appManPlus.appMan();
-		this.dpService = appManPlus.dpService();
+		super(appManPlus);
 		maxDutyCycle = ResourceHelper.getEvalCollection(appMan).getSubResource(paramMaxDutyCycle, FloatResource.class);
 		maxWritePerCCUperHour = ResourceHelper.getEvalCollection(appMan).getSubResource(paramMaxWritePerCCUperHour, FloatResource.class);
-		intervalStart = appMan.getFrameworkTime();
-		nextEvalInterval = intervalStart + DEFAULT_EVAL_INTERVAL;
 	}
 	
 	private static HmCentralManager instance = null;
@@ -99,67 +69,6 @@ public class HmCentralManager {
 		if(instance == null)
 			instance = new HmCentralManager(appManPlus);
 		return instance;
-	}
-	
-	public SensorData registerSensor(TemperatureResource setp) {
-		String loc = setp.getLocation();
-		SensorData result = knownSensors.get(loc);
-		if(result != null)
-			return result;
-		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
-		result = new SensorData(sensor, this);
-		knownSensors.put(loc, result);
-		return result;
-	}
-	
-	//TODO: Implement prioritization
-	public boolean requestSetpointWrite(TemperatureResource setp, float setpoint) {
-		SensorData sens = registerSensor(setp);
-		boolean isOverload = isSensorInOverload(sens);
-		if(!isOverload) {
-			if(sens.ccu != null)
-				sens.ccu.conditionalWriteCount++;
-			sens.setpoint.setValue(setpoint);
-			return true;
-		}
-		if(sens.ccu != null)
-			sens.ccu.conditionalDropCount++;
-		return false;
-	}
-	
-	public boolean isSensorInOverload(SensorData data) {
-		if(data.ccu == null)
-			return false;
-		return isCCUInOverload(data.ccu);
-	}
-	
-	//TODO: We need some averaging most likely
-	public boolean isCCUInOverload(CCUInstance ccu) {
-		if(ccu.dutyCycle != null) {
-			float maxDC;
-			if(maxDutyCycle != null)
-				maxDC = maxDutyCycle.getValue();
-			else
-				maxDC = 0.97f;
-			float curDC = ccu.dutyCycle.getValue();
-			return (curDC > maxDC);
-		}
-		float maxWritePerHour;
-		if(maxWritePerCCUperHour != null)
-			maxWritePerHour = maxWritePerCCUperHour.getValue();
-		else
-			maxWritePerHour = 360;
-		float total = ccu.totalWritePerHour.getValue();
-		return (total > maxWritePerHour);
-	}
-
-	protected void stopInternal() {
-		for(SensorData sens: knownSensors.values()) {
-			if(sens.setpointListener != null && sens.setpoint != null) {
-				sens.setpoint.removeValueListener(sens.setpointListener);
-				sens.setpointListener = null;
-			}
-		}
 	}
 	
 	public static boolean stop() {
@@ -171,61 +80,105 @@ public class HmCentralManager {
 		return false;
 	}
 	
-	protected void reportSetpointRequest(CCUInstance ccu) {
-		long now = appMan.getFrameworkTime();
-		if(now > nextEvalInterval)  synchronized (this) {
-			long deltaT = now - intervalStart;
-			if(ccu.totalWritePerHour != null) {
-				ValueResourceHelper.setCreate(ccu.totalWritePerHour, (float) (((double)(ccu.totalWriteCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
-			}
-			ccu.totalWriteCount = 0;
-			if(ccu.conditionalWritePerHour!= null) {
-				ValueResourceHelper.setCreate(ccu.conditionalWritePerHour, (float) (((double)(ccu.conditionalWriteCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
-			}
-			ccu.conditionalWriteCount = 0;
-			if(ccu.conditionalDropPerHour!= null) {
-				ValueResourceHelper.setCreate(ccu.conditionalDropPerHour, (float) (((double)(ccu.conditionalDropCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
-			}
-			ccu.conditionalDropCount = 0;
-			intervalStart = nextEvalInterval;
-			nextEvalInterval += DEFAULT_EVAL_INTERVAL;
+	@Override
+	public SensorDataHm registerSensor(TemperatureResource setp) {
+		String loc = setp.getLocation();
+		SensorDataHm result = (SensorDataHm) knownSensors.get(loc);
+		if(result != null)
+			return result;
+		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
+		result = new SensorDataHm(sensor, this);
+		knownSensors.put(loc, result);
+		return result;
+	}
+	
+	@Override
+	public boolean isSensorInOverload(SensorData data, int priority) {
+		CCUInstance ccu = ((SensorDataHm)data).ccu;
+		if(ccu == null)
+			return false;
+		return isRouterInOverload(ccu, priority);
+	}
+	
+	Float maxWritePerInterval = null;
+	
+	//TODO: We need some averaging most likely
+	@Override
+	public boolean isRouterInOverload(RouterInstance router, int priority) {
+		CCUInstance ccu = (CCUInstance) router;
+		if(maxWritePerInterval == null) {
+			if(maxWritePerCCUperHour != null) {
+				maxWritePerInterval = maxWritePerCCUperHour.getValue() * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
+			} else
+				maxWritePerInterval = DEFAULT_MAX_WRITE_PER_HOUR * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
 		}
-		ccu.totalWriteCount++;
+		if(ccu.totalWriteCount > maxWritePerInterval)
+			return false;
+		
+		float curDC;
+		float maxDC;
+		if(maxDutyCycle != null && priority <= CONDITIONAL_PRIO)
+			maxDC = maxDutyCycle.getValue();
+		else
+			maxDC = priority; // 0.97f;
+		if(ccu.dutyCycleMax != null) {
+			curDC = ccu.dutyCycleMax.getValue();
+		} else if(ccu.dutyCycle != null) {
+			curDC = ccu.dutyCycle.getValue();
+		} else {
+			//float maxWritePerHour;
+			if(maxWritePerCCUperHour != null) {
+				curDC = ccu.totalWritePerHour.getValue() / maxWritePerCCUperHour.getValue();
+			} else {
+				curDC = ccu.totalWritePerHour.getValue() / DEFAULT_MAX_WRITE_PER_HOUR;
+			}
+		}
+		return (curDC > maxDC);
+
 	}
 
-	long lastCCUListUpdate = -1;
-	protected void updateCCUList() {
-		long now = appMan.getFrameworkTime();
-		if(now - lastCCUListUpdate > CCU_UPDATE_INTERVAL) {
-			updateCCUListForced();
-			lastCCUListUpdate = now;
-		}
-	}
+	@Override
 	protected void updateCCUListForced() {
 		Collection<InstallAppDevice> ccus = ChartsUtil.getCCUs(dpService);
 		for(InstallAppDevice ccu: ccus) {
 			if(knownCCUs.containsKey(ccu.getLocation()))
 				continue;
 			CCUInstance cd = new CCUInstance();
-			cd.device = ccu;
+			initRouterStandardValues(cd, ccu);
+			knownCCUs.put(ccu.getLocation(), cd);
+			
+			//application specific
 			PhysicalElement dev = ccu.device();
 			cd.dutyCycle = dev.getSubResource("dutyCycle", GenericFloatSensor.class).reading();
-			cd.conditionalWritePerHour = ccu.getSubResource(conditionalWritePerHour, FloatResource.class);
-			cd.totalWritePerHour = ccu.getSubResource(totalWritePerHour, FloatResource.class);
-			cd.conditionalDropPerHour = ccu.getSubResource(conditionalDropPerHour, FloatResource.class);
-			//cd.minimumAverageRequestDistance = ccu.getSubResource(minimumAverageRequestDistance, FloatResource.class);
-			knownCCUs.put(ccu.getLocation(), cd);
+			if(cd.dutyCycle != null && cd.dutyCycle.isActive()) {
+				cd.dutyCycleMax = ccu.getSubResource(dutyCycleMax, FloatResource.class);
+				cd.dutyCycleListener = new ResourceValueListener<FloatResource>() {
+	
+					@Override
+					public void resourceChanged(FloatResource resource) {
+						float val = cd.dutyCycle.getValue();
+						if(val > cd.dutyCycleValueMax)
+							cd.dutyCycleValueMax = val;
+					}
+				};
+				cd.dutyCycle.addValueListener(cd.dutyCycleListener);
+			}
 		}
 	}
 	
-	public CCUInstance getCCU(TemperatureSensor sensor) {
+	public RouterInstance getCCU(TemperatureResource setpoint) {
+		PhysicalElement dev = LogHelper.getDeviceResource(setpoint, false);
+		return getCCU(dev);
+	}
+
+	public RouterInstance getCCU(Sensor sensor) {
 		PhysicalElement dev = LogHelper.getDeviceResource(sensor, false);
 		return getCCU(dev);
 	}
 	
-	public CCUInstance getCCU(PhysicalElement device) {
+	public RouterInstance getCCU(PhysicalElement device) {
 		updateCCUList();
-		for(CCUInstance ccu: knownCCUs.values()) {
+		for(RouterInstance ccu: knownCCUs.values()) {
 			Resource parent = ccu.device.device().getLocationResource().getParent();
 			if(parent == null)
 				continue;
@@ -233,5 +186,37 @@ public class HmCentralManager {
 				return ccu;
 		}
 		return null;
+	}
+
+	@Override
+	protected SensorData getSensorDataInstance(Sensor sensor) {
+		return new SensorDataHm((TemperatureSensor) sensor, this);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	protected Collection<RouterInstance> getRouters() {
+		return (Collection)knownCCUs.values();
+	}
+	
+	@Override
+	protected void writeDataReporting(RouterInstance ccu, long deltaT) {
+		super.writeDataReporting(ccu, deltaT);
+		
+		CCUInstance ccuMy = (CCUInstance)ccu;
+		
+		if(ccuMy.dutyCycleMax != null) {
+			ValueResourceHelper.setCreate(ccuMy.dutyCycleMax, ccuMy.dutyCycleValueMax);
+		}
+		ccuMy.dutyCycleValueMax = 0;		
+	}
+	
+	@Override
+	public long knownSetpointValueOmitDuration(TemperatureResource temperatureSetpoint) {
+		RouterInstance ccu = getCCU(temperatureSetpoint);
+		if(ccu != null && isRouterInOverload(ccu, CONDITIONAL_PRIO)) {
+			return 5*TimeProcUtil.MINUTE_MILLIS;
+		}
+		return super.knownSetpointValueOmitDuration(temperatureSetpoint);
 	}
 }
