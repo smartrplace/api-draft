@@ -196,6 +196,7 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected Collection<RouterInstance> getRouters() {
+		updateCCUList();
 		return (Collection)knownCCUs.values();
 	}
 	

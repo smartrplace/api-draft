@@ -22,6 +22,8 @@ import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.Sensor;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.util.logconfig.LogHelper;
@@ -61,9 +63,8 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	}	
 	
 	protected final Timer resendTimer;
+	protected Logger log = LoggerFactory.getLogger(this.getClass());
 
-	//public static class SensorSendData {
-	//}
 	public static class RouterInstance {
 		int totalWriteCount = 0;
 		int conditionalWriteCount = 0;
@@ -181,6 +182,9 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 				sens.stop();
 			}
 		}
+		if(resendTimer != null) {
+			resendTimer.destroy();
+		};
 	}
 	
 	protected void writeDataReporting(RouterInstance ccu, long deltaT) {
