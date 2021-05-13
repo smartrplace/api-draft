@@ -66,11 +66,11 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	protected Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public static class RouterInstance {
-		int totalWriteCount = 0;
-		int conditionalWriteCount = 0;
-		int conditionalDropCount = 0;
-		int priorityWriteCount = 0;
-		int priorityDropCount = 0;
+		volatile int totalWriteCount = 0;
+		volatile int conditionalWriteCount = 0;
+		volatile int conditionalDropCount = 0;
+		volatile int priorityWriteCount = 0;
+		volatile int priorityDropCount = 0;
 		InstallAppDevice device;
 		public FloatResource conditionalWritePerHour;
 		public FloatResource conditionalDropPerHour;
@@ -118,6 +118,7 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 				resendTimerUpdate();
 			}
 		});
+		log.info("Started timer for SetpointControlManager:"+this.getClass().getSimpleName());
 	}
 	
 	public SensorData registerSensor(T setp) {
@@ -211,20 +212,21 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		}
 		ccu.priorityDropCount = 0;		
 	}
-	protected void checkForDataReporting(RouterInstance ccu) {
+	/*protected void checkForDataReporting(RouterInstance ccu) {
 		long now = appMan.getFrameworkTime();
 		if(now > nextEvalInterval)  synchronized (this) {
 			long deltaT = now - intervalStart;
 			
+			log.info("In "+this.getClass().getSimpleName()+" write report resources for "+deltaT+" msec");
 			writeDataReporting(ccu, deltaT);
 
 			intervalStart = nextEvalInterval;
 			nextEvalInterval += DEFAULT_EVAL_INTERVAL;
 		}		
-	}
+	}*/
 	
 	protected void reportSetpointRequest(RouterInstance ccu) {
-		checkForDataReporting(ccu);
+		//checkForDataReporting(ccu);
 		ccu.totalWriteCount++;
 	}
 
@@ -244,8 +246,22 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	protected void resendTimerUpdate() {
 		Collection<RouterInstance> routers = getRouters();
 		long now = appMan.getFrameworkTime();
+		log.info("In timer of "+this.getClass().getSimpleName()+" found "+routers.size()+" routers to update.");
+		Long deltaT;
+		if(now > nextEvalInterval) {
+			deltaT = now - intervalStart;
+			
+			log.info("In "+this.getClass().getSimpleName()+" write report resources for "+deltaT+" msec");
+			
+
+			intervalStart = nextEvalInterval;
+			nextEvalInterval += DEFAULT_EVAL_INTERVAL;
+		} else
+			deltaT = null;
 		for(RouterInstance cd: routers) {
-			checkForDataReporting(cd);
+			if(deltaT != null)
+				writeDataReporting(cd, deltaT);
+			//checkForDataReporting(cd);
 			
 			if(isRouterInOverload(cd, CONDITIONAL_PRIO))
 				continue;
