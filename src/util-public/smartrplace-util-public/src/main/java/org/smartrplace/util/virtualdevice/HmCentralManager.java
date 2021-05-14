@@ -57,13 +57,16 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 		}
 	}
 	
-	protected final FloatResource maxDutyCycle;
-	protected final FloatResource maxWritePerCCUperHour;
+	/** Parameter defining alternative limit for conditional writes. Note very relevant most likely*/
+	protected final FloatResource maxDutyCycleParam;
+	
+	/** Parameter overwriting DEFAULT_MAX_WRITE_PER_HOUR. This could be very relevant*/
+	protected final FloatResource maxWritePerCCUperHourParam;
 	
 	private HmCentralManager(ApplicationManagerPlus appManPlus) {
 		super(appManPlus);
-		maxDutyCycle = ResourceHelper.getEvalCollection(appMan).getSubResource(paramMaxDutyCycle, FloatResource.class);
-		maxWritePerCCUperHour = ResourceHelper.getEvalCollection(appMan).getSubResource(paramMaxWritePerCCUperHour, FloatResource.class);
+		maxDutyCycleParam = ResourceHelper.getEvalCollection(appMan).getSubResource(paramMaxDutyCycle, FloatResource.class);
+		maxWritePerCCUperHourParam = ResourceHelper.getEvalCollection(appMan).getSubResource(paramMaxWritePerCCUperHour, FloatResource.class);
 	}
 	
 	private static HmCentralManager instance = null;
@@ -95,47 +98,62 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 	}
 	
 	@Override
-	public boolean isSensorInOverload(SensorData data, int priority) {
+	public boolean isSensorInOverload(SensorData data, float priority) {
 		CCUInstance ccu = ((SensorDataHm)data).ccu;
 		if(ccu == null)
 			return false;
 		return isRouterInOverload(ccu, priority);
 	}
 	
-	Float maxWritePerInterval = null;
+	//Float maxWritePerInterval = null;
 	
-	//TODO: We need some averaging most likely
+	/** The current interval is limited based on the number of write operations. Also the dutyCycleMax is evaluated for the previous interval.
+	 * Both must be ok to allow for writing
+	 * 
+	 */
 	@Override
-	public boolean isRouterInOverload(RouterInstance router, int priority) {
+	public boolean isRouterInOverload(RouterInstance router, float priority) {
 		CCUInstance ccu = (CCUInstance) router;
-		if(maxWritePerInterval == null) {
-			if(maxWritePerCCUperHour != null) {
-				maxWritePerInterval = maxWritePerCCUperHour.getValue() * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
-			} else
-				maxWritePerInterval = DEFAULT_MAX_WRITE_PER_HOUR * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
-		}
-		if(ccu.totalWriteCount > maxWritePerInterval)
-			return false;
-		
-		float curDC;
+
 		float maxDC;
-		if(maxDutyCycle != null && priority <= CONDITIONAL_PRIO)
-			maxDC = maxDutyCycle.getValue();
+		if(maxDutyCycleParam != null && maxDutyCycleParam.isActive() && priority <= CONDITIONAL_PRIO)
+			maxDC = maxDutyCycleParam.getValue();
 		else
 			maxDC = priority; // 0.97f;
-		if(ccu.dutyCycleMax != null) {
-			curDC = ccu.dutyCycleMax.getValue();
-		} else if(ccu.dutyCycle != null) {
-			curDC = ccu.dutyCycle.getValue();
+
+		float maxWritePerInterval;
+		if(maxWritePerCCUperHourParam != null && maxWritePerCCUperHourParam.isActive()) {
+			maxWritePerInterval = maxWritePerCCUperHourParam.getValue() * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
+		} else
+			maxWritePerInterval = DEFAULT_MAX_WRITE_PER_HOUR * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
+		float relLoad = ccu.totalWriteCount / maxWritePerInterval;
+		if(relLoad > ccu.relativeLoadMax)
+			ccu.relativeLoadMax = relLoad;
+		if(relLoad >= maxDC) {
+			return false;
+		}
+
+		//Check also for current duty cycle
+		//float curDC;
+		if(ccu.dutyCycleValueMax >= maxDC) {
+			return false;
+		}
+		
+		float prevDC;
+		if(ccu.dutyCycleMax != null && ccu.dutyCycleMax.isActive()) {
+			prevDC = ccu.dutyCycleMax.getValue();
+		//} else if(ccu.dutyCycle != null) {
+			//usually max is available and this not used
+		//	prevDC = Boolean.getBoolean("org.smartrplace.util.virtualdevice.dutycycle100")?(ccu.dutyCycle.getValue()*0.01f):ccu.dutyCycle.getValue();
 		} else {
-			//float maxWritePerHour;
-			if(maxWritePerCCUperHour != null) {
-				curDC = ccu.totalWritePerHour.getValue() / maxWritePerCCUperHour.getValue();
+			//usually max is available and this not used
+			if(maxWritePerCCUperHourParam != null && maxWritePerCCUperHourParam.isActive()) {
+				prevDC = ccu.totalWritePerHour.getValue() / maxWritePerCCUperHourParam.getValue();
 			} else {
-				curDC = ccu.totalWritePerHour.getValue() / DEFAULT_MAX_WRITE_PER_HOUR;
+				prevDC = ccu.totalWritePerHour.getValue() / DEFAULT_MAX_WRITE_PER_HOUR;
 			}
 		}
-		return (curDC > maxDC);
+		return (prevDC > maxDC);
 
 	}
 
@@ -158,7 +176,7 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 	
 					@Override
 					public void resourceChanged(FloatResource resource) {
-						float val = cd.dutyCycle.getValue();
+						float val = Boolean.getBoolean("org.smartrplace.util.virtualdevice.dutycycle100")?(cd.dutyCycle.getValue()*0.01f):cd.dutyCycle.getValue();
 						if(val > cd.dutyCycleValueMax)
 							cd.dutyCycleValueMax = val;
 					}

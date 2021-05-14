@@ -19,6 +19,7 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 	public static final String paramMaxWriteOnDefaultPerHour = "paramMaxWriteOnDefaultPerHour";
 	private static final float DEFAULT_MAX_WRITE_PER_HOUR = 360;
 	
+	/** Parameter overwriting DEFAULT_MAX_WRITE_PER_HOUR. This could be very relevant*/
 	protected final FloatResource maxWriteOnDefaultPerHour;
 	protected RouterInstance gateway = null;
 	
@@ -56,33 +57,31 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 	}
 	
 	@Override
-	public boolean isSensorInOverload(SensorData data, int priority) {
+	public boolean isSensorInOverload(SensorData data, float priority) {
 		RouterInstance ccu = data.ccu();
 		if(ccu == null)
 			return false;
 		return isRouterInOverload(ccu, priority);
 	}
 	
-	Float maxWritePerInterval = null;
+	//Float maxWritePerInterval = null;
 
-	//TODO: We need some averaging most likely
 	@Override
-	public boolean isRouterInOverload(RouterInstance ccu, int priority) {
-		if(maxWritePerInterval == null) {
-			if(maxWriteOnDefaultPerHour != null) {
-				maxWritePerInterval =  maxWriteOnDefaultPerHour.getValue() * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
-			} else
-				maxWritePerInterval = DEFAULT_MAX_WRITE_PER_HOUR * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
-		}
+	public boolean isRouterInOverload(RouterInstance ccu, float priority) {
+		float maxWritePerInterval;
+		if(maxWriteOnDefaultPerHour != null && maxWriteOnDefaultPerHour.isActive()) {
+			maxWritePerInterval =  maxWriteOnDefaultPerHour.getValue() * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
+		} else
+			maxWritePerInterval = DEFAULT_MAX_WRITE_PER_HOUR * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
 		if(ccu.totalWriteCount > maxWritePerInterval)
 			return false;
 
 		float curDC;
 		float maxDC = priority;
-		if(maxWriteOnDefaultPerHour != null) {
+		if(maxWriteOnDefaultPerHour != null && maxWriteOnDefaultPerHour.isActive()) {
 			curDC = ccu.totalWritePerHour.getValue() / maxWriteOnDefaultPerHour.getValue();
 		} else {
-				curDC = ccu.totalWritePerHour.getValue() / DEFAULT_MAX_WRITE_PER_HOUR;
+			curDC = ccu.totalWritePerHour.getValue() / DEFAULT_MAX_WRITE_PER_HOUR;
 		}
 		return (curDC > maxDC);
 	}

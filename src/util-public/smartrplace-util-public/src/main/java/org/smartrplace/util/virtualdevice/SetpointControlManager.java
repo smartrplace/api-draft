@@ -34,16 +34,18 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	public static final long CCU_UPDATE_INTERVAL = 10000;
 	public static final long DEFAULT_EVAL_INTERVAL = Long.getLong("org.smartrplace.util.virtualdevice.evalinterval", 5*TimeProcUtil.MINUTE_MILLIS);
 	private static final long RESEND_TIMER_INTERVAL = 60000;
-	public static final int CONDITIONAL_PRIO = 60;
-	public static final int PRIORITY_PRIO = 90;
+	public static final float CONDITIONAL_PRIO = 0.6f;
+	public static final float PRIORITY_PRIO = 0.9f;
 	public static final int FORCE_PRIO = 1000;
 	public static final long KEEPKNOWNTEMPERATURES_DURATION_DEFAULT = 30000;
 
 	public static final String totalWritePerHour = "totalWritePerHour";
 	public static final String conditionalWritePerHour = "conditionalWritePerHour";
 	public static final String conditionalDropPerHour = "conditionalDropPerHour";
-	public static final String priorityWritePerHour = "prorityWritePerHour";
-	public static final String priorityDropPerHour = "prorityDropPerHour";
+	public static final String priorityWritePerHour = "priorityWritePerHour";
+	public static final String priorityDropPerHour = "priorityDropPerHour";
+	public static final String resendMissingFbPerHour = "resendMissingFbPerHour";
+	public static final String relativeLoadEff = "relativeLoadEff";
 	
 	public static enum SetpointControlType {
 		/** Default types use the gateway as CCU/router*/
@@ -52,8 +54,8 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		HmThermostat
 	}
 	
-	public abstract boolean isSensorInOverload(SensorData data, int priority);
-	public abstract boolean isRouterInOverload(RouterInstance ccu, int priority);
+	public abstract boolean isSensorInOverload(SensorData data, float priority);
+	public abstract boolean isRouterInOverload(RouterInstance ccu, float priority);
 	public abstract RouterInstance getCCU(Sensor sensor);
 	protected abstract void updateCCUListForced();
 	protected abstract SensorData getSensorDataInstance(Sensor sensor);
@@ -71,12 +73,19 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		volatile int conditionalDropCount = 0;
 		volatile int priorityWriteCount = 0;
 		volatile int priorityDropCount = 0;
+		volatile int resendMissingFbCount = 0;
+		/** During an evaluation interval this value should only go up and shall be limited below
+		 * 100%, usually below the level of PRIORITY_PRIO*/
+		volatile float relativeLoadMax = 0;
+		
 		InstallAppDevice device;
 		public FloatResource conditionalWritePerHour;
 		public FloatResource conditionalDropPerHour;
 		public FloatResource priorityWritePerHour;
 		public FloatResource priorityDropPerHour;
 		public FloatResource totalWritePerHour;
+		public FloatResource resendMissingFbPerHour;
+		public FloatResource relativeLoadEff;
 		
 		//setpoint location -> data
 		Map<String, SensorData> sensorResendMan = new HashMap<>();
@@ -146,8 +155,15 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	 * @param priority
 	 * @return true if resource is written that triggers sending setpoint to device. False if request is dropped or postponed
 	 */
-	public boolean requestSetpointWrite(T setp, float setpoint, int priority) {
+	public boolean requestSetpointWrite(T setp, float setpoint, float priority) {
 		SensorData sens = registerSensor(setp);
+
+		//FIXME: Only for test phase for standard gateways
+		if(!Boolean.getBoolean("org.smartrplace.util.virtualdevice.dutycycle100")) {
+			sens.writeSetpoint(setpoint);
+			return true;
+		}
+		
 		boolean isOverload = isSensorInOverload(sens, priority);
 		if(!isOverload) {
 			long now = appMan.getFrameworkTime();
@@ -217,7 +233,18 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		if(ccu.priorityDropPerHour!= null) {
 			ValueResourceHelper.setCreate(ccu.priorityDropPerHour, (float) (((double)(ccu.priorityDropCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
 		}
-		ccu.priorityDropCount = 0;		
+		ccu.priorityDropCount = 0;
+		
+		if(ccu.resendMissingFbPerHour!= null) {
+			ValueResourceHelper.setCreate(ccu.resendMissingFbPerHour, (float) (((double)(ccu.resendMissingFbCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
+		}
+		ccu.resendMissingFbCount = 0;
+
+		if(ccu.relativeLoadEff != null) {
+			ValueResourceHelper.setCreate(ccu.relativeLoadEff, ccu.relativeLoadMax);
+		}
+		ccu.relativeLoadMax = 0;		
+
 	}
 	/*protected void checkForDataReporting(RouterInstance ccu) {
 		long now = appMan.getFrameworkTime();
@@ -247,6 +274,7 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	}
 	
 	//TODO: Shall be flexible in the future
+	long pendingTimeForMissingFeedback = 4*TimeProcUtil.MINUTE_MILLIS;
 	long pendingTimeForRetry = 8*TimeProcUtil.MINUTE_MILLIS;
 	long lastSentAgoForRetry = 15*TimeProcUtil.MINUTE_MILLIS;
 	@SuppressWarnings("unchecked")
@@ -276,8 +304,10 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 			for(SensorData resenddata: allresend) {
 				if(resenddata.valueFeedbackPending != null) {
 					long timePendingFb = now - resenddata.valuePendingSince;
-					long sentAgoFb = now - resenddata.lastSent;
-					if((timePendingFb > pendingTimeForRetry) && (sentAgoFb > lastSentAgoForRetry)) {
+					//long sentAgoFb = now - resenddata.lastSent;
+					if((timePendingFb > pendingTimeForMissingFeedback)) { // && (sentAgoFb > lastSentAgoForRetry)) {
+						log.warn("Feedback missing for "+resenddata.sensor.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
+						cd.resendMissingFbCount++;
 						boolean success = requestSetpointWrite((T) resenddata.sensor.setpoint(), resenddata.valueFeedbackPending, CONDITIONAL_PRIO);
 						if(success) {
 							resenddata.valueFeedbackPending = null;
@@ -311,6 +341,8 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		cd.conditionalDropPerHour = ccu.getSubResource(conditionalDropPerHour, FloatResource.class);
 		cd.priorityWritePerHour = ccu.getSubResource(priorityWritePerHour, FloatResource.class);
 		cd.priorityDropPerHour = ccu.getSubResource(priorityDropPerHour, FloatResource.class);
+		cd.resendMissingFbPerHour = ccu.getSubResource(resendMissingFbPerHour, FloatResource.class);
+		cd.relativeLoadEff = ccu.getSubResource(relativeLoadEff, FloatResource.class);
 	}
 	
 	public static SetpointControlType getControlType(SingleValueResource setpoint) {
