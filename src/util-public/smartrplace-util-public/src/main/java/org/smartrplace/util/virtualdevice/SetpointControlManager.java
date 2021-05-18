@@ -158,12 +158,6 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	public boolean requestSetpointWrite(T setp, float setpoint, float priority) {
 		SensorData sens = registerSensor(setp);
 
-		//FIXME: Only for test phase for standard gateways
-		if(!Boolean.getBoolean("org.smartrplace.util.virtualdevice.dutycycle100")) {
-			sens.writeSetpoint(setpoint);
-			return true;
-		}
-		
 		boolean isOverload = isSensorInOverload(sens, priority);
 		if(!isOverload) {
 			long now = appMan.getFrameworkTime();
