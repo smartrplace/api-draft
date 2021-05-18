@@ -35,7 +35,7 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 		public FloatResource dutyCycleMax = null;
 		
 		public ResourceValueListener<FloatResource> dutyCycleListener;
-		public float dutyCycleValueMax = 0;
+		public volatile float dutyCycleValueMax = 0;
 	}
 	
 	public static class SensorDataHm extends SensorDataTemperature {
@@ -135,6 +135,8 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 
 		//Check also for current duty cycle
 		//float curDC;
+		if(ccu.dutyCycleValueMax > ccu.relativeLoadMax)
+			ccu.relativeLoadMax = ccu.dutyCycleValueMax;
 		if(ccu.dutyCycleValueMax >= maxDC) {
 			return false;
 		}
@@ -153,6 +155,8 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 				prevDC = ccu.totalWritePerHour.getValue() / DEFAULT_MAX_WRITE_PER_HOUR;
 			}
 		}
+		if(prevDC > ccu.relativeLoadMax)
+			ccu.relativeLoadMax = prevDC;
 		return (prevDC > maxDC);
 
 	}
