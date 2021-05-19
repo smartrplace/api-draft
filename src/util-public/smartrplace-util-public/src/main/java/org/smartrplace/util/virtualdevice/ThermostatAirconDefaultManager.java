@@ -67,14 +67,14 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 	//Float maxWritePerInterval = null;
 
 	@Override
-	public boolean isRouterInOverload(RouterInstance ccu, float priority) {
+	protected boolean isRouterInOverloadForced(RouterInstance ccu, float priority) {
 		float maxWritePerInterval;
 		if(maxWriteOnDefaultPerHour != null && maxWriteOnDefaultPerHour.isActive()) {
 			maxWritePerInterval =  maxWriteOnDefaultPerHour.getValue() * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
 		} else
 			maxWritePerInterval = DEFAULT_MAX_WRITE_PER_HOUR * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
 		if(ccu.totalWriteCount > maxWritePerInterval)
-			return false;
+			return true;
 
 		float curDC;
 		float maxDC = priority;

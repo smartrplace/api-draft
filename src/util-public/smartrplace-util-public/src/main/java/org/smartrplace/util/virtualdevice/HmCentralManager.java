@@ -112,7 +112,7 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 	 * 
 	 */
 	@Override
-	public boolean isRouterInOverload(RouterInstance router, float priority) {
+	public boolean isRouterInOverloadForced(RouterInstance router, float priority) {
 		CCUInstance ccu = (CCUInstance) router;
 
 		float maxDC;
@@ -130,7 +130,7 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 		if(relLoad > ccu.relativeLoadMax)
 			ccu.relativeLoadMax = relLoad;
 		if(relLoad >= maxDC) {
-			return false;
+			return true;
 		}
 
 		//Check also for current duty cycle
@@ -138,7 +138,7 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 		if(ccu.dutyCycleValueMax > ccu.relativeLoadMax)
 			ccu.relativeLoadMax = ccu.dutyCycleValueMax;
 		if(ccu.dutyCycleValueMax >= maxDC) {
-			return false;
+			return true;
 		}
 		
 		float prevDC;
@@ -158,7 +158,6 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 		if(prevDC > ccu.relativeLoadMax)
 			ccu.relativeLoadMax = prevDC;
 		return (prevDC > maxDC);
-
 	}
 
 	@Override

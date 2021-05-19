@@ -55,7 +55,7 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	}
 	
 	public abstract boolean isSensorInOverload(SensorData data, float priority);
-	public abstract boolean isRouterInOverload(RouterInstance ccu, float priority);
+	protected abstract boolean isRouterInOverloadForced(RouterInstance ccu, float priority);
 	public abstract RouterInstance getCCU(Sensor sensor);
 	protected abstract void updateCCUListForced();
 	protected abstract SensorData getSensorDataInstance(Sensor sensor);
@@ -337,6 +337,11 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		cd.priorityDropPerHour = ccu.getSubResource(priorityDropPerHour, FloatResource.class);
 		cd.resendMissingFbPerHour = ccu.getSubResource(resendMissingFbPerHour, FloatResource.class);
 		cd.relativeLoadEff = ccu.getSubResource(relativeLoadEff, FloatResource.class);
+	}
+	
+	public boolean isRouterInOverload(RouterInstance ccu, float priority) {
+		//TODO: implement caching per ccu and priority
+		return isRouterInOverloadForced(ccu, priority);
 	}
 	
 	public static SetpointControlType getControlType(SingleValueResource setpoint) {
