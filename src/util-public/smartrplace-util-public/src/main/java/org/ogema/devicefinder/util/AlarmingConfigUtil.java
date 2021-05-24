@@ -1,7 +1,9 @@
 package org.ogema.devicefinder.util;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
@@ -28,6 +30,32 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public class AlarmingConfigUtil {
+	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 6;
+	public static final Map<String, String> ASSIGNEMENT_ROLES = new LinkedHashMap<>();
+	static {
+		ASSIGNEMENT_ROLES.put("0", "None");
+		//ASSIGNEMENT_ROLES.put("1", "requires more analysis");
+		ASSIGNEMENT_ROLES.put("1000", "Other");	
+		ASSIGNEMENT_ROLES.put("2000", "Operation");
+		ASSIGNEMENT_ROLES.put("2100", "Op Battery");
+		ASSIGNEMENT_ROLES.put("2150", "Op Device not Reacheable");
+		ASSIGNEMENT_ROLES.put("2200", "Op Signal strength");
+		ASSIGNEMENT_ROLES.put("2500", "Op External");
+		ASSIGNEMENT_ROLES.put("3000", "Development");
+		//ASSIGNEMENT_ROLES.put("2100", "Development Logic");
+		//ASSIGNEMENT_ROLES.put("2200", "Development HW Driver");
+		ASSIGNEMENT_ROLES.put("3500", "Dev External");
+		ASSIGNEMENT_ROLES.put("4000", "Customer");
+		ASSIGNEMENT_ROLES.put("5000", "Backlog");
+		ASSIGNEMENT_ROLES.put("6000", "Dependent");
+	}
+	public static String assignedText(int value) {
+		String result = ASSIGNEMENT_ROLES.get(""+value);
+		if(result != null)
+			return result;
+		return "unknown:"+value;
+	}
+	
 	public static IntegerResource getAlarmStatus(ValueResource reading) {
 		return getAlarmStatus(reading, true);
 	}
@@ -287,7 +315,7 @@ public class AlarmingConfigUtil {
 	
 	/** 0: number of Knis not assigned or assigned to other, [1]: assigned to operation, [2]: development, [3]: customer,
 	 * more indeces may be defined by AlarmGroupData.USER_ROLES*/
-	public static int[] getKnownIssues(ResourceAccess resAcc) {
+	/*public static int[] getKnownIssues(ResourceAccess resAcc) {
 		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
 		int[] result = new int[AlarmGroupData.USER_ROLES.length];
 		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
@@ -312,7 +340,37 @@ public class AlarmingConfigUtil {
 			}
 		}
 		return result;
+	}*/
+	
+	/** 0: number of Knis not assigned or assigned to other, [1]: assigned to operation, [2]: development, [3]: customer,
+	 * more indeces may be defined by AlarmGroupData.USER_ROLES*/
+	public static int[] getKnownIssues(ResourceAccess resAcc) {
+		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
+		int[] result = new int[MAIN_ASSIGNEMENT_ROLE_NUM];
+		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
+			AlarmGroupData kni = dev.knownFault();
+			if(!kni.isActive())
+				continue;
+			if(!kni.assigned().exists()) {
+				result[0] ++;
+				continue;
+			}
+			int role = kni.assigned().getValue();
+			int mainRole = role/1000-1;
+			if(mainRole < 0) {
+				result[0] ++;
+				continue;
+			}
+			if(mainRole >= MAIN_ASSIGNEMENT_ROLE_NUM) {
+				System.out.println("Assigned value too large:"+role+" for "+kni.assigned().getLocation());
+				//result[0] ++;
+				continue;
+			}
+			result[mainRole] ++;
+		}
+		return result;
 	}
+
 
 	public static int[] getActiveAlarms(ResourceAccess resAcc) {
 		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
