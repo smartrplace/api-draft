@@ -30,7 +30,7 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public class AlarmingConfigUtil {
-	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 6;
+	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 7;
 	public static final Map<String, String> ASSIGNEMENT_ROLES = new LinkedHashMap<>();
 	static {
 		ASSIGNEMENT_ROLES.put("0", "None");
@@ -48,6 +48,7 @@ public class AlarmingConfigUtil {
 		ASSIGNEMENT_ROLES.put("4000", "Customer");
 		ASSIGNEMENT_ROLES.put("5000", "Backlog");
 		ASSIGNEMENT_ROLES.put("6000", "Dependent");
+		ASSIGNEMENT_ROLES.put("7000", "Special Settings (Non Blocking)");
 	}
 	public static String assignedText(int value) {
 		String result = ASSIGNEMENT_ROLES.get(""+value);
