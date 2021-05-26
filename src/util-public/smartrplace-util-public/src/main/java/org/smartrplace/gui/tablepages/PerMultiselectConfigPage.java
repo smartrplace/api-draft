@@ -32,11 +32,19 @@ public abstract class PerMultiselectConfigPage<T, G, R extends Resource> extends
 	protected abstract void setGroups(T object, List<G> groups, OgemaHttpRequest req);
 	protected abstract String getGroupLabel(G object, OgemaLocale locale);
 
+	//Only relevant for pages that are used in variants and in some cases the multiselect column shall not be shown
+	protected final boolean suppressMultiSelectColumn;
+	
 	//protected abstract String getGroupLabel(G group);
 	//protected abstract 
 	
 	public PerMultiselectConfigPage(WidgetPage<?> page, ApplicationManager appMan, T initObject) {
+		this(page, appMan, initObject, false);
+	}
+	public PerMultiselectConfigPage(WidgetPage<?> page, ApplicationManager appMan, T initObject,
+			boolean suppressMultiSelectColumn) {
 		super(page, appMan, initObject);
+		this.suppressMultiSelectColumn = suppressMultiSelectColumn;
 		//this.controller = controller;
 	}
 
@@ -58,7 +66,8 @@ public abstract class PerMultiselectConfigPage<T, G, R extends Resource> extends
 		addWidgetsBeforeMultiSelect(object, vh, id, req, row, appMan);
 
 		if(req == null) {
-			vh.registerHeaderEntry(getGroupColumnLabel());
+			if(!suppressMultiSelectColumn)
+				vh.registerHeaderEntry(getGroupColumnLabel());
 			addWidgetsAfterMultiSelect(object, vh, id, req, row, appMan);
 			return;
 		}

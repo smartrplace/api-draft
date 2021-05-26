@@ -112,4 +112,10 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 		return appConfigData.gatewayData().getAllElements();
 	}
 
+
+	@Override
+	public String getLineId(GatewayData object) {
+		String baseId = ViaHeartbeatUtil.getBaseGwId(ResourceUtils.getHumanReadableShortName(object));
+		return baseId+super.getLineId(object);
+	}
 }
