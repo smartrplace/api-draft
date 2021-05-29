@@ -47,6 +47,8 @@ public class DatapointGroupImpl implements DatapointGroup {
 
 	@Override
 	public void setLabel(OgemaLocale locale, String label) {
+		if(locale == null)
+			labels.put(OgemaLocale.ENGLISH, label);
 		labels.put(locale, label);
 	}
 

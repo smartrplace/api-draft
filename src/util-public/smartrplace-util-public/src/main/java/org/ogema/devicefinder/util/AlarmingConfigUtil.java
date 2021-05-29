@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.array.StringArrayResource;
 import org.ogema.core.model.simple.BooleanResource;
@@ -16,12 +17,15 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.AlarmingService;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
 import org.ogema.model.extended.alarming.AlarmGroupData;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
+import org.ogema.timeseries.eval.simple.mon.TimeSeriesServlet;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -30,6 +34,8 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public class AlarmingConfigUtil {
+	public static final double QUALITY_TIME_SHARE_LIMIT = 0.95f;
+
 	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 8; //including unassigned (0)
 	public static final Map<String, String> ASSIGNEMENT_ROLES = new LinkedHashMap<>();
 	static {
@@ -384,6 +390,74 @@ public class AlarmingConfigUtil {
 		return result;
 	}
 
+	public static double getValueSum(List<SampledValue> svs) {
+		double sum = 0;
+		for(SampledValue sv: svs) {
+			float val = sv.getValue().getFloatValue();
+			if(!Float.isNaN(val))
+				sum += val;
+		}
+		return sum;
+	}
+	
+	/** 0: qualityShort, [1] qualityLong, [2]: qualityShort V2, [3]: qualityLong V2*/
+	public static int[] getQualityValues(ApplicationManager appMan, DatapointService dpService) {
+		ResourceAccess resAcc = appMan.getResourceAccess();
+		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
+		int[] result = new int[] {0,0,0,0};
+		long now = appMan.getFrameworkTime();
+		long startShort = now - 4*TimeProcUtil.DAY_MILLIS;
+		long startLong = now - 28*TimeProcUtil.DAY_MILLIS;
+		int countShortOk = 0;
+		int countLongOk = 0;
+		int countShortOkGold = 0;
+		int countLongOkGold = 0;
+		int countEval = 0;
+		int countEvalGold =0;
+		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
+			if(dev.isTrash().getValue())
+				continue;
+			boolean isAssigned = (dev.knownFault().assigned().isActive() && (dev.knownFault().assigned().getValue() > 0));
+			for(AlarmConfiguration ac: dev.alarms().getAllElements()) {
+				if(!ac.sendAlarm().getValue())
+					continue;
+				SingleValueResource sens = ac.sensorVal().getLocationResource();
+				if(!sens.exists())
+					continue;
+				Datapoint dp = dpService.getDataPointAsIs(sens);
+				if(dp == null)
+					continue; //should not occur
+				ReadOnlyTimeSeries ts = dp.getTimeSeries();
+				if(ts == null) {
+					appMan.getLogger().warn("No timeseries for datapoint configured for alarming:"+sens.getLocation());
+					continue;
+				}
+				float maxGapSize = ac.maxIntervalBetweenNewValues().getValue();
+				List<SampledValue> gaps = TimeSeriesServlet.getGaps(ts, startShort, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
+				double sum = getValueSum(gaps);
+				if(sum <= 4*1440) {
+					countShortOkGold++;
+					if(!isAssigned)
+						countShortOk++;
+				}
+				List<SampledValue> gapsLong = TimeSeriesServlet.getGaps(ts, startLong, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
+				sum = getValueSum(gapsLong);
+				if(sum <= 28*1440) {
+					countLongOkGold++;
+					if(!isAssigned)
+						countLongOk++;
+				}
+				countEvalGold++;
+				if(!isAssigned)
+					countEval++;
+			}
+			result[0] = (int) (((float)countShortOk) / countEval * 100);
+			result[1] = (int) (((float)countLongOk) / countEval * 100);
+			result[2] = (int) (((float)countShortOkGold) / countEvalGold * 100);
+			result[3] = (int) (((float)countLongOkGold) / countEvalGold * 100);
+		}
+		return result;
+	}
 
 	public static int[] getActiveAlarms(ResourceAccess resAcc) {
 		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);

@@ -520,6 +520,7 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		return sum;
 	}
 
+	/** Return gap durations in minutes as FloatValues*/
 	public static List<SampledValue> getGaps(ReadOnlyTimeSeries timeSeries, long start, long end, long maxGapSize) {
 		List<SampledValue> input = timeSeries.getValues(start, end+1);
 		List<SampledValue> result = new ArrayList<>();

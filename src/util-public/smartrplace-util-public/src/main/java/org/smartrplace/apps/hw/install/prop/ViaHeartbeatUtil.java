@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.devicefinder.util.AlarmingConfigUtil;
+import org.smartrplace.gateway.device.KnownIssueDataGw;
+
+import de.iwes.util.resource.ValueResourceHelper;
 
 public class ViaHeartbeatUtil {
 	public static final String VIA_HEARTBEAT_TYPE = "VIA_HEARTBT";
@@ -153,5 +158,24 @@ System.out.println("Use send group:"+sendGroup.id()+" recvGroup"+recvGroup.id())
 		if(gatewayId.startsWith("_"))
 			return gatewayId.substring(1);
 		return gatewayId;
+	}
+
+	public static void updateEvalResources(KnownIssueDataGw kniData, ApplicationManager appMan) {
+		if(kniData != null) {
+			int[] alarmNum = AlarmingConfigUtil.getActiveAlarms(appMan.getResourceAccess());
+			ValueResourceHelper.setCreate(kniData.datapointsInAlarmState(), alarmNum[0]);
+			ValueResourceHelper.setCreate(kniData.activeAlarmSupervision(), alarmNum[1]);
+			ValueResourceHelper.setCreate(kniData.datapointsTotal(), alarmNum[2]);
+			ValueResourceHelper.setCreate(kniData.devicesTotal(), alarmNum[3]);
+			
+			int[] knis = AlarmingConfigUtil.getKnownIssues(appMan.getResourceAccess());
+			ValueResourceHelper.setCreate(kniData.knownIssuesUnassigned(), knis[0]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedOther(), knis[1]+knis[5]+knis[6]+knis[7]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedOperationOwn(), knis[2]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedDevOwn(), knis[3]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedCustomer(), knis[4]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesOpExternal(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesDevExternal(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+1]);
+		}		
 	}
 }
