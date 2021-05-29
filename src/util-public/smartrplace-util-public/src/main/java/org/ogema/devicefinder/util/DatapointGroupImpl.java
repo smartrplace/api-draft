@@ -70,8 +70,6 @@ public class DatapointGroupImpl implements DatapointGroup {
 	public boolean addDatapoint(Datapoint dp) {
 		synchronized(this) {
 			for(Datapoint dpknown: this.datapoints) {
-if(dpknown == null || dp == null || dpknown.id() == null)
-System.out.print("");
 				if(dpknown.id().equals(dp.id()))
 					return false;
 			}

@@ -5,7 +5,7 @@ import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 
 public class TimeseriesSetProcSum extends TimeseriesSetProcMultiToSingle {
 	
-	public TimeseriesSetProcSum(String label) {
+	/*public TimeseriesSetProcSum(String label) {
 		super(label);
 	}
 	public TimeseriesSetProcSum(String label, int intervalType) {
@@ -16,6 +16,9 @@ public class TimeseriesSetProcSum extends TimeseriesSetProcMultiToSingle {
 	}
 	public TimeseriesSetProcSum(String label, int intervalType, Integer absoluteTiming, Long minIntervalForReCalc) {
 		super(label, intervalType, absoluteTiming, minIntervalForReCalc);
+	}*/
+	public TimeseriesSetProcSum(String label, int intervalType, Integer absoluteTiming, Long minIntervalForReCalc, int updateMode) {
+		super(label, intervalType, absoluteTiming, minIntervalForReCalc, updateMode);
 	}
 
 	@Override

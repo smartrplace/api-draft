@@ -30,7 +30,7 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public class AlarmingConfigUtil {
-	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 7;
+	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 8; //including unassigned (0)
 	public static final Map<String, String> ASSIGNEMENT_ROLES = new LinkedHashMap<>();
 	static {
 		ASSIGNEMENT_ROLES.put("0", "None");
@@ -343,11 +343,11 @@ public class AlarmingConfigUtil {
 		return result;
 	}*/
 	
-	/** 0: number of Knis not assigned or assigned to other, [1]: assigned to operation, [2]: development, [3]: customer,
+	/** 0: number of Knis not assigned, [1] assigned to other, [2]: assigned to operation, [3]: development, [4]: customer,
 	 * more indeces may be defined by AlarmGroupData.USER_ROLES*/
 	public static int[] getKnownIssues(ResourceAccess resAcc) {
 		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
-		int[] result = new int[MAIN_ASSIGNEMENT_ROLE_NUM];
+		int[] result = new int[MAIN_ASSIGNEMENT_ROLE_NUM+2];
 		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
 			AlarmGroupData kni = dev.knownFault();
 			if(!kni.isActive())
@@ -357,10 +357,22 @@ public class AlarmingConfigUtil {
 				continue;
 			}
 			int role = kni.assigned().getValue();
-			int mainRole = role/1000-1;
+			if(role == 0) {
+				result[0] ++;
+				continue;
+			}
+			int mainRole = role/1000;
 			if(mainRole < 0) {
 				result[0] ++;
 				continue;
+			}
+			if(mainRole >= 2500 && mainRole < 3000) {
+				result[MAIN_ASSIGNEMENT_ROLE_NUM] ++;
+				continue;				
+			}
+			if(mainRole >= 3500 && mainRole < 4000) {
+				result[MAIN_ASSIGNEMENT_ROLE_NUM+1] ++;
+				continue;				
 			}
 			if(mainRole >= MAIN_ASSIGNEMENT_ROLE_NUM) {
 				System.out.println("Assigned value too large:"+role+" for "+kni.assigned().getLocation());
@@ -375,11 +387,15 @@ public class AlarmingConfigUtil {
 
 	public static int[] getActiveAlarms(ResourceAccess resAcc) {
 		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
-		int[] result = new int[] {0,0};
+		int[] result = new int[] {0,0,0,0};
 		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
+			if(dev.isTrash().getValue())
+				continue;
 			int[] devNum = getActiveAlarms(dev);
 			result[0] += devNum[0];
 			result[1] += devNum[1];
+			result[2] += dev.dpNum().getValue();
+			result[3]++;
 		}
 		return result;
 	}

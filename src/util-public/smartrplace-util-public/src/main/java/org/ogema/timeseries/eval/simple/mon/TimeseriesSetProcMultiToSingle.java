@@ -23,7 +23,6 @@ import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcSingleToSingle.Proc
 import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
-import de.iwes.util.timer.AbsoluteTiming;
 
 /** The input time series for this provider must be aligned having common time stamps
  * and the time series starting first and ending last shall have no gap in between that occurs not in
@@ -55,7 +54,10 @@ public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetPro
 	 *  3: Update for any input change onwards completely
 	 *  4: Update completely if any input has a change 
 	 */
-	public int updateMode;
+	public final int updateMode;
+	//public void setUpdateMode(int value) {
+	//	this.updateMode = value;
+	//}
 	
 	protected final Integer absoluteTiming;
 	
@@ -220,26 +222,31 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLa
 	//protected final int intervalType2;
 	private final long TEST_SHIFT;
 	
-	public TimeseriesSetProcMultiToSingle(String resultlabel) {
+	/*public TimeseriesSetProcMultiToSingle(String resultlabel) {
 		this(resultlabel, AbsoluteTiming.DAY);
 	}
 	public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType) {
 		this(resultlabel, intervalType, null);
-	}
+	}*/
 	/**
 	 * 
 	 * @param resultlabel
 	 * @param intervalType relevant for test shift only
 	 * @param absoluteTiming if set then knownEnd will be reset to beginning of interval always
 	 */
-	public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType, Integer absoluteTiming) {
+	/*public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType, Integer absoluteTiming) {
 		this(resultlabel, intervalType, absoluteTiming, null);
 	}
-	public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType, Integer absoluteTiming,
+	private TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType, Integer absoluteTiming,
 			Long minIntervalForReCalc) {
+		this(resultlabel, intervalType, absoluteTiming, minIntervalForReCalc, TimeseriesSimpleProcUtil.DEFAULT_UPDATE_MODE);
+	}*/
+	public TimeseriesSetProcMultiToSingle(String resultlabel, int intervalType, Integer absoluteTiming,
+			Long minIntervalForReCalc, int updateMode) {
 		this.label = resultlabel;
 		//this.intervalType = intervalType;
 		this.absoluteTiming = absoluteTiming;
+		this.updateMode = updateMode;
 		this.minIntervalForReCalc = minIntervalForReCalc;
 		TEST_SHIFT = (long) (0.9*AbsoluteTimeHelper.getStandardInterval(intervalType)); //TimeProcUtil.DAY_MILLIS-2*TimeProcUtil.HOUR_MILLIS;
 	}

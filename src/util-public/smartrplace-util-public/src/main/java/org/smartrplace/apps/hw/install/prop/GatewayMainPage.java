@@ -56,6 +56,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 		addNameLabel(object, vh, id, row, req);
 		if(req == null) {
 			vh.registerHeaderEntry("Software Release Group");
+			vh.registerHeaderEntry("Expected Online");
 			vh.registerHeaderEntry("GUI");
 		} else {
 			Map<GatewayGroupData, String> valuesToSetG = new HashMap<>();
@@ -63,11 +64,16 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				valuesToSetG.put(grGrp, ResourceUtils.getHumanReadableShortName(grGrp));
 			}
 			vh.referenceDropdownFixedChoice("Software Release Group", id, object.installationLevelGroup(), row, valuesToSetG);
-			if(object.guiLink().isActive()) {
+			vh.booleanEdit("Expected Online", id, object.expectedOnHeartbeat(), row);
+			String gwUrl = ServerGatewayUtil.getGatewayBaseUrl(object);
+			if(gwUrl != null) {
+				vh.linkingButton("GUI", id, object, row, "To GW", gwUrl+"/ogema/index.html");
+			}
+			/*if(object.guiLink().isActive()) {
 				RedirectButton guiButton = new RedirectButton(mainTable, id+"guiButton", "GUI",
 						object.guiLink().getValue()+"/ogema/index.html", req);
 				row.addCell("GUI", guiButton);
-			}
+			}*/
 		}
 		vh.stringEdit("Customer", id, object.customer(), row, alert);
 		if(req == null) {
