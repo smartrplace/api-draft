@@ -165,11 +165,14 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		long end = start + AbsoluteTimeHelper.getStandardInterval(intervalType); //TimeProcUtil.DAY_MILLIS;
 		final float startFloat;
 		final float endFloat;
-		long ACCEPTED_PREVIOUS_VALUE_DISTANCE = AbsoluteTimeHelper.getStandardInterval(intervalType)/2;
+		float startFloat1 = -1;
+		float endFloat1 = -1;
 		if(interpolate) {
-			startFloat = TimeProcUtil.getInterpolatedValue(ts, start);
-			endFloat = TimeProcUtil.getInterpolatedValue(ts, end);			
-		} else {
+			startFloat1 = TimeProcUtil.getInterpolatedValue(ts, start);
+			endFloat1 = TimeProcUtil.getInterpolatedValue(ts, end);			
+		}
+		if((!interpolate) || Float.isNaN(startFloat1) || Float.isNaN(endFloat1)) {
+			long ACCEPTED_PREVIOUS_VALUE_DISTANCE = AbsoluteTimeHelper.getStandardInterval(intervalType)/2;
 			SampledValue startval = ts.getPreviousValue(start);
 			if(startval == null || (start - startval.getTimestamp() > ACCEPTED_PREVIOUS_VALUE_DISTANCE)) { //ACCEPTED_PREVIOUS_VALUE_DISTANCE_FOR_DAY_EVAL)) {
 				return Float.NaN; //-1
@@ -185,7 +188,11 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				e.printStackTrace();
 				return -2;
 			}
+		} else {
+			startFloat = startFloat1;
+			endFloat = endFloat1;
 		}
+			
 		return endFloat - startFloat;
 	}
 	/** This method is only applicable for AggregationMode.Meter2Meter*/
