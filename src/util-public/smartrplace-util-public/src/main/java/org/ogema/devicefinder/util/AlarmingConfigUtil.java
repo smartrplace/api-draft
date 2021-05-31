@@ -17,6 +17,7 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.core.resourcemanager.ResourceNotFoundException;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.AlarmingService;
 import org.ogema.devicefinder.api.Datapoint;
@@ -72,11 +73,16 @@ public class AlarmingConfigUtil {
 		//Resource parent = reading.getParent();
 		//IntegerResource alarmStatus = parent.getSubResource(AlarmingService.ALARMSTATUS_RES_NAME,
 		//		IntegerResource.class);
-		IntegerResource alarmStatus = reading.getSubResource(AlarmingService.ALARMSTATUS_RES_NAME,
-				IntegerResource.class);
-		if(!mustBeActive)
-			return alarmStatus;
-		return alarmStatus.isActive()?alarmStatus:null;		
+		try {
+			IntegerResource alarmStatus = reading.getSubResource(AlarmingService.ALARMSTATUS_RES_NAME,
+					IntegerResource.class);
+			if(!mustBeActive)
+				return alarmStatus;
+			return alarmStatus.isActive()?alarmStatus:null;
+		} catch(ResourceNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public static void applyTemplate(String devTypeId, ApplicationManagerPlus appManPlus) {
