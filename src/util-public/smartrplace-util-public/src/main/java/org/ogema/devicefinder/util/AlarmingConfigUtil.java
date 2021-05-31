@@ -35,6 +35,8 @@ import de.iwes.util.resource.ValueResourceHelper;
 
 public class AlarmingConfigUtil {
 	public static final double QUALITY_TIME_SHARE_LIMIT = 0.95f;
+	public static final double QUALITY_SHORT_MAX_MINUTES = 4*1440*(1.0 - QUALITY_TIME_SHARE_LIMIT);
+	public static final double QUALITY_LONG_MAX_MINUTES = 28*1440*(1.0 - QUALITY_TIME_SHARE_LIMIT);
 
 	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 8; //including unassigned (0)
 	public static final Map<String, String> ASSIGNEMENT_ROLES = new LinkedHashMap<>();
@@ -367,18 +369,19 @@ public class AlarmingConfigUtil {
 				result[0] ++;
 				continue;
 			}
+			if(role >= 2500 && role < 3000) {
+				result[MAIN_ASSIGNEMENT_ROLE_NUM] ++;
+				continue;				
+			}
+			if(role >= 3500 && role < 4000) {
+				result[MAIN_ASSIGNEMENT_ROLE_NUM+1] ++;
+				continue;				
+			}
+
 			int mainRole = role/1000;
 			if(mainRole < 0) {
 				result[0] ++;
 				continue;
-			}
-			if(mainRole >= 2500 && mainRole < 3000) {
-				result[MAIN_ASSIGNEMENT_ROLE_NUM] ++;
-				continue;				
-			}
-			if(mainRole >= 3500 && mainRole < 4000) {
-				result[MAIN_ASSIGNEMENT_ROLE_NUM+1] ++;
-				continue;				
 			}
 			if(mainRole >= MAIN_ASSIGNEMENT_ROLE_NUM) {
 				System.out.println("Assigned value too large:"+role+" for "+kni.assigned().getLocation());
@@ -435,14 +438,14 @@ public class AlarmingConfigUtil {
 				float maxGapSize = ac.maxIntervalBetweenNewValues().getValue();
 				List<SampledValue> gaps = TimeSeriesServlet.getGaps(ts, startShort, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
 				double sum = getValueSum(gaps);
-				if(sum <= 4*1440) {
+				if(sum <= QUALITY_SHORT_MAX_MINUTES) {
 					countShortOkGold++;
 					if(!isAssigned)
 						countShortOk++;
 				}
 				List<SampledValue> gapsLong = TimeSeriesServlet.getGaps(ts, startLong, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
 				sum = getValueSum(gapsLong);
-				if(sum <= 28*1440) {
+				if(sum <= QUALITY_LONG_MAX_MINUTES) {
 					countLongOkGold++;
 					if(!isAssigned)
 						countLongOk++;
