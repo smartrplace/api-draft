@@ -17,6 +17,7 @@ import org.ogema.devicefinder.api.Datapoint;
 import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
+import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 
@@ -355,8 +356,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 
 	/** Structure for passing on downsampling information from one input sample to the next one*/
 	static class DownSamplingData {
-		long lastTs = -1;
-		Long lastTsCollected = null;
+		long lastTs = -1; //time stamp of last SampledValue written
+		Long lastTsCollected = null; //time stamp of last input SampledValue processed IF it is not part of an output value yet
 		float maxVal = -Float.MAX_VALUE;
 		float minVal = -Float.MAX_VALUE;
 		boolean suppressNaN;
@@ -385,7 +386,16 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		DownSamplingData data = new DownSamplingData();
 		data.suppressNaN = suppressNaN;
 		
+		long lastBaseTs = -1;
+		int idx = -1;
 		for(SampledValue sv: vals) {
+			idx++;
+			if(sv.getTimestamp() < lastBaseTs) {
+				//System.out.println("BASE Timestamp["+idx+"] in wrong order:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(sv.getTimestamp())+
+				//		" given after:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastBaseTs));
+				continue;				
+			} else
+				lastBaseTs = sv.getTimestamp();
 			LinkedHashMap<Long, Float> svMap = new LinkedHashMap<>();
 			Float fval = UserServletUtil.getJSONValue(sv.getValue().getFloatValue());
 			if(fval != null) {
@@ -411,12 +421,29 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					}
 					result.put(sub);
 				}
-			} else if(!svMap.isEmpty())
-				result.put(svMap);
+			} else if(!svMap.isEmpty()) {
+				if(svMap.size() > 1) {
+					for(Entry<Long, Float> e: svMap.entrySet()) {
+						LinkedHashMap<Long, Float> newMap = new LinkedHashMap<Long, Float>();
+						newMap.put(e.getKey(), e.getValue());
+						result.put(newMap);
+					}
+				} else
+					result.put(svMap);
+			}
 		}
 		return result;
 	}
 	
+	/** Make sure all values that are put into svMap have at least a distance of valueDist. If more than one value
+	 * is aggregated put minimum and maximum if they differ
+	 * 
+	 * @param data
+	 * @param tsNow
+	 * @param valueDist
+	 * @param fval
+	 * @param svMap can contain between 0 and 3 pairs of Long, Float (sampled values)
+	 */
 	protected static void processMinMaxDownSampling(DownSamplingData data, long tsNow, int valueDist, float fval,
 			LinkedHashMap<Long, Float> svMap) {
 		if(data.lastTsCollected == null) {
@@ -425,7 +452,8 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				data.minVal = fval;
 				data.lastTsCollected = tsNow;
 			} else {
-				data.lastTs = putDownSampledTs(tsNow, fval, svMap, data.suppressNaN);
+				//we just write out the input value
+				data.lastTs = putDownSampledTs(tsNow, fval, svMap, data.suppressNaN, data);
 			}
 		} else {
 			if((tsNow - data.lastTs) < valueDist) {
@@ -435,17 +463,31 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					data.minVal = fval;
 				data.lastTsCollected = tsNow;
 			} else {
-				data.lastTs = putDownSampledTs(data.lastTsCollected,data.minVal, svMap, data.suppressNaN);
+				data.lastTs = putDownSampledTs(data.lastTsCollected,data.minVal, svMap, data.suppressNaN, data);
 				if(data.maxVal != data.minVal)
-					putDownSampledTs(data.lastTsCollected, data.maxVal, svMap, data.suppressNaN);
+					putDownSampledTs(data.lastTsCollected, data.maxVal, svMap, data.suppressNaN, data);
 				data.lastTsCollected = null;
+				//The new input value has not been processed. We process it with condition lastTsCollected=null
 				processMinMaxDownSampling(data, tsNow, valueDist, fval, svMap);
 			}
 		}		
 	}
 	
+	/** Add new SampledValue to map if value fulfills NaN reuqirements
+	 * 
+	 * @param timeStamp time stamp of SampledValue
+	 * @param fval value of SampledValue
+	 * @param svMap
+	 * @param suppressNaN
+	 * @return timeStamp
+	 */
 	protected static long putDownSampledTs(long timeStamp, float fval,
-			LinkedHashMap<Long, Float> svMap, boolean suppressNaN) {
+			LinkedHashMap<Long, Float> svMap, boolean suppressNaN,
+			DownSamplingData data) {
+		if(timeStamp < data.lastTs) {
+			System.out.println("Timestamp in wrong order:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(timeStamp));
+			return data.lastTs;
+		}
 		if(suppressNaN && (Float.isNaN(fval) || Float.isInfinite(fval) || (fval == Float.MAX_VALUE) || (fval == -Float.MAX_VALUE)))
 			return timeStamp;
 		svMap.put(timeStamp, fval);
