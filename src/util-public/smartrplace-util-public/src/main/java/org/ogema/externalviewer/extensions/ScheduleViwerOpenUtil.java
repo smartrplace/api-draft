@@ -67,6 +67,12 @@ public class ScheduleViwerOpenUtil {
 	public static ScheduleViewerOpenButton getScheduleViewerOpenButton(WidgetPage<?> page, String widgetId,
 			String text, final SchedOpenDataProvider provider,
 			final DefaultScheduleViewerConfigurationProviderExtended scheduleViewerExpertProvider) {
+		return getScheduleViewerOpenButton(page, widgetId, text, provider, scheduleViewerExpertProvider, false);
+	}
+	public static ScheduleViewerOpenButton getScheduleViewerOpenButton(WidgetPage<?> page, String widgetId,
+			String text, final SchedOpenDataProvider provider,
+			final DefaultScheduleViewerConfigurationProviderExtended scheduleViewerExpertProvider,
+			boolean generateGraphImmediately) {
 		ScheduleViewerOpenButtonEval schedOpenButtonEval = new ScheduleViewerOpenButtonEval(page, widgetId, text,
 				scheduleViewerExpertProvider.getConfigurationProviderId(),
 				scheduleViewerExpertProvider) {
@@ -96,6 +102,11 @@ public class ScheduleViwerOpenUtil {
 			@Override
 			protected IntervalConfiguration getITVConfiguration(OgemaHttpRequest req) {
 				return provider.getITVConfiguration();
+			}
+			
+			@Override
+			boolean generateGraphImmediately() {
+				return generateGraphImmediately;
 			}
 		};
 		schedOpenButtonEval.setNameProvider(null);

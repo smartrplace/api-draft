@@ -29,14 +29,22 @@ public class DefaultDedicatedTSSessionConfiguration extends DefaultSessionConfig
 	protected final List<ReadOnlyTimeSeries> timeSeriesSelected;
 	//protected final List<ReadOnlyTimeSeries> timeSeriesOffered;
 	protected final ScheduleViewerConfiguration viewerConfiguration;
+	protected final boolean generateGraphImmediately;
 
 	public DefaultDedicatedTSSessionConfiguration(List<ReadOnlyTimeSeries> timeSeriesSelected,
 			//List<ReadOnlyTimeSeries> timeSeriesOffered,
 			ScheduleViewerConfiguration viewerConfiguration) {
+		this(timeSeriesSelected, viewerConfiguration, false);
+	}
+	public DefaultDedicatedTSSessionConfiguration(List<ReadOnlyTimeSeries> timeSeriesSelected,
+			//List<ReadOnlyTimeSeries> timeSeriesOffered,
+			ScheduleViewerConfiguration viewerConfiguration,
+			boolean generateGraphImmediately) {
 		super();
 		this.timeSeriesSelected = timeSeriesSelected;
 		//this.timeSeriesOffered = timeSeriesOffered;
 		this.viewerConfiguration = viewerConfiguration;
+		this.generateGraphImmediately = generateGraphImmediately;
 	}
 
 	@Override
@@ -74,5 +82,10 @@ public class DefaultDedicatedTSSessionConfiguration extends DefaultSessionConfig
 			return result;
 		} else
 			return super.programsPreselected();
+	}
+	
+	@Override
+	public boolean generateGraphImmediately() {
+		return generateGraphImmediately;
 	}
 }

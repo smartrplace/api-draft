@@ -50,6 +50,7 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 	 */
 	protected abstract String getEvaluationProviderId(OgemaHttpRequest req);
 	protected abstract IntervalConfiguration getITVConfiguration(OgemaHttpRequest req);
+	boolean generateGraphImmediately() { return false;}
 	
 	protected ScheduleViewerConfiguration getViewerConfiguration(long startTime, long endTime,
 			List<Collection<TimeSeriesFilter>> programs) {
@@ -111,7 +112,8 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 		//		ScheduleViewerConfigurationBuilder.newBuilder().setPrograms(programs).
 		//		setStartTime(startTime).setEndTime(endTime).setShowManipulator(true).build();
 		
-		String ci = addConfig(new DefaultDedicatedTSSessionConfiguration(filteringResult.timeSeries, viewerConfiguration));
+		String ci = addConfig(new DefaultDedicatedTSSessionConfiguration(filteringResult.timeSeries, viewerConfiguration,
+				generateGraphImmediately()));
 		setConfigId(ci, req);
 	}
 	
