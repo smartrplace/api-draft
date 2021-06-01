@@ -14,7 +14,7 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 
 	public static class AlarmListenerDataBase {
 		public CountDownDelayedExecutionTimer timer;
-		public long nextTimeAlarmAllowed = -1;
+		public long nextTimeAlarmAllowed; // = -1;
 	}
 
 	public static class ValueListenerDataBase extends AlarmListenerDataBase {
@@ -50,7 +50,8 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 		public CountDownDelayedExecutionTimer alarmReleaseTimer = null;
 		//public long nextTimeAlarmAllowed = -1;
 		public long nextTimeNoValueAlarmAllowed = -1;
-		public long resendRetard;
+		private long resendRetard;
+		public long resendRetard() {return resendRetard;}
 		public boolean isAlarmActive = false;
 		public boolean isNoValueAlarmActive = false;
 		
@@ -60,6 +61,18 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 
 		public AlarmGroupData knownDeviceFault = null;		
 		public long lastMessageTime = -1;
+		
+		public void init(AlarmConfiguration ac, long resendRetard) {
+			this.resendRetard = resendRetard;
+			SingleValueResource sres = ac.sensorVal();
+			IntegerResource status = AlarmingConfigUtil.getAlarmStatus(sres);
+			if(status.getValue() > 0 && status.getValue() < 1000) {
+				long lastSent = status.getLastUpdateTime();
+				this.nextTimeAlarmAllowed = lastSent + resendRetard;
+			} else
+				this.nextTimeAlarmAllowed = -1;
+		}
+
 	}
 
 	protected class AlarmExtListenerBase implements AlarmingExtensionListener {
