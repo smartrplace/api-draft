@@ -363,6 +363,8 @@ public class AlarmingConfigUtil {
 		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
 		int[] result = new int[MAIN_ASSIGNEMENT_ROLE_NUM+2];
 		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
+			if(dev.isTrash().getValue())
+				continue;
 			AlarmGroupData kni = dev.knownFault();
 			if(!kni.exists())
 				continue;
