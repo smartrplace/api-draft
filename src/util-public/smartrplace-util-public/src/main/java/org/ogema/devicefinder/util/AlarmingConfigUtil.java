@@ -364,7 +364,7 @@ public class AlarmingConfigUtil {
 		int[] result = new int[MAIN_ASSIGNEMENT_ROLE_NUM+2];
 		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
 			AlarmGroupData kni = dev.knownFault();
-			if(!kni.isActive())
+			if(!kni.exists())
 				continue;
 			if(!kni.assigned().exists()) {
 				result[0] ++;
