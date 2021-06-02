@@ -28,6 +28,8 @@ import org.ogema.model.extended.alarming.AlarmGroupData;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.mon.TimeSeriesServlet;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
@@ -39,6 +41,8 @@ public class AlarmingConfigUtil {
 	public static final double QUALITY_SHORT_MAX_MINUTES = 4*1440*(1.0 - QUALITY_TIME_SHARE_LIMIT);
 	public static final double QUALITY_LONG_MAX_MINUTES = 28*1440*(1.0 - QUALITY_TIME_SHARE_LIMIT);
 
+	private final static Logger logger = LoggerFactory.getLogger(AlarmingConfigUtil.class);
+	
 	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 8; //including unassigned (0)
 	public static final Map<String, String> ASSIGNEMENT_ROLES = new LinkedHashMap<>();
 	static {
@@ -444,23 +448,28 @@ public class AlarmingConfigUtil {
 					continue;
 				}
 				float maxGapSize = ac.maxIntervalBetweenNewValues().getValue();
-				List<SampledValue> gaps = TimeSeriesServlet.getGaps(ts, startShort, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
-				double sum = getValueSum(gaps);
-				if(sum <= QUALITY_SHORT_MAX_MINUTES) {
-					countShortOkGold++;
+				try {
+					List<SampledValue> gaps = TimeSeriesServlet.getGaps(ts, startShort, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
+					double sum = getValueSum(gaps);
+					if(sum <= QUALITY_SHORT_MAX_MINUTES) {
+						countShortOkGold++;
+						if(!isAssigned)
+							countShortOk++;
+					}
+					List<SampledValue> gapsLong = TimeSeriesServlet.getGaps(ts, startLong, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
+					sum = getValueSum(gapsLong);
+					if(sum <= QUALITY_LONG_MAX_MINUTES) {
+						countLongOkGold++;
+						if(!isAssigned)
+							countLongOk++;
+					}
+					countEvalGold++;
 					if(!isAssigned)
-						countShortOk++;
+						countEval++;
+				} catch(OutOfMemoryError e) {
+					logger.error("OutOfMemory for "+sens.getLocation());
+					e.printStackTrace();
 				}
-				List<SampledValue> gapsLong = TimeSeriesServlet.getGaps(ts, startLong, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
-				sum = getValueSum(gapsLong);
-				if(sum <= QUALITY_LONG_MAX_MINUTES) {
-					countLongOkGold++;
-					if(!isAssigned)
-						countLongOk++;
-				}
-				countEvalGold++;
-				if(!isAssigned)
-					countEval++;
 			}
 			result[0] = (int) (((float)countShortOk) / countEval * 100);
 			result[1] = (int) (((float)countLongOk) / countEval * 100);
