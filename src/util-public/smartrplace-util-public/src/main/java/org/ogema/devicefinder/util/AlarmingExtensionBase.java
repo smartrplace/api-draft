@@ -66,7 +66,7 @@ public abstract class AlarmingExtensionBase implements AlarmingExtension {
 			this.resendRetard = resendRetard;
 			SingleValueResource sres = ac.sensorVal();
 			IntegerResource status = AlarmingConfigUtil.getAlarmStatus(sres);
-			if(status.getValue() > 0 && status.getValue() < 1000) {
+			if((status != null) && (status.getValue() > 0) && (status.getValue() < 1000)) {
 				long lastSent = status.getLastUpdateTime();
 				this.nextTimeAlarmAllowed = lastSent + resendRetard;
 			} else
