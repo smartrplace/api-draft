@@ -1,8 +1,5 @@
 package org.smartrplace.apps.heatcontrol.extensionapi;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
@@ -60,7 +57,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 
 	/** keep feedbackValues and setPoint values from last 20 seconds to determine values
 	 * not relevant for manual setting*/
-	public List<KnownValue> knownValues = new ArrayList<>();
+	//public List<KnownValue> knownValues = new ArrayList<>();
 	public float currentSetpointBeforeOffset;
 	public ResourceValueListener<TemperatureResource> feedbackListener = null;
 	public boolean receivedFirstFBValue = false;

@@ -564,7 +564,7 @@ public class UserServlet extends HttpServlet {
 		else {
 			return;
 		}
-		if(subURL != null && subURL.length > 1) {
+		if(subURL != null && subURL.length > 0) {
 			int startIdx;
 			String page = subURL[0];
 			if(pages.containsKey(page)) {
@@ -572,7 +572,7 @@ public class UserServlet extends HttpServlet {
 				startIdx = 1;
 			} else
 				startIdx = 0;
-			for(idx=startIdx; idx<subURL.length-1; idx+=2) {
+			for(idx=startIdx; idx<subURL.length-2; idx+=2) {
 				String paramName = subURL[idx];
 				String param = subURL[idx+1];
 				addParameter(paramName, param, paramMap);
