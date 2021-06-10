@@ -51,4 +51,12 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default boolean relevantForDefaultLogging(Datapoint dp) {
 		return true;
 	};
+	
+	/** Get a 3-4 letter abbreviation indicating the type of device.
+	 * @param device shall support a null argument
+	 * @param dpService
+	 * @return short id
+	 * 
+	 */
+	String getDeviceTypeShortId(DatapointService dpService);
 }

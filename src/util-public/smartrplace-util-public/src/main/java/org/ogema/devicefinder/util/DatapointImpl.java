@@ -19,7 +19,7 @@ import org.ogema.devicefinder.api.DatapointInfo;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.devicefinder.api.DatapointInfoProvider;
 import org.ogema.devicefinder.api.DatapointService;
-import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.devicefinder.api.DeviceHandlerProviderDP;
 import org.ogema.devicefinder.api.DpConnection;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
@@ -202,7 +202,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	}
 	
 	public static String getDeviceLabel(InstallAppDevice appDev, OgemaLocale locale, DatapointService dpService,
-			DeviceHandlerProvider<?> tableProvider) {
+			DeviceHandlerProviderDP<?> tableProvider) {
 		return getDeviceLabelPlus(appDev, locale, dpService, tableProvider).deviceLabel;
 	}
 	public static class DeviceLabelPlus {
@@ -212,12 +212,12 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		public DPRoom room;
 	}
 	public static DeviceLabelPlus getDeviceLabelPlus(InstallAppDevice appDev, OgemaLocale locale, DatapointService dpService,
-			DeviceHandlerProvider<?> tableProvider) {
+			DeviceHandlerProviderDP<?> tableProvider) {
 		DeviceLabelPlus result = new DeviceLabelPlus();
 		
 		//String devTypeShort;
 		if(tableProvider != null)
-			result.devTypeShort = tableProvider.getDeviceTypeShortId(appDev, dpService);
+			result.devTypeShort = tableProvider.getDeviceTypeShortId(dpService);
 		else {
 			String[] els = appDev.deviceId().getValue().split("-");
 			result.devTypeShort = els[0];

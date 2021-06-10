@@ -111,4 +111,9 @@ public class DpGroupUtil {
 		}
 		return Collections.emptyList();
 	}
+	
+	public static Collection<InstallAppDevice> getAllDevices(ResourceAccess resAcc) {
+		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
+		return hwInstall.knownDevices().getAllElements();
+	}
 }

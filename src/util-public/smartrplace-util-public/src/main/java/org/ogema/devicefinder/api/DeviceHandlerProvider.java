@@ -128,12 +128,14 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	 * @return short id
 	 * 
 	 */
-	default String getDeviceTypeShortId(InstallAppDevice device, DatapointService dpService) {
-		if(device == null)
-			return getResourceType().getClass().getSimpleName().replaceAll("[^A-Z]", "");
-		if (device.device().exists())
+	@Override
+	default String getDeviceTypeShortId(DatapointService dpService) {
+		//if(device == null)
+		String name = getResourceType().getSimpleName();
+		return name.replaceAll("[^A-Z]", "");
+		/*if (device.device().exists())
 			return device.device().getClass().getSimpleName().replaceAll("[^A-Z]", "");
-		return getDeviceTypeShortId(null, dpService);
+		return getDeviceTypeShortId(null, dpService);*/
 		//return "UNK"; // unknown
 	}
 

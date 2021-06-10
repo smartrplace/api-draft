@@ -112,6 +112,13 @@ public class UserServlet extends HttpServlet {
 		TOPARRAY_DICTIONARY
 	}
 	public interface ServletPageProvider<T extends Object> {
+		/** Create single data providers for an object
+		 * 
+		 * @param object
+		 * @param user
+		 * @param parameters
+		 * @return null if object shall not be added to the result
+		 */
 		Map<String, ServletValueProvider> getProviders(T object, String user, Map<String, String[]> parameters);
 		
 		/** Usually this should be implemented.
@@ -355,6 +362,8 @@ public class UserServlet extends HttpServlet {
 			String objStr = null;
 			try {
 				data = pageprov.getProviders(obj, user, paramMap);
+				if(data == null)
+					continue;
 				objStr = pageprov.getObjectId(obj);
 			} catch(Exception e) {
 				if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
@@ -726,35 +735,48 @@ public class UserServlet extends HttpServlet {
 			Map<String, String[]> paramMap,
 			GetObjectResult<T> odata) {
 		if(odata.objects == null) return;
+		if(odata.objects.size() > 1) {
+			if(odata.objectId != null)
+				throw new IllegalStateException("POST can be applied only to a single object, we found:"+odata.objects.size()+"for "+pageprov.toString()+", object:"+odata.objectId);
+			else
+				throw new IllegalStateException("POST can be applied only to a single object, we found:"+odata.objects.size()+"for "+pageprov.toString());
+		}
 		
 		paramMap.put("METHOD", new String[] {"POST"});
-		for(T obj: odata.objects) {
-			Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user, paramMap);
-			for(String key: postData.keySet()) {
-				ServletValueProvider prov = userMap.get(key);
-				if(prov == null)
-					throw new IllegalStateException(key+" not available for "+pageprov.toString());
-				String value;
-				try {
-					value = postData.get(key).toString();
-				} catch(JSONException e) {
-					value = postData.getJSONObject(key).toString();
-				}
-				try {
-					String keyForSetValue;
-					if(timeString != null)
-						keyForSetValue = key+TIMEPREFIX+timeString;
-					else
-						keyForSetValue = key;
-					prov.setValue(user, keyForSetValue, value);
-				} catch(Exception e) {
-					if(odata.objectId != null)
-						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object:"+odata.objectId+", "+e.getMessage(), e);
-					else
-						throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object not provided; "+e.getMessage(), e);
-				}
+		//for(T obj: odata.objects) {
+		T obj = odata.objects.iterator().next();
+		Map<String, ServletValueProvider> userMap = pageprov.getProviders(obj, user, paramMap);
+		if(userMap == null) {
+			if(odata.objectId != null)
+				throw new IllegalStateException("Object not part of result in POST for "+pageprov.toString()+", object:"+odata.objectId);
+			else
+				throw new IllegalStateException("Object not part of result in POST for "+pageprov.toString());			
+		}
+		for(String key: postData.keySet()) {
+			ServletValueProvider prov = userMap.get(key);
+			if(prov == null)
+				throw new IllegalStateException(key+" not available for "+pageprov.toString());
+			String value;
+			try {
+				value = postData.get(key).toString();
+			} catch(JSONException e) {
+				value = postData.getJSONObject(key).toString();
+			}
+			try {
+				String keyForSetValue;
+				if(timeString != null)
+					keyForSetValue = key+TIMEPREFIX+timeString;
+				else
+					keyForSetValue = key;
+				prov.setValue(user, keyForSetValue, value);
+			} catch(Exception e) {
+				if(odata.objectId != null)
+					throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object:"+odata.objectId+", "+e.getMessage(), e);
+				else
+					throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object not provided; "+e.getMessage(), e);
 			}
 		}
+		//}
 		
 		//return response;
 	}

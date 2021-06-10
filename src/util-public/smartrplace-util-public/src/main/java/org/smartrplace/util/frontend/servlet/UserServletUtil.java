@@ -125,5 +125,11 @@ public class UserServletUtil {
 			return false;
 		return depth.contains("timeseries");
 	}
+	public static boolean isPOST(Map<String, String[]> paramMap) {
+		String method = UserServlet.getParameter("METHOD", paramMap);
+		if(method == null)
+			return false;
+		return method.equals("POST");
+	}
 
 }
