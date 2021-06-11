@@ -89,6 +89,27 @@ public class AlarmingConfigUtil {
 		}
 	}
 
+	public static void disAbleAllOfTemplateType(String devTypeId, ApplicationManagerPlus appManPlus) {
+		List<InstallAppDevice> allDev = new ArrayList<>();
+		InstallAppDevice template = null;
+		for(InstallAppDevice dev: appManPlus.getResourceAccess().getResources(InstallAppDevice.class)) {
+			DatapointGroup devTypeGrp = DpGroupUtil.getDeviceTypeGroup(dev, appManPlus);
+			//GenericFilterFixedSingle<String> selected = (GenericFilterFixedSingle<String>) deviceDrop.getSelectedItem(req);
+			if(devTypeGrp == null || (!devTypeGrp.id().equals(devTypeId)))
+				continue;
+			if(DeviceTableRaw.isTemplate(dev, null)) {
+				template = dev;
+				continue;
+			}
+			allDev.add(dev);
+		}
+		if(template == null)
+			return;
+		for(InstallAppDevice dev: allDev) {
+			AlarmingConfigUtil.deactivateAlarms(dev);
+		}		
+	}
+
 	public static void applyTemplate(String devTypeId, ApplicationManagerPlus appManPlus) {
 		List<InstallAppDevice> allDev = new ArrayList<>();
 		InstallAppDevice template = null;
@@ -264,8 +285,13 @@ public class AlarmingConfigUtil {
 						return null;
 					if(resLoc)
 						result = true;
+					break;
 				}
 			}
+		}
+		if(!result) for(AlarmConfiguration alarmDest: destination.alarms().getAllElements()) {
+			if(alarmDest.sendAlarm().getValue())
+				return true;
 		}
 		return result;
 	}
