@@ -650,6 +650,12 @@ public class UserServlet extends HttpServlet {
 		}
 		String request = sb.toString();
 
+		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.logdetails")) {
+			String fullURL = HttpUtils.getRequestURL(req).toString();
+			logger.info("POST message to "+fullURL);
+			logger.info("POST body: "+request);
+		}
+		
 		try {
 			JSONObject result = new JSONObject(request);
 			JSONObject params = result.optJSONObject("params");
