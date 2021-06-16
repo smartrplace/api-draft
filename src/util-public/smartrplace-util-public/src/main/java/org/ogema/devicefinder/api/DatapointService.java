@@ -157,6 +157,8 @@ public interface DatapointService {
 	 * access to driver properties.*/
 	Map<String, OGEMADriverPropertyService<?>> driverpropertyServices();
 	
+	TimedJobMgmtService timedJobService();
+	
 	default OSGiConfigAccessService configService() {
 		return null;
 	}
