@@ -26,7 +26,8 @@ import org.ogema.model.connections.ElectricityConnection;
 import org.ogema.recordeddata.DataRecorder;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
-import org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtil;
+import org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtilBase;
+import org.ogema.timeseries.eval.simple.mon3.TimeseriesSimpleProcUtil3;
 import org.slf4j.Logger;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
 
@@ -52,8 +53,9 @@ import de.iwes.util.timer.AbsoluteTiming;
  *
  */
 public abstract class VirtualSensorKPIMgmt {
-	protected final TimeseriesSimpleProcUtil tsProcUtil;
-//	protected final DataRecorder dataRecorder2;
+	protected final TimeseriesSimpleProcUtilBase tsProcUtil;
+
+	//	protected final DataRecorder dataRecorder2;
 	private final Logger logger;
 	private final DatapointService dpService;
 	/** Source EnergyResource location -> data for accumulation*/
@@ -88,7 +90,10 @@ public abstract class VirtualSensorKPIMgmt {
 				registerGovernedSchedule, registerRemoteScheduleViaHeartbeat, result);
 	}
 
-	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtil util, Logger logger, DatapointService dpService) {
+	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtilBase util, Logger logger, DatapointService dpService) {
+		this(util, null, logger, dpService);
+	}
+	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtil3 util, Logger logger, DatapointService dpService) {
 		this(util, null, logger, dpService);
 	}
 
@@ -98,7 +103,7 @@ public abstract class VirtualSensorKPIMgmt {
 	 * @param logger
 	 * @param dpService
 	 */
-	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtil util, DataRecorder dataRecorder, Logger logger, DatapointService dpService) {
+	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtilBase util, DataRecorder dataRecorder, Logger logger, DatapointService dpService) {
 		this.tsProcUtil = util;
 //		this.dataRecorder = dataRecorder;
 		this.logger = logger;
@@ -263,8 +268,9 @@ logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocatio
 				ReadOnlyTimeSeries accTs = mapData.evalDp.getTimeSeries();
 				lastSv = accTs.getPreviousValue(nowReal+1);
 				if(lastSv != null)
-					lastVal = lastSv.getTimestamp();  
-				((ProcessedReadOnlyTimeSeries2)accTs).setUpdateLastTimestampInSourceOnEveryCall(true);
+					lastVal = lastSv.getTimestamp();
+				if(accTs instanceof ProcessedReadOnlyTimeSeries2)
+					((ProcessedReadOnlyTimeSeries2)accTs).setUpdateLastTimestampInSourceOnEveryCall(true);
 				
 				/** We have to go back a little bit with the end to make sure the value is really in. Otherwise it will not be read
 				 * again as the logic assumes that the time series does not change after now.
@@ -272,7 +278,8 @@ logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocatio
 				long now = nowReal - intervalToStayBehindNow;
 				if(lastVal >= now)
 					return;
-				((ProcessedReadOnlyTimeSeries2)accTs).resetKnownEnd(lastVal, false);
+				if(accTs instanceof ProcessedReadOnlyTimeSeries2)
+					((ProcessedReadOnlyTimeSeries2)accTs).resetKnownEnd(lastVal, false);
 				List<SampledValue> svs = accTs.getValues(lastVal+1, now+1);
 logger.info("   In EnergyServer energyDaily onValueChanged: Found new vals:"+svs.size()+" Checked from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal));
 if(!svs.isEmpty())
@@ -320,7 +327,8 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			lastVal = lastSv.getTimestamp();  
 		//}
 		ReadOnlyTimeSeries accTs = dp.getTimeSeries();
-		((ProcessedReadOnlyTimeSeries2)accTs).setUpdateLastTimestampInSourceOnEveryCall(true);
+		if(accTs instanceof ProcessedReadOnlyTimeSeries2)
+			((ProcessedReadOnlyTimeSeries2)accTs).setUpdateLastTimestampInSourceOnEveryCall(true);
 		
 		/** We have to go back a little bit with the end to make sure the value is really in. Otherwise it will not be read
 		 * again as the logic assumes that the time series does not change after now.
@@ -331,7 +339,8 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 		List<SampledValue> svs = accTs.getValues(lastVal+1, now+1);
 		SampledValue lastTs = LogConfigSP.storeData(svs, recStor, 20*TimeProcUtil.MINUTE_MILLIS);
 		if(lastTs != null) {
-			((ProcessedReadOnlyTimeSeries2)accTs).resetKnownEnd(lastTs.getTimestamp(), false);
+			if(accTs instanceof ProcessedReadOnlyTimeSeries2)
+				((ProcessedReadOnlyTimeSeries2)accTs).resetKnownEnd(lastTs.getTimestamp(), false);
 			svs = accTs.getValues(lastTs.getTimestamp()+1, now+1);
 			SampledValue lastTs2 = LogConfigSP.storeData(svs, recStor, 20*TimeProcUtil.MINUTE_MILLIS);
 			if(lastTs2 != null) {
@@ -344,11 +353,11 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 	}
 	
 	public static List<Datapoint> registerEnergySumDatapointOverSubPhases(ElectricityConnection conn, AggregationMode inputAggMode,
-			TimeseriesSimpleProcUtil util, DatapointService dpService, String startLevel) {
+			TimeseriesSimpleProcUtilBase util, DatapointService dpService, String startLevel) {
 		return registerEnergySumDatapointOverSubPhases(conn, inputAggMode, util, dpService, startLevel, false);
 	}
 	public static List<Datapoint> registerEnergySumDatapointOverSubPhases(ElectricityConnection conn, AggregationMode inputAggMode,
-			TimeseriesSimpleProcUtil util, DatapointService dpService, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter) {
+			TimeseriesSimpleProcUtilBase util, DatapointService dpService, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter) {
 		if(conn == null || (!conn.exists()))
 			return Collections.emptyList();
 		List<Datapoint> energyDailys = new ArrayList<>();
@@ -371,7 +380,7 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 	 * @return
 	 */
 	public static List<Datapoint> registerEnergySumDatapoint(List<Datapoint> inputEnergy, AggregationMode inputAggMode,
-			TimeseriesSimpleProcUtil util, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter,
+			TimeseriesSimpleProcUtilBase util, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter,
 			DatapointService dpService) {
 		if(inputAggMode != null) for(Datapoint dp: inputEnergy) {
 			if(dp != null)

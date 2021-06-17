@@ -337,7 +337,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for
 				insertNewValues(newVals, newFirst);
 			}
 		} else {
-			List<SampledValue> concat = new ArrayList<SampledValue>(values);
+			List<SampledValue> concat = (values!=null)?new ArrayList<SampledValue>(values):new ArrayList<>();
 			if(existing != null)
 				concat.removeAll(existing);
 			//concat.addAll(newVals);

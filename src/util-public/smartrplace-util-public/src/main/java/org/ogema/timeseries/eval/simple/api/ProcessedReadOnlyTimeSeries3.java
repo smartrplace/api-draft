@@ -7,6 +7,7 @@ import java.util.List;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
@@ -15,6 +16,8 @@ import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
+
+import de.iwes.util.timer.AbsoluteTimeHelper;
 
 public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTimeSeries {
 	/** This method is called to obtain the calculated values. The method may be called again for the same
@@ -39,8 +42,10 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	protected abstract List<SampledValue> getResultValuesMulti(List<ReadOnlyTimeSeries> timeSeries, long start, long end,
 			AggregationMode mode);
 	
+	public abstract Long getFirstTimeStampInSource();
+
 	/** Implement one of these three OR use constructor that sets input type SINGLE directly*/
-	protected Datapoint getInputDp() {return dpInSingle;}
+	public Datapoint getInputDp() {return dpInSingle;}
 	protected List<Datapoint> getInputDps() {return null;}
 	protected String getResultLocation() {return null;}
 	
@@ -52,7 +57,7 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {};
 	
 	/** Override for NONE and MULTI*/
-	protected String resultLabel() {
+	public String resultLabel() {
 		if(getInputType() == InputType.SINGLE) {
 			return getInputDp().label(null)+getLabelPostfix();
 		} else {
@@ -69,11 +74,15 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	/** For {@link ProcessedReadOnlyTimeSeries2} this is always true*/
 	private boolean updateLastTimestampInSourceOnEveryCall;
 
-	protected long lastUpdateTime = -1;
+	/*protected long lastUpdateTime = -1;
 	public long getLastUdpateTime() {
 		return lastUpdateTime;
+	}*/
+	protected long lastEndTime = -1;
+	public long getLastEndTime() {
+		return lastEndTime;
 	}
-	
+
 	public enum InputType {
 		NoneOrImplicit,
 		SINGLE,
@@ -81,7 +90,7 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	}
 	private InputType inputType = null;
 	private Datapoint dpInSingle = null;
-	private List<Datapoint >dpsInMulti = null;
+	private List<Datapoint> dpsInMulti = null;
 	protected final InputType getInputType() {
 		if(inputType == null) {
 			Datapoint dp = getInputDp();
@@ -168,6 +177,25 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		return ProcessedReadOnlyTimeSeries2.getDpLocation(baseLoc, getLabelPostfix());
 	}
 	
+	protected long lastIntervalCalculated = -1;
+	public List<SampledValue> updateValuesStoredAligned(long start, long end, boolean force) {
+		if(absoluteTiming != null) {
+			long startItv = AbsoluteTimeHelper.getIntervalStart(start, absoluteTiming);
+			if(lastIntervalCalculated < 0)
+				//at the beginning we just calculate from the current interval
+				lastIntervalCalculated = startItv;
+			if(startItv == lastIntervalCalculated)
+				return updateValuesStored(startItv, end, force);
+			else {
+				//new interval
+				List<SampledValue> result = updateValuesStored(lastIntervalCalculated, end, force);
+				lastIntervalCalculated = startItv;
+				return result;
+			}
+		}
+		return updateValuesStored(start, end, force);
+	}
+	
 	/** Call this to update or add values that are stored internally
 	 * @return sampled values calculated (usually should not be neeeded to be used)*/
 	public List<SampledValue> updateValuesStored(long start, long end, boolean force) {
@@ -200,8 +228,12 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		default:
 			throw new IllegalStateException("Unknonw input type: "+getInputType());
 		}
-		lastUpdateTime = lastReCalc = getCurrentTime();
-		addValues(newVals);
+		lastReCalc = getCurrentTime();
+		lastEndTime = end;
+		if(newVals != null)
+			addValues(newVals);
+		else
+			System.out.println("Warning: newVals null!");
 		return newVals;
 	}
 	
@@ -222,11 +254,18 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		String label = resultLabel();
 		result.setLabel(label, null);
 		result.setTimeSeries(this, false);
-		DPUtil.copyExistingDataRoomDevice(getInputDp(), result);
+		if(inputType == InputType.SINGLE)
+			DPUtil.copyExistingDataRoomDevice(getInputDp(), result);
 		result.info().setAggregationMode(AggregationMode.Consumption2Meter);
 		result.info().setInterpolationMode(InterpolationMode.NONE);
 		datapointForChangeNotification = result;
 		return result ;
 	}
+	/*public static void copyExistingDataRoomDevice(DPRoom room, Datapoint dest) {
+		//if(source.getDeviceResource() != null)
+		//	dest.setDeviceResource(source.getDeviceResource());
+		if(room != null)
+			dest.setRoom(room);
+	}*/
 
 }

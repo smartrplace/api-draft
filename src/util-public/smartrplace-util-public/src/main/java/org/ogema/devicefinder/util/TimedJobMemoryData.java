@@ -89,7 +89,7 @@ public class TimedJobMemoryData {
 			return false;
 		if(myThreadForRunningOnceFromOutside != null)
 			return false;
-		myThreadForRunningOnceFromOutside = new CountDownDelayedExecutionTimer(appMan, 0) {
+		myThreadForRunningOnceFromOutside = new CountDownDelayedExecutionTimer(appMan, 1) {
 			
 			@Override
 			public void delayedExecution() {
@@ -182,6 +182,8 @@ public class TimedJobMemoryData {
 		float startup = res.performOperationOnStartUpWithDelay().getValue();
 		if(startup >= 0) {
 			long delay = (long) (startup*TimeProcUtil.MINUTE_MILLIS);
+			if(delay < 1)
+				delay = 1;
 			nextScheduledStart = appMan.getFrameworkTime() + delay;
 			new CountDownDelayedExecutionTimer(appMan, delay) {
 				@Override
