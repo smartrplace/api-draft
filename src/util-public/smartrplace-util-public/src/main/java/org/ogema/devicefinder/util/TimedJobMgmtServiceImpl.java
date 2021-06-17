@@ -10,6 +10,7 @@ import org.ogema.devicefinder.api.TimedJobProvider;
 import org.ogema.model.gateway.LocalGatewayInformation;
 import org.smartrplace.apps.eval.timedjob.TimedEvalJobConfig;
 import org.smartrplace.apps.eval.timedjob.TimedJobConfig;
+import org.smartrplace.autoconfig.api.InitialConfig;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resourcelist.ResourceListHelper;
@@ -27,7 +28,7 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 		String id = prov.id();
 		TimedJobMemoryData result = knownJobs.get(id);
 		if(result == null) {
-			result = new TimedJobMemoryData();
+			result = new TimedJobMemoryData(appMan);
 			result.prov = prov;
 			result.res = getOrCreateConfiguration(id, prov.evalJobType()>0);
 			if(!result.res.isActive()) {
@@ -35,13 +36,22 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 				result.res.activate(true);
 			}
 			knownJobs.put(id, result);
+		} else {
+			final String provVersion = prov.getInitVersion();
+			final String shortID = provVersion.isEmpty()?id:(id+"_"+provVersion);
+			LocalGatewayInformation gw = ResourceHelper.getLocalGwInfo(appMan);
+			if((!InitialConfig.isInitDone(shortID, gw.initDoneStatus()))) {	
+				prov.initConfigResource(result.res);				
+			}
 		}
+		result.startTimerIfNotStarted();
 		return result;
 	}
 
 	@Override
 	public TimedJobMemoryData unregisterTimedJobProvider(TimedJobProvider prov) {
-		if(prov.isRunning()) {
+		TimedJobMemoryData data = getProvider(prov.id());
+		if(data != null && data.isRunning()) {
 			return null;
 		}
 		return knownJobs.remove(prov.id());
@@ -63,5 +73,10 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 			return ResourceListHelper.getOrCreateNamedElementFlex(id, gw.timedJobs(), TimedEvalJobConfig.class, false);
 		else
 			return ResourceListHelper.getOrCreateNamedElementFlex(id, gw.timedJobs(), TimedJobConfig.class, false);
+	}
+
+	public void stop() {
+		// TODO Auto-generated method stub
+		
 	}
 }

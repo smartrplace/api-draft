@@ -207,13 +207,17 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLa
 	protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {};
 	//protected abstract AggregationMode getMode(String tsLabel);
 	protected String resultLabel() {return label;}
-	protected String resultLoction(List<Datapoint> input) {
+	public String resultLoction(List<Datapoint> input) {
+		return resultLoction(input, this.getClass().getName());
+	}
+
+	public static String resultLoction(List<Datapoint> input, String className) {
 		JSONObject json = new JSONObject();
 		JSONArray args = new JSONArray();
 		for(Datapoint inp:input) {
 			args.put(inp.getLocation());
 		}
-		json.put(this.getClass().getName(), args);
+		json.put(className, args);
 		String location = json.toString();
 		return location;
 	}
@@ -330,4 +334,7 @@ if(tsSingleLog != null) tsSingleLog.logEvent((endOfCalc-startOfCalc), "Calculati
 		return result;
 	}
 
+	public static String getResultDpLocation(List<Datapoint> input, String className) {
+		return resultLoction(input, className)+"_SgInp";		
+	}
 }

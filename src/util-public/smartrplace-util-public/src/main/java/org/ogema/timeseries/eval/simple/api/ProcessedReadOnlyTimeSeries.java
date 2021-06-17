@@ -128,7 +128,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	long lastIntervalToUpdateProc = -1;
 	long lastReCalc = -1;
 	
-	/** User for the update when knownEndUpdateInterval is triggered
+	/** Used for the update when knownEndUpdateInterval is triggered
 	 */
 	final Integer absoluteTiming; 
 	

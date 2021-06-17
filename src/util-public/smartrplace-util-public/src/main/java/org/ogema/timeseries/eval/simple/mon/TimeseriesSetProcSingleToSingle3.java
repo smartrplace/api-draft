@@ -11,11 +11,12 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
 
-public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetProcessor {
+public abstract class TimeseriesSetProcSingleToSingle3 implements TimeseriesSetProcessor {
 	protected final Integer absoluteTiming;
 	/** Perform calculation on a certain input series.
 	 * 
@@ -28,7 +29,7 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 	 * @return
 	 */
 	protected abstract List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start,
-			long end, AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2);
+			long end, AggregationMode mode, ProcessedReadOnlyTimeSeries3 newTs2);
 	
 	/** change startTime and endTime of parameter if necessary*/
 	protected abstract void alignUpdateIntervalFromSource(DpUpdated updateInterval);
@@ -37,15 +38,10 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 	//protected abstract AggregationMode getMode(String tsLabel);
 	protected final String labelPostfix;
 	
-	/** Return true if informatoin relevant for the labelling has been added*/
-	protected boolean addDatapointInfo(Datapoint tsdi) {
-		return false;
-	}
-	
-	public TimeseriesSetProcSingleToSingle(String labelPostfix) {
+	public TimeseriesSetProcSingleToSingle3(String labelPostfix) {
 		this(labelPostfix, null);
 	}
-	public TimeseriesSetProcSingleToSingle(String labelPostfix, Integer absoluteTiming) {
+	public TimeseriesSetProcSingleToSingle3(String labelPostfix, Integer absoluteTiming) {
 		this.labelPostfix = labelPostfix;
 		this.absoluteTiming = absoluteTiming;
 	}
@@ -54,11 +50,11 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 		List<Datapoint> result = new ArrayList<>();
 		for(Datapoint tsdi: input) {
 			String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
-			ProcTsProvider provider = new ProcTsProvider() {
+			ProcTsProvider3 provider = new ProcTsProvider3() {
 				
 				@Override
-				public ProcessedReadOnlyTimeSeries2 getTimeseries(Datapoint newtsdi) {
-					return new ProcessedReadOnlyTimeSeries2(tsdi) {
+				public ProcessedReadOnlyTimeSeries3 getTimeseries(Datapoint newtsdi) {
+					return new ProcessedReadOnlyTimeSeries3(tsdi) {
 						@Override
 						protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
 								long end, AggregationMode mode) {
@@ -78,9 +74,9 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()
 						
 						@Override
 						protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
-							TimeseriesSetProcSingleToSingle.this.alignUpdateIntervalFromSource(updateInterval);
+							TimeseriesSetProcSingleToSingle3.this.alignUpdateIntervalFromSource(updateInterval);
 						}
-						@Override
+						/*@Override
 						protected List<DpGap> getIntervalsToUpdate(long startTime, long endTime) {
 							if(absoluteTiming == null)
 								return super.getIntervalsToUpdate(startTime, endTime);
@@ -105,6 +101,11 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("last/new val in "+dpLabe
 if(Boolean.getBoolean("evaldebug")) System.out.println("new val in "+dpLabel()+" at:"+TimeProcPrint.getFullTime(sv.getTimestamp()));
 							return result ;			
 							
+						}*/
+						@Override
+						protected List<SampledValue> getResultValuesMulti(List<ReadOnlyTimeSeries> timeSeries,
+								long start, long end, AggregationMode mode) {
+							return null;
 						}
 					};
 				}
@@ -115,8 +116,8 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("new val in "+dpLabel()+"
 		return result;
 	}
 
-	public interface ProcTsProvider {
-		ProcessedReadOnlyTimeSeries2 getTimeseries(Datapoint newtsdi);
+	public interface ProcTsProvider3 {
+		ProcessedReadOnlyTimeSeries3 getTimeseries(Datapoint newtsdi);
 	}
 	
 	/**
@@ -127,15 +128,15 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("new val in "+dpLabel()+"
 	 * @param dpService
 	 * @return
 	 */
-	static Datapoint getOrUpdateTsDp(String resultLocation, ProcTsProvider provider, DatapointService dpService) {
-		ProcessedReadOnlyTimeSeries2 newTs2 = null;
+	static Datapoint getOrUpdateTsDp(String resultLocation, ProcTsProvider3 provider, DatapointService dpService) {
+		ProcessedReadOnlyTimeSeries3 newTs2 = null;
 		Datapoint newtsdi = null;
 		if(dpService != null) {
 			//String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
 			newtsdi = dpService.getDataPointStandard(resultLocation);
 			ReadOnlyTimeSeries dpts = newtsdi.getTimeSeries();
-			if((dpts != null) && (dpts instanceof ProcessedReadOnlyTimeSeries2))
-				newTs2 = (ProcessedReadOnlyTimeSeries2) dpts; 
+			if((dpts != null) && (dpts instanceof ProcessedReadOnlyTimeSeries3))
+				newTs2 = (ProcessedReadOnlyTimeSeries3) dpts; 
 		} else
 			throw new IllegalStateException("Operation without DatapointService not supported anymore!");
 		if(newTs2 == null) {

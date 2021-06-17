@@ -295,8 +295,11 @@ if(uv2Log != null) uv2Log.logEvent(endCalc-startCalc, "Calculation of UV2 "+getS
 	
 	public static String getDpLocation(Datapoint dpSource, String locationPostfix) {
 if(dpSource == null || dpSource.getLocation() == null || locationPostfix == null)
-System.out.println(dpSource.getLocation());			
-		return dpSource.getLocation()+locationPostfix;
+System.out.println(dpSource.getLocation());	
+		return getDpLocation(dpSource.getLocation(), locationPostfix);
+	}
+	public static String getDpLocation(String dpSource, String locationPostfix) {
+		return dpSource+locationPostfix;
 	}
 	/** See constructor documentation*/
 	public boolean isUpdateLastTimestampInSourceOnEveryCall() {

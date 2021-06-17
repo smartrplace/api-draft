@@ -3,7 +3,6 @@ package org.ogema.devicefinder.api;
 import java.util.Collection;
 
 import org.ogema.devicefinder.util.TimedJobMemoryData;
-import org.smartrplace.apps.eval.timedjob.TimedEvalJobConfig;
 
 public interface TimedJobMgmtService {
 	/** Register provider. If the ID is already known, do nothing
