@@ -234,4 +234,16 @@ public class TimedJobMemoryData {
 		} else
 			return now+interval;
 	}
+	
+	@Override
+	public String toString() {
+		try {
+			return prov.id()+":"+prov.label(null);
+		} catch(Exception e) {
+			if(res != null)
+				return "WOjob:"+res.getLocation();
+			else
+				return "WOres:"+super.toString();
+		}
+	}
 }
