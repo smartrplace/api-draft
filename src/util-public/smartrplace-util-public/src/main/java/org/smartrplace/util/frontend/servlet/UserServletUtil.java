@@ -131,5 +131,13 @@ public class UserServletUtil {
 			return false;
 		return method.equals("POST");
 	}
+	
+	public static String getHashWithPrefix(String preFix, String toHash) {
+		int hash = toHash.hashCode();
+		if(hash >= 0)
+			return preFix+"P"+hash;
+		else
+			return preFix+"N"+Math.abs(hash);
+	}
 
 }

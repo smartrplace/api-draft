@@ -27,7 +27,6 @@ import org.ogema.recordeddata.DataRecorder;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtilBase;
-import org.ogema.timeseries.eval.simple.mon3.TimeseriesSimpleProcUtil3;
 import org.slf4j.Logger;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
 
@@ -93,9 +92,9 @@ public abstract class VirtualSensorKPIMgmt {
 	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtilBase util, Logger logger, DatapointService dpService) {
 		this(util, null, logger, dpService);
 	}
-	public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtil3 util, Logger logger, DatapointService dpService) {
+	/*public VirtualSensorKPIMgmt(TimeseriesSimpleProcUtil3 util, Logger logger, DatapointService dpService) {
 		this(util, null, logger, dpService);
-	}
+	}*/
 
 	/**
 	 * @param util
@@ -407,8 +406,12 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			
 		}
 		if(startLevel.toLowerCase().contains("day") || started) {
+			if(!started)
+				dailySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_DAY_EVAL, inputEnergy);
+			else
+				dailySum = util.processSingle(TimeProcUtil.PER_DAY_EVAL, hourlySum);
 			started = true;
-			dailySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_DAY_EVAL, inputEnergy);
+			//dailySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_DAY_EVAL, inputEnergy);
 			if(dailySum == null) {
 				System.out.println("    !!!! WARNING: No daily sum for inputSize:"+inputEnergy.size()+ "First:"+
 						(inputEnergy.isEmpty()?"--":inputEnergy.get(0).getLocation()));
@@ -421,14 +424,17 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			
 		}
 		if(startLevel.toLowerCase().contains("month") || started) {
+			if(!started)
+				monthlySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_MONTH_EVAL, inputEnergy);
+			else
+				monthlySum = util.processSingle(TimeProcUtil.PER_MONTH_EVAL, dailySum);
 			started = true;
-			monthlySum = util.processSingle(TimeProcUtil.PER_MONTH_EVAL, dailySum);
 			result.add(monthlySum);
 			monthlySum.setLabelDefault("kWhMonthly");
 			if(registerForTransferViaHeartbeatAsMainMeter)
 				monthlySum.addAlias(Datapoint.ALIAS_MAINMETER_MONTHLYCONSUMPTION);
 		}
-		if(startLevel.toLowerCase().contains("year") || started) {
+		if(started) { //if(startLevel.toLowerCase().contains("year") || started) {
 			started = true;
 			yearlySum = util.processSingle(TimeProcUtil.PER_YEAR_EVAL, monthlySum);
 			result.add(yearlySum);

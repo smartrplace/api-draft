@@ -15,7 +15,7 @@ import de.iwes.util.timer.AbsoluteTimerListener;
 
 /** Data for a TimedJob that is not stored persistently*/
 public class TimedJobMemoryData {
-	public static final float MINIMUM_MINUTES_FOR_TIMER_START = 5;
+	public static final float MINIMUM_MINUTES_FOR_TIMER_START = 2.5f;
 	
 	public long lastRunStart() {
 		return lastRunStart;

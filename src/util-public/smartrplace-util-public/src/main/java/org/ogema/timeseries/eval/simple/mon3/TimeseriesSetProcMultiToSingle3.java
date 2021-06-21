@@ -23,6 +23,7 @@ import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcSingleToSingle;
 import org.smartrplace.apps.eval.timedjob.TimedJobConfig;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog;
+import org.smartrplace.util.frontend.servlet.UserServletUtil;
 
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
@@ -63,7 +64,6 @@ public abstract class TimeseriesSetProcMultiToSingle3 implements TimeseriesSetPr
 	protected final Integer absoluteTiming;
 	
 	protected final long minIntervalForReCalc;
-
 	
 	protected void debugCalculationResult(List<Datapoint> input, List<SampledValue> resultLoc) {};
 	//protected abstract AggregationMode getMode(String tsLabel);
@@ -114,6 +114,12 @@ public abstract class TimeseriesSetProcMultiToSingle3 implements TimeseriesSetPr
 					long end, AggregationMode mode) {
 				return null;
 			}
+			
+			@Override
+			protected List<Datapoint> getInputDps() {
+				return input;
+			}
+			
 			@Override
 			protected String getLabelPostfix() {
 				return ""; //labelPostfix;
@@ -201,7 +207,7 @@ if(tsSingleLog != null) tsSingleLog.logEvent((endOfCalc-startOfCalc), "Calculati
 			newtsdi.setLabelDefault(label);
 
 		if(registersTimedJob) {
-			registerTimedJob(resultTs, input, resultLabel(), newtsdi.getLocation(), minIntervalForReCalc, dpService);
+			registerTimedJob(resultTs, input, resultLabel(), newtsdi.getLocation(), "M2S", minIntervalForReCalc, dpService);
 		}
 
 		result.add(newtsdi);
@@ -223,7 +229,7 @@ if(tsSingleLog != null) tsSingleLog.logEvent((endOfCalc-startOfCalc), "Calculati
 	}
 
 	protected static void registerTimedJob(ProcessedReadOnlyTimeSeries3 ts, List<Datapoint> input,
-			String label, String resultLocation,
+			String label, String resultLocation, String idBase,
 			long repetitionTime,
 			DatapointService dpService) {
 		dpService.timedJobService().registerTimedJobProvider(new TimedJobProvider() {
@@ -235,6 +241,11 @@ if(tsSingleLog != null) tsSingleLog.logEvent((endOfCalc-startOfCalc), "Calculati
 			
 			@Override
 			public String id() {
+				return UserServletUtil.getHashWithPrefix(idBase+"_"+label+"_", resultLocation);
+			}
+			
+			@Override
+			public String description(OgemaLocale locale) {
 				return resultLocation;
 			}
 			

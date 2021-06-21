@@ -35,7 +35,7 @@ public abstract class TimeseriesSimpleProcUtilBase {
 		this.appMan = appMan;
 		this.dpService = dpService;
 		
-		TimeseriesSetProcMultiToSingle3.tsSingleLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle3.class.getName()+"_TSI",
+		TimeseriesSetProcMultiToSingle.tsSingleLog = TimeseriesSetProcMultiToSingle3.tsSingleLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle3.class.getName()+"_TSI",
 				new GwSubResProvider() {
 					
 					@Override
@@ -48,7 +48,7 @@ public abstract class TimeseriesSimpleProcUtilBase {
 						return device.pstMultiToSingleCounter();
 					}
 				});
-		TimeseriesSetProcMultiToSingle3.aggregateLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle3.class.getName()+"_AGG",
+		TimeseriesSetProcMultiToSingle.aggregateLog = TimeseriesSetProcMultiToSingle3.aggregateLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle3.class.getName()+"_AGG",
 				new GwSubResProvider() {
 					
 					@Override
@@ -121,7 +121,7 @@ public abstract class TimeseriesSimpleProcUtilBase {
 		return proc.getResultSeries(input, dpService);
 	}
 	
-	/** Regarding calculation notes see {@link TimeseriesSetProcMultiToSingle3}
+	/** Regarding calculation notes see {@link TimeseriesSetProcMultiToSingle}
 	 * 
 	 * @param tsProcessRequest
 	 * @param input
