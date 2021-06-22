@@ -234,6 +234,9 @@ logger.info("   Starting Accumlated full Recstor size(3):"+accTs.size());
 				mapData.resourceDp.setParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM, schedProv);
 		}
 
+if(Boolean.getBoolean("suppress.addSourceResourceListenerFloat"))
+return mapData;
+		
 		//TODO: We should add support also for other SingleValueResourceTypes
 		for(Datapoint dp: dpSource) {
 			if((dp.getResource() instanceof FloatResource) && (destRes != null || destRes instanceof FloatResource))
@@ -353,10 +356,20 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 	
 	public static List<Datapoint> registerEnergySumDatapointOverSubPhases(ElectricityConnection conn, AggregationMode inputAggMode,
 			TimeseriesSimpleProcUtilBase util, DatapointService dpService, String startLevel) {
-		return registerEnergySumDatapointOverSubPhases(conn, inputAggMode, util, dpService, startLevel, false);
+		return registerEnergySumDatapointOverSubPhases(conn, inputAggMode, util, dpService, startLevel, false, null);
+	}
+	public static List<Datapoint> registerEnergySumDatapointOverSubPhasesFromDay(ElectricityConnection conn, AggregationMode inputAggMode,
+			TimeseriesSimpleProcUtilBase util, DatapointService dpService, Datapoint hourlySum) {
+		return registerEnergySumDatapointOverSubPhases(conn, inputAggMode, util, dpService, "day", false, hourlySum);
 	}
 	public static List<Datapoint> registerEnergySumDatapointOverSubPhases(ElectricityConnection conn, AggregationMode inputAggMode,
 			TimeseriesSimpleProcUtilBase util, DatapointService dpService, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter) {
+		return registerEnergySumDatapointOverSubPhases(conn, inputAggMode, util, dpService, startLevel,
+				registerForTransferViaHeartbeatAsMainMeter, null);
+	}
+	public static List<Datapoint> registerEnergySumDatapointOverSubPhases(ElectricityConnection conn, AggregationMode inputAggMode,
+			TimeseriesSimpleProcUtilBase util, DatapointService dpService, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter,
+			Datapoint hourlySum) {
 		if(conn == null || (!conn.exists()))
 			return Collections.emptyList();
 		List<Datapoint> energyDailys = new ArrayList<>();
@@ -364,6 +377,10 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			EnergyResource inputEnergy = phaseConn.energySensor().reading();
 			DeviceHandlerBase.addDatapoint(inputEnergy, energyDailys, dpService);
 		}
+		if(hourlySum != null)
+			return registerEnergySumDatapointFromDay(energyDailys, inputAggMode, util, startLevel, registerForTransferViaHeartbeatAsMainMeter,
+					registerForTransferViaHeartbeatAsMainMeter?dpService:null,
+					hourlySum, null);
 		return registerEnergySumDatapoint(energyDailys, inputAggMode, util, startLevel, registerForTransferViaHeartbeatAsMainMeter,
 				registerForTransferViaHeartbeatAsMainMeter?dpService:null);
 	}
@@ -376,7 +393,7 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 	 * @param registerForTransferViaHeartbeatAsMainMeter if true the results are registered for sending via heartbeat. This
 	 * 		is also implies that main meter aliases are registered
 	 * @param dpService only relevant if registerForTransfer is true, otherwise may be null
-	 * @return
+	 * @return all datapoints created for sum e.g hourly, daily, monthly, yearly sum
 	 */
 	public static List<Datapoint> registerEnergySumDatapoint(List<Datapoint> inputEnergy, AggregationMode inputAggMode,
 			TimeseriesSimpleProcUtilBase util, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter,
@@ -386,13 +403,10 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 				dp.info().setAggregationMode(inputAggMode);
 		}
 		List<Datapoint> result = new ArrayList<>();
-		boolean started = false;
+		//boolean started = false;
 		Datapoint hourlySum = null;
-		Datapoint dailySum = null;
-		Datapoint monthlySum = null;
-		Datapoint yearlySum = null;
 		if(startLevel.toLowerCase().contains("hour")) {
-			started = true;
+			//started = true;
 			hourlySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_HOUR_EVAL, inputEnergy);
 			if(hourlySum == null) {
 				System.out.println("    !!!! WARNING: No hourly sum for inputSize:"+inputEnergy.size()+ "First:"+
@@ -402,9 +416,28 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			result.add(hourlySum);
 			hourlySum.setLabelDefault("kWhHourly");
 			if(registerForTransferViaHeartbeatAsMainMeter)
-				hourlySum.addAlias(Datapoint.ALIAS_MAINMETER_HOURLYCONSUMPTION);
-			
+				hourlySum.addAlias(Datapoint.ALIAS_MAINMETER_HOURLYCONSUMPTION);		
 		}
+		
+		return registerEnergySumDatapointFromDay(inputEnergy, inputAggMode, util, startLevel, registerForTransferViaHeartbeatAsMainMeter, dpService,
+				hourlySum, result);
+	}
+	
+	
+	public static List<Datapoint> registerEnergySumDatapointFromDay(List<Datapoint> inputEnergy, AggregationMode inputAggMode,
+			TimeseriesSimpleProcUtilBase util, String startLevel, boolean registerForTransferViaHeartbeatAsMainMeter,
+			DatapointService dpService,
+			Datapoint hourlySum,
+			List<Datapoint> result) {
+		Datapoint dailySum = null;
+		Datapoint monthlySum = null;
+		Datapoint yearlySum = null;
+
+		if(result == null)
+			result = new ArrayList<>();
+		
+		boolean started = hourlySum != null;
+		
 		if(startLevel.toLowerCase().contains("day") || started) {
 			if(!started)
 				dailySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_DAY_EVAL, inputEnergy);

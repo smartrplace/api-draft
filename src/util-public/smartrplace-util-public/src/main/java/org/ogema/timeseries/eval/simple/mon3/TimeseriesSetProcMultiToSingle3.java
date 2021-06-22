@@ -1,9 +1,8 @@
 package org.ogema.timeseries.eval.simple.mon3;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.TreeSet;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -151,7 +150,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Starting aggregation for
 				//List<SampledValue> vals; // = getTSDI().getTimeSeries().getValues(start, end);
 				
 				//get all datapoints from input
-				Set<Long> vals = new HashSet<>();
+				TreeSet<Long> vals = new TreeSet<>(); //)<>();
 				//for(Datapoint dpLoc: input) {
 				for(ReadOnlyTimeSeries ts: timeSeries) {
 					List<SampledValue> svv = ts.getValues(start, end); //dpLoc.getTimeSeries().getValues(start, end);

@@ -319,7 +319,7 @@ long startCalc =  getCurrentTime();
 if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for "+dpLabel()+" without registration in getIntervalsToUpdate - now accepted");
 			existing = existingLoc;
 		}
-		if(Boolean.getBoolean("evaldebug")) {
+		if(Boolean.getBoolean("evaldebug") && values != null) {
 			TimeProcUtil.checkConsistency(values, "PRE::"+dpLabel());
 		}
 		if(isOwnList) {
@@ -348,6 +348,9 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for
 		updateValueLimits();
 long endCalc =  getCurrentTime();
 if(subTsBuildLog != null) subTsBuildLog.logEvent((endCalc-startCalc), "Calculation of ADD "+dpLabel()+" took");
+if(Boolean.getBoolean("evaldebug")) {
+	TimeProcUtil.checkConsistency(values, "PRE::"+dpLabel());
+}
 	}
 	
 	protected void insertNewValues(List<SampledValue> newVals, long newFirst) {
