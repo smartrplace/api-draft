@@ -25,6 +25,10 @@ public class TimedJobMemoryData {
 		return lastRunDuration;
 	}
 
+	public long maxRunDuration() {
+		return maxRunDuration;
+	}
+
 	public long nextScheduledStart() {
 		return nextScheduledStart;
 	}
@@ -46,6 +50,7 @@ public class TimedJobMemoryData {
 
 	protected volatile long lastRunStart = -1;
 	protected volatile long lastRunDuration = 0;
+	protected volatile long maxRunDuration = 0;
 	protected volatile long nextScheduledStart = 0;
 	protected volatile boolean isRunning;
 	
@@ -78,6 +83,8 @@ public class TimedJobMemoryData {
 		isRunning = false;
 		long finish = appMan.getFrameworkTime();
 		lastRunDuration = finish - lastRunStart;
+		if(lastRunDuration > maxRunDuration)
+			maxRunDuration = lastRunDuration;
 		return true;
 	}
 	
