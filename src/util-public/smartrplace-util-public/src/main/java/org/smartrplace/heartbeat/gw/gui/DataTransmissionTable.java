@@ -30,14 +30,16 @@ public class DataTransmissionTable extends ObjectGUITablePageNamed<DpTransData, 
 	public static final long DEFAULT_POLL_RATE = 5000;
 
 	protected final ViaHeartbeartOGEMAInstanceDpTransfer hbMan;
+	protected final boolean isServer;
 	protected ViaHeartbeartOGEMAInstanceDpTransfer getHbMan(OgemaHttpRequest req) {
 		return hbMan;
 	}
 	
 	public DataTransmissionTable(WidgetPage<?> page, ApplicationManager appMan,
-			ViaHeartbeartOGEMAInstanceDpTransfer hbMan) {
+			ViaHeartbeartOGEMAInstanceDpTransfer hbMan, boolean isServer) {
 		super(page, appMan, new DpTransData(null, "init", false, null));
 		this.hbMan = hbMan;
+		this.isServer = isServer;
 		triggerPageBuild();
 	}
 
@@ -63,7 +65,8 @@ public class DataTransmissionTable extends ObjectGUITablePageNamed<DpTransData, 
 		vh.stringLabel("Key", id, object.key, row);
 		if(req == null) {
 			vh.registerHeaderEntry("Location");
-			vh.registerHeaderEntry("Alias");
+			if(!isServer)
+				vh.registerHeaderEntry("Alias");
 			vh.registerHeaderEntry("isString");
 			vh.registerHeaderEntry("type");
 			vh.registerHeaderEntry("valueLastWrite");
@@ -74,11 +77,13 @@ public class DataTransmissionTable extends ObjectGUITablePageNamed<DpTransData, 
 		}
 		vh.stringLabel("Location", id, object.dp.id(), row);
 		Set<String> als = object.dp.getAliases();
-		if(als.isEmpty())
-			vh.stringLabel("Alias", id, "--", row);
-		else {
-			String text = als.iterator().next()+" ("+als.size()+")";
-			vh.stringLabel("Alias", id, text, row);
+		if(!isServer) {
+			if(als.isEmpty())
+				vh.stringLabel("Alias", id, "--", row);
+			else {
+				String text = als.iterator().next()+" ("+als.size()+")";
+				vh.stringLabel("Alias", id, text, row);
+			}
 		}
 		Object prov = object.dp.getParameter(Datapoint.HEARTBEAT_STRING_PROVIDER_PARAM);
 		if(prov == null) {

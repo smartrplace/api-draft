@@ -1,6 +1,8 @@
 package org.smartrplace.apps.hw.install.prop;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.resourcemanager.ResourceAccess;
@@ -54,5 +56,13 @@ public class ViaHeartbeatLocalData {
 				return result;
 		}
 		return null;
+	}
+	
+	public List<String> getAllCommPartnerIds() {
+		List<String> result = new ArrayList<>();
+		for(String gw: partnerData.keySet()) {
+			result.add(gw);
+		}
+		return result;
 	}
 }

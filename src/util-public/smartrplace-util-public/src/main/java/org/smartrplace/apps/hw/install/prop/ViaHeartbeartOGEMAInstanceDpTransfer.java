@@ -38,10 +38,10 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	//Process requests to datapoints that do not yet exist when the request is received
 	//Usually only relevant for datapoints not representing a SingleValueResource
 	// up to now only used if connectingAsClient
-	private static class OpenDpRequest {
-		final String key;
-		final String dpIdFromRemote;
-		final boolean isToSend;
+	public static class OpenDpRequest {
+		public final String key;
+		public final String dpIdFromRemote;
+		public final boolean isToSend;
 		public OpenDpRequest(String key, String value, boolean isToSend) {
 			this.key = key;
 			this.dpIdFromRemote = value;
@@ -259,6 +259,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	/** To be called by heartbeat to process data received*/
 	public void processRemoteData(Map<String, Float> dataReceived, Map<String, String> dataReceivedString,
 			String configJsonReceived, boolean connectingAsClient) {
+		//configJsonReceived is null if no struct update is transmitted
 		if(configJsonReceived != null) {
 			ViaHeartbeatRemoteTransferList tlist = JSONManagement.importFromJSON(configJsonReceived,
 					ViaHeartbeatRemoteTransferList.class);
@@ -266,6 +267,11 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 //System.out.println("   Received Structure update: A2C:"+tlist.datapointsFromAccptorToCreator.size()+ " / C2A:"+tlist.datapointsFromCreatorToAcceptor.size());			
 				//TODO: We cannot handle any unsubscribes here. For this we will need separate
 				//DatapointGroups for local and remote requests
+				if(connectingAsClient && (!(tlist.datapointsFromAccptorToCreator.isEmpty() &&
+						tlist.datapointsFromCreatorToAcceptor.isEmpty()))) {
+					datapointsToSendM.clear();
+					datapointsToRecvM.clear();
+				}
 				if(tlist.isStructureRequestStatus > 0)
 					structureUpdateToRemotePending = true;
 				if(tlist.datapointsFromCreatorToAcceptor != null && (tlist.isStructureRequestStatus < 2)) {
@@ -346,7 +352,9 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		long now = dpService.getFrameworkTime();
 		boolean forceSendAllValues = allValueUpdatePending;
 		allValueUpdatePending = false;
-//System.out.println("   Auto update Rate: "+(autoStructureUpdateRate!=null?(""+autoStructureUpdateRate):"null")+" commPartner:"+commPartnerId);
+		/**autoStructureUpdateRate always must be null on the client
+		  Initially structureUpdateToRemotePending is true also on the client. The datapointsToSend/RevcM
+		should be empty at this time, so this is only relevant to send isStructureRequestStatus=1*/
 		if(autoStructureUpdateRate != null) {
 			if(now - lastStructureUpdate > autoStructureUpdateRate)
 				structureUpdateToRemotePending = true;
@@ -440,6 +448,10 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		return datapointsToSendM;
 	}
 
+	public Map<String, OpenDpRequest> openRequests() {
+		return openDpRequests;
+	}
+	
 	//just for debugging
 	public ViaHeartbeatInfoProvider getInfoProvider(Datapoint dp) {
 		//Map<Datapoint, ViaHeartbeatInfoProvider> infoProviders;

@@ -37,7 +37,10 @@ public class ViaHeartbeatUtil {
 	}
 	
 	/** Register a data point for transfer from gateway to server, to be used on server<br>
-	 * If the datapoint on the server has a resource...
+	 * Note that this does NOT automatically trigger a recalculation of
+	 * {@link ViaHeartbeartOGEMAInstanceDpTransfer#updateByDpGroups(DatapointGroup, DatapointGroup)}.
+	 * To get this you should make sure that {{@link #updateAllTransferRegistrations(DatapointService, ResourceAccess, boolean)}
+	 * is called after each block/app init calling this method.
 	 * 
 	 * @param dp should be remote datapoint related to gateway specified by gwId. 
 	 * @param gwId TODO: Check if this is really necessary as gatewayId is also given by the datapoint
@@ -62,7 +65,7 @@ public class ViaHeartbeatUtil {
 		return grp;
 	}
 	
-	public static DatapointGroup getSendOrReceiveTransferGroup(String commPartnerId, DatapointService dpService) {
+	/*public static DatapointGroup getSendOrReceiveTransferGroup(String commPartnerId, DatapointService dpService) {
 		String id = DatapointGroup.getGroupIdForGw(VIA_HEARTBEAT_RECEIVE, commPartnerId);
 		if(dpService.hasGroup(id))
 			return dpService.getGroup(id);
@@ -70,7 +73,7 @@ public class ViaHeartbeatUtil {
 		if(dpService.hasGroup(id2))
 			return dpService.getGroup(id2);
 		return null;
-	}
+	}*/
 
 	public static void updateAllTransferRegistrations(DatapointService dpService, ResourceAccess resAcc, boolean connectingAsClient) {
 		List<String> gwsDone = new ArrayList<String>();

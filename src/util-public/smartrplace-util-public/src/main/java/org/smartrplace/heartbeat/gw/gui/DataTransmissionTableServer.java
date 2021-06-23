@@ -29,7 +29,7 @@ public abstract class DataTransmissionTableServer extends DataTransmissionTable 
 	protected SingleFilteringDirect<String> gwSelection;
 	
 	public DataTransmissionTableServer(WidgetPage<?> page, ApplicationManager appMan) {
-		super(page, appMan, null);
+		super(page, appMan, null, true);
 		//triggerPageBuild();
 	}
 

@@ -11,16 +11,33 @@ import org.ogema.model.gateway.LocalGatewayInformation;
 import org.smartrplace.apps.eval.timedjob.TimedEvalJobConfig;
 import org.smartrplace.apps.eval.timedjob.TimedJobConfig;
 import org.smartrplace.autoconfig.api.InitialConfig;
+import org.smartrplace.gateway.device.MemoryTimeseriesPST;
 
 import de.iwes.util.resource.ResourceHelper;
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.util.resourcelist.ResourceListHelper;
 
 public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 	Map<String, TimedJobMemoryData> knownJobs = new HashMap<>();
 	protected final ApplicationManager appMan;
+	protected final TimedJobMgmtData jobData;
+	
+	public static class TimedJobMgmtData {
+		public final MemoryTimeseriesPST logResource;
+
+		public TimedJobMgmtData(MemoryTimeseriesPST logResource) {
+			this.logResource = logResource;
+		}
+	}
 	
 	public TimedJobMgmtServiceImpl(ApplicationManager appMan) {
 		this.appMan = appMan;
+		MemoryTimeseriesPST logResource = ResourceHelper.getEvalCollection(appMan).getSubResource("memoryTimeseriesPST", MemoryTimeseriesPST.class);
+		if(!logResource.exists()) {
+			logResource.create();
+			logResource.activate(false);
+		}
+		this.jobData = new TimedJobMgmtData(logResource);
 	}
 
 	@Override
@@ -28,10 +45,11 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 		String id = prov.id();
 		TimedJobMemoryData result = knownJobs.get(id);
 		if(result == null) {
-			result = new TimedJobMemoryData(appMan);
+			result = new TimedJobMemoryData(appMan, jobData);
 			result.prov = prov;
 			result.res = getOrCreateConfiguration(id, prov.evalJobType()>0);
 			if(!result.res.isActive()) {
+				createPersistentIndex(result.res);
 				prov.initConfigResource(result.res);
 				result.res.activate(true);
 			}
@@ -78,5 +96,22 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 	public void stop() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	protected int maxPIdx = -1;
+	
+	/** Create persistent index if it does not exist yet*/
+	protected void createPersistentIndex(TimedJobConfig config) {
+		if(config.persistentIndex().exists())
+			return;
+		if(maxPIdx < 0) {
+			LocalGatewayInformation gw = ResourceHelper.getLocalGwInfo(appMan);
+			for(TimedJobConfig tj: gw.timedJobs().getAllElements()) {
+				if(tj.persistentIndex().getValue() > maxPIdx)
+					maxPIdx = tj.persistentIndex().getValue();
+			}
+		}
+		maxPIdx++;
+		ValueResourceHelper.setCreate(config.persistentIndex(), maxPIdx);
 	}
 }

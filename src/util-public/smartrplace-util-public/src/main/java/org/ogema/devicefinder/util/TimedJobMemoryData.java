@@ -4,11 +4,13 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.application.Timer;
 import org.ogema.core.application.TimerListener;
 import org.ogema.devicefinder.api.TimedJobProvider;
+import org.ogema.devicefinder.util.TimedJobMgmtServiceImpl.TimedJobMgmtData;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resourcemanipulator.timer.CountDownAbsoluteTimer;
 import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.smartrplace.apps.eval.timedjob.TimedJobConfig;
 
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.util.timer.AbsolutePersistentTimer;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTimerListener;
@@ -16,6 +18,7 @@ import de.iwes.util.timer.AbsoluteTimerListener;
 /** Data for a TimedJob that is not stored persistently*/
 public class TimedJobMemoryData {
 	public static final float MINIMUM_MINUTES_FOR_TIMER_START = 2.5f;
+	public static final long LOAD_REPORT_INTERVAL = 5*TimeProcUtil.MINUTE_MILLIS;
 	
 	public long lastRunStart() {
 		return lastRunStart;
@@ -49,21 +52,33 @@ public class TimedJobMemoryData {
 	}
 
 	protected volatile long lastRunStart = -1;
+	protected volatile long lastRunEnd;
+	
 	protected volatile long lastRunDuration = 0;
 	protected volatile long maxRunDuration = 0;
 	protected volatile long nextScheduledStart = 0;
+	
+	protected volatile long executionTimeCounter = 0;
+	protected volatile long freeTimeCounter = 0;
+	protected volatile long lastLoadReport = -1;
+	
 	protected volatile boolean isRunning;
 	
 	protected TimedJobConfig res;
 	protected TimedJobProvider prov;
+	protected final TimedJobMgmtData jobData;
 	
 	protected Timer timerUnaligned = null;
 	protected AbsolutePersistentTimer timerAligned = null;
 	
 	private final ApplicationManager appMan;
 	
-	public TimedJobMemoryData(ApplicationManager appMan) {
+	public TimedJobMemoryData(ApplicationManager appMan, TimedJobMgmtData jobData) {
 		this.appMan = appMan;
+		this.jobData = jobData;
+		long now = appMan.getFrameworkTime();
+		lastRunEnd = now;
+		lastLoadReport = now;
 	}
 
 	boolean isAligned;
@@ -77,14 +92,24 @@ public class TimedJobMemoryData {
 	protected boolean executeBlockingOnce() {
 		if(isRunning())
 			return false;
-		isRunning = true;
 		lastRunStart = appMan.getFrameworkTime();
+		long lastFreeTime = lastRunStart - lastRunEnd;
+		freeTimeCounter += lastFreeTime;
+		isRunning = true;
 		prov.execute(lastRunStart, this);
 		isRunning = false;
-		long finish = appMan.getFrameworkTime();
-		lastRunDuration = finish - lastRunStart;
+		ValueResourceHelper.setCreate(jobData.logResource.jobIdxStarted(), res.persistentIndex().getValue());
+		lastRunEnd = appMan.getFrameworkTime();
+		lastRunDuration = lastRunEnd - lastRunStart;
 		if(lastRunDuration > maxRunDuration)
 			maxRunDuration = lastRunDuration;
+		executionTimeCounter += lastRunDuration;
+		ValueResourceHelper.setCreate(jobData.logResource.jobDuration(), lastRunDuration);
+		if(lastRunEnd - lastLoadReport > LOAD_REPORT_INTERVAL) {
+			float load = (float) (((double)executionTimeCounter)/(executionTimeCounter+freeTimeCounter));
+			ValueResourceHelper.setCreate(jobData.logResource.jobLoad(), load);
+			lastLoadReport = lastRunEnd;
+		}
 		return true;
 	}
 	

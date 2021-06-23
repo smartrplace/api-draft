@@ -31,6 +31,13 @@ public abstract class PerformanceLog {
 		this.id = id;
 	}
 	
+	/** Write message to text log file and write to slotsDB single duration and 
+	 * incremented duration counter
+	 *  Note that event counter only will be written if duration is greater zero
+	 *  or the org.smartrplace.tissue.util.logconfig.logzero=true property is set
+	 * @param msec
+	 * @param consoleMessageHeader
+	 */
 	public void logEvent(long msec, String consoleMessageHeader) {
 		if(Boolean.getBoolean("evaldebug0")||Boolean.getBoolean("evaldebug")) {
 			if(msec > MINIUM_DURATION_TO_CONSOLE)
