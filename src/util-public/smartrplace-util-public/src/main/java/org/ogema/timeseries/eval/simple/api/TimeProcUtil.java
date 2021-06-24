@@ -156,6 +156,16 @@ public class TimeProcUtil {
 		return max;
 	}
 	
+	public static SampledValue getFirstValueInLimit(ReadOnlyTimeSeries ts, long start, long end, float min, float max) {
+		List<SampledValue> svs = ts.getValues(start, end);
+		for(SampledValue sv: svs) {
+			float val = sv.getValue().getFloatValue();
+			if((min <= val) && (val <= max))
+				return sv;	
+		}
+		return null;
+	}
+
 	public static boolean checkConsistency(List<SampledValue> values, String label) {
 		long prevTime = 0;
 		int idx = 0;
