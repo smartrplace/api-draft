@@ -19,10 +19,21 @@ public class ViaHeartbeatUtil {
 	public static final String VIA_HEARTBEAT_SEND = "##Transfer_via_Heartbeat_Send";
 	public static final String VIA_HEARTBEAT_RECEIVE = "##Transfer_via_Heartbeat_Receive";
 	
+	/** See {@link #registerForTansferViaHeartbeatFromGateway(Datapoint, String, DatapointService)}
+	 * The datapoint give here is registed for transfer from server to gateway, though.
+	 * @param dp
+	 * @param gwId
+	 * @param dpService
+	 * @return
+	 */
 	public static DatapointGroup registerForTansferViaHeartbeatToGateway(Datapoint dp, String gwId,
 			DatapointService dpService) {
 		return registerForTansferViaHeartbeatSend(dp, gwId, dpService);
 	}
+	@Deprecated
+	/** Registration of datapoints on the Gateway currently is not supported. See HeartbeatServerGwData
+	 * for details.
+	 */
 	public static DatapointGroup registerForTansferViaHeartbeatToServer(Datapoint dp, String serverUrl,
 			DatapointService dpService) {
 		return registerForTansferViaHeartbeatSend(dp, serverUrl, dpService);
@@ -51,6 +62,10 @@ public class ViaHeartbeatUtil {
 			DatapointService dpService) {
 		return registerForTansferViaHeartbeatRecv(dp, gwId, dpService);
 	}
+	@Deprecated
+	/** Registration of datapoints on the Gateway currently is not supported. See HeartbeatServerGwData
+	 * for details.
+	 */
 	public static DatapointGroup registerForTansferViaHeartbeatFromServer(Datapoint dp, String serverUrl,
 			DatapointService dpService) {
 		return registerForTansferViaHeartbeatRecv(dp, serverUrl, dpService);
