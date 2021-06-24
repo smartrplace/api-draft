@@ -28,6 +28,10 @@ public class TimedJobMemoryData {
 		return lastRunDuration;
 	}
 
+	public long lastRunEnd() {
+		return lastRunEnd;
+	}
+
 	public long maxRunDuration() {
 		return maxRunDuration;
 	}
