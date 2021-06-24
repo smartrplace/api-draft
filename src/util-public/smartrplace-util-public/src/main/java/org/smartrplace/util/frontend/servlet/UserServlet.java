@@ -261,10 +261,13 @@ public class UserServlet extends HttpServlet {
 			}
 		}
 		resp.addHeader("content-type", "application/json;charset=utf-8");
-		if(result.result != null)
+		if(result.result != null) {
 			resp.getWriter().write(result.result.toString());
-		else
+			if(logger.isTraceEnabled()) logger.trace("GET Servlet response:"+result.result.toString());
+		} else {
 			resp.getWriter().write(result.resultArr.toString());
+			if(logger.isTraceEnabled()) logger.trace("GET Servlet response(A):"+result.resultArr.toString());
+		}
 		resp.setStatus(200);
 	}
 	
@@ -566,6 +569,7 @@ public class UserServlet extends HttpServlet {
 	/** SubUrl must end on '/' */
 	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap, String servletSubUrl) {
 		String fullURL = HttpUtils.getRequestURL(req).toString();
+		if(logger.isTraceEnabled()) logger.trace("GET Full URL(B):"+fullURL);
 		int idx = fullURL.indexOf(servletSubUrl);
 		String[] subURL;
 		if(idx >= 0)
@@ -595,6 +599,7 @@ public class UserServlet extends HttpServlet {
 			return;
 		}
 		String fullURL = HttpUtils.getRequestURL(req).toString();
+		if(logger.isTraceEnabled()) logger.trace("GET Full URL:"+fullURL);
 		int idx = fullURL.indexOf("/userdata/");
 		String[] subURL;
 		if(idx >= 0)
