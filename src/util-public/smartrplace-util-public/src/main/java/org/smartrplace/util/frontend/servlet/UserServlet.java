@@ -17,7 +17,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -261,12 +260,21 @@ public class UserServlet extends HttpServlet {
 			}
 		}
 		resp.addHeader("content-type", "application/json;charset=utf-8");
+		String out;
 		if(result.result != null) {
-			resp.getWriter().write(result.result.toString());
-			if(logger.isTraceEnabled()) logger.trace("GET Servlet response:"+result.result.toString());
+			out = result.result.toString();
 		} else {
-			resp.getWriter().write(result.resultArr.toString());
-			if(logger.isTraceEnabled()) logger.trace("GET Servlet response(A):"+result.resultArr.toString());
+			out = result.resultArr.toString();
+		}
+		resp.getWriter().write(out);
+		if(logger.isTraceEnabled()) {
+			String fullURL = req.getRequestURL().toString();
+			String paramStr = req.getQueryString();
+			if(paramStr != null)
+				logger.trace("Finished GET for:"+fullURL+"?"+paramStr);
+			else
+				logger.trace("Finished GET for:"+fullURL);
+			logger.trace("GET Response:"+out);
 		}
 		resp.setStatus(200);
 	}
@@ -568,8 +576,14 @@ public class UserServlet extends HttpServlet {
 	
 	/** SubUrl must end on '/' */
 	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap, String servletSubUrl) {
-		String fullURL = HttpUtils.getRequestURL(req).toString();
-		if(logger.isTraceEnabled()) logger.trace("GET Full URL(B):"+fullURL);
+		String fullURL = req.getRequestURL().toString();
+		if(logger.isTraceEnabled())  {
+			String paramStr = req.getQueryString();
+			if(paramStr != null)
+				logger.trace("Starting GET for(A):"+fullURL+"?"+paramStr);
+			else
+				logger.trace("Starting GET for(A):"+fullURL);
+		}
 		int idx = fullURL.indexOf(servletSubUrl);
 		String[] subURL;
 		if(idx >= 0)
@@ -598,8 +612,14 @@ public class UserServlet extends HttpServlet {
 			addParametersFromUrl(req, paramMap, this.servletSubUrl);
 			return;
 		}
-		String fullURL = HttpUtils.getRequestURL(req).toString();
-		if(logger.isTraceEnabled()) logger.trace("GET Full URL:"+fullURL);
+		String fullURL = req.getRequestURL().toString();
+		if(logger.isTraceEnabled())  {
+			String paramStr = req.getQueryString();
+			if(paramStr != null)
+				logger.trace("Starting GET for:"+fullURL+"?"+paramStr);
+			else
+				logger.trace("Starting GET for:"+fullURL);
+		}
 		int idx = fullURL.indexOf("/userdata/");
 		String[] subURL;
 		if(idx >= 0)
@@ -656,7 +676,7 @@ public class UserServlet extends HttpServlet {
 		String request = sb.toString();
 
 		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.logdetails")) {
-			String fullURL = HttpUtils.getRequestURL(req).toString();
+			String fullURL = req.getRequestURL().toString();
 			logger.info("POST message to "+fullURL);
 			logger.info("POST body: "+request);
 		}
