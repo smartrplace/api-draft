@@ -48,8 +48,8 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 			result = new TimedJobMemoryData(appMan, jobData);
 			result.prov = prov;
 			result.res = getOrCreateConfiguration(id, prov.evalJobType()>0);
+			createPersistentIndex(result.res);
 			if(!result.res.isActive()) {
-				createPersistentIndex(result.res);
 				prov.initConfigResource(result.res);
 				result.res.activate(true);
 			}
