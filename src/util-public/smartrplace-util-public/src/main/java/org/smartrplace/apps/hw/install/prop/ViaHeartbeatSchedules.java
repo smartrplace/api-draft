@@ -27,7 +27,11 @@ import de.iwes.util.timer.AbsoluteTimeHelper;
  * transmitted then the entire schedule is deleted before new values are written. This is triggered by calling
  * {@link #resendAllOnNextOccasion()} on the source system. By default this occurs when the reference time is changed
  * or when a datapoint change notification is detected in getValues or setValue (more details to be provided). This is
- * NOT triggered on startup of a gateway.*/
+ * NOT triggered on startup of a gateway, but doClean is set initially so the schedule schould be rewritten on the server
+ * on the first data sending after restart of the gateway. We do not perform a resending after restart of the server,
+ * but this sould not be necessary as all data that has not been sent to the server is sent then.<br>
+ * TODO: A gap may arise if the HTTP connection is closed on the server before it is fully processed. But this gap
+ * should be filled when the gateway is restarted.*/
 public class ViaHeartbeatSchedules implements StringProvider {
 	protected final ReadOnlyTimeSeries rot;
 	

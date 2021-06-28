@@ -18,15 +18,15 @@ public interface TimedJobProvider extends LabelledItem {
 	/** If true the job implementation or the application registring the job can
 	 * trigger the job directrly
 	 */
-	default boolean canJobTriggerItself() {
-		return false;
-	}
+	//default boolean canJobTriggerItself() {
+	//	return false;
+	//}
 	
 	/** Only relevant if {@link #canJobTriggerItself()} is true
 	 */
-	default long lastTimeJobWasStarted() {
-		return -1;
-	}
+	//default long lastTimeJobWasStarted() {
+	//	return -1;
+	//}
 	
 	/** 0: No evaluation job
 	 *  1: standard evaluation job

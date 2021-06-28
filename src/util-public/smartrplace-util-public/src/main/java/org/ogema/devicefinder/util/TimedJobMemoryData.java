@@ -3,6 +3,7 @@ package org.ogema.devicefinder.util;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.application.Timer;
 import org.ogema.core.application.TimerListener;
+import org.ogema.devicefinder.api.TimedJobMgmtService;
 import org.ogema.devicefinder.api.TimedJobProvider;
 import org.ogema.devicefinder.util.TimedJobMgmtServiceImpl.TimedJobMgmtData;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
@@ -40,6 +41,10 @@ public class TimedJobMemoryData {
 		return nextScheduledStart;
 	}
 
+	/** The {@link TimedJobMgmtService} makes sure that each job cannot be triggered again while it is running.
+	 * It will also not be queued then. If minimum gaps are required between starting a job
+	 * (e.g. for jobs performing bundle restarts) then the job has to implement such a
+	 * supervision itself. See BundleRestartButton as an example.*/
 	public boolean isRunning() {
 		return isRunning;
 	}
