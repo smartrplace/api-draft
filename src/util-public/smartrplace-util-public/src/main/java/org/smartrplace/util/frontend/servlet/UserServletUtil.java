@@ -95,6 +95,17 @@ public class UserServletUtil {
 		}
 		return getOrAddTimeSeriesData(tsd);
 	}
+	public static TimeSeriesDataImpl getOrAddTimeSeriesDataPlus(UserServletParamData pdata) {
+		TimeSeriesDataImpl tsd = null;
+		if(pdata.tsData != null) {
+			tsd = pdata.tsData;
+		} else if(pdata.tsDataRaw != null && pdata.tsLocationOrBaseId != null) {
+			String hash = ""+pdata.tsLocationOrBaseId.hashCode();
+			tsd = new TimeSeriesDataImpl(pdata.tsDataRaw, hash, hash, InterpolationMode.NONE);
+		}
+		getOrAddTimeSeriesData(tsd);
+		return tsd;
+	}
 	
 	public static String getOrAddTimeSeriesData(TimeSeriesDataImpl tsd) {
 		if(tsd != null) {
@@ -108,6 +119,12 @@ public class UserServletUtil {
 		String hash = ""+tsLocationOrBaseId.hashCode();
 		TimeSeriesDataImpl tsd = new TimeSeriesDataImpl(tsDataRaw, hash, hash, InterpolationMode.NONE);
 		return getOrAddTimeSeriesData(tsd);
+	}
+	public static TimeSeriesDataImpl getOrAddTimeSeriesDataPlus(ReadOnlyTimeSeries tsDataRaw, String tsLocationOrBaseId) {
+		String hash = ""+tsLocationOrBaseId.hashCode();
+		TimeSeriesDataImpl tsd = new TimeSeriesDataImpl(tsDataRaw, hash, hash, InterpolationMode.NONE);
+		getOrAddTimeSeriesData(tsd);
+		return tsd;
 	}
 	
 	public static <T extends Resource> T getObject(String objectId, Collection<T> allObjects) {

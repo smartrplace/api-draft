@@ -1,5 +1,7 @@
 package org.smartrplace.util.frontend.servlet;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	public String unit = null;
 	public String label = null;
 	public String align = null;
+	public boolean addUTCOffset = false;
 	
 	//First factor, then offset are applied to gateway values on reading (GET)
 	//On write a reverse transformation is applied, but not tested yet
@@ -157,6 +160,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				json.put("align", align);
 			if(label != null)
 				json.put("label", label);
+			if(addUTCOffset) {
+				ZoneOffset utcOffset = ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
+				json.put("UTCoffset", ""+utcOffset.getTotalSeconds()*1000);
+			}
 			return realResult;
 		} else
 			vals = timeSeries.getValues(startEnd[0], startEnd[1]);
@@ -175,6 +182,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			json.put("align", align);
 		if(label != null)
 			json.put("label", label);
+		if(addUTCOffset) {
+			ZoneOffset utcOffset = ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
+			json.put("UTCoffset", ""+utcOffset.getTotalSeconds()*1000);
+		}
 
 		JSONVarrRes realResult = new JSONVarrRes();
 		realResult.result = json;

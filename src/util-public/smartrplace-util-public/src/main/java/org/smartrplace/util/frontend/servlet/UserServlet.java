@@ -198,7 +198,7 @@ public class UserServlet extends HttpServlet {
 		if(stdPageId == null)
 			stdPageId = pageId;
 		pages.put(pageId, prov);
-		addProvider(this.getClass().getName(), pageId, prov);
+		addProvider(prov.getClass().getName(), pageId, prov);
 	}
 	
 	@Override
