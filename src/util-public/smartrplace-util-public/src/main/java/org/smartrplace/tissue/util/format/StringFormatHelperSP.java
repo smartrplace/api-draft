@@ -98,4 +98,28 @@ public class StringFormatHelperSP {
 		}
 		return result;
 	}
+
+	public static String getCamelCase(String init) {
+		if (init == null)
+			return null;
+
+		final StringBuilder ret1 = new StringBuilder(init.length());
+
+		for (final String word : init.split(" ")) {
+			if (!word.isEmpty()) {
+				ret1.append(Character.toUpperCase(word.charAt(0)));
+				ret1.append(word.substring(1).toLowerCase());
+			}
+		}
+
+		String retval1 = ret1.toString();
+		final StringBuilder ret = new StringBuilder(retval1.length());
+		for (final String word : init.split("_")) {
+			if (!word.isEmpty()) {
+				ret.append(Character.toUpperCase(word.charAt(0)));
+				ret.append(word.substring(1).toLowerCase());
+			}
+		}
+		return ret1.toString();
+	}
 }
