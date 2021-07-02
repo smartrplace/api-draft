@@ -17,7 +17,7 @@ public class TimeProcUtil {
 	public static final long MINUTE_MILLIS = 60000;
 	public static final long HOUR_MILLIS = 60*60000;
 	public static final long DAY_MILLIS = 24*HOUR_MILLIS;
-	public static final long YEAR_MILLIS = (long)(365.25*HOUR_MILLIS);
+	public static final long YEAR_MILLIS = (long)(365.25*DAY_MILLIS);
 
 	public static final String PER_DAY_EVAL = "DAY";
 	public static final String PER_DAY_SUFFIX = "_proTag";
