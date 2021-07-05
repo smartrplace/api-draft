@@ -6,6 +6,7 @@ import java.util.List;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.schedule.AbsoluteSchedule;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
@@ -201,7 +202,7 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	
 	/** Wrapper for {@link #addDatapoint(SingleValueResource, List, String, DatapointService)}
 	 * 
-	 * @param res
+	 * @param absoluteSchedule
 	 * @param result
 	 * @return
 	 */
@@ -210,6 +211,9 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	}
 	protected Datapoint addDatapoint(SingleValueResource res, String subLocation, List<Datapoint> result) {
 		return super.addDatapoint(res, result, subLocation, dpService);
+	}
+	protected Datapoint addDatapoint(AbsoluteSchedule res, List<Datapoint> result) {
+		return super.addDatapoint(res, result, dpService);
 	}
 	
 	/** Doubled from {@link DeviceTableRaw}

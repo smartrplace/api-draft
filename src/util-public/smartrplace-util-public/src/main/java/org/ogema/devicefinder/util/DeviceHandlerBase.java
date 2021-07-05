@@ -7,6 +7,7 @@ import java.util.List;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.model.schedule.AbsoluteSchedule;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
@@ -112,6 +113,16 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		return dp;
 	}
 	
+	public Datapoint addDatapoint(AbsoluteSchedule res, List<Datapoint> result,
+			DatapointService dpService) {
+		if(res.isActive()) {
+			Datapoint dp = dpService.getDataPointStandard(res);
+			result.add(dp);
+			return dp;
+		}
+		return null;
+	}
+
 	/*@Override
 	public String getDeviceName(InstallAppDevice installDeviceRes) {
 		return DeviceTableRaw.getName(installDeviceRes);
