@@ -15,6 +15,9 @@ public interface TemperatureControlBase {
     public TemperatureResource getTemperatureSetpoint();
     
     public void setTemperatureSetpoint(float t);
+    /** Write to setpoint even if this may cause a network traffic overflow. This can be used e.g. to switch thermostats
+     * to summer mode. In this case settings may be sent to devices later, but need to be visible right away*/
+    public void setTemperatureSetpointForced(float t);
 
     /** Get temperature setpoint feedback resource
      * 

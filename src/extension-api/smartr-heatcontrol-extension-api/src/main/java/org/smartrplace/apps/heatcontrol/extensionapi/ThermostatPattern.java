@@ -120,5 +120,4 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 		}
 		return setpMan;
 	}
-	
 }
