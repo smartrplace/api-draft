@@ -142,6 +142,12 @@ public class UserServletUtil {
 			return false;
 		return depth.contains("timeseries");
 	}
+	public static boolean isValueOnly(Map<String, String[]> paramMap) {
+		String depth = UserServlet.getParameter("depth", paramMap);
+		if(depth == null)
+			return false;
+		return depth.equalsIgnoreCase("valueOnly");
+	}
 	public static boolean isPOST(Map<String, String[]> paramMap) {
 		String method = UserServlet.getParameter("METHOD", paramMap);
 		if(method == null)
