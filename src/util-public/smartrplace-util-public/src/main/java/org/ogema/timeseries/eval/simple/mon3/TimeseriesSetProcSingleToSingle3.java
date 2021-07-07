@@ -1,7 +1,9 @@
 package org.ogema.timeseries.eval.simple.mon3;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
@@ -32,6 +34,11 @@ public abstract class TimeseriesSetProcSingleToSingle3 implements TimeseriesSetP
 	
 	/** change startTime and endTime of parameter if necessary*/
 	protected abstract void alignUpdateIntervalFromSource(DpUpdated updateInterval);
+	
+	/** Overwrite to add dependent time series*/
+	protected Map<String, Datapoint> addDependetTimeseries(Datapoint input) {return null;}
+	/** Overwrite this if no input timeseries is provided*/
+	protected Long getFirstTimestampInSource() {return null;}
 		
 	//protected TimeSeriesNameProvider nameProvider() {return null;}
 	//protected abstract AggregationMode getMode(String tsLabel);
@@ -49,7 +56,7 @@ public abstract class TimeseriesSetProcSingleToSingle3 implements TimeseriesSetP
 	public List<Datapoint> getResultSeries(List<Datapoint> input, boolean registersTimedJob, DatapointService dpService) {
 		List<Datapoint> result = new ArrayList<>();
 		for(Datapoint tsdi: input) {
-			String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
+			/*String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
 			ProcessedReadOnlyTimeSeries3 resultTs = new ProcessedReadOnlyTimeSeries3(tsdi) {
 				@Override
 				protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
@@ -88,11 +95,61 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()
 				//throw new UnsupportedOperationException("Own TimedJob for Single2Single not implemented yet!");
 				TimeseriesSetProcMultiToSingle3.registerTimedJob(resultTs, input, resultTs.resultLabel(),
 						newtsdi.getLocation(), "S2S", minIntervalForReCalc, dpService);
-			}
+			}*/
+			Datapoint newtsdi = getResultSeriesSingle(tsdi, registersTimedJob, dpService);
 			result.add(newtsdi);
 			
 		}
 		return result;
+	}
+
+	public Datapoint getResultSeriesSingle(Datapoint tsdi, boolean registersTimedJob, DatapointService dpService) {
+		String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
+		Map<String, Datapoint> deps = addDependetTimeseries(tsdi);
+		List<Datapoint> input = Arrays.asList(new Datapoint[] {tsdi});
+		ProcessedReadOnlyTimeSeries3 resultTs = new ProcessedReadOnlyTimeSeries3(tsdi, deps) {
+			@Override
+			protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
+					long end, AggregationMode mode) {
+SampledValue sv = timeSeries!=null?timeSeries.getPreviousValue(Long.MAX_VALUE):null;
+if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()+" lastInput:"+((sv!=null)?TimeProcPrint.getFullTime(sv.getTimestamp()):"no sv"));
+				return calculateValues(timeSeries, start, end, mode, this);						
+			}
+			@Override
+			protected String getLabelPostfix() {
+				return labelPostfix;
+			}
+			
+			@Override
+			protected long getCurrentTime() {
+				return dpService.getFrameworkTime();
+			}
+			
+			@Override
+			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
+				TimeseriesSetProcSingleToSingle3.this.alignUpdateIntervalFromSource(updateInterval);
+			}
+			@Override
+			protected List<SampledValue> getResultValuesMulti(List<ReadOnlyTimeSeries> timeSeries,
+					long start, long end, AggregationMode mode) {
+				return null;
+			}
+			
+			@Override
+			public Long getFirstTimeStampInSource() {
+				Long directVal = TimeseriesSetProcSingleToSingle3.this.getFirstTimestampInSource();
+				if(directVal != null)
+					return directVal;
+				return getFirstTsInSource(input);
+			}
+		};
+		Datapoint newtsdi = getOrUpdateTsDp(location, resultTs , dpService);
+		if(registersTimedJob) {
+			//throw new UnsupportedOperationException("Own TimedJob for Single2Single not implemented yet!");
+			TimeseriesSetProcMultiToSingle3.registerTimedJob(resultTs, input, resultTs.resultLabel(),
+					newtsdi.getLocation(), "S2S", minIntervalForReCalc, dpService);
+		}
+		return newtsdi;
 	}
 
 	/**
@@ -126,6 +183,8 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()
 		Long earliestStart = Long.getLong("org.ogema.timeseries.eval.simple.mon3.evalafter");
 		for(Datapoint indp: input) {
 			ReadOnlyTimeSeries ints = indp.getTimeSeries();
+			if(ints == null)
+				continue;
 			if(ints instanceof ProcessedReadOnlyTimeSeries3) {
 				ProcessedReadOnlyTimeSeries3 ints3 = (ProcessedReadOnlyTimeSeries3)ints;
 				Long start = ints3.getFirstTimeStampInSource();

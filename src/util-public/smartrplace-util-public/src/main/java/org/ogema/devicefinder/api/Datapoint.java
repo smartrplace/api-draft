@@ -155,6 +155,9 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	public static final String ALIAS_MAINMETER_MONTHLYCONSUMPTION = "mainMeterTotalConsumptionMonthly";
 	public static final String ALIAS_MAINMETER_YEARLYCONSUMPTION = "mainMeterTotalConsumptionYearly";
 	
+	public static final String ALIAS_QUALITY_DAILY = "qualityDaily";
+	public static final String ALIAS_QUALITY_DAILY_GOLD = "qualityDailyGold";
+
 	/** Only relevant for volatile datapoints with a timeseries that is also changed for
 	 * the past. Note that we do not send notifications for upates behind the last datapoint. This also means
 	 * that we consider the 15 minutes before the last reading to a timeseries to be generally volatile,

@@ -579,6 +579,28 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return foundEnergy;
 	}
 	
+	//TODO: Add device handler for this type
+	public static boolean isCO2wMBUSDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if(subResources == null)
+			return false;
+		//do not accept if subResource size fits GasEnergyCam
+		if((!resourceLocation.toLowerCase().startsWith("jmbus")||resourceLocation.startsWith("serverMirror")))
+			return false;
+		if(isHeatMeterDevice(resourceLocation, subResources))
+			return false;
+		int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
+		if(unsup  > 0)
+			return false;
+		boolean foundUserDefined = false;
+		for(SubResourceInfo srinfo: subResources) {
+			if(srinfo.resourceName.equals("USER_DEFINED_0_0")) {
+				foundUserDefined = true;
+				break;
+			}
+		}
+		return foundUserDefined;
+	}
+	
 	public static boolean isOpenWeatherMapSensorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		return resourceLocation.startsWith("BigBlueRoom") || resourceLocation.startsWith("WeatherData");
 	}

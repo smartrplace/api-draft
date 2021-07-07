@@ -158,7 +158,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLa
 			} 
 			
 			@Override
-			protected String dpLabel() {
+			public String dpLabel() {
 				return "InpSingleLead_"+((resultSeriesStore!=null)?resultSeriesStore.dpLabel():"?");
 			}
 			

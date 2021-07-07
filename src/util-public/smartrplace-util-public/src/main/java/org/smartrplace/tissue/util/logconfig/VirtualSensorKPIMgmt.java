@@ -26,7 +26,9 @@ import org.ogema.model.connections.ElectricityConnection;
 import org.ogema.recordeddata.DataRecorder;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
+import org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtil;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtilBase;
+import org.ogema.timeseries.eval.simple.mon3.TimeseriesSimpleProcUtil3;
 import org.slf4j.Logger;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
 
@@ -36,17 +38,50 @@ import de.iwes.util.timer.AbsoluteTiming;
 /** Management of Virtual sensors for a certain application<br>
  * Note that virtual sensors are created with resources, but time series are only stored as memory time series. Only
  * when transferred via heartbeat then schedules are created on the server side. Evaluations and alarming relying on
- * historical data should access this via the datapoint to also get time series for virtual datapoints.<br>
- * Devices shown in Installation&Setup on the collecting gateway refer to the serverMirror sub device. Here the plots do
+ * historical data should access this via the datapoint to also get time series for virtual datapoints. Note that
+ * the simpler version of providing virtual datapoints is the calculation of gateway-wide KPIs. This generally
+ * implies call of {@link ViaHeartbeatSchedules#registerDatapointForHeartbeatDp2Schedule(Datapoint, Integer)}.
+ * There is a good example for this in KPILocInit. Usually no resources are created for such KPIs on the gateway.<br>
+ * All such types require an instance of TimeseriesSimpleProcUtilBase, which can either by a standard {@link TimeseriesSimpleProcUtil} or
+ * a {@link TimeseriesSimpleProcUtil3}. The latter is recommended for any new implementations.<br>
+ * <br>
+ * Standard virtual sensors:<br>
+ * Usually for each device type an instance of VirtualSensorKPIMgmt is created that either overwrites getAndConfigureValueResourceSingle or
+ * getAndConfigureValueResource. The actual generation of the virtual datapoint in the getDatapoints() method of a
+ * device handler is done via {@link #addVirtualDatapoint(List, String, Resource, long, boolean, boolean, List)}. In the
+ * getAndConfigureValueResource method the actual creation of the virtual datapoint and the creation of the
+ * SingleValueResource representing the virtual datapoint must be made. If the virtual sensor data shall be 
+ * transferred to a superior via heartbeat-schedule this must also be registered here.<br>
+ * For some virtual sensor types the datapoint creation and heartbeat-schedule registration can be done by static methods e.g. in this class. Currently there are only two types with
+ * some options:<br>
+ * - {@link #registerEnergySumDatapointOverSubPhasesFromDay(ElectricityConnection, AggregationMode, TimeseriesSimpleProcUtilBase, DatapointService, Datapoint)}<br>
+ * - {@link #registerEnergySumDatapointFromDay(List, AggregationMode, TimeseriesSimpleProcUtilBase, String, boolean, DatapointService, Datapoint, List)}<br>
+ * For simple virtual datapoints it should be no problem to generate datapoints from TimeseriesSimpleProcUtil3 and schedule transfer via 
+ * ViaHeartbeatSchedules#registerDatapointForHeartbeatDp2Schedule directly, though.<br>
+ * In both cases if heartbeat-schedule transfer is used it has to be registered with remote device processing below
+ * DPManServer also, see SPSKPI_Init.createVirtualEnergySensorOnSuperior for an example.
+ * 
+ * <br>
+ * Collecting Gateways:<br>
+ * Devices shown in Installation&Setup on the collecting gateway refer to the serverMirror sub device. For the datapoints
+ * refering to these resources the remote slotsDb is used and these can be used in any charts by this. Applications
+ * using getHistoricalData() would fail, though.<br>
+ * Should be deprecated: Here the plots do
  * not provide any reasonable data. You have to use the Charts app to get the real plot data of the devices from the
- * sub gateways. TODO: This should be changed in the future.<br>
+ * sub gateways.<br>
  * Collecting Gateways calculate virtual sensors on the collecting gateway, but the slotsDB source is stored in the
  * directory of the sub gateway. TODO: This leads to the effect that on superior e.g. a Iotawatt device is shown twice,
  * the real slotsDB source is shown in the sub gateway device plot, the virtual sensor data is shown in the collecting
  * gateway device plot.<br>
- * To access the schedule content on the superior gateway you have to use the gateway KPI plots for the respective
- * collecting gateway. There is a link in the TsAny plot page of superior, which is usually almost empty. The schedules
- * in the resource database should be under serverMirror/<collectingGw>/gw/ as KPI.
+ * <br>
+ * KPIs:<br>
+ * KPIs are usually not part of specific devices, but calculated for an entire gateway. So the schedules are stored
+ * in serverMirror/_gw<gwId>/gw. To access the schedule content on the superior gateway you have to use the gateway KPI plots for the respective
+ * collecting gateway. There is a link in the TsAny plot page of superior, which is usually almost empty.<br>
+ * Registration of KPIs on the server is usually done in methods calling SKSKPI_Init#registerKPIorVirtualSensorSchedule,
+ * usually at the end of DpManServer#init.<br>
+ * On the gateway charts for KPIs can be generated or they can be added to any gateway-wide virtual device offered by the
+ * PST device handler.
  * 
  * @author dnestle
  *
@@ -384,14 +419,17 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 		return registerEnergySumDatapoint(energyDailys, inputAggMode, util, startLevel, registerForTransferViaHeartbeatAsMainMeter,
 				registerForTransferViaHeartbeatAsMainMeter?dpService:null);
 	}
-	/**
+	/** The method creates datapoints representing the hourly, daily, monthly and yearly sums of the input timeseries,
+	 * which are aggregated for this purpose. The datapoints created are returned. By registerForTransferViaHeartbeatAsMainMeter
+	 * it is also possible to trigger registration of main meter data transmission to a superior.
 	 * 
 	 * @param inputEnergy
 	 * @param inputAggMode
 	 * @param util
 	 * @param startLevel
 	 * @param registerForTransferViaHeartbeatAsMainMeter if true the results are registered for sending via heartbeat. This
-	 * 		is also implies that main meter aliases are registered
+	 * 		assumes that the inputEnergy time series represent the data from the main meter of the gateway. This
+	 *      is also implies that main meter aliases are registered.
 	 * @param dpService only relevant if registerForTransfer is true, otherwise may be null
 	 * @return all datapoints created for sum e.g hourly, daily, monthly, yearly sum
 	 */

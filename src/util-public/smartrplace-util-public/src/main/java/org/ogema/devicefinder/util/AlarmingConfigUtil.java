@@ -40,6 +40,7 @@ public class AlarmingConfigUtil {
 	public static final double QUALITY_TIME_SHARE_LIMIT = 0.95f;
 	public static final double QUALITY_SHORT_MAX_MINUTES = 4*1440*(1.0 - QUALITY_TIME_SHARE_LIMIT);
 	public static final double QUALITY_LONG_MAX_MINUTES = 28*1440*(1.0 - QUALITY_TIME_SHARE_LIMIT);
+	public static final double QUALITY_DAY_MAX_MINUTES = 1*1440*(1.0 - QUALITY_TIME_SHARE_LIMIT);
 
 	private final static Logger logger = LoggerFactory.getLogger(AlarmingConfigUtil.class);
 	
@@ -443,16 +444,23 @@ public class AlarmingConfigUtil {
 	
 	/** 0: qualityShort, [1] qualityLong, [2]: qualityShort V2, [3]: qualityLong V2*/
 	public static int[] getQualityValues(ApplicationManager appMan, DatapointService dpService) {
-		ResourceAccess resAcc = appMan.getResourceAccess();
-		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
-		int[] result = new int[] {0,0,0,0};
 		long now = appMan.getFrameworkTime();
 		long startShort = now - 4*TimeProcUtil.DAY_MILLIS;
 		long startLong = now - 28*TimeProcUtil.DAY_MILLIS;
+		int[] resShort = getQualityValues(appMan, dpService, startShort, now, QUALITY_SHORT_MAX_MINUTES);
+		int[] resLong = getQualityValues(appMan, dpService, startLong, now, QUALITY_LONG_MAX_MINUTES);
+		return new int[] {resShort[0], resShort[1], resLong[0], resLong[1]};
+	}
+	
+	/** [0]: quality V1, [1]: quality V2*/
+	public static int[] getQualityValues(ApplicationManager appMan, DatapointService dpService,
+			long startTime, long endTime, double QUALITY_MAX_MINUTES) {
+
+		ResourceAccess resAcc = appMan.getResourceAccess();
+		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
+		int[] result = new int[] {0,0};
 		int countShortOk = 0;
-		int countLongOk = 0;
 		int countShortOkGold = 0;
-		int countLongOkGold = 0;
 		int countEval = 0;
 		int countEvalGold =0;
 		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
@@ -475,19 +483,12 @@ public class AlarmingConfigUtil {
 				}
 				float maxGapSize = ac.maxIntervalBetweenNewValues().getValue();
 				try {
-					List<SampledValue> gaps = TimeSeriesServlet.getGaps(ts, startShort, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
+					List<SampledValue> gaps = TimeSeriesServlet.getGaps(ts, startTime, endTime, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
 					double sum = getValueSum(gaps);
-					if(sum <= QUALITY_SHORT_MAX_MINUTES) {
+					if(sum <= QUALITY_MAX_MINUTES) {
 						countShortOkGold++;
 						if(!isAssigned)
 							countShortOk++;
-					}
-					List<SampledValue> gapsLong = TimeSeriesServlet.getGaps(ts, startLong, now, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
-					sum = getValueSum(gapsLong);
-					if(sum <= QUALITY_LONG_MAX_MINUTES) {
-						countLongOkGold++;
-						if(!isAssigned)
-							countLongOk++;
 					}
 					countEvalGold++;
 					if(!isAssigned)
@@ -497,11 +498,9 @@ public class AlarmingConfigUtil {
 					e.printStackTrace();
 				}
 			}
-			result[0] = (int) (((float)countShortOk) / countEval * 100);
-			result[1] = (int) (((float)countLongOk) / countEval * 100);
-			result[2] = (int) (((float)countShortOkGold) / countEvalGold * 100);
-			result[3] = (int) (((float)countLongOkGold) / countEvalGold * 100);
 		}
+		result[0] = (int) (((float)countShortOk) / countEval * 100);
+		result[1] = (int) (((float)countShortOkGold) / countEvalGold * 100);
 		return result;
 	}
 

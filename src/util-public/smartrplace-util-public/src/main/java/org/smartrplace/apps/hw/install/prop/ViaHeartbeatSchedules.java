@@ -33,6 +33,7 @@ import de.iwes.util.timer.AbsoluteTimeHelper;
  * TODO: A gap may arise if the HTTP connection is closed on the server before it is fully processed. But this gap
  * should be filled when the gateway is restarted.*/
 public class ViaHeartbeatSchedules implements StringProvider {
+
 	protected final ReadOnlyTimeSeries rot;
 	
 	/** On initial schedule sending we reset data on server*/

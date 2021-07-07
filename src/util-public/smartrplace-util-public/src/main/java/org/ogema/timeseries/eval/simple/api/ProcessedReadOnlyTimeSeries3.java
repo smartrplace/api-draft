@@ -1,16 +1,17 @@
 package org.ogema.timeseries.eval.simple.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
-import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
-import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
@@ -147,15 +148,24 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		lastReCalc = getCurrentTime();
 	}
 	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput) {
+		this(dpInput, null);
+	}
+	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput, Map<String, Datapoint> dependentTimeseries) {
 		this(null, dpInput.info().getAggregationMode());
 		inputType = InputType.SINGLE;
 		dpInSingle = dpInput;
+		this.dependentTimeseries = dependentTimeseries;
 	}
 	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput, Integer absoluteTiming, Long minIntervalForReCalc) {
+		this(dpInput, absoluteTiming, minIntervalForReCalc, null);
+	}
+	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput, Integer absoluteTiming, Long minIntervalForReCalc,
+			Map<String, Datapoint> dependentTimeseries) {
 		this(null, dpInput.info().getAggregationMode(),
 				!Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"), absoluteTiming);
 		inputType = InputType.SINGLE;
 		dpInSingle = dpInput;
+		this.dependentTimeseries = dependentTimeseries;
 	}
 	
 	
@@ -237,6 +247,16 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		return newVals;
 	}
 	
+	public List<SampledValue> updateValuesStoredForcedForDependentTimeseries(long end, List<SampledValue> newVals) {
+		lastReCalc = getCurrentTime();
+		lastEndTime = end;
+		if(newVals != null)
+			addValues(newVals);
+		else
+			System.out.println("Warning: newVals null!");
+		return newVals;		
+	}
+
 	public DatapointImpl getResultSeriesDP(DatapointService dpService, String location) {
 		DatapointImpl result;
 		if(location != null) {
@@ -268,4 +288,14 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 			dest.setRoom(room);
 	}*/
 
+	/** Dependent timeseries are added by the {@link ProcessedReadOnlyTimeSeries3} itself. Get the timeseries via a
+	 * known ID that is defined for each type by the implementation of the {@link ProcessedReadOnlyTimeSeries3}.
+	 */
+	protected Map<String, Datapoint> dependentTimeseries;
+	public Datapoint getDependentTimeseries(String id) {
+		return dependentTimeseries.get(id);
+	};
+	public Collection<Datapoint> getAllDependentTimeseries() {
+		return dependentTimeseries.values();
+	};
 }

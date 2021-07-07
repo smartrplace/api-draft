@@ -105,7 +105,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	/** Only relevant if updateFinalValue is active (default is every two hours)*/
 	protected abstract long getCurrentTime();
 
-	protected String dpLabel() {
+	public String dpLabel() {
 		return getClass().getSimpleName();
 	};
 	

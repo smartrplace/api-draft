@@ -1,6 +1,8 @@
 package org.smartrplace.apps.heatcontrol.extensionapi.heatandcool;
 
 import org.ogema.core.model.units.TemperatureResource;
+import org.ogema.model.devices.buildingtechnology.AirConditioner;
+import org.ogema.model.devices.buildingtechnology.MechanicalFan;
 import org.ogema.model.locations.Room;
 
 /** This interface can be implemented by single devices and by room control units that control all heating and
@@ -54,4 +56,27 @@ public interface TemperatureControlBase {
 
     public Room getRoom();
     //public ResourcePattern getPattern();
+    
+    /** Get number off speed states the device supports. According to
+     * resource {@link AirConditioner#fan()} and {@link MechanicalFan#setting()} this can usually be null, 2 or 3.<br>
+     * 4 states may be given if auto shall be supported (currently not implemented)
+     *  
+     * @return null if no fan speed is supported
+     */
+	default Integer fanSpeedStateNum() {return null;}
+	
+	/** Set fan speed. See {@link MechanicalFan#setting()} for details.
+	 * 
+	 * @param state TODO: Specifiy indexing for device => can driver do this?
+	 * @return true if setting the fan speed was succesful
+	 */
+	default boolean setFanSpeed(int state) {return false;}
+	default Integer getFanSpeed() {return null;}
+	/** Set operation mode
+	 * 
+	 * @param state see {@link AirConditioner#operationMode()}
+	 * @return
+	 */
+	default boolean setOperationMode(int state) {return false;}
+	default Integer getOperationMode() {return null;}
 }

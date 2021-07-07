@@ -16,6 +16,7 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.api.TimedJobProvider;
 import org.ogema.devicefinder.util.TimedJobMemoryData;
+import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
@@ -107,7 +108,7 @@ public abstract class TimeseriesSetProcMultiToSingle3 implements TimeseriesSetPr
 	public List<Datapoint> getResultSeries(List<Datapoint> input, boolean registersTimedJob, DatapointService dpService) {
 		List<Datapoint> result = new ArrayList<>();
 
-		ProcessedReadOnlyTimeSeries3 resultTs = new ProcessedReadOnlyTimeSeries3(null, null) {
+		ProcessedReadOnlyTimeSeries3 resultTs = new ProcessedReadOnlyTimeSeries3((TimeSeriesNameProvider)null, null) {
 			@Override
 			protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
 					long end, AggregationMode mode) {
@@ -284,7 +285,10 @@ if(tsSingleLog != null) tsSingleLog.logEvent((endOfCalc-startOfCalc), "Calculati
 	protected static void updateTimeseries(ProcessedReadOnlyTimeSeries3 ts, long now) {
 		long start;
 		if(ts.getLastEndTime() <= 0) {
-			start = ts.getFirstTimeStampInSource();
+			Long startRaw = ts.getFirstTimeStampInSource();
+			if(startRaw == null)
+				start = now;
+			else start = startRaw;
 		} else
 			start = ts.getLastEndTime();
 		ts.updateValuesStoredAligned(start, now, false);		
