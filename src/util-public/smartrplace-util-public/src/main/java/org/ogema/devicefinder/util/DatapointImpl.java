@@ -489,7 +489,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 
 	@Override
 	public Float getCurrentValue() {
-		if(resource != null) try {
+		if(resource != null && (resource instanceof SingleValueResource)) try {
 			return ValueResourceUtils.getFloatValue((SingleValueResource) resource);
 		} catch(NumberFormatException e) {
 			return null;
