@@ -473,6 +473,9 @@ public class AlarmingConfigUtil {
 				SingleValueResource sens = ac.sensorVal().getLocationResource();
 				if(!sens.exists())
 					continue;
+				float maxGapSize = ac.maxIntervalBetweenNewValues().getValue();
+				if(maxGapSize < 0)
+					continue;
 				Datapoint dp = dpService.getDataPointAsIs(sens);
 				if(dp == null)
 					continue; //should not occur
@@ -481,7 +484,6 @@ public class AlarmingConfigUtil {
 					appMan.getLogger().warn("No timeseries for datapoint configured for alarming:"+sens.getLocation());
 					continue;
 				}
-				float maxGapSize = ac.maxIntervalBetweenNewValues().getValue();
 				try {
 					List<SampledValue> gaps = TimeSeriesServlet.getGaps(ts, startTime, endTime, (long) ((double)maxGapSize*TimeProcUtil.MINUTE_MILLIS));
 					double sum = getValueSum(gaps);
@@ -489,7 +491,8 @@ public class AlarmingConfigUtil {
 						countShortOkGold++;
 						if(!isAssigned)
 							countShortOk++;
-					}
+					} else if(Boolean.getBoolean("qualitydebug") && (!isAssigned))
+						System.out.println("Gaps found for "+QUALITY_MAX_MINUTES+" for "+sens.getLocation());
 					countEvalGold++;
 					if(!isAssigned)
 						countEval++;
@@ -499,8 +502,14 @@ public class AlarmingConfigUtil {
 				}
 			}
 		}
-		result[0] = (int) (((float)countShortOk) / countEval * 100);
-		result[1] = (int) (((float)countShortOkGold) / countEvalGold * 100);
+		if(countEval == 0)
+			result[0] = 100;
+		else
+			result[0] = (int) (((float)countShortOk) / countEval * 100);
+		if(countEvalGold == 0)
+			result[1] = 100;
+		else
+			result[1] = (int) (((float)countShortOkGold) / countEvalGold * 100);
 		return result;
 	}
 
