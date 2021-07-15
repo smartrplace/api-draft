@@ -7,6 +7,9 @@ import java.util.Map;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
+import org.ogema.messaging.api.MessageTransport;
+import org.ogema.tools.app.useradmin.api.UserDataAccess;
+import org.ogema.tools.app.useradmin.config.UserAdminData;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.autoconfig.api.OSGiConfigAccessService;
 
@@ -158,6 +161,9 @@ public interface DatapointService {
 	Map<String, OGEMADriverPropertyService<?>> driverpropertyServices();
 	
 	TimedJobMgmtService timedJobService();
+	Collection<MessageTransport> messageTransportServices();
+	MessageTransport messageTransportService(String name);
+	UserDataAccess userAdminDataService();
 	
 	default OSGiConfigAccessService configService() {
 		return null;

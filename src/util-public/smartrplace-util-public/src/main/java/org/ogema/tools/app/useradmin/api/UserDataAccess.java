@@ -20,7 +20,10 @@ public interface UserDataAccess {
      */
     Resource getUserPropertyResource(String userId);
 
-    /**
+    /** Add messaging address or update time stamp.
+     * TODO: If the address already exists then the respective StringResource shall be
+     * rewritten in order to update the timestamp indicating the last time the address was updated
+     * (e.g. to clean up addresses that have not been confirmed for a certain time)
      * @param userId
      * @param addressType
      * @param address
@@ -45,5 +48,4 @@ public interface UserDataAccess {
      * @throws IllegalArgumentException if userId == null or does not exist.
      */
     List<MessagingAddress> getMessagingAddresses(String userId, String addressType);
-
 }
