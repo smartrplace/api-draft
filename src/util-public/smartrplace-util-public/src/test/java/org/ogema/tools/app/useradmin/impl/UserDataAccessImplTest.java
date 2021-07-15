@@ -23,8 +23,8 @@ public class UserDataAccessImplTest extends WidgetsTestBase {
     @Inject
     UserDataAccess dataAccess;
     
-    final String MESSAGING_TYPE_1 = "testType1";
-    final String MESSAGING_TYPE_2 = "testType2";
+    final String ADDRESS_TYPE_1 = "testType1";
+    final String ADDRESS_TYPE_2 = "testType2";
     final String TESTUSER = "master";
 
     public UserDataAccessImplTest() {
@@ -83,27 +83,27 @@ public class UserDataAccessImplTest extends WidgetsTestBase {
 
     @Test
     public void testMessagingAddressRW() {
-        Assert.assertTrue(dataAccess.getMessagingAddresses(TESTUSER, MESSAGING_TYPE_1).isEmpty());
-        Assert.assertTrue(dataAccess.getMessagingAddresses(TESTUSER, MESSAGING_TYPE_2).isEmpty());
+        Assert.assertTrue(dataAccess.getMessagingAddresses(TESTUSER, ADDRESS_TYPE_1).isEmpty());
+        Assert.assertTrue(dataAccess.getMessagingAddresses(TESTUSER, ADDRESS_TYPE_2).isEmpty());
         Assert.assertTrue(dataAccess.getMessagingAddresses(TESTUSER, null).isEmpty());
         String addrT1 = "foo@bar";
         String addrT2 = "4711";
-        dataAccess.addMessagingAddress(TESTUSER, MESSAGING_TYPE_1, addrT1);
-        dataAccess.addMessagingAddress(TESTUSER, MESSAGING_TYPE_2, addrT2);
+        dataAccess.addMessagingAddress(TESTUSER, ADDRESS_TYPE_1, addrT1);
+        dataAccess.addMessagingAddress(TESTUSER, ADDRESS_TYPE_2, addrT2);
         System.out.println(dataAccess.getUserPropertyResource(TESTUSER));
         System.out.println(dataAccess.getUserPropertyResource(TESTUSER).getSubResources(true));
-        Assert.assertEquals(1, dataAccess.getMessagingAddresses(TESTUSER, MESSAGING_TYPE_1).size());
-        Assert.assertEquals(1, dataAccess.getMessagingAddresses(TESTUSER, MESSAGING_TYPE_2).size());
+        Assert.assertEquals(1, dataAccess.getMessagingAddresses(TESTUSER, ADDRESS_TYPE_1).size());
+        Assert.assertEquals(1, dataAccess.getMessagingAddresses(TESTUSER, ADDRESS_TYPE_2).size());
         Assert.assertEquals(2, dataAccess.getMessagingAddresses(TESTUSER, null).size());
         
-        Assert.assertFalse(dataAccess.removeMessagingAddress(TESTUSER, MESSAGING_TYPE_1, addrT2));
+        Assert.assertFalse(dataAccess.removeMessagingAddress(TESTUSER, ADDRESS_TYPE_1, addrT2));
         Assert.assertEquals(2, dataAccess.getMessagingAddresses(TESTUSER, null).size());
-        Assert.assertTrue(dataAccess.removeMessagingAddress(TESTUSER, MESSAGING_TYPE_1, addrT1));
-        Assert.assertEquals(0, dataAccess.getMessagingAddresses(TESTUSER, MESSAGING_TYPE_1).size());
-        Assert.assertEquals(1, dataAccess.getMessagingAddresses(TESTUSER, MESSAGING_TYPE_2).size());
+        Assert.assertTrue(dataAccess.removeMessagingAddress(TESTUSER, ADDRESS_TYPE_1, addrT1));
+        Assert.assertEquals(0, dataAccess.getMessagingAddresses(TESTUSER, ADDRESS_TYPE_1).size());
+        Assert.assertEquals(1, dataAccess.getMessagingAddresses(TESTUSER, ADDRESS_TYPE_2).size());
         Assert.assertEquals(1, dataAccess.getMessagingAddresses(TESTUSER, null).size());
         
-        Assert.assertTrue(dataAccess.removeMessagingAddress(TESTUSER, MESSAGING_TYPE_2, addrT2));
+        Assert.assertTrue(dataAccess.removeMessagingAddress(TESTUSER, ADDRESS_TYPE_2, addrT2));
         Assert.assertEquals(0, dataAccess.getMessagingAddresses(TESTUSER, null).size());
     }
 

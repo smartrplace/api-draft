@@ -11,6 +11,6 @@ public interface MessagingAddress extends Data {
     
     StringResource address();
     
-    StringResource messagingType();
+    StringResource addressType();
     
 }

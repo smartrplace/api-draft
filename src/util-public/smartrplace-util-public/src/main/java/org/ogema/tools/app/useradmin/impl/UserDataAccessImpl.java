@@ -91,41 +91,41 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
     }
     
     @Override
-    public List<MessagingAddress> getMessagingAddresses(String userId, String messagingType) {
+    public List<MessagingAddress> getMessagingAddresses(String userId, String addressType) {
         ResourceList<MessagingAddress> addresses = getAddressList(userId);
         return addresses.getAllElements().stream()
-                .filter(a -> messagingType == null || messagingType.equalsIgnoreCase(a.messagingType().getValue()))
+                .filter(a -> addressType == null || addressType.equalsIgnoreCase(a.addressType().getValue()))
                 .collect(Collectors.toList());
     }
     
     @Override
-    public synchronized void addMessagingAddress(String userId, String messagingType, String address) {
-        if (userId == null || messagingType == null || address == null) {
+    public synchronized void addMessagingAddress(String userId, String addressType, String address) {
+        if (userId == null || addressType == null || address == null) {
             throw new IllegalArgumentException("null argument");
         }
-        if (getMessagingAddresses(userId, messagingType).stream()
+        if (getMessagingAddresses(userId, addressType).stream()
                 .filter(addr -> address.equals(addr.address().getValue())).findAny().isPresent()) {
             return;
         }
         @SuppressWarnings("unchecked")
         ResourceList<MessagingAddress> l = getAddressList(userId);
-        String resname = ResourceUtils.getValidResourceName(messagingType + "/" + address);
+        String resname = ResourceUtils.getValidResourceName(addressType + "/" + address);
         MessagingAddress newAddr = l.getSubResource(resname) != null
                 ? l.add() //name clash
                 : l.getSubResource(resname, MessagingAddress.class);
         newAddr.address().create();
-        newAddr.messagingType().create();
+        newAddr.addressType().create();
         newAddr.address().setValue(address);
-        newAddr.messagingType().setValue(messagingType);
+        newAddr.addressType().setValue(addressType);
         newAddr.activate(true);
     }
     
     @Override
-    public boolean removeMessagingAddress(String userId, String messagingType, String address) {
-        if (userId == null || messagingType == null || address == null) {
+    public boolean removeMessagingAddress(String userId, String addressType, String address) {
+        if (userId == null || addressType == null || address == null) {
             throw new IllegalArgumentException("null argument");
         }
-        Optional<MessagingAddress> addressRes = getMessagingAddresses(userId, messagingType).stream()
+        Optional<MessagingAddress> addressRes = getMessagingAddresses(userId, addressType).stream()
                 .filter(addr -> address.equals(addr.address().getValue())).findAny();
         addressRes.ifPresent(MessagingAddress::delete);
         return addressRes.isPresent();
