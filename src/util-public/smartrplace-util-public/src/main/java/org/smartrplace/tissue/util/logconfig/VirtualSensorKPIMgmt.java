@@ -51,7 +51,10 @@ import de.iwes.util.timer.AbsoluteTiming;
  * device handler is done via {@link #addVirtualDatapoint(List, String, Resource, long, boolean, boolean, List)}. In the
  * getAndConfigureValueResource method the actual creation of the virtual datapoint and the creation of the
  * SingleValueResource representing the virtual datapoint must be made. If the virtual sensor data shall be 
- * transferred to a superior via heartbeat-schedule this must also be registered here.<br>
+ * transferred to a superior via heartbeat-schedule this must also be registered here. Note that if a SingleValueResource
+ * is created and the path of this resource is requested via heartbeat by the server then no separate registration
+ * on the client side is necessary (but of course on the server). See ESE_ElConnBoxDeviceHandler (simplest)
+ * or DeviceHandlerMQTT_ElecConnBox as examples.<br>
  * For some virtual sensor types the datapoint creation and heartbeat-schedule registration can be done by static methods e.g. in this class. Currently there are only two types with
  * some options:<br>
  * - {@link #registerEnergySumDatapointOverSubPhasesFromDay(ElectricityConnection, AggregationMode, TimeseriesSimpleProcUtilBase, DatapointService, Datapoint)}<br>
