@@ -7,8 +7,10 @@ import org.ogema.devicefinder.api.Datapoint;
 
 public class VirtualSensorKPIDataBase {
 	public ResourceValueListener<EnergyResource> aggListener;
-	/** TS-ANY-Datapoint with location representing the input time series of the calculation of the virtual
-	 * sensor. Both evalDp and resourceDp have the same time series representing the virtual sensor.
+	/** TS-ANY-Datapoint providing the result timeseries for a virtual datapoint
+	 * The location of this datapoint should represent the input time series of the calculation of the virtual
+	 * with a pre and/or post fix for the calculation method.<br>
+	 * Both evalDp and resourceDp have the same time series representing the virtual sensor.
 	 */
 	public Datapoint evalDp;		
 	public Integer absoluteTiming;
