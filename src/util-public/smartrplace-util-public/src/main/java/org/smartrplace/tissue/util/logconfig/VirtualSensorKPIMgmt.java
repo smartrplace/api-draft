@@ -31,9 +31,17 @@ import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
  * device handler is done via {@link #addVirtualDatapoint(List, String, Resource, long, boolean, boolean, List)}. In the
  * getAndConfigureValueResource method the actual creation of the virtual datapoint and the creation of the
  * SingleValueResource representing the virtual datapoint must be made. If the virtual sensor data shall be 
- * transferred to a superior via heartbeat-schedule this must also be registered here. Note that if a SingleValueResource
+ * transferred to a superior via heartbeat-schedule this must also be registered here.<br>
+ * Important: Collecting gateways find devices in the serverMirror structure and process them via the DeviceHandler.
+ * So any virtual sensor for a device is generated on the collecting gateway, a transfer via heartbeat is
+ * not necessary. As the computing power on a collecting gateway is usually sufficient for several, but no
+ * a very large number of sub-gateways this is the preferred option. This also saves traffic via a mobile connection.
+ * For superior servers that do not activate sub gateway devices virtual sensor calculation shall take place on
+ * the gateway, data shall be transferred via heartbeat.<br>
+ * [Unsure as the registration is done by addVirtualDatapoint: Note that if a SingleValueResource
  * is created and the path of this resource is requested via heartbeat by the server then no separate registration
- * on the client side is necessary (but of course on the server). See GatewayDeviceHandler as latest example,
+ * on the client side is necessary (but of course on the server).]<br>
+ * See GatewayDeviceHandler as latest example,
  * also ESE_ElConnBoxDeviceHandler (simplest) or DeviceHandlerMQTT_ElecConnBox can be used.<br>
  * For some virtual sensor types the datapoint creation and heartbeat-schedule registration can be done by static methods e.g. in this class. Currently there are only two types with
  * some options:<br>

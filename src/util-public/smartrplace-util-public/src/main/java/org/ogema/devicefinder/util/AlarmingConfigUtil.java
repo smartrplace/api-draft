@@ -481,7 +481,7 @@ public class AlarmingConfigUtil {
 					continue; //should not occur
 				ReadOnlyTimeSeries ts = dp.getTimeSeries();
 				if(ts == null) {
-					appMan.getLogger().warn("No timeseries for datapoint configured for alarming:"+sens.getLocation());
+					appMan.getLogger().trace("No timeseries for datapoint configured for alarming:"+sens.getLocation());
 					continue;
 				}
 				try {

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
@@ -455,6 +456,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			return (ReadOnlyTimeSeries) resource;
 		if(resource instanceof SingleValueResource)
 			return ValueResourceHelper.getRecordedData((SingleValueResource) resource);
+		if(resource != null) {
+			System.out.println("is FloatResource:"+(resource instanceof FloatResource));
+		}
+			
 		return null;
 	}
 	@Override
