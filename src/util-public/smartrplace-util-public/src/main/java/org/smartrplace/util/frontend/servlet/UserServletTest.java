@@ -207,7 +207,7 @@ public abstract class UserServletTest extends HttpServlet {
     	}
     	try {
     		final String userName;
-    		if(userData != null)
+    		if(userData != null) {
     			userName = restAcc.authenticateToUser(req, resp, false, new LoginViaNaturalUserChecker() {
 					
 					@Override
@@ -218,7 +218,7 @@ public abstract class UserServletTest extends HttpServlet {
 						return false;
 					}
 				});
-    		else
+    		} else
     			userName = restAcc.authenticateToUser(req, resp, false);
  			if(userName == null) {
  				if(isTest)
