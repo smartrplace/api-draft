@@ -74,7 +74,7 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
             data.activate(false);
         }
         //Resource userDataRes = data.userData().addDecorator(userId, NaturalPerson.class);
-        Resource userDataRes = ResourceListHelper.getNamedElementFlex(userId, data.userData());
+        Resource userDataRes = ResourceListHelper.getOrCreateNamedElementFlex(userId, data.userData());
         userDataRes.create();
         data.userData().activate(false);
         userDataRes.activate(false);
