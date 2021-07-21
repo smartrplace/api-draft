@@ -25,12 +25,15 @@ import org.ogema.devicefinder.util.DeviceHandlerBase;
 import org.ogema.model.connections.ElectricityConnection;
 import org.ogema.recordeddata.DataRecorder;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtilBase;
 import org.slf4j.Logger;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
 
 import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.resource.ValueResourceHelper;
+import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 
 /** see {@link VirtualSensorKPIMgmt}
@@ -162,9 +165,28 @@ public abstract class VirtualSensorKPIMgmtBase<D extends Resource, S extends Sin
 			long intervalToStayBehindNow,
 			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
 			List<Datapoint> result) {
+		return addVirtualDatapointSingle(dpSource, newSubResName, device, intervalToStayBehindNow, registerGovernedSchedule,
+				registerRemoteScheduleViaHeartbeat, result, null);
+		
+	}
+	public VirtualSensorKPIDataBase addVirtualDatapointSingle(Datapoint dpSource,
+			//VirtualDatapointSetup setupProvider,
+			String newSubResName, D device,
+			long intervalToStayBehindNow,
+			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
+			List<Datapoint> result, Integer absoluteTiming) {
 		List<Datapoint> dpSources = Arrays.asList(new Datapoint[] {dpSource});
 		return addVirtualDatapoint(dpSources, newSubResName, device, intervalToStayBehindNow, registerGovernedSchedule,
-				registerRemoteScheduleViaHeartbeat, result);		
+				registerRemoteScheduleViaHeartbeat, result, absoluteTiming);		
+	}
+	public VirtualSensorKPIDataBase addVirtualDatapoint(List<Datapoint> dpSource,
+			//VirtualDatapointSetup setupProvider,
+			String newSubResName, D device,
+			long intervalToStayBehindNow,
+			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
+			List<Datapoint> result) {
+		return addVirtualDatapoint(dpSource, newSubResName, device, intervalToStayBehindNow, registerGovernedSchedule,
+				registerRemoteScheduleViaHeartbeat, result, null);
 	}
 	/**
 	 * 
@@ -182,7 +204,8 @@ public abstract class VirtualSensorKPIMgmtBase<D extends Resource, S extends Sin
 			String newSubResName, D device,
 			long intervalToStayBehindNow,
 			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
-			List<Datapoint> result) {
+			List<Datapoint> result,
+			Integer absoluteTiming) {
 
 		String sourceLocation;
 		//TODO: We should be able to just use dpSource.getLocation, but to change as little as possible we do it like this
@@ -237,8 +260,16 @@ if(Boolean.getBoolean("suppress.addSourceResourceListenerFloat"))
 return mapData;
 		
 		//TODO: We should add support also for other SingleValueResourceTypes
+		boolean useAlignedListenerNewVersion = (mapData.evalDp.getTimeSeries() instanceof ProcessedReadOnlyTimeSeries3)
+				&& (absoluteTiming != null);
 		for(Datapoint dp: dpSource) {
-			if((dp.getResource() instanceof FloatResource) && (destRes != null || destRes instanceof FloatResource))
+			if(useAlignedListenerNewVersion) {
+				if((dp.getResource() instanceof FloatResource) && (destRes != null || destRes instanceof FloatResource)) {
+					addLastCompleteValueFromScheduleToResource(
+							(FloatResource) dp.getResource(), (FloatResource) destRes, absoluteTiming, mapData);
+				}
+			}
+			else if((dp.getResource() instanceof FloatResource) && (destRes != null || destRes instanceof FloatResource))
 				addSourceResourceListenerFloat(mapData, (FloatResource) destRes, (FloatResource) dp.getResource(),
 						intervalToStayBehindNow);
 		}
@@ -250,17 +281,17 @@ return mapData;
 	/**
 	 * 
 	 * @param mapData
-	 * @param energyDailyRealAgg may be null for pure memory timeseries
+	 * @param destRes may be null for pure memory timeseries
 	 * @param sourceRes may not be null as the update function relies on a {@link ResourceValueListener}
 	 * @param intervalToStayBehindNow Sometimes the input data for the current time may not be available right away. In this
 	 * 		case we always stop the calculations a bit earlier then the current time, e.g. 15 minutes for a typical metering situation
 	 */
-	protected void addSourceResourceListenerFloat(VirtualSensorKPIDataBase mapData, FloatResource energyDailyRealAgg,
+	protected void addSourceResourceListenerFloat(VirtualSensorKPIDataBase mapData, FloatResource destRes,
 			FloatResource sourceRes, long intervalToStayBehindNow) {
-		mapData.aggListener = new ResourceValueListener<EnergyResource>() {
+		mapData.aggListener = new ResourceValueListener<FloatResource>() {
 			//long lastVal = 0;
 			@Override
-			public void resourceChanged(EnergyResource resource) {
+			public void resourceChanged(FloatResource resource) {
 logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocation());
 				//we just have to perform a read to trigger an update
 				long nowReal = dpService.getFrameworkTime();
@@ -285,10 +316,10 @@ logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocatio
 logger.info("   In EnergyServer energyDaily onValueChanged: Found new vals:"+svs.size()+" Checked from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal));
 if(!svs.isEmpty())
 logger.info("   Last value written at: "+StringFormatHelper.getFullTimeDateInLocalTimeZone(svs.get(svs.size()-1).getTimestamp()));
-				if(!svs.isEmpty() && (energyDailyRealAgg != null))
-					energyDailyRealAgg.setValue(svs.get(svs.size()-1).getValue().getFloatValue());
-if((energyDailyRealAgg != null))
-logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\n"+
+				if(!svs.isEmpty() && (destRes != null))
+					destRes.setValue(svs.get(svs.size()-1).getValue().getFloatValue());
+if((destRes != null))
+logger.info("OnValueChanged Summary for "+destRes.getLocation()+":\r\n"+
 						(lastSv!=null?"Found existing last SampledValue in SlotsDB at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastSv.getTimestamp()):"")+
 						",\r\n Calculated values for DP"+mapData.evalDp.getLocation()+" from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal+1)+" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(now+1)+
 						",\r\n Found "+svs.size()+" new values. Wrote into "+mapData.evalDp.getLocation()); //+
@@ -296,6 +327,42 @@ logger.info("OnValueChanged Summary for "+energyDailyRealAgg.getLocation()+":\r\
 			}
 		};
 		sourceRes.addValueListener(mapData.aggListener, true);	
+	}
+	
+	protected void addLastCompleteValueFromScheduleToResource(FloatResource timerByValueChangedSource,
+			FloatResource destRes, int absoluteTiming,
+			VirtualSensorKPIDataBase mapData) {
+		if(destRes == null)
+			return;
+		mapData.aggListener = new ResourceValueListener<FloatResource>() {
+			//long lastVal = 0;
+			@Override
+			public void resourceChanged(FloatResource resource) {
+logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocation());
+				
+				long nowReal = dpService.getFrameworkTime();
+				long nowItvStart = AbsoluteTimeHelper.getIntervalStart(nowReal, absoluteTiming);
+				
+				long lastWritten = destRes.getLastUpdateTime();
+
+				//If we have already written once during the current interval then we do not have
+				//to write again
+				if(lastWritten > nowItvStart)
+					return;
+
+				SampledValue lastSv = null;
+				ReadOnlyTimeSeries accTs = mapData.evalDp.getTimeSeries();
+				lastSv = accTs.getPreviousValue(nowItvStart);
+				if(lastSv == null)
+					return;
+
+				float value = lastSv.getValue().getFloatValue();
+				if(Float.isNaN(value))
+					return;
+				ValueResourceHelper.setCreate(destRes, value);
+			}
+		};
+		timerByValueChangedSource.addValueListener(mapData.aggListener, true);	
 	}
 	
 	/** Also updates the memory timeseries of datapoint as any read will update anyways

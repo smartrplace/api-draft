@@ -296,10 +296,10 @@ return mapData;
 	 */
 	protected void addSourceResourceListenerFloat(VirtualSensorKPIDataBase mapData, FloatResource energyDailyRealAgg,
 			FloatResource sourceRes, long intervalToStayBehindNow) {
-		mapData.aggListener = new ResourceValueListener<EnergyResource>() {
+		mapData.aggListener = new ResourceValueListener<FloatResource>() {
 			//long lastVal = 0;
 			@Override
-			public void resourceChanged(EnergyResource resource) {
+			public void resourceChanged(FloatResource resource) {
 logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocation());
 				//we just have to perform a read to trigger an update
 				long nowReal = dpService.getFrameworkTime();
