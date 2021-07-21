@@ -19,6 +19,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
+import de.iwes.util.resourcelist.ResourceListHelper;
+
 /**
  *
  * @author jlapp
@@ -71,7 +73,8 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
             data = appman.getResourceManagement().createResource(TOPLEVELNAME, UserAdminData.class);
             data.activate(false);
         }
-        Resource userDataRes = data.userData().addDecorator(userId, NaturalPerson.class);
+        //Resource userDataRes = data.userData().addDecorator(userId, NaturalPerson.class);
+        Resource userDataRes = ResourceListHelper.getNamedElementFlex(userId, data.userData());
         userDataRes.create();
         data.userData().activate(false);
         userDataRes.activate(false);
