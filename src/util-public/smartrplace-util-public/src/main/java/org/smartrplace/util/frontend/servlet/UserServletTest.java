@@ -60,8 +60,7 @@ public abstract class UserServletTest extends HttpServlet {
     	if(user == null) return null;
     	//TODO: Perform mapping from REST user to natural user
     	//Perform mapping from REST user to natural user
- System.out.println("Detected raw login of user "+user);
- if(user.equals(DEFAULT_LOGIN_USER_NAME)) {
+        if(user.equals(DEFAULT_LOGIN_USER_NAME)) {
         	user = req.getParameter("user");
         } else {
         	if(user.endsWith("_rest"))
