@@ -267,13 +267,13 @@ public class UserServlet extends HttpServlet {
 			out = result.resultArr.toString();
 		}
 		resp.getWriter().write(out);
-		if(logger.isTraceEnabled()) {
+		if(logger.isDebugEnabled()) {
 			String fullURL = req.getRequestURL().toString();
 			String paramStr = req.getQueryString();
 			if(paramStr != null)
-				logger.trace("Finished GET for:"+fullURL+"?"+paramStr);
+				logger.debug("Finished GET for:"+fullURL+"?"+paramStr);
 			else
-				logger.trace("Finished GET for:"+fullURL);
+				logger.debug("Finished GET for:"+fullURL);
 			logger.trace("GET Response:"+out);
 		}
 		resp.setStatus(200);
@@ -577,12 +577,12 @@ public class UserServlet extends HttpServlet {
 	/** SubUrl must end on '/' */
 	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap, String servletSubUrl) {
 		String fullURL = req.getRequestURL().toString();
-		if(logger.isTraceEnabled())  {
+		if(logger.isDebugEnabled())  {
 			String paramStr = req.getQueryString();
 			if(paramStr != null)
-				logger.trace("Starting GET for(A):"+fullURL+"?"+paramStr);
+				logger.debug("Starting GET for(A):"+fullURL+"?"+paramStr);
 			else
-				logger.trace("Starting GET for(A):"+fullURL);
+				logger.debug("Starting GET for(A):"+fullURL);
 		}
 		int idx = fullURL.indexOf(servletSubUrl);
 		String[] subURL;
@@ -613,12 +613,12 @@ public class UserServlet extends HttpServlet {
 			return;
 		}
 		String fullURL = req.getRequestURL().toString();
-		if(logger.isTraceEnabled())  {
+		if(logger.isDebugEnabled())  {
 			String paramStr = req.getQueryString();
 			if(paramStr != null)
-				logger.trace("Starting GET for:"+fullURL+"?"+paramStr);
+				logger.debug("Starting GET for:"+fullURL+"?"+paramStr);
 			else
-				logger.trace("Starting GET for:"+fullURL);
+				logger.debug("Starting GET for:"+fullURL);
 		}
 		int idx = fullURL.indexOf("/userdata/");
 		String[] subURL;
