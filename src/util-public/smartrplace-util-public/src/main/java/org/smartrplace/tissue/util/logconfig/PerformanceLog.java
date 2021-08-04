@@ -50,7 +50,8 @@ public abstract class PerformanceLog {
 			zeroCounter++;
 			zeroCounterSinceReport++;
 			if(zeroCounterSinceReport > ZERO_COUNTER_REPORT_INTERVAL) {
-				System.out.println("   ZERO-DURATIONS for "+id+":"+zeroCounter);
+				if(Boolean.getBoolean("evaldebug0")||Boolean.getBoolean("evaldebug"))
+					System.out.println("   ZERO-DURATIONS for "+id+":"+zeroCounter);
 				zeroCounterSinceReport = 0;
 			}
 			if(!Boolean.getBoolean("org.smartrplace.tissue.util.logconfig.logzero"))

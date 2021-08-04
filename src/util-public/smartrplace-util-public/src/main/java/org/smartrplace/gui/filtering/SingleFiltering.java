@@ -308,9 +308,12 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 				lastOptionsUpdate = now;
 			}
 		}
-		if (saveOptionMode == OptionSavingMode.PER_USER) {
+		if(saveOptionMode == OptionSavingMode.PER_USER) {
 			String user = GUIUtilHelper.getUserLoggedIn(req);
 			GenericFilterOption<A> presel = getFilterOption(preSelectionPerUser.get(user));
+			selectItem(presel, req);
+		} else if(saveOptionMode == OptionSavingMode.GENERAL) {
+			GenericFilterOption<A> presel = getFilterOption(preSelectionGeneralEnglish);
 			selectItem(presel, req);
 		}
 	}

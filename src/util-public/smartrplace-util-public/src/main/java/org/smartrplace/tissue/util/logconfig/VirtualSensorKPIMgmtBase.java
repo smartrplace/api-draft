@@ -238,12 +238,12 @@ public abstract class VirtualSensorKPIMgmtBase<D extends Resource, S extends Sin
 			mapData.resourceDp.setTimeSeries(accTs);
 			if(result != null)
 				result.add(mapData.resourceDp);
-			logger.info("   Starting Accumlated full for:"+destRes.getLocation()+ " DP size:"+accTs.size());
+			logger.trace("   Starting Accumlated full for:"+destRes.getLocation()+ " DP size:"+accTs.size());
 			long now = dpService.getFrameworkTime();
 			SampledValue lastVal = accTs.getPreviousValue(now+1);
-logger.info("   Starting Accumlated found previous accFull DP value: "+
+logger.trace("   Starting Accumlated found previous accFull DP value: "+
 ((lastVal != null)?StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal.getTimestamp()):"NONE"));
-logger.info("   Starting Accumlated full Recstor size(3):"+accTs.size());
+logger.trace("   Starting Accumlated full Recstor size(3):"+accTs.size());
 		} else if(result != null)
 			result.add(mapData.evalDp);
 		
