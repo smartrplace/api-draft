@@ -79,4 +79,6 @@ public interface TemperatureControlBase {
 	 */
 	default boolean setOperationMode(int state) {return false;}
 	default Integer getOperationMode() {return null;}
+	default Boolean getSwingMode() {return null;}
+	default boolean setSwingMode(boolean newState) {return false;}
 }
