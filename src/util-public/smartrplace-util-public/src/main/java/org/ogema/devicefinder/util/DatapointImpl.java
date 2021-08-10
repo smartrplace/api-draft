@@ -194,14 +194,40 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			return result;
 		String subRoom = getSubRoomLocation(locale, null);
 		String stdLabel = getDeviceLabel(locale, getRoomName(locale), subRoom, isLocal()?null:getGatewayId());
-		if(typeName.isEmpty()) {
-			
-		}
-		if((subRoom != null) && (getGaroDataType() == null || getGaroDataType().equals(GaRoDataType.Unknown)) && typeName.isEmpty())
+		if((subRoom != null) && isGaRoInvalid() && typeName.isEmpty()) {
 			return stdLabel;
+		}
+		if(subRoom == null && typeName.isEmpty() && isGaRoInvalid()) {
+			//try to generate typeName from location
+			String[] els = location.split("/");
+			int idx = els.length-1;
+			while((idx > 0) && els[idx].equals("reading"))
+				idx--;
+			String type;
+			if(els[idx].length() > 27) {
+				type = els[idx].substring(0, 25);
+				int lastSepIdx = Math.max(type.lastIndexOf('_'), type.lastIndexOf('-'));
+				lastSepIdx = Math.max(lastSepIdx, getLastUpperCaseIndex(type));
+				if(lastSepIdx > 12)
+					type.substring(0, lastSepIdx);
+			} else
+				type = els[idx];
+			setDataTypeName(type, null);
+		}
 		stdLabel += "-"+getTypeName(locale);
-
 		return stdLabel;
+	}
+	
+	public static int getLastUpperCaseIndex(String in) {
+		for(int i=in.length()-1; i>=0; i--) {
+			if(in.charAt(i)>='A' && in.charAt(i)<='Z')
+				return i;
+		}
+		return -1;
+	}
+	
+	protected boolean isGaRoInvalid() {
+		return (getGaroDataType() == null || getGaroDataType().equals(GaRoDataType.Unknown));		
 	}
 	
 	public static String getDeviceLabel(InstallAppDevice appDev, OgemaLocale locale, DatapointService dpService,
