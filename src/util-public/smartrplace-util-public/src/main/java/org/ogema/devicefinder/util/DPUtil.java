@@ -74,7 +74,7 @@ public class DPUtil {
 			dp = new DatapointImpl((TimeSeriesDataImpl)tsd);
 		else {
 			dp = dpService.getDataPointStandard(tsd.label(null));
-			dp.setTimeSeries(((TimeSeriesDataImpl)tsd).getTimeSeries(), false);
+			dp.setTimeSeries(((TimeSeriesDataImpl)tsd).getTimeSeries(), true);
 		}
 		return dp;
 	}

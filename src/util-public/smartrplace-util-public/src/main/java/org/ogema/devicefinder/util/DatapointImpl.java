@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
-import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
@@ -195,6 +194,9 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			return result;
 		String subRoom = getSubRoomLocation(locale, null);
 		String stdLabel = getDeviceLabel(locale, getRoomName(locale), subRoom, isLocal()?null:getGatewayId());
+		if(typeName.isEmpty()) {
+			
+		}
 		if((subRoom != null) && (getGaroDataType() == null || getGaroDataType().equals(GaRoDataType.Unknown)) && typeName.isEmpty())
 			return stdLabel;
 		stdLabel += "-"+getTypeName(locale);
@@ -460,12 +462,17 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	}
 	@Override
 	public void setTimeSeries(ReadOnlyTimeSeries tseries) {
+		//If the timeseriesID is used at all we have to make sure it fits the actual timeseries when changed
+		if(timeSeriesID != null) {
+			setTimeSeries(tseries, true);
+			return;
+		}
 		this.tseries = tseries;
 	}
 	
 	@Override
 	public void setTimeSeries(ReadOnlyTimeSeries tseries, boolean publishViaServlet) {
-		setTimeSeries(tseries);
+		this.tseries = tseries;
 		if(publishViaServlet) {
 			/** The label of the time series given to UserServletUtil/TimeSeriesServlet must be equal to
 			 * the timeseriesID. So we cannot use the label when using the timeseries later on
@@ -627,5 +634,17 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 				result.end = intv.end;
 		}
 		return result;
+	}
+	
+	public boolean equals(Object obj) {
+		if(!(obj instanceof Datapoint))
+			return false;
+		Datapoint dp2 = (Datapoint) obj;
+		return (location.equals(dp2.getLocation()));
+	};
+	
+	@Override
+	public int hashCode() {
+		return location.hashCode();
 	}
 }

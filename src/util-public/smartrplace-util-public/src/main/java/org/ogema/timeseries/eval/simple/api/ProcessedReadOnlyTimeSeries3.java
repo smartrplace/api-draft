@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.ogema.core.channelmanager.measurements.FloatValue;
+import org.ogema.core.channelmanager.measurements.Quality;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
@@ -17,6 +19,8 @@ import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
+import org.ogema.timeseries.eval.simple.mon3.ProcTs3PersistentData;
+import org.ogema.timeseries.eval.simple.mon3.SampledValueSimple;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
 
@@ -45,6 +49,11 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	
 	public abstract Long getFirstTimeStampInSource();
 
+	/**Overwrite this to load data into the timeseries initially, e.g. by reading
+	 * from a file
+	 */
+	public void loadInitData() {}
+	
 	/** Implement one of these three OR use constructor that sets input type SINGLE directly*/
 	public Datapoint getInputDp() {return dpInSingle;}
 	protected List<Datapoint> getInputDps() {return null;}
@@ -297,5 +306,38 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	};
 	public Collection<Datapoint> getAllDependentTimeseries() {
 		return dependentTimeseries.values();
-	};
+	}
+
+	public void initValuesFromFile(ProcTs3PersistentData fromFile) {
+		values = new ArrayList<>();
+		for(SampledValueSimple simple: fromFile.values) {
+			values.add(new SampledValue(new FloatValue(simple.v), simple.t, Quality.GOOD));
+		}
+		lastEndTime = fromFile.lastEndTime;
+		knownStart = fromFile.knownStart;
+		knownEnd = fromFile.knownEnd;
+		firstValueInList = fromFile.firstValueInList;
+		lastValueInList = fromFile.lastValueInList;		
+	}
+	
+	public ProcTs3PersistentData getPersistentData() {
+		if(values == null)
+			return null;
+		ProcTs3PersistentData result = new ProcTs3PersistentData();
+		int size = values.size();
+		result.values = new SampledValueSimple[size];
+		for(int i=0; i<size; i++) {
+			SampledValue sv = values.get(i);
+			result.values[i] = new SampledValueSimple();
+			result.values[i].t = sv.getTimestamp();
+			result.values[i].v = sv.getValue().getFloatValue();
+		}
+		result.lastEndTime = lastEndTime;
+		result.knownStart = knownStart;
+		result.knownEnd = knownEnd;
+		result.firstValueInList = firstValueInList;
+		result.lastValueInList = lastValueInList;
+		result.dpLocation = datapointForChangeNotification.getLocation();
+		return result;
+	}
 }

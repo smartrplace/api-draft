@@ -27,6 +27,8 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 	protected long lastStructureUpdate = -1;
 	protected boolean initStructureRequestSent = false;
 	
+	public long lastStructUpdateReceived = -1;
+	
 	protected Long autoStructureUpdateRate = Long.getLong("org.smartrplace.apps.hw.install.prop.autostructureupdaterate");
 	public void setAutoStructureUpdateRate(long interval) {
 		this.autoStructureUpdateRate = interval;
@@ -261,6 +263,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			String configJsonReceived, boolean connectingAsClient) {
 		//configJsonReceived is null if no struct update is transmitted
 		if(configJsonReceived != null) {
+			lastStructUpdateReceived = dpService.getFrameworkTime();
 			ViaHeartbeatRemoteTransferList tlist = JSONManagement.importFromJSON(configJsonReceived,
 					ViaHeartbeatRemoteTransferList.class);
 			if(tlist != null) {
@@ -303,17 +306,7 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 				allValueUpdatePending = true;
 				//ViaHeartbeatUtil.updateTransferRegistration(commPartnerId, this, dpService, connectingAsClient);
 			} else  {
-				List<OpenDpRequest> all = new ArrayList<>(openDpRequests.values());
-				for(OpenDpRequest openReq: all) {
-					Datapoint dp = getDatapointForRemoteRequest(openReq.dpIdFromRemote, this.connectingAsClient, dpService);
-					if(dp == null) {
-						continue;
-					}
-					if(openReq.isToSend)
-						processDpFromAcceptorToCreator(dp, openReq.key);
-					else
-						processDpFromCreatorToAcceptor(dp, openReq.key);
-				}
+				checkOpenRequests();
 			}
 		} //else
 //System.out.println("   Received Structure update tlist == null");			
@@ -345,7 +338,22 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 			}
 			((StringProvider)prov).received(recv.getValue(), now);
 		}
-	}		
+	}
+	
+	public void checkOpenRequests() {
+		List<OpenDpRequest> all = new ArrayList<>(openDpRequests.values());
+		for(OpenDpRequest openReq: all) {
+			Datapoint dp = getDatapointForRemoteRequest(openReq.dpIdFromRemote, this.connectingAsClient, dpService);
+			if(dp == null) {
+				continue;
+			}
+			if(openReq.isToSend)
+				processDpFromAcceptorToCreator(dp, openReq.key);
+			else
+				processDpFromCreatorToAcceptor(dp, openReq.key);
+		}		
+	}
+	
 	/** To be called by heartbeat to obtain data to send*/
 	public ProcessRemoteDataResult getRemoteData(boolean connectingAsClient) {
 

@@ -40,6 +40,11 @@ public abstract class TimeseriesSetProcSingleToSingle3 implements TimeseriesSetP
 	/** Overwrite this if no input timeseries is provided*/
 	protected Long getFirstTimestampInSource() {return null;}
 		
+	/**Overwrite this to load data into the timeseries initially, e.g. by reading
+	 * from a file
+	 */
+	protected void loadInitData(Datapoint dp) {}
+	
 	//protected TimeSeriesNameProvider nameProvider() {return null;}
 	//protected abstract AggregationMode getMode(String tsLabel);
 	protected final String labelPostfix;
@@ -107,6 +112,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()
 		String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
 		Map<String, Datapoint> deps = addDependetTimeseries(tsdi);
 		List<Datapoint> input = Arrays.asList(new Datapoint[] {tsdi});
+		final Datapoint newtsdi;
 		ProcessedReadOnlyTimeSeries3 resultTs = new ProcessedReadOnlyTimeSeries3(tsdi, deps) {
 			@Override
 			protected List<SampledValue> getResultValues(ReadOnlyTimeSeries timeSeries, long start,
@@ -129,6 +135,12 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()
 			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
 				TimeseriesSetProcSingleToSingle3.this.alignUpdateIntervalFromSource(updateInterval);
 			}
+
+			@Override
+			public void loadInitData() {
+				TimeseriesSetProcSingleToSingle3.this.loadInitData(datapointForChangeNotification);
+			}
+			
 			@Override
 			protected List<SampledValue> getResultValuesMulti(List<ReadOnlyTimeSeries> timeSeries,
 					long start, long end, AggregationMode mode) {
@@ -143,7 +155,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Calculate in "+dpLabel()
 				return getFirstTsInSource(input);
 			}
 		};
-		Datapoint newtsdi = getOrUpdateTsDp(location, resultTs , dpService);
+		newtsdi = getOrUpdateTsDp(location, resultTs , dpService);
 		if(registersTimedJob) {
 			//throw new UnsupportedOperationException("Own TimedJob for Single2Single not implemented yet!");
 			TimeseriesSetProcMultiToSingle3.registerTimedJob(resultTs, input, resultTs.resultLabel(),

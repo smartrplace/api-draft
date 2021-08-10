@@ -49,6 +49,11 @@ public abstract class TimeseriesSetProcMultiToSingle3 implements TimeseriesSetPr
 	/** change startTime and endTime of parameter if necessary*/
 	protected abstract void alignUpdateIntervalFromSource(DpUpdated updateInterval);
 	
+	/**Overwrite this to load data into the timeseries initially, e.g. by reading
+	 * from a file
+	 */
+	protected void loadInitData(Datapoint dp) {}
+	
 	/** Update mode regarding interval propagation and regarding singleInput.<br>
 	 * Note that from mode 2 on any change in the input data triggers a recalculation of the output data<br>
 	 * !! Note also that this is set for the entire processor, so usually for your instance of {@link TimeseriesSimpleProcUtil3} !!
@@ -139,6 +144,12 @@ public abstract class TimeseriesSetProcMultiToSingle3 implements TimeseriesSetPr
 			protected void alignUpdateIntervalFromSource(DpUpdated updateInterval) {
 				TimeseriesSetProcMultiToSingle3.this.alignUpdateIntervalFromSource(updateInterval);
 			}
+			
+			@Override
+			public void loadInitData() {
+				TimeseriesSetProcMultiToSingle3.this.loadInitData(datapointForChangeNotification);
+			}
+			
 			@Override
 			protected List<SampledValue> getResultValuesMulti(List<ReadOnlyTimeSeries> timeSeries,
 					long start, long end, AggregationMode mode) {
@@ -285,10 +296,14 @@ if(tsSingleLog != null) tsSingleLog.logEvent((endOfCalc-startOfCalc), "Calculati
 	protected static void updateTimeseries(ProcessedReadOnlyTimeSeries3 ts, long now) {
 		long start;
 		if(ts.getLastEndTime() <= 0) {
-			Long startRaw = ts.getFirstTimeStampInSource();
-			if(startRaw == null)
-				start = now;
-			else start = startRaw;
+			ts.loadInitData();
+			if(ts.getLastEndTime() <= 0) {
+				Long startRaw = ts.getFirstTimeStampInSource();
+				if(startRaw == null)
+					start = now;
+				else start = startRaw;
+			} else
+				start = ts.getLastEndTime();
 		} else
 			start = ts.getLastEndTime();
 		ts.updateValuesStoredAligned(start, now, false);		

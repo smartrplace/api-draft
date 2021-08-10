@@ -9,11 +9,16 @@ import org.smartrplace.apps.hw.install.prop.ViaHeartbeartOGEMAInstanceDpTransfer
 import org.smartrplace.gui.tablepages.ObjectGUITablePageNamed;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
+import de.iwes.util.format.StringFormatHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
+import de.iwes.widgets.html.form.button.Button;
+import de.iwes.widgets.html.form.label.Label;
 
+@SuppressWarnings("serial")
 public class OpenRequestTable extends ObjectGUITablePageNamed<OpenDpRequest, Resource> {
 	public static final long DEFAULT_POLL_RATE = 5000;
 
@@ -34,6 +39,30 @@ public class OpenRequestTable extends ObjectGUITablePageNamed<OpenDpRequest, Res
 	@Override
 	protected String getHeader(OgemaLocale locale) {
 		return "Open Datapoint Requests";
+	}
+	
+	@Override
+	public void addWidgetsAboveTable() {
+		super.addWidgetsAboveTable();
+		Button checkForNewDatapoints = new Button(page, "checkForNewDpsBut", "Check for new datapoints to resolve open requests") {
+			@Override
+			public void onPOSTComplete(String data, OgemaHttpRequest req) {
+				hbMan.checkOpenRequests();
+			}
+		};
+		
+		Label lastStructUpdRecvLabel = new Label(page, "lastStructUpdR") {
+			@Override
+			public void onGET(OgemaHttpRequest req) {
+				setText(StringFormatHelper.getFullTimeDateInLocalTimeZone(hbMan.lastStructUpdateReceived), req);
+			}
+		};
+		lastStructUpdRecvLabel.setDefaultPollingInterval(DEFAULT_POLL_RATE);
+		
+		StaticTable topTable = new StaticTable(1, 4);
+		topTable.setContent(0, 0, checkForNewDatapoints).setContent(0, 1, "Last struct-update received:").setContent(0, 2, lastStructUpdRecvLabel);
+		
+		page.append(topTable);
 	}
 	
 	@Override

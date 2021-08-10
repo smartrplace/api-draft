@@ -105,7 +105,12 @@ public class TimedJobMemoryData {
 		long lastFreeTime = lastRunStart - lastRunEnd;
 		freeTimeCounter += lastFreeTime;
 		isRunning = true;
-		prov.execute(lastRunStart, this);
+		try {
+			prov.execute(lastRunStart, this);
+		} catch(Exception e) {
+			appMan.getLogger().warn("Exception in provider "+prov.id(), e);
+			e.printStackTrace();
+		}
 		isRunning = false;
 		ValueResourceHelper.setCreate(jobData.logResource.jobIdxStarted(), res.persistentIndex().getValue());
 		lastRunEnd = appMan.getFrameworkTime();

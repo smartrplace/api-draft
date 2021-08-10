@@ -109,7 +109,7 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 		return getClass().getSimpleName();
 	};
 	
-	private List<SampledValue> values = null;
+	protected List<SampledValue> values = null;
 	//For Debugging only!
 	public List<SampledValue> getCurrentValues() {
 		return values;

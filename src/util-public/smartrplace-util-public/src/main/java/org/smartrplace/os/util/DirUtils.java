@@ -62,4 +62,16 @@ public class DirUtils {
 			return Paths.get(path);
 		}
 	}
+	
+	public static String getValidFilename(String in) {
+		return getValidFilename(in, 250);
+	}
+	public static String getValidFilename(String in, int sizeLimit) {
+		String result;
+		if(in.length() > sizeLimit) {
+			result = "H"+in.hashCode()+in.substring(0, 1)+in.substring(sizeLimit-1, sizeLimit);
+		} else 
+			result = in.replaceAll("[\\\\/:*?\"<>|]", "_");
+		return result;
+	}
 }
