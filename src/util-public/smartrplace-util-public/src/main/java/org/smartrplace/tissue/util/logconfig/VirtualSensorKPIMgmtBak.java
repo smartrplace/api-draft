@@ -28,7 +28,6 @@ import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtil;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSimpleProcUtilBase;
-import org.ogema.timeseries.eval.simple.mon3.TimeseriesSimpleProcUtil3;
 import org.slf4j.Logger;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatSchedules;
 

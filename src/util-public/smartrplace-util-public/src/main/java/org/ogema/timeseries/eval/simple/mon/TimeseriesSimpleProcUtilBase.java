@@ -15,7 +15,6 @@ import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
-import org.ogema.timeseries.eval.simple.mon3.TimeseriesSetProcMultiToSingle3;
 import org.smartrplace.gateway.device.MemoryTimeseriesPST;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog.GwSubResProvider;
@@ -35,7 +34,7 @@ public abstract class TimeseriesSimpleProcUtilBase {
 		this.appMan = appMan;
 		this.dpService = dpService;
 		
-		TimeseriesSetProcMultiToSingle.tsSingleLog = TimeseriesSetProcMultiToSingle3.tsSingleLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle3.class.getName()+"_TSI",
+		TimeseriesSetProcMultiToSingle.tsSingleLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle.class.getName()+"_TSI",
 				new GwSubResProvider() {
 					
 					@Override
@@ -48,7 +47,7 @@ public abstract class TimeseriesSimpleProcUtilBase {
 						return device.pstMultiToSingleCounter();
 					}
 				});
-		TimeseriesSetProcMultiToSingle.aggregateLog = TimeseriesSetProcMultiToSingle3.aggregateLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle3.class.getName()+"_AGG",
+		TimeseriesSetProcMultiToSingle.aggregateLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle.class.getName()+"_AGG",
 				new GwSubResProvider() {
 					
 					@Override

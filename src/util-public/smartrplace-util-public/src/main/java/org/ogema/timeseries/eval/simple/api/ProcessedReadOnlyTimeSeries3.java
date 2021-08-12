@@ -19,8 +19,6 @@ import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
-import org.ogema.timeseries.eval.simple.mon3.ProcTs3PersistentData;
-import org.ogema.timeseries.eval.simple.mon3.SampledValueSimple;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
 
@@ -267,6 +265,8 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	}
 
 	public DatapointImpl getResultSeriesDP(DatapointService dpService, String location) {
+		if(datapointForChangeNotification != null)
+			return (DatapointImpl) datapointForChangeNotification;
 		DatapointImpl result;
 		if(location != null) {
 			result = (DatapointImpl) dpService.getDataPointStandard(location);

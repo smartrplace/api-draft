@@ -55,6 +55,9 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	protected final ApplicationManager appMan;
 
 	public static final Logger log = LoggerFactory.getLogger(TimeSeriesServlet.class);
+
+	/** Distance for last value after which interpolation will not take place */
+	public static final long ACCEPTED_PREVIOUS_VALUE_DISTANCE_INTERPOLATED = 2*TimeProcUtil.DAY_MILLIS;
 	public TimeSeriesServlet(ApplicationManager appMan) {
 		this.appMan = appMan;
 	}
@@ -171,10 +174,12 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			startFloat1 = TimeProcUtil.getInterpolatedValue(ts, start);
 			endFloat1 = TimeProcUtil.getInterpolatedValue(ts, end);			
 		}
-		if((!interpolate) || Float.isNaN(startFloat1) || Float.isNaN(endFloat1)) {
-			long ACCEPTED_PREVIOUS_VALUE_DISTANCE = AbsoluteTimeHelper.getStandardInterval(intervalType)/2;
-			SampledValue startval = ts.getPreviousValue(start);
-			if(startval == null || (start - startval.getTimestamp() > ACCEPTED_PREVIOUS_VALUE_DISTANCE)) { //ACCEPTED_PREVIOUS_VALUE_DISTANCE_FOR_DAY_EVAL)) {
+		SampledValue startval = ts.getPreviousValue(start);
+		long startDistance = startval==null?Long.MAX_VALUE:(start - startval.getTimestamp());
+		long specificAcceptedDistance = AbsoluteTimeHelper.getStandardInterval(intervalType)/2;
+		if((!interpolate) || Float.isNaN(startFloat1) || Float.isNaN(endFloat1) ||
+				(!allowInterpolation(startDistance, intervalType, specificAcceptedDistance))) {
+			if(startval == null || (startDistance > specificAcceptedDistance)) { //ACCEPTED_PREVIOUS_VALUE_DISTANCE_FOR_DAY_EVAL)) {
 				return Float.NaN; //-1
 			}
 			SampledValue endval = ts.getPreviousValue(end);
@@ -195,6 +200,15 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			
 		return endFloat - startFloat;
 	}
+	
+	public static boolean allowInterpolation(long lastValDistance, int intervalType, long specificAcceptedDistance) {
+		if(lastValDistance < ACCEPTED_PREVIOUS_VALUE_DISTANCE_INTERPOLATED)
+			return true;
+		if(lastValDistance < specificAcceptedDistance)
+			return true;
+		return false;
+	}
+	
 	/** This method is only applicable for AggregationMode.Meter2Meter*/
 	public static float getDiffForDayOrLast24(long timeStamp, ReadOnlyTimeSeries ts,
 			ApplicationManager appMan) {

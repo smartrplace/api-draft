@@ -1,4 +1,4 @@
-package org.ogema.timeseries.eval.simple.mon3;
+package org.ogema.timeseries.eval.simple.api;
 
 public class ProcTs3PersistentData {
 	public SampledValueSimple[] values;

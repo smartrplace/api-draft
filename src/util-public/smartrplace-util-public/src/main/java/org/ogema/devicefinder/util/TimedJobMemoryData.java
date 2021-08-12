@@ -63,8 +63,8 @@ public class TimedJobMemoryData {
 	protected volatile long lastRunStart = -1;
 	protected volatile long lastRunEnd;
 	
-	protected volatile long lastRunDuration = 0;
-	protected volatile long maxRunDuration = 0;
+	protected volatile long lastRunDuration = -1;
+	protected volatile long maxRunDuration = -1;
 	protected volatile long nextScheduledStart = 0;
 	
 	protected volatile long executionTimeCounter = 0;

@@ -1338,7 +1338,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 						time = StringFormatHelper.getFormattedFutureValue(appMan, value);
 					break;
 				case 4:
-					if(value <= 0) time = "not set";
+					if(value < 0) time = "not set";
 					else
 						time = StringFormatHelper.getFormattedValue(value);
 					break;
