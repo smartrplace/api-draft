@@ -23,6 +23,7 @@ import org.ogema.devicefinder.api.AlarmingService;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.model.devices.sensoractordevices.SingleSwitchBox;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
 import org.ogema.model.extended.alarming.AlarmGroupData;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
@@ -157,7 +158,17 @@ public class AlarmingConfigUtil {
 	public static void copySettings(InstallAppDevice source, InstallAppDevice destination, ApplicationManager appMan,
 			boolean setSendAlarms) {
 		for(AlarmConfiguration alarmSource: source.alarms().getAllElements()) {
-			SingleValueResource destSens = ResourceHelper.getRelativeResource(source.device(),alarmSource.sensorVal(), destination.device());
+			//TODO: Make this more general
+			SingleValueResource destSens = null;
+			if((source.device() instanceof SingleSwitchBox) && (source.device().getLocation().startsWith("virtSwitchBoxes"))) {
+				String sourceLoc = alarmSource.sensorVal().getLocation();
+				if(sourceLoc.endsWith("stateControl"))
+					destSens = ((SingleSwitchBox)destination.device()).onOffSwitch().stateControl();
+				else if(sourceLoc.endsWith("stateFeedback"))
+					destSens = ((SingleSwitchBox)destination.device()).onOffSwitch().stateFeedback();
+			}
+			if(destSens == null)
+				destSens = ResourceHelper.getRelativeResource(source.device(),alarmSource.sensorVal(), destination.device());
 			if(destSens == null || (!destSens.exists())) {
 				//appMan.getLogger().warn("Alarming "+alarmSource.sensorVal().getLocation()+" not found as relative path for: "+destination.device().getLocation());
 				//throw new IllegalStateException("Alarming "+alarmSource.sensorVal().getLocation()+" not found as relative path for: "+destination.device().getLocation());
