@@ -162,7 +162,7 @@ public interface DatapointService {
 	
 	TimedJobMgmtService timedJobService();
 	Collection<MessageTransport> messageTransportServices();
-	MessageTransport messageTransportService(String name);
+	MessageTransport messageTransportService(String adressType);
 	UserDataAccess userAdminDataService();
 	
 	default OSGiConfigAccessService configService() {
