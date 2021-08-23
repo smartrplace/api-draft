@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.resourcemanager.ResourceAlreadyExistsException;
 import org.ogema.devicefinder.api.TimedJobMgmtService;
 import org.ogema.devicefinder.api.TimedJobProvider;
 import org.ogema.model.gateway.LocalGatewayInformation;
@@ -87,10 +88,16 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 
 	protected TimedJobConfig getOrCreateConfiguration(String id, boolean isEval) {
 		LocalGatewayInformation gw = ResourceHelper.getLocalGwInfo(appMan);
+		try {
 		if(isEval)
 			return ResourceListHelper.getOrCreateNamedElementFlex(id, gw.timedJobs(), TimedEvalJobConfig.class, false);
 		else
 			return ResourceListHelper.getOrCreateNamedElementFlex(id, gw.timedJobs(), TimedJobConfig.class, false);
+		} catch(ResourceAlreadyExistsException e) {
+			System.out.println("Could not create for "+id);
+			e.printStackTrace();
+			return null;			
+		}
 	}
 
 	public void stop() {

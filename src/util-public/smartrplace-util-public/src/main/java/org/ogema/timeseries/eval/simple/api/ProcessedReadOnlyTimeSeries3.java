@@ -340,4 +340,10 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		result.dpLocation = datapointForChangeNotification.getLocation();
 		return result;
 	}
+	
+	/** Here we allow to add values also from external calculations. In this case the automated recalculation should
+	 * be disabled (minIntervalForReCalc with very long interval).*/
+	public void addValuesPublic(List<SampledValue> newVals) {
+		addValues(newVals);
+	}
 }
