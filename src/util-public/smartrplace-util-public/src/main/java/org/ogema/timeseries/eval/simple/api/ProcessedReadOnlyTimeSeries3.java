@@ -17,6 +17,7 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
+import org.ogema.devicefinder.util.TimedJobMemoryData;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
 
@@ -51,6 +52,8 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	 * from a file
 	 */
 	public void loadInitData() {}
+	
+	public TimedJobMemoryData timedJob = null;
 	
 	/** Implement one of these three OR use constructor that sets input type SINGLE directly*/
 	public Datapoint getInputDp() {return dpInSingle;}
