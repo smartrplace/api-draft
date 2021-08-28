@@ -8,12 +8,13 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.messaging.api.MessageTransport;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.app.useradmin.api.UserDataAccess;
-import org.ogema.tools.app.useradmin.config.UserAdminData;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.autoconfig.api.OSGiConfigAccessService;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
+import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.TypeChecker;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -140,6 +141,7 @@ public interface DatapointService {
 	/** Device information*/
 	Collection<Class<? extends Resource>> getManagedDeviceResoureceTypes();
 	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
+	InstallAppDevice getMangedDeviceResource(PhysicalElement device);
 	/** This handler also provides access to Driver Properties*/
 	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
 	

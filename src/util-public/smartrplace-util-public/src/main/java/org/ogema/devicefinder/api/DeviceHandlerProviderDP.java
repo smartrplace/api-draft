@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
@@ -38,6 +39,45 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * automatically by the DatapointService.*/
 	Collection<Datapoint> getDatapoints(InstallAppDevice installDeviceRes, DatapointService dpService);
 	
+	/** Provide a sensor value of the device that usually should be updated most frequently and that also
+	 * should be most relevant for the user to check whether the device works as it should.
+	 * @param device device resource
+	 * @param deviceConfiguration configuration resource that contains additional configuration information
+	 * @return sensor resource to be displayed in the overview table. If the device has no sensor this should be
+	 * 		a feedback or status value of an actor or most relevant configuration value
+	 */
+	default SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration) {
+		try {
+			Collection<Datapoint> all = getDatapoints(deviceConfiguration, null);
+			if(all.isEmpty())
+				return null;
+			return (SingleValueResource) all.iterator().next().getResource();
+		} catch(Exception e) {
+			return null;
+		}
+	}
+	
+	public static class SetpointData {
+		public SetpointData() {}
+		public SetpointData(SingleValueResource stateControl, SingleValueResource stateFeedback) {
+			this.stateControl = stateControl;
+			this.stateFeedback = stateFeedback;
+		}
+		public SingleValueResource stateControl;
+		public SingleValueResource stateFeedback;
+	}
+	
+	/** Provide information on all setpoints / actors of the device that are relevant for setpoint supervision
+	 * The first element shall be the main setpoint if relevant
+	 * @param <S>
+	 * @param device
+	 * @param deviceConfiguration
+	 * @return
+	 */
+	default List<SetpointData> getSetpointData(T device, InstallAppDevice deviceConfiguration) {
+		return null;
+	}
+
 	/** Get device name. Usually this should be the same name as the name shown in the table provided if {@link DriverHandlerProvider}
 	 * is also implemented.*/
 	//String getDeviceName(InstallAppDevice installDeviceRes);

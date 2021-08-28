@@ -188,6 +188,9 @@ System.out.println("Use send group:"+sendGroup.id()+" recvGroup"+recvGroup.id())
 			
 			int[] knis = AlarmingConfigUtil.getKnownIssues(appMan.getResourceAccess());
 			ValueResourceHelper.setCreate(kniData.knownIssuesUnassigned(), knis[0]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedBattery(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+2]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedDevNotReacheable(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+3]);
+			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedSignalStrength(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+4]);
 			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedOther(), knis[1]+knis[5]+knis[6]+knis[7]);
 			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedOperationOwn(), knis[2]);
 			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedDevOwn(), knis[3]);

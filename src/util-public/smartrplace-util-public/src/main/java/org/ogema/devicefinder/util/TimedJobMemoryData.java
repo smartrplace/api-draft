@@ -129,6 +129,9 @@ public class TimedJobMemoryData {
 	
 	//protected volatile Thread myThread = null;
 	protected volatile CountDownDelayedExecutionTimer myThreadForRunningOnceFromOutside = null;
+	public boolean executeBlockingOnceOnYourOwnRisk() {
+		return executeBlockingOnce();
+	}
 	public boolean executeNonBlockingOnce() {
 		
 		if(isRunning())

@@ -70,16 +70,7 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 		this.dpService = appMan.dpService();
 		this.isInRoom = isInRoom;
 	}
-	
-	/** Provide a sensor value of the device that usually should be updated most frequently and that also
-	 * should be most relevant for the user to check whether the device works as it should.
-	 * @param device device resource
-	 * @param deviceConfiguration configuration resource that contains additional configuration information
-	 * @return sensor resource to be displayed in the overview table. If the device has no sensor this should be
-	 * 		a feedback or status value of an actor or most relevant configuration value
-	 */
-	protected abstract SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration);
-	
+		
 	/** Additional widgets for the standard table can be added here. To add widgets for the expert table,
 	 * overwrite the method {@link #addMoreWidgetsExpert(InstallAppDevice, Resource, ObjectResourceGUIHelper, String, OgemaHttpRequest, Row, ApplicationManager)}
 	 * @param object

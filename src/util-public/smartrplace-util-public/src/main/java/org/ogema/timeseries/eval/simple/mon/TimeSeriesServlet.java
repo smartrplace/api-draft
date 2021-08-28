@@ -606,6 +606,7 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		return false;
 	}	
 	
+	/** Return setpoint reaction gap durations in minutes as FloatValues*/
 	public static List<SampledValue> getSensReact(ReadOnlyTimeSeries setpReq, ReadOnlyTimeSeries setpFb, long start, long end, long maxReactTime) {
 		List<SampledValue> req = setpReq.getValues(start, end+1);
 		//List<SampledValue> fb = setpFb.getValues(start, end+1);

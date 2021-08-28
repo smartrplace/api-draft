@@ -51,6 +51,7 @@ import de.iwes.widgets.html.form.button.RedirectButton;
 import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
+import de.iwes.widgets.html.form.label.LabelData;
 
 public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITablePage<T,R>  {
 	public static final long DEFAULT_POLL_RATE = 5000;
@@ -269,21 +270,29 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		}*/
 		VoltageResource batteryVoltage = DeviceHandlerBase.getBatteryVoltage(device2); //ResourceHelper.getSubResourceOfSibbling(device2,
 		//		"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
-		if(batteryVoltage != null)
-			return new AddBatteryVoltageResult(vh.floatLabel("Battery", id, batteryVoltage, row, "%.1f#min:0.1"),
+		if(batteryVoltage != null) {
+			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel("Battery", id, batteryVoltage, row, "%.1f#min:0.1"),
 					batteryVoltage);
-		else if(req == null)
+			float val = batteryVoltage.getValue();
+			BatteryEvalBase.addBatteryStyle(result.label, val, true, req);
+			return result;
+		} else if(req == null)
 			vh.registerHeaderEntry("Battery");
 		return null;
 	}
+		
 	protected AddBatteryVoltageResult addBatteryStatus(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
 			PhysicalElement device2) {
 		BooleanResource batteryStatus = ResourceHelper.getSubResourceOfSibbling(device2,
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "batteryLow", BooleanResource.class);
-		if(batteryStatus != null)
-			return new AddBatteryVoltageResult(vh.booleanLabel("Bat.Low", id, batteryStatus, row, 0), batteryStatus);
-		else if(req == null)
+		if(batteryStatus != null) {
+			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.booleanLabel("Bat.Low", id, batteryStatus, row, 0), batteryStatus);
+			boolean val = batteryStatus.getValue();
+			if(val)
+				result.label.addStyle(LabelData.BOOTSTRAP_RED, req);
+			return result;
+		} else if(req == null)
 			vh.registerHeaderEntry("Bat.Low");
 		return null;
 	}

@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Map;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.array.StringArrayResource;
 import org.ogema.core.model.simple.BooleanResource;
@@ -33,7 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.apps.hw.install.config.InstallAppDeviceBase;
 
+import de.iwes.util.resource.OGEMAResourceCopyHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
@@ -155,9 +159,53 @@ public class AlarmingConfigUtil {
 	public static void copySettings(InstallAppDevice source, InstallAppDevice destination, ApplicationManager appMan) {
 		copySettings(source, destination, appMan, false);
 	}
+	
+	public static class CopyAlarmsSettings {
+		public CopyAlarmsSettings(AlarmConfiguration templateConfig, AlarmConfiguration deviceConfig) {
+			this.templateConfig = templateConfig;
+			this.deviceConfig = deviceConfig;
+		}
+		public AlarmConfiguration templateConfig;
+		public AlarmConfiguration deviceConfig;
+	}
+	
+	public static Map<String, CopyAlarmsSettings> getTemplateAlarmSettings(InstallAppDeviceBase template, InstallAppDevice device) {
+		Map<String, CopyAlarmsSettings> result = new HashMap<>();
+		for(AlarmConfiguration alarmSource: template.alarms().getAllElements()) {
+			//TODO: Make this more general
+			SingleValueResource destSens = null;
+			if((template.device() instanceof SingleSwitchBox) && (template.device().getLocation().startsWith("virtSwitchBoxes"))) {
+				String sourceLoc = alarmSource.sensorVal().getLocation();
+				if(sourceLoc.endsWith("stateControl"))
+					destSens = ((SingleSwitchBox)device.device()).onOffSwitch().stateControl();
+				else if(sourceLoc.endsWith("stateFeedback"))
+					destSens = ((SingleSwitchBox)device.device()).onOffSwitch().stateFeedback();
+			}
+			if(destSens == null)
+				destSens = ResourceHelper.getRelativeResource(template.device(),alarmSource.sensorVal(), device.device());
+			if(destSens == null || (!destSens.exists())) {
+				continue;
+			}
+			String destPath = destSens.getLocation();
+			for(AlarmConfiguration alarmDest: device.alarms().getAllElements()) {
+				if(alarmDest.sensorVal().getLocation().equals(destPath)) {
+					result.put(destPath, new CopyAlarmsSettings(alarmSource, alarmDest));
+					//copySettings(alarmSource, alarmDest, setSendAlarms);
+					break;
+				}
+			}
+		}
+		return result ;
+	}
+	
 	public static void copySettings(InstallAppDevice source, InstallAppDevice destination, ApplicationManager appMan,
 			boolean setSendAlarms) {
-		for(AlarmConfiguration alarmSource: source.alarms().getAllElements()) {
+		Map<String, CopyAlarmsSettings> data = getTemplateAlarmSettings(source, destination);
+		for(CopyAlarmsSettings copy: data.values()) {
+			copySettings(copy.templateConfig, copy.deviceConfig, setSendAlarms);
+		}
+		
+		/*for(AlarmConfiguration alarmSource: source.alarms().getAllElements()) {
 			//TODO: Make this more general
 			SingleValueResource destSens = null;
 			if((source.device() instanceof SingleSwitchBox) && (source.device().getLocation().startsWith("virtSwitchBoxes"))) {
@@ -181,7 +229,7 @@ public class AlarmingConfigUtil {
 					break;
 				}
 			}
-		}
+		}*/
 	}
 	
 	public static void copySettings(AlarmConfiguration source, AlarmConfiguration destination,
@@ -370,40 +418,12 @@ public class AlarmingConfigUtil {
 		return dp;
 	}
 	
-	/** 0: number of Knis not assigned or assigned to other, [1]: assigned to operation, [2]: development, [3]: customer,
-	 * more indeces may be defined by AlarmGroupData.USER_ROLES*/
-	/*public static int[] getKnownIssues(ResourceAccess resAcc) {
-		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
-		int[] result = new int[AlarmGroupData.USER_ROLES.length];
-		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
-			AlarmGroupData kni = dev.knownFault();
-			if(!kni.isActive())
-				continue;
-			if(!kni.acceptedByUser().exists()) {
-				result[0] ++;
-				continue;
-			}
-			String role = kni.acceptedByUser().getValue();
-			boolean found = false;
-			for(int idx=0; idx<AlarmGroupData.USER_ROLES.length; idx++) {
-				if(role.equals(AlarmGroupData.USER_ROLES[idx])) {
-					result[idx] ++;
-					found = true;
-					break;
-				}
-			}
-			if(!found) {
-				result[0] ++;
-			}
-		}
-		return result;
-	}*/
-	
 	/** 0: number of Knis not assigned, [1] assigned to other, [2]: assigned to operation, [3]: development, [4]: customer,
+	 * [8]: operation external, [9]: development external, [10]: battery, [11]: device not reachable, [12]: signal strength
 	 * more indeces may be defined by AlarmGroupData.USER_ROLES*/
 	public static int[] getKnownIssues(ResourceAccess resAcc) {
 		HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, resAcc);
-		int[] result = new int[MAIN_ASSIGNEMENT_ROLE_NUM+2];
+		int[] result = new int[MAIN_ASSIGNEMENT_ROLE_NUM+5];
 		for(InstallAppDevice dev: hwInstall.knownDevices().getAllElements()) {
 			if(dev.isTrash().getValue())
 				continue;
@@ -418,6 +438,18 @@ public class AlarmingConfigUtil {
 			if(role == 0) {
 				result[0] ++;
 				continue;
+			}
+			if(role == 2100) {
+				result[MAIN_ASSIGNEMENT_ROLE_NUM+2] ++;
+				continue;								
+			}
+			if(role == 2150) {
+				result[MAIN_ASSIGNEMENT_ROLE_NUM+3] ++;
+				continue;								
+			}
+			if(role == 2200) {
+				result[MAIN_ASSIGNEMENT_ROLE_NUM+4] ++;
+				continue;								
 			}
 			if(role >= 2500 && role < 3000) {
 				result[MAIN_ASSIGNEMENT_ROLE_NUM] ++;
@@ -454,6 +486,7 @@ public class AlarmingConfigUtil {
 	}
 	
 	/** 0: qualityShort, [1] qualityLong, [2]: qualityShort V2, [3]: qualityLong V2*/
+	@Deprecated // Use StandardEvalAccess#getQualityValuesForStandardDurations instead
 	public static int[] getQualityValues(ApplicationManager appMan, DatapointService dpService) {
 		long now = appMan.getFrameworkTime();
 		long startShort = now - 4*TimeProcUtil.DAY_MILLIS;
@@ -464,6 +497,7 @@ public class AlarmingConfigUtil {
 	}
 	
 	/** [0]: quality V1, [1]: quality V2*/
+	@Deprecated // Use StandardEvalAccess#getQualityValues instead
 	public static int[] getQualityValues(ApplicationManager appMan, DatapointService dpService,
 			long startTime, long endTime, double QUALITY_MAX_MINUTES) {
 
@@ -555,5 +589,34 @@ public class AlarmingConfigUtil {
 			}
 		}
 		return new int[] {alStatusNum, alNum};
+	}
+	
+	public static InstallAppDeviceBase getTemplate(InstallAppDevice iad, List<InstallAppDeviceBase> templates) {
+		for(InstallAppDeviceBase template: templates) {
+			if(template.devHandlerInfo().getValue().equals(iad.devHandlerInfo().getValue()))
+				return template;
+		}
+		return null;
+	}
+
+	public static InstallAppDeviceBase getOrCreateTemplate(InstallAppDevice iad,
+			ResourceList<InstallAppDeviceBase> templates, ApplicationManager appMan) {
+		InstallAppDeviceBase result = getTemplate(iad, templates.getAllElements());
+		if(result != null)
+			return result;
+		result = templates.add();
+		ValueResourceHelper.setCreate(result.devHandlerInfo(), iad.devHandlerInfo().getValue());
+		OGEMAResourceCopyHelper.copySubResourceIntoDestination(result.alarms(), iad.alarms(), appMan, true);
+		result.activate(false);
+		return result;
+	}
+	
+	public static String getDeviceHandlerShortId(InstallAppDeviceBase iad) {
+		return getDeviceHandlerShortId(iad.devHandlerInfo().getValue());
+	}
+	public static String getDeviceHandlerShortId(String longId) {
+		String[] dhidfull = longId.split("\\.");
+		String dhid = dhidfull[dhidfull.length-1];
+		return dhid;
 	}
 }
