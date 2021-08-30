@@ -54,6 +54,7 @@ public class TimeProcUtil {
 	public static final String ALARM_OUTVALUE_SUFFIX = "_outvalue";
 	public static final String ALARM_SETPREACT_SUFFIX = "_setpreact";
 	public static final String ALARM_VALCHANGED_SUFFIX = "_valchanged";
+	public static final String ALARM_BATDURATION_SUFFIX = "_batduration";
 	public static final String BASE_GRADIENT_SUFFIX = "_gradient";
 	
 	public static TimeResource getDefaultMeteringReferenceResource(ResourceAccess resAcc ) {

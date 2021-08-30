@@ -22,6 +22,7 @@ import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DatapointDesc.ScalingProvider;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
+import org.ogema.devicefinder.util.BatteryEvalBase;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -689,4 +690,60 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		return result;
 
 	}
+
+	/** Estimate remaining life time of a battery each time the voltage drops permanently. A new battery is indicated by
+	 * a value of -10
+	 * @param timeSeries batteryVoltage measurements for a device
+	 * @param start
+	 * @param end
+	 * @param addFirstNonNaNValue
+	 * @return
+	 */
+	public static List<SampledValue> getBatteryRemainingLifetimeEstimation(ReadOnlyTimeSeries timeSeries, long start, long end,
+			boolean addFirstNonNaNValue) {
+		List<SampledValue> input = timeSeries.getValues(start, end+1);
+		List<SampledValue> result = new ArrayList<>();
+		SampledValue lastUpSv = null;
+		for(SampledValue sv: input) {
+			if(lastUpSv == null) {
+				lastUpSv = sv;
+			} else if(Float.isNaN(lastUpSv.getValue().getFloatValue())) {
+				lastUpSv = sv;
+			} else {
+				float lastUpVal = lastUpSv.getValue().getFloatValue();
+				float newVal = sv.getValue().getFloatValue();
+				if(Float.isNaN(newVal))
+					continue;
+				if(newVal == lastUpVal) {
+					lastUpSv = sv;
+					continue;
+				} else if(newVal > lastUpVal) {
+					if((lastUpVal >= 2.9f && (newVal - lastUpVal > 0.15f))
+							|| (lastUpVal >= 2.6f && (newVal - lastUpVal > 0.25f))
+							|| (newVal - lastUpVal > 0.35f)) {
+						SampledValue resultsv = new SampledValue(new FloatValue(-10), sv.getTimestamp(), Quality.GOOD);
+						result.add(resultsv);					
+						lastUpSv = sv;
+					}
+				} else { //smaller
+					boolean isEndOfLevel;
+					if(lastUpVal - newVal > 0.15f)
+						isEndOfLevel = true;
+					else {
+						long dist = sv.getTimestamp() - lastUpSv.getTimestamp();
+						isEndOfLevel = (dist > 7*TimeProcUtil.DAY_MILLIS);
+					}
+					if(isEndOfLevel) {
+						float days = (float) (((double)BatteryEvalBase.getRemainingLifeTimeEstimation(lastUpVal))/TimeProcUtil.DAY_MILLIS);
+						SampledValue resultsv = new SampledValue(new FloatValue(days), sv.getTimestamp(), Quality.GOOD);
+						result.add(resultsv);
+						lastUpSv = sv;
+					}
+				}
+			}
+		}
+		return result;
+
+	}
+
 }
