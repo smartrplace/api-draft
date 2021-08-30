@@ -60,7 +60,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	protected abstract String id();
 	
 	/** Heading to be shown over the table*/
-	protected abstract String getTableTitle();
+	protected abstract String getTableTitleRaw();
 	
 	protected DocumentationLinkProvider getDocLinkProvider() {
 		return null;
@@ -103,7 +103,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 
 	@Override
 	public void addWidgetsAboveTable() {
-		headerWinSens = new Header(page, WidgetHelper.getValidWidgetId("header_"+id()), getTableTitle());
+		headerWinSens = new Header(page, WidgetHelper.getValidWidgetId("header_"+id()), getTableTitleRaw());
 		headerWinSens.addDefaultStyle(HeaderData.TEXT_ALIGNMENT_LEFT);
 
 		DocumentationLinkProvider docLinkProv = getDocLinkProvider();

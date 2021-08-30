@@ -56,6 +56,12 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 			return null;
 		}
 	}
+	default SingleValueResource getMainSensorValue(InstallAppDevice deviceConfiguration) {
+		@SuppressWarnings("unchecked")
+		T device = (T) deviceConfiguration.device();
+		return getMainSensorValue(device, deviceConfiguration);
+		
+	}
 	
 	public static class SetpointData {
 		public SetpointData() {}
@@ -76,6 +82,12 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 */
 	default List<SetpointData> getSetpointData(T device, InstallAppDevice deviceConfiguration) {
 		return null;
+	}
+	
+	default List<SetpointData> getSetpointData(InstallAppDevice deviceConfiguration) {
+		@SuppressWarnings("unchecked")
+		T device = (T) deviceConfiguration.device();
+		return getSetpointData(device, deviceConfiguration);
 	}
 
 	/** Get device name. Usually this should be the same name as the name shown in the table provided if {@link DriverHandlerProvider}

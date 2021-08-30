@@ -48,7 +48,7 @@ public class BatteryEvalBase {
 		URGENT,
 		EMPTY,
 		UNKNOWN,
-		NO_RESOURCE
+		NO_BATTERY
 	}
 	public static class BatteryStatusResult {
 		public InstallAppDevice iad;
@@ -64,8 +64,10 @@ public class BatteryEvalBase {
 		BatteryStatusResult result = new BatteryStatusResult();
 		BatteryStatusPlus plus = getBatteryStatusPlus(iad, true, now);
 		result.status = plus.status;
-		result.currentVoltage = plus.voltage;
 		result.iad = iad;
+		if(result.status == BatteryStatus.NO_BATTERY)
+			return result;
+		result.currentVoltage = plus.voltage;
 		result.expectedEmptyDate = getExpectedEmptyDate(plus.batRes, now);
 		return result ;
 	}
@@ -94,7 +96,7 @@ public class BatteryEvalBase {
 		BatteryStatusPlus result = new BatteryStatusPlus();
 		result.batRes = batRes;
 		if(batRes == null) {
-			result.status = BatteryStatus.NO_RESOURCE;
+			result.status = BatteryStatus.NO_BATTERY;
 			return result;
 		}
 		result.voltage = batRes.getValue();
@@ -151,7 +153,7 @@ public class BatteryEvalBase {
 			result = LabelData.BOOTSTRAP_ORANGE;
 		else if(stat == BatteryStatus.CHANGE_RECOMMENDED)
 			result = LabelData.BOOTSTRAP_BLUE;
-		else if(stat == BatteryStatus.UNKNOWN || stat == BatteryStatus.NO_RESOURCE)
+		else if(stat == BatteryStatus.UNKNOWN || stat == BatteryStatus.NO_BATTERY)
 			result = LabelData.BOOTSTRAP_GREY;
 		if(result != null)
 			label.addStyle(result, req);
@@ -175,6 +177,8 @@ public class BatteryEvalBase {
 		batteryDurationsFromLast.put(21, 2*TimeProcUtil.DAY_MILLIS);
 		batteryDurationsFromLast.put(20, 1*TimeProcUtil.DAY_MILLIS);
 	}
+	
+	//TODO: We need improved implementation that is efficient and finds last step down
 	public static Long getExpectedEmptyDate(VoltageResource batRes, long now) {
 		RecordedData ts = batRes.getHistoricalData();
 		if(ts == null)
@@ -184,7 +188,8 @@ public class BatteryEvalBase {
 			return null;
 		float curVal = ts.getPreviousValue(now).getValue().getFloatValue();
 		long testTs = now - 7*TimeProcUtil.DAY_MILLIS;
-		long lastHigherTime;
+		long lastHigherTime = testTs;
+		/*long lastHigherTime;
 		while(true) {
 			SampledValue sv = ts.getPreviousValue(testTs-1);
 			if(sv == null) {
@@ -193,16 +198,19 @@ public class BatteryEvalBase {
 			}
 			if(sv.getValue().getFloatValue() > curVal) {
 				lastHigherTime = sv.getTimestamp();
-				break;				
+				break;		
 			}
-		}
+			testTs = sv.getTimestamp();
+		}*/
 		long duration;
-		if(curVal > 3.3f)
+		if(Float.isNaN(curVal))
+			return null;
+		if(curVal >= 3.3f)
 			duration = batteryDurationsFromLast.get(33);
-		else if(curVal < 2.0f)
+		else if(curVal <= 2.0f)
 			duration = batteryDurationsFromLast.get(20);
 		else
-			duration = batteryDurationsFromLast.get(Math.round(curVal));
+			duration = batteryDurationsFromLast.get(Math.round(curVal*10));
 		return lastHigherTime + duration;
 	}
 }

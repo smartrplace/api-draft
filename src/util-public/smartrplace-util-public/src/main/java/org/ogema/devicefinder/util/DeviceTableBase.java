@@ -40,6 +40,11 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 			throw new IllegalStateException("InstalledAppsSelector must be provided or implemented!");
 	}
 
+	@Override
+	protected String getTableTitleRaw() {
+		return devHand.getTableTitle();
+	}
+	
 	protected void addHomematicCCUId(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {

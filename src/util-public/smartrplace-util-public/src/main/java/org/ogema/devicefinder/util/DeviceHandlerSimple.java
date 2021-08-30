@@ -94,9 +94,6 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 	 */
 	protected abstract Collection<Datapoint> getDatapoints(T device, InstallAppDevice deviceConfiguration);
 	
-	/** Set title of table listing the devices processed by the DeviceHandlerProvider*/
-	public abstract String getTableTitle();
-	
 	/** The value and last contact labels are polled. You can adapt the poll rate here*/
 	protected long getLabelPollRate() {
 		return DEFAULT_POLL_RATE;
@@ -160,11 +157,6 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 			@Override
 			protected String id() {
 				return DeviceHandlerSimple.this.id();
-			}
-
-			@Override
-			public String getTableTitle() {
-				return DeviceHandlerSimple.this.getTableTitle();
 			}
 		};
 	}
