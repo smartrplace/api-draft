@@ -105,8 +105,11 @@ public class TimedJobMemoryData {
 		long lastFreeTime = lastRunStart - lastRunEnd;
 		freeTimeCounter += lastFreeTime;
 		isRunning = true;
+if(Boolean.getBoolean("jobdebug"))
+System.out.println("Starting job of provider:"+prov.id());
 		try {
-			prov.execute(lastRunStart, this);
+			if(!skipKJobForTesting())
+				prov.execute(lastRunStart, this);
 		} catch(Exception e) {
 			appMan.getLogger().warn("Exception in provider "+prov.id(), e);
 			e.printStackTrace();
@@ -124,7 +127,17 @@ public class TimedJobMemoryData {
 			ValueResourceHelper.setCreate(jobData.logResource.jobLoad(), load);
 			lastLoadReport = lastRunEnd;
 		}
+if(Boolean.getBoolean("jobdebug"))
+System.out.println("Finished job of provider:"+prov.id());
 		return true;
+	}
+	
+	public boolean skipKJobForTesting() {
+		if(Boolean.getBoolean("org.ogema.devicefinder.util.skipalljobs"))
+			return true;
+		if(Boolean.getBoolean("org.ogema.devicefinder.util.skipevaljobs") && prov.evalJobType()>0)
+			return true;
+		return false;
 	}
 	
 	//protected volatile Thread myThread = null;
