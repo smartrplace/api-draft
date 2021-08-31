@@ -20,6 +20,7 @@ import de.iwes.util.timer.AbsoluteTimerListener;
 public class TimedJobMemoryData {
 	public static final float MINIMUM_MINUTES_FOR_TIMER_START = 2.5f;
 	public static final long LOAD_REPORT_INTERVAL = 5*TimeProcUtil.MINUTE_MILLIS;
+	public static final long MIN_FREE_MEMORY_MB = Long.getLong("org.ogema.devicefinder.util.minfreemb", 200);
 	
 	public long lastRunStart() {
 		return lastRunStart;
@@ -133,7 +134,7 @@ if(Boolean.getBoolean("jobdebug")) {
 if(Boolean.getBoolean("jobdebug")) {
 	long free = rt.freeMemory()/(1024*1024);
 System.out.println("Finished after "+lastRunDuration+" msec job of provider:"+prov.id()+" Free:"+free);
-if(free < 200) {
+if(free < MIN_FREE_MEMORY_MB) {
 	rt.gc();
 	System.out.println(" Free after GC:"+rt.freeMemory()/(1024*1024));
 }

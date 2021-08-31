@@ -14,6 +14,7 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
@@ -185,6 +186,18 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		return Collections.emptyList();
 	}
 
+	@Override
+	public List<SampledValue> getValues(long startTime, long endTime) {
+		List<SampledValue> result = getValuesWithoutUpdate(startTime, endTime);
+		List<DpGap> toUpdate = getIntervalsToUpdate(startTime, endTime);
+		if((toUpdate != null) && (!toUpdate.isEmpty()) && (datapointForChangeNotification != null)) {
+			DpUpdated updTotal = DatapointImpl.getStartEndForUpdList(toUpdate);
+			datapointForChangeNotification.notifyTimeseriesChange(updTotal.start, updTotal.end);
+		}
+if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size()+" vals for "+dpLabel()+" "+TimeProcPrint.getFullTime(startTime)+" : "+TimeProcPrint.getFullTime(endTime));
+		return result;
+	}
+	
 	protected String getDpLocation() {
 		Datapoint dpIn = getInputDp();
 		if(dpIn != null)

@@ -547,6 +547,7 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		List<SampledValue> input = timeSeries.getValues(start, end+1);
 		List<SampledValue> result = new ArrayList<>();
 		SampledValue lastVal = null;
+if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size()+" input timestamps in GAPs");
 		if(input.isEmpty() && ((end-start) > maxGapSize)) {
 			result.add(new SampledValue(new FloatValue((float)((double)(end-start)/TimeProcUtil.MINUTE_MILLIS)), end, Quality.GOOD));
 			return result;
@@ -704,6 +705,7 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		List<SampledValue> input = timeSeries.getValues(start, end+1);
 		List<SampledValue> result = new ArrayList<>();
 		SampledValue lastUpSv = null;
+if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size()+" input timestamps in BATtery");
 		for(SampledValue sv: input) {
 			if(lastUpSv == null) {
 				lastUpSv = sv;

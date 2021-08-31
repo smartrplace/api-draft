@@ -194,7 +194,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("getValues for  "+dpLabel
 			long endOfAgg =  getCurrentTime();
 if(lockLog != null) lockLog.logEvent((endOfAgg-startWait), "Acquired lock for "+dpLabel()+" after");
 		}
-		List<DpGap> toUpdate = null;
+		final List<DpGap> toUpdate;
 		try {
 		long now = getCurrentTime();
 		if(minIntervalForReCalc != null && ((now - lastReCalc) < minIntervalForReCalc))
@@ -232,7 +232,8 @@ if(lockLog != null) lockLog.logEvent((endOfAgg-startWait), "Acquired lock for "+
 					knownStart = intv.start;
 			}
 			lastIntervalToUpdateProc = now;
-		}
+		} else
+			toUpdate = null;
 		if((knownStart < 0) || (startTime < knownStart && endTime > knownEnd)) {
 			values = updateValues2(startTime, endTime, now);
 if(Boolean.getBoolean("evaldebug")) System.out.println("return-updateVals3:  "+dpLabel()+" "+TimeProcPrint.getSummary(values));
