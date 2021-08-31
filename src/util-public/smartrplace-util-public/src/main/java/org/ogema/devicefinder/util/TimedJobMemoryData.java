@@ -105,8 +105,10 @@ public class TimedJobMemoryData {
 		long lastFreeTime = lastRunStart - lastRunEnd;
 		freeTimeCounter += lastFreeTime;
 		isRunning = true;
-if(Boolean.getBoolean("jobdebug"))
-System.out.println("Starting job of provider:"+prov.id());
+Runtime rt = Runtime.getRuntime();
+if(Boolean.getBoolean("jobdebug")) {
+	System.out.println("Starting job of provider:"+prov.id()+" Free:"+rt.freeMemory()/(1024*1024));
+}
 		try {
 			if(!skipKJobForTesting())
 				prov.execute(lastRunStart, this);
@@ -127,8 +129,11 @@ System.out.println("Starting job of provider:"+prov.id());
 			ValueResourceHelper.setCreate(jobData.logResource.jobLoad(), load);
 			lastLoadReport = lastRunEnd;
 		}
-if(Boolean.getBoolean("jobdebug"))
-System.out.println("Finished job of provider:"+prov.id());
+if(Boolean.getBoolean("jobdebug")) {
+System.out.println("Finished after "+lastRunDuration+" msec job of provider:"+prov.id()+" Free:"+rt.freeMemory()/(1024*1024));
+rt.gc();
+System.out.println(" Free after GC:"+rt.freeMemory()/(1024*1024));
+}
 		return true;
 	}
 	
