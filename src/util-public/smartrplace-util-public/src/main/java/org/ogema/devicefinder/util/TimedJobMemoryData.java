@@ -101,6 +101,8 @@ public class TimedJobMemoryData {
 	protected boolean executeBlockingOnce() {
 		if(isRunning())
 			return false;
+		if(skipKJobForTesting())
+			return false;
 		lastRunStart = appMan.getFrameworkTime();
 		long lastFreeTime = lastRunStart - lastRunEnd;
 		freeTimeCounter += lastFreeTime;
@@ -110,8 +112,7 @@ if(Boolean.getBoolean("jobdebug")) {
 	System.out.println("Starting job of provider:"+prov.id()+" Free:"+rt.freeMemory()/(1024*1024));
 }
 		try {
-			if(!skipKJobForTesting())
-				prov.execute(lastRunStart, this);
+			prov.execute(lastRunStart, this);
 		} catch(Exception e) {
 			appMan.getLogger().warn("Exception in provider "+prov.id(), e);
 			e.printStackTrace();
@@ -130,9 +131,12 @@ if(Boolean.getBoolean("jobdebug")) {
 			lastLoadReport = lastRunEnd;
 		}
 if(Boolean.getBoolean("jobdebug")) {
-System.out.println("Finished after "+lastRunDuration+" msec job of provider:"+prov.id()+" Free:"+rt.freeMemory()/(1024*1024));
-rt.gc();
-System.out.println(" Free after GC:"+rt.freeMemory()/(1024*1024));
+	long free = rt.freeMemory()/(1024*1024);
+System.out.println("Finished after "+lastRunDuration+" msec job of provider:"+prov.id()+" Free:"+free);
+if(free < 200) {
+	rt.gc();
+	System.out.println(" Free after GC:"+rt.freeMemory()/(1024*1024));
+}
 }
 		return true;
 	}
@@ -140,7 +144,7 @@ System.out.println(" Free after GC:"+rt.freeMemory()/(1024*1024));
 	public boolean skipKJobForTesting() {
 		if(Boolean.getBoolean("org.ogema.devicefinder.util.skipalljobs"))
 			return true;
-		if(Boolean.getBoolean("org.ogema.devicefinder.util.skipevaljobs") && prov.evalJobType()>0)
+		if((prov.evalJobType()>0) && (!Boolean.getBoolean("org.ogema.devicefinder.util.runevaljobs")))
 			return true;
 		return false;
 	}
