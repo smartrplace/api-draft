@@ -106,7 +106,12 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	protected abstract long getCurrentTime();
 
 	public String dpLabel() {
-		return getClass().getSimpleName();
+		String result = getClass().getSimpleName();
+		if(!result.isEmpty())
+			return result;
+		if(datapointForChangeNotification != null)
+			return datapointForChangeNotification.getLocation();
+		return getClass().getName();
 	};
 	
 	protected List<SampledValue> values = null;

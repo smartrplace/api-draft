@@ -46,7 +46,7 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 		String id = prov.id();
 		TimedJobMemoryData result = knownJobs.get(id);
 		if(result == null) {
-			result = new TimedJobMemoryData(appMan, jobData);
+			result = new TimedJobMemoryData(appMan, this, jobData);
 			result.prov = prov;
 			result.res = getOrCreateConfiguration(id, prov.evalJobType()>0);
 			createPersistentIndex(result.res);

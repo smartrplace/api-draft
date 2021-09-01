@@ -69,6 +69,10 @@ public abstract class DeviceHandlerSimple<T extends PhysicalElement> extends Dev
 		this.appMan = appMan;
 		this.dpService = appMan.dpService();
 		this.isInRoom = isInRoom;
+if(Boolean.getBoolean("jobdebug")) {
+	Runtime rt = Runtime.getRuntime();
+	System.out.println(this.getClass().getSimpleName()+" created with free memory: "+rt.freeMemory()/(1024*1024));
+}
 	}
 		
 	/** Additional widgets for the standard table can be added here. To add widgets for the expert table,

@@ -22,6 +22,8 @@ public class TimedJobMemoryData {
 	public static final long LOAD_REPORT_INTERVAL = 5*TimeProcUtil.MINUTE_MILLIS;
 	public static final long MIN_FREE_MEMORY_MB = Long.getLong("org.ogema.devicefinder.util.minfreemb", 200);
 	
+	protected static volatile int countSinceLastGC = 1;
+	
 	public long lastRunStart() {
 		return lastRunStart;
 	}
@@ -82,9 +84,12 @@ public class TimedJobMemoryData {
 	protected AbsolutePersistentTimer timerAligned = null;
 	
 	private final ApplicationManager appMan;
+	private final TimedJobMgmtServiceImpl timedJobMgmtServiceImpl;
 	
-	public TimedJobMemoryData(ApplicationManager appMan, TimedJobMgmtData jobData) {
+	public TimedJobMemoryData(ApplicationManager appMan, TimedJobMgmtServiceImpl timedJobMgmtServiceImpl,
+			TimedJobMgmtData jobData) {
 		this.appMan = appMan;
+		this.timedJobMgmtServiceImpl = timedJobMgmtServiceImpl;
 		this.jobData = jobData;
 		long now = appMan.getFrameworkTime();
 		lastRunEnd = now;
@@ -131,14 +136,34 @@ if(Boolean.getBoolean("jobdebug")) {
 			ValueResourceHelper.setCreate(jobData.logResource.jobLoad(), load);
 			lastLoadReport = lastRunEnd;
 		}
-if(Boolean.getBoolean("jobdebug")) {
-	long free = rt.freeMemory()/(1024*1024);
-System.out.println("Finished after "+lastRunDuration+" msec job of provider:"+prov.id()+" Free:"+free);
-if(free < MIN_FREE_MEMORY_MB) {
-	rt.gc();
-	System.out.println(" Free after GC:"+rt.freeMemory()/(1024*1024));
-}
-}
+		if(prov.evalJobType() == 0)
+			return true;
+		long free = rt.freeMemory()/(1024*1024);
+if(Boolean.getBoolean("jobdebug")) System.out.println("Finished after "+lastRunDuration+" msec job of provider:"+prov.id()+" Free:"+free);
+		if(free < MIN_FREE_MEMORY_MB) {
+			//rt.gc();
+			if(countSinceLastGC > 10) {
+				//TimeseriesSimpleProcUtil;
+				TimedJobMemoryData saveJob = timedJobMgmtServiceImpl.getProvider("SaveVDP2Disk");
+				if(saveJob != null) {
+					saveJob.executeBlockingOnceOnYourOwnRisk();
+					countSinceLastGC = 0;
+				}
+			}
+			long freeAfter = rt.freeMemory()/(1024*1024);
+			System.out.println(" Free after GC:"+freeAfter+" not saved:"+countSinceLastGC);
+			/*if(countSinceLastGC == 0 && freeAfter < MIN_FREE_MEMORY_MB) {
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				rt.gc();
+				freeAfter = rt.freeMemory()/(1024*1024);
+				System.out.println(" Free after second GC:"+freeAfter);
+			}*/
+		}
+		countSinceLastGC++;
 		return true;
 	}
 	
@@ -175,24 +200,6 @@ if(free < MIN_FREE_MEMORY_MB) {
 		    }  
 		};
 		return true;
-
-		/*synchronized(this) {
-			if(myThread != null)
-				return false;
-			myThread = new Thread() {
-			    public void run() {
-			        try {
-			        	executeBlockingOnce();
-			        } catch(Exception e) {
-			            e.printStackTrace();
-			        } finally {
-						myThread = null;
-					}
-			    }  
-			};
-			myThread.start();
-			return true;
-		}*/
 	}
 	
 	/** Start timed operation
