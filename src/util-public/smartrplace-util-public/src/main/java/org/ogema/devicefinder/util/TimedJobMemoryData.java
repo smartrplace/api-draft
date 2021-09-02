@@ -3,6 +3,8 @@ package org.ogema.devicefinder.util;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.application.Timer;
 import org.ogema.core.application.TimerListener;
+import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.devicefinder.api.TimedJobMgmtService;
 import org.ogema.devicefinder.api.TimedJobProvider;
 import org.ogema.devicefinder.util.TimedJobMgmtServiceImpl.TimedJobMgmtData;
@@ -76,7 +78,7 @@ public class TimedJobMemoryData {
 	
 	protected volatile boolean isRunning;
 	
-	protected TimedJobConfig res;
+	TimedJobConfig res;
 	protected TimedJobProvider prov;
 	protected final TimedJobMgmtData jobData;
 	
@@ -177,6 +179,30 @@ if(Boolean.getBoolean("jobdebug")) System.out.println("Finished after "+lastRunD
 	
 	//protected volatile Thread myThread = null;
 	protected volatile CountDownDelayedExecutionTimer myThreadForRunningOnceFromOutside = null;
+	protected volatile ResourceValueListener<IntegerResource> myThreadForRunningDirect = null;
+	protected abstract class DirectRunner implements ResourceValueListener<IntegerResource> {
+		protected abstract void asapExecution();
+		
+		public DirectRunner() {
+			if(myThreadForRunningOnceFromOutside != null || myThreadForRunningDirect != null)
+				return;
+			myThreadForRunningDirect = this;
+			res.triggerTimedJobStartsWithoutDelay().addValueListener(myThreadForRunningDirect, true);
+			res.triggerTimedJobStartsWithoutDelay().getAndAdd(1);
+		}
+
+		@Override
+		public void resourceChanged(IntegerResource resource) {
+			try {
+				asapExecution();
+	        } catch(Exception e) {
+	            e.printStackTrace();
+	        } finally {
+	        	myThreadForRunningDirect = null;
+			}
+		}
+	}
+	
 	public boolean executeBlockingOnceOnYourOwnRisk() {
 		return executeBlockingOnce();
 	}
@@ -184,9 +210,15 @@ if(Boolean.getBoolean("jobdebug")) System.out.println("Finished after "+lastRunD
 		
 		if(isRunning())
 			return false;
-		if(myThreadForRunningOnceFromOutside != null)
-			return false;
-		myThreadForRunningOnceFromOutside = new CountDownDelayedExecutionTimer(appMan, 1) {
+		new DirectRunner() {
+			
+			@Override
+			protected void asapExecution() {
+				executeBlockingOnce();
+			}
+		};
+		
+		/*myThreadForRunningOnceFromOutside = new CountDownDelayedExecutionTimer(appMan, 1) {
 			
 			@Override
 			public void delayedExecution() {
@@ -197,8 +229,8 @@ if(Boolean.getBoolean("jobdebug")) System.out.println("Finished after "+lastRunD
 		        } finally {
 					myThreadForRunningOnceFromOutside = null;
 				}
-		    }  
-		};
+		    } 
+		};*/
 		return true;
 	}
 	
@@ -239,7 +271,15 @@ if(Boolean.getBoolean("jobdebug")) System.out.println("Finished after "+lastRunD
 							
 							@Override
 							public void timerElapsed(CountDownAbsoluteTimer myTimer, long absoluteTime, long timeStep) {
-								if(interval > 0) {
+								if(interval > 0 && interval < 1000) {
+									new DirectRunner() {
+										
+										@Override
+										protected void asapExecution() {
+											executeBlockingOnceFromTimer();
+										}
+									};
+								} else if(interval > 0) {
 									new CountDownDelayedExecutionTimer(appMan, interval) {
 										@Override
 										public void delayedExecution() {
@@ -264,13 +304,23 @@ if(Boolean.getBoolean("jobdebug")) System.out.println("Finished after "+lastRunD
 			if(delay < 1)
 				delay = 1;
 			nextScheduledStart = appMan.getFrameworkTime() + delay;
-			new CountDownDelayedExecutionTimer(appMan, delay) {
+
+			new DirectRunner() {
+				
+				@Override
+				protected void asapExecution() {
+					nextScheduledStart = nextScheduledStartWithoutStart;
+					executeBlockingOnce();
+				}
+			};
+			
+			/*new CountDownDelayedExecutionTimer(appMan, delay) {
 				@Override
 				public void delayedExecution() {
 					nextScheduledStart = nextScheduledStartWithoutStart;
 					executeBlockingOnce();
 				}
-			};
+			};*/
 		} else
 			nextScheduledStart = nextScheduledStartWithoutStart;
 

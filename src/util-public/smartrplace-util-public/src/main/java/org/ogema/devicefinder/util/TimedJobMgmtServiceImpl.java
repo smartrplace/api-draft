@@ -109,6 +109,7 @@ public class TimedJobMgmtServiceImpl implements TimedJobMgmtService {
 	
 	/** Create persistent index if it does not exist yet*/
 	protected void createPersistentIndex(TimedJobConfig config) {
+		ValueResourceHelper.setCreate(config.triggerTimedJobStartsWithoutDelay(), 0);
 		if(config.persistentIndex().exists())
 			return;
 		if(maxPIdx < 0) {
