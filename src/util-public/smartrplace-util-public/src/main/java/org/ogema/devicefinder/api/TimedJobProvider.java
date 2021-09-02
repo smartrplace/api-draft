@@ -1,6 +1,5 @@
 package org.ogema.devicefinder.api;
 
-import org.ogema.devicefinder.util.TimedJobMemoryData;
 import org.smartrplace.apps.eval.timedjob.TimedEvalJobConfig;
 import org.smartrplace.apps.eval.timedjob.TimedJobConfig;
 

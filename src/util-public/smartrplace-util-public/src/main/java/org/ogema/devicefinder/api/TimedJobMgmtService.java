@@ -2,8 +2,6 @@ package org.ogema.devicefinder.api;
 
 import java.util.Collection;
 
-import org.ogema.devicefinder.util.TimedJobMemoryData;
-
 public interface TimedJobMgmtService {
 	/** Register provider. If the ID is already known, do nothing
 	 * @param prov
