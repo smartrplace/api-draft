@@ -141,19 +141,20 @@ if(Boolean.getBoolean("jobdebug")) {
 		if(prov.evalJobType() == 0)
 			return true;
 		long free = rt.freeMemory()/(1024*1024);
-if(Boolean.getBoolean("jobdebug")) System.out.println("Finished after "+lastRunDuration+" msec job of provider:"+prov.id()+" Free:"+free);
+if(Boolean.getBoolean("jobdebug")) System.out.println("Finished after "+lastRunDuration+" msec job of provider:"+prov.id()+" Free:"+free+" not saved:"+countSinceLastGC);
 		if(free < MIN_FREE_MEMORY_MB) {
 			//rt.gc();
 			if(countSinceLastGC > 10) {
 				//TimeseriesSimpleProcUtil;
+if(Boolean.getBoolean("jobdebug")) System.out.println("Triggering Save2Disk from evaluation...");
 				TimedJobMemoryData saveJob = timedJobMgmtServiceImpl.getProvider("SaveVDP2Disk");
 				if(saveJob != null) {
 					saveJob.executeBlockingOnceOnYourOwnRisk();
 					countSinceLastGC = 0;
 				}
 			}
-			long freeAfter = rt.freeMemory()/(1024*1024);
-			System.out.println(" Free after GC:"+freeAfter+" not saved:"+countSinceLastGC);
+			//long freeAfter = rt.freeMemory()/(1024*1024);
+			//System.out.println(" Free after GC:"+freeAfter+" not saved:"+countSinceLastGC);
 			/*if(countSinceLastGC == 0 && freeAfter < MIN_FREE_MEMORY_MB) {
 				try {
 					Thread.sleep(10000);
