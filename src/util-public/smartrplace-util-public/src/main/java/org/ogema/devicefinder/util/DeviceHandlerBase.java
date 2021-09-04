@@ -40,7 +40,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	 * of the patterns make sure that each device of the type is assigned to exactly one DeviceHandlerProvider.
 	 */
 	protected abstract Class<? extends ResourcePattern<T>> getPatternClass();
-
+	
 	protected PatternListenerExtended<ResourcePattern<T>, T> listener = null;
 	public List<ResourcePattern<T>> getAllPatterns() {
 		if(listener == null)

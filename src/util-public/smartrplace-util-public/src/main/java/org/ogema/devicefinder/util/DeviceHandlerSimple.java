@@ -106,6 +106,11 @@ if(Boolean.getBoolean("jobdebug")) {
 	@Override
 	public DeviceTableBase getDeviceTable(WidgetPage<?> page, Alert alert,
 			InstalledAppsSelector appSelector) {
+		throw new IllegalStateException("Only with config supported for DeviceHandlerSimple!");
+	}
+	@Override
+	public DeviceTableBase getDeviceTable(WidgetPage<?> page, Alert alert,
+			InstalledAppsSelector appSelector, DeviceTableConfig config) {
 		return new DeviceTableBase(page, appMan, alert, appSelector, this) {
 			@Override
 			protected String pid() {
@@ -117,7 +122,7 @@ if(Boolean.getBoolean("jobdebug")) {
 					String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 
 				@SuppressWarnings("unchecked")
-				final T box = (T)addNameWidget(object, vh, id, req, row, appMan);
+				final T box = (T)addNameWidget(object, vh, id, req, row, appMan, config.showOnlyBaseCols());
 
 				SingleValueResource sampleSensor = getMainSensorValue(box, object);
 				if(sampleSensor != null) {
@@ -140,14 +145,16 @@ if(Boolean.getBoolean("jobdebug")) {
 					}
 				}
 				
-				addMoreValueWidgets(object, box, vh, id, req, row, appMan, alert);
+				if(!config.showOnlyBaseCols())
+					addMoreValueWidgets(object, box, vh, id, req, row, appMan, alert);
 				
 				if(isInRoom) {
 					Room deviceRoom = box.location().room();
 					addRoomWidget(vh, id, req, row, appMan, deviceRoom);
 				}
 				addSubLocation(object, vh, id, req, row);
-				addInstallationStatus(object, vh, id, req, row);
+				if(!config.showOnlyBaseCols())
+					addInstallationStatus(object, vh, id, req, row);
 				addComment(object, vh, id, req, row);
 
 				appSelector.addWidgetsExpert(DeviceHandlerSimple.this, object, vh, id, req, row, appMan);

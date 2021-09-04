@@ -111,4 +111,18 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * 
 	 */
 	String getDeviceTypeShortId(DatapointService dpService);
+	
+	public enum ComType {
+		IP,
+		ZIGBEE,
+		HOMEMATIC,
+		BLUETOOTH,
+		WMBUS,
+		BACNET_SUB,
+		LOCAL_VIRTUAL,
+		OTHER_UNKNOWN
+	}
+	default ComType getComType() {
+		return ComType.OTHER_UNKNOWN;
+	}
 }

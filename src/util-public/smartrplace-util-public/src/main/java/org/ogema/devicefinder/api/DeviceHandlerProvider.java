@@ -76,6 +76,10 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	 */
 	void removePatternDemand();
 	
+	public static interface DeviceTableConfig {
+		boolean showOnlyBaseCols();
+	}
+	
 	/** Provide table to be included into the hardware-installation app. It is recommended to use the
 	 * pre-implemented methods for common table elements such as
 	 * {@link DeviceTableBase#addNameWidget(org.smartrplace.apps.hw.install.config.InstallAppDevice, org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper, String, de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest, de.iwes.widgets.html.complextable.RowTemplate.Row, ApplicationManager)}
@@ -87,8 +91,18 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	 * @param appSelector same object also provided with {@link #addPatternDemand(ResourcePatternAccess, InstalledAppsSelector)}
 	 * @return object of class extending DeviceTableBase
 	 */
-	DeviceTableBase getDeviceTable(WidgetPage<?> page, Alert alert,
-			InstalledAppsSelector appSelector);
+	default DeviceTableBase getDeviceTable(WidgetPage<?> page, Alert alert,
+			InstalledAppsSelector appSelector, DeviceTableConfig config) {
+		return getDeviceTable(page, alert, appSelector);
+	}
+	/** If {@link #getDeviceTable(WidgetPage, Alert, InstalledAppsSelector, DeviceTableConfig)} is overwritten then this method
+	 * may thrown an exception or just return null
+	 * @param page
+	 * @param alert
+	 * @param appSelector
+	 * @return
+	 */
+	DeviceTableBase getDeviceTable(WidgetPage<?> page, Alert alert, InstalledAppsSelector appSelector);
 	
 	/** Provide simulation for a device. The primary goal of the simulation is provide a realistic feedback on
 	 * setpoint actions on the device as many applications expect a feedback from the hardware device when

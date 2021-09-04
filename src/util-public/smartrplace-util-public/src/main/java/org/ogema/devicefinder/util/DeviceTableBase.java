@@ -57,6 +57,10 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	
 	public Resource addNameWidget(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
+		return addNameWidget(object, vh, id, req, row, appMan, false);
+	}
+	public Resource addNameWidget(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan, boolean showOnlyBaseCols) {
 		
 		final String name;
         final String deviceId;
@@ -71,7 +75,8 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
             else
                 deviceId = "n/a";
         }
-		vh.stringLabel("Name", id, name, row);
+		if(!showOnlyBaseCols)
+			vh.stringLabel("Name", id, name, row);
 		vh.stringLabel("ID", id, deviceId, row);
 		
 		final Resource device;
