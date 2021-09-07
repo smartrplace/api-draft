@@ -135,8 +135,10 @@ public abstract class ProcessedReadOnlyTimeSeries implements ReadOnlyTimeSeries 
 	
 	/** Used for the update when knownEndUpdateInterval is triggered
 	 */
-	final Integer absoluteTiming; 
-	
+	final Integer absoluteTiming;
+	public Integer absoluteTiming() {
+		return absoluteTiming;
+	}
 	protected final long creationTime;
 	
 	protected final InterpolationMode interpolationMode;

@@ -55,6 +55,13 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	public void loadInitData() {}
 	
 	public TimedJobMemoryData timedJob = null;
+	public TimeseriesUpdateListener listener = null;
+	@Override
+	protected void addValues(List<SampledValue> newVals) {
+		super.addValues(newVals);
+		if(listener != null)
+			listener.updated(newVals);
+	}
 	
 	/** Implement one of these three OR use constructor that sets input type SINGLE directly*/
 	public Datapoint getInputDp() {return dpInSingle;}

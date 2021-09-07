@@ -692,6 +692,10 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size
 
 	}
 
+	public static class BatteryEvalResult {
+		public List<SampledValue> remainingLifeTime = new ArrayList<>();
+		public List<SampledValue> voltageMinimal = new ArrayList<>();
+	}
 	/** Estimate remaining life time of a battery each time the voltage drops permanently. A new battery is indicated by
 	 * a value of -10
 	 * @param timeSeries batteryVoltage measurements for a device
@@ -700,10 +704,10 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size
 	 * @param addFirstNonNaNValue
 	 * @return
 	 */
-	public static List<SampledValue> getBatteryRemainingLifetimeEstimation(ReadOnlyTimeSeries timeSeries, long start, long end,
+	public static BatteryEvalResult getBatteryRemainingLifetimeEstimation(ReadOnlyTimeSeries timeSeries, long start, long end,
 			boolean addFirstNonNaNValue) {
 		List<SampledValue> input = timeSeries.getValues(start, end+1);
-		List<SampledValue> result = new ArrayList<>();
+		BatteryEvalResult result = new BatteryEvalResult();
 		SampledValue lastUpSv = null;
 if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size()+" input timestamps in BATtery");
 		for(SampledValue sv: input) {
@@ -724,7 +728,9 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size
 							|| (lastUpVal >= 2.6f && (newVal - lastUpVal > 0.25f))
 							|| (newVal - lastUpVal > 0.35f)) {
 						SampledValue resultsv = new SampledValue(new FloatValue(-10), sv.getTimestamp(), Quality.GOOD);
-						result.add(resultsv);					
+						result.remainingLifeTime.add(resultsv);
+						result.voltageMinimal.add(new SampledValue(new FloatValue(lastUpVal), lastUpSv.getTimestamp(), Quality.GOOD));
+						result.voltageMinimal.add(new SampledValue(new FloatValue(newVal), sv.getTimestamp(), Quality.GOOD));
 						lastUpSv = sv;
 					}
 				} else { //smaller
@@ -738,7 +744,9 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size
 					if(isEndOfLevel) {
 						float days = (float) (((double)BatteryEvalBase.getRemainingLifeTimeEstimation(lastUpVal))/TimeProcUtil.DAY_MILLIS);
 						SampledValue resultsv = new SampledValue(new FloatValue(days), sv.getTimestamp(), Quality.GOOD);
-						result.add(resultsv);
+						result.remainingLifeTime.add(resultsv);
+						result.voltageMinimal.add(new SampledValue(new FloatValue(lastUpVal), lastUpSv.getTimestamp(), Quality.GOOD));
+						result.voltageMinimal.add(new SampledValue(new FloatValue(newVal), sv.getTimestamp(), Quality.GOOD));
 						lastUpSv = sv;
 					}
 				}
