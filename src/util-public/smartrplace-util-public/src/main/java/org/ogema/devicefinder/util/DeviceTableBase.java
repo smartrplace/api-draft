@@ -8,9 +8,11 @@ import org.ogema.core.model.Resource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
+import de.iwes.util.linkingresource.RoomHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -154,5 +156,16 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	
 	public Header getHeaderWidget() {
 		return headerWinSens;
+	}
+	
+	@Override
+	public String getLineId(InstallAppDevice object) {
+		if(appSelector.sortByRoom()) {
+			Room room = ResourceUtils.getDeviceLocationRoom(object.device());
+			if(room != null) {
+				return "_"+ResourceUtils.getHumanReadableShortName(room)+super.getLineId(object);				
+			}
+		}
+		return object.deviceId().getValue()+super.getLineId(object);
 	}
 }

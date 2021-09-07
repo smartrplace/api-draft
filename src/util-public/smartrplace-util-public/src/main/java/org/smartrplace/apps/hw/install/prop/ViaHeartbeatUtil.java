@@ -181,22 +181,22 @@ System.out.println("Use send group:"+sendGroup.id()+" recvGroup"+recvGroup.id())
 	public static void updateEvalResources(KnownIssueDataGw kniData, ApplicationManager appMan) {
 		if(kniData != null) {
 			int[] alarmNum = AlarmingConfigUtil.getActiveAlarms(appMan.getResourceAccess());
-			ValueResourceHelper.setCreate(kniData.datapointsInAlarmState(), alarmNum[0]);
-			ValueResourceHelper.setCreate(kniData.activeAlarmSupervision(), alarmNum[1]);
-			ValueResourceHelper.setCreate(kniData.datapointsTotal(), alarmNum[2]);
-			ValueResourceHelper.setCreate(kniData.devicesTotal(), alarmNum[3]);
+			ValueResourceHelper.setCreateIfChanged(kniData.datapointsInAlarmState(), alarmNum[0]);
+			ValueResourceHelper.setCreateIfChanged(kniData.activeAlarmSupervision(), alarmNum[1]);
+			ValueResourceHelper.setCreateIfChanged(kniData.datapointsTotal(), alarmNum[2]);
+			ValueResourceHelper.setCreateIfChanged(kniData.devicesTotal(), alarmNum[3]);
 			
 			int[] knis = AlarmingConfigUtil.getKnownIssues(appMan.getResourceAccess());
-			ValueResourceHelper.setCreate(kniData.knownIssuesUnassigned(), knis[0]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedBattery(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+2]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedDevNotReacheable(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+3]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedSignalStrength(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+4]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedOther(), knis[1]+knis[5]+knis[6]+knis[7]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedOperationOwn(), knis[2]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedDevOwn(), knis[3]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesAssignedCustomer(), knis[4]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesOpExternal(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM]);
-			ValueResourceHelper.setCreate(kniData.knownIssuesDevExternal(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+1]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesUnassigned(), knis[0]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesAssignedBattery(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+2]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesAssignedDevNotReacheable(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+3]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesAssignedSignalStrength(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+4]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesAssignedOther(), knis[1]+knis[5]+knis[6]+knis[7]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesAssignedOperationOwn(), knis[2]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesAssignedDevOwn(), knis[3]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesAssignedCustomer(), knis[4]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesOpExternal(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM]);
+			ValueResourceHelper.setCreateIfChanged(kniData.knownIssuesDevExternal(), knis[AlarmingConfigUtil.MAIN_ASSIGNEMENT_ROLE_NUM+1]);
 		}		
 	}
 }

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
-import org.ogema.devicefinder.util.DeviceHandlerBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -35,4 +34,8 @@ public interface InstalledAppsSelector {
 	
 	void addWidgetsExpert(DeviceHandlerProvider<?> tableProvider, InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan);
+	
+	default boolean sortByRoom() {
+		return false;
+	}
 }
