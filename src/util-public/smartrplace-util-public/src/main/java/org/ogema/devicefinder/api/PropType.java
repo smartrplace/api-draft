@@ -239,11 +239,10 @@ public class PropType implements LabelledItem {
 		else if(type == PropType.THERMOSTAT_VALVE_MAXPOSITION)
 			return getSubFloat(master, "VALVE_MAXIMUM_POSITION", feedback);
 		else
-			throw new IllegalStateException("PropType not supported as resource:"+type);
+			throw new IllegalStateException("PropType not supported as resource:"+type.id);
 	}
 
 	public static final List<PropType> PROPS_RESOURCES = Arrays.asList(new PropType[] {
-			PropType.THERMOSTAT_OPERATION_MODE,
 			PropType.THERMOSTAT_WINDOWOPEN_MODE, PropType.THERMOSTAT_WINDOWOPEN_TEMPERATURE, PropType.THERMOSTAT_WINDOWOPEN_MINUTES,
 			PropType.THERMOSTAT_VALVE_MAXPOSITION});
 
