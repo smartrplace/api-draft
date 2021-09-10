@@ -78,7 +78,8 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * @param <S>
 	 * @param device
 	 * @param deviceConfiguration
-	 * @return
+	 * @return if deviceConfiguration == null and device == null then return emptyList to indicate that device handler
+	 * 		can provide setpoint information
 	 */
 	default List<SetpointData> getSetpointData(T device, InstallAppDevice deviceConfiguration) {
 		return null;
@@ -87,7 +88,10 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default List<SetpointData> getSetpointData(InstallAppDevice deviceConfiguration) {
 		@SuppressWarnings("unchecked")
 		T device = (T) deviceConfiguration.device();
-		return getSetpointData(device, deviceConfiguration);
+		if(!device.exists())
+			return getSetpointData(null, null);
+		else
+			return getSetpointData(device, deviceConfiguration);
 	}
 
 	/** Get device name. Usually this should be the same name as the name shown in the table provided if {@link DriverHandlerProvider}

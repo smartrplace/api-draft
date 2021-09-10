@@ -20,10 +20,10 @@ public interface AlarmOngoingGroup extends LabelledItem {
 	 */
 	default boolean consumesBaseAlarms() {return true;}
 	
-	/** Persistent data of the object. Note that resources for which not object is created anymore
+	/** Persistent data of the object. Note that resources for which no object is created anymore
 	 * shall be deleted
 	 */
-	AlarmGroupData getResource();
+	AlarmGroupData getResource(boolean forceToCreate);
 	
 	AlarmingExtension sourceOfGroup();
 	

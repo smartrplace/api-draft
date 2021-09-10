@@ -51,8 +51,7 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 		super(page, id, saveOptionMode, 1, addAllOptionSecondDrop);
 		if(saveOptionMode == OptionSavingMode.PER_USER)
 			throw new UnsupportedOperationException("PER_USER not supported for DualFiltering2Steps");
-		//FIXME: For now we add the all option to the first dropdown always. This should be configurable in the future,
-		//maybe also dynamically to detect whether this leads to too large dropdowns
+
 		firstDropDown = new SingleFilteringGroupBased<A, G, A>(page, id+"_first", saveOptionMode, optionSetUpdateRate, addAllOptionFirstDrop) {
 			private static final long serialVersionUID = 1L;
 
@@ -71,15 +70,11 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 				List<A> result = new ArrayList<>();
 				result.add(object);
 				return result ;
-				//return getGroups(object);
 			}
 			
 			@Override
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			protected List<GenericFilterOption<A>> getOptionsDynamic(OgemaHttpRequest req) {
-			//	return getOptionsDynamic();
-			//}
-			//protected List<GenericFilterOption<A>> getOptionsDynamic() {
 				if(suppressEmptyOptionsInFirstDropdown) {
 					List<GenericFilterFixedGroup<A, G>> all = (getGroupOptionsDynamic());
 					List<GenericFilterOption<A>> result = new ArrayList<>();
@@ -103,13 +98,6 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 			@Override
 			public boolean isInSelection(A object, G group) {
 				return isInSelectionObjectInGroup(object, group);
-				/*List<G> grpsForObject = getGroups(object);
-				for(G grp1: grpsForObject) {
-					if(isGroupEqual(grp1, group))
-						return true;
-				}
-				return false;
-				//return grpsForObject.contains(group);*/
 			}
 		};
 		firstDropDown.registerDependentWidget(this);
@@ -122,7 +110,6 @@ public abstract class DualFiltering2Steps<A, G, T> extends SingleFiltering<A, T>
 				return true;
 		}
 		return false;
-		//return grpsForObject.contains(group);		
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -54,7 +54,7 @@ public class AlarmingServiceImpl implements AlarmingService {
 		AlarmOngoingGroup grp = getOngoingGroup(id);
 		if(grp == null)
 			return false;
-		ValueResourceHelper.setCreate(grp.getResource().isFinished(), true);
+		ValueResourceHelper.setCreate(grp.getResource(true).isFinished(), true);
 		return true;
 	}
 
