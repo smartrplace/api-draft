@@ -32,6 +32,7 @@ public interface AlarmingService {
 	 * @param id
 	 * @return
 	 */
+	@Deprecated // not used
 	boolean finishOngoingGroup(String id);
 	
 	void registerRecReplayObserver(RecReplayObserver observer);

@@ -50,6 +50,7 @@ public class AlarmingServiceImpl implements AlarmingService {
 	}
 
 	@Override
+	@Deprecated // not used
 	public boolean finishOngoingGroup(String id) {
 		AlarmOngoingGroup grp = getOngoingGroup(id);
 		if(grp == null)

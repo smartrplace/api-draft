@@ -51,14 +51,17 @@ public class AlarmingConfigUtil {
 	
 	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 8; //including unassigned (0)
 	public static final Map<String, String> ASSIGNEMENT_ROLES = new LinkedHashMap<>();
+	public static final int ASSIGNMENT_BATTERYLOW = 2100;
+	public static final int ASSIGNMENT_DEVICE_NOT_REACHEABLE = 2150;
+	public static final int ASSIGNMENT_SIGNALSTRENGTH = 2200;
 	static {
 		ASSIGNEMENT_ROLES.put("0", "None");
 		//ASSIGNEMENT_ROLES.put("1", "requires more analysis");
 		ASSIGNEMENT_ROLES.put("1000", "Other");	
 		ASSIGNEMENT_ROLES.put("2000", "Operation");
-		ASSIGNEMENT_ROLES.put("2100", "Op Battery");
-		ASSIGNEMENT_ROLES.put("2150", "Op Device not Reacheable");
-		ASSIGNEMENT_ROLES.put("2200", "Op Signal strength");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_BATTERYLOW, "Op Battery");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVICE_NOT_REACHEABLE, "Op Device not Reacheable");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_SIGNALSTRENGTH, "Op Signal strength");
 		ASSIGNEMENT_ROLES.put("2500", "Op External");
 		ASSIGNEMENT_ROLES.put("3000", "Development");
 		//ASSIGNEMENT_ROLES.put("2100", "Development Logic");
@@ -439,15 +442,15 @@ public class AlarmingConfigUtil {
 				result[0] ++;
 				continue;
 			}
-			if(role == 2100) {
+			if(role == ASSIGNMENT_BATTERYLOW) {
 				result[MAIN_ASSIGNEMENT_ROLE_NUM+2] ++;
 				continue;								
 			}
-			if(role == 2150) {
+			if(role == ASSIGNMENT_DEVICE_NOT_REACHEABLE) {
 				result[MAIN_ASSIGNEMENT_ROLE_NUM+3] ++;
 				continue;								
 			}
-			if(role == 2200) {
+			if(role == ASSIGNMENT_SIGNALSTRENGTH) {
 				result[MAIN_ASSIGNEMENT_ROLE_NUM+4] ++;
 				continue;								
 			}
