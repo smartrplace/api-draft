@@ -35,4 +35,11 @@ public class MessageDTO {
      */    
     public Map<String, Object> messageProperties;
     
+    /**
+     * For message systems that support messages with generic maps: should
+     * the message properties defined in {@link MessagingConstants} which are
+     * used in {@link #messageProperties} be propagated to that map? Default: false.
+     */
+    public boolean keepStandardPropertiesInGenericMap = false;
+    
 }

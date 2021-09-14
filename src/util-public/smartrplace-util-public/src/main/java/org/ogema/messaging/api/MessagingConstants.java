@@ -1,5 +1,9 @@
 package org.ogema.messaging.api;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  *
  * @author jlapp
@@ -35,6 +39,22 @@ public abstract class MessagingConstants {
      */
     public static final String MESSAGE = "standardMessageProperty.message";
     
+    /**
+     * Standard message property for time to live in millisecconds.
+     */
+    public static final String TTL = "standardMessageProperty.ttl";
+    
+    /**
+     * Standard message property for collapse key.
+     */
+    public static final String COLLAPSE_KEY = "standardMessageProperty.collapsekey";
+    
+    private static final List<String> MESSAGE_PROPERTIES = Arrays.asList(TITLE, MESSAGE, TTL, COLLAPSE_KEY);
+    
     private MessagingConstants() {}
+    
+    public static List<String> MESSAGE_PROPERTIES() {
+        return Collections.unmodifiableList(MESSAGE_PROPERTIES);
+    }
     
 }
