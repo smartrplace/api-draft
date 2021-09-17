@@ -20,7 +20,7 @@ import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.html.form.label.LabelData;
 
 public class BatteryEvalBase {
-	public static final float DEFAULT_BATTERY_CHANGE_VOLTAGE = 2.8f;
+	public static final float DEFAULT_BATTERY_CHANGE_VOLTAGE = 2.7f;
 	public static final float DEFAULT_BATTERY_WARN_VOLTAGE = 2.5f;
 	public static final float DEFAULT_BATTERY_URGENT_VOLTAGE = 2.3f;
 	public static final long TIME_TO_ASSUME_EMPTY = 1*TimeProcUtil.DAY_MILLIS;
@@ -65,7 +65,7 @@ public class BatteryEvalBase {
 		else if(val <= DEFAULT_BATTERY_WARN_VOLTAGE)
 			return BatteryStatus.WARNING;
 		else if(changeInfoRelevant && (val <= DEFAULT_BATTERY_CHANGE_VOLTAGE))
-			return BatteryStatus.URGENT;
+			return BatteryStatus.CHANGE_RECOMMENDED;
 		return BatteryStatus.OK;
 	}
 	

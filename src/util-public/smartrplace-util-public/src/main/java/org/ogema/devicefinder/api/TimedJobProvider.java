@@ -51,5 +51,4 @@ public interface TimedJobProvider extends LabelledItem {
 	
 	default void timerStartedNotification(TimedJobMemoryData data) {}
 	default void timerStoppedNotification(TimedJobMemoryData data) {}
-	
 }

@@ -12,6 +12,12 @@ public class InitialConfig {
 			return true;
 		return false;
 	}
+	public static boolean checkInitAndMarkAsDone(String initID, StringResource res, String deviceId) {
+		if(isInitDone(initID, res))
+			return true;
+		addString(initID, res, deviceId);
+		return false;
+	}
 	
 	public static void addString(String initID, StringResource res) {
 		addString(initID, res, null);

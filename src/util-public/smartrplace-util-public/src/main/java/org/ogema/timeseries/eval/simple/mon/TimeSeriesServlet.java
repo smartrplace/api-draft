@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,9 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 
 	/** Distance for last value after which interpolation will not take place */
 	public static final long ACCEPTED_PREVIOUS_VALUE_DISTANCE_INTERPOLATED = 2*TimeProcUtil.DAY_MILLIS;
+
+	public static final int MAX_SAMPLE_PER_EVAL = 50000;
+	public static final int MIN_SAMPLE_PER_SPLITEVAL = MAX_SAMPLE_PER_EVAL/2;
 	public TimeSeriesServlet(ApplicationManager appMan) {
 		this.appMan = appMan;
 	}
@@ -542,17 +546,59 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		return sum;
 	}
 
+	protected static long getEndBelowMaxSample(ReadOnlyTimeSeries timeSeries, long start, long curEnd, int curSize) {
+		if(curSize < MAX_SAMPLE_PER_EVAL)
+			return curEnd;
+		double factor = ((double)MAX_SAMPLE_PER_EVAL)/curSize;
+		if(factor > 0.5)
+			factor = 0.5;
+		long newEnd = (long) (factor*(curEnd-start))+start;
+		int newSize = timeSeries.size(start, newEnd);
+		while((newSize < MIN_SAMPLE_PER_SPLITEVAL) && (factor < 0.5)) {
+			factor *= 2;
+			newEnd = (long) (factor*(curEnd-start))+start;
+			newSize = timeSeries.size(start, newEnd);
+		}
+		return getEndBelowMaxSample(timeSeries, start, newEnd, newSize);
+	}
+	
 	/** Return gap durations in minutes as FloatValues*/
-	public static List<SampledValue> getGaps(ReadOnlyTimeSeries timeSeries, long start, long end, long maxGapSize) {
+	/*public static List<SampledValue> getGaps(ReadOnlyTimeSeries timeSeries, long start, long end, long maxGapSize,
+			Integer absoluteTiming) {
+		int svNum = timeSeries.size(start, end+1);
+		if(svNum > MAX_SAMPLE_PER_EVAL) {
+			List<SampledValue> result = new ArrayList<>();
+			long partEnd = getEndBelowMaxSample(timeSeries, start, end, svNum);
+			long partStart = start;
+			while(partEnd < end) {
+				List<SampledValue> input = timeSeries.getValues(partStart, partEnd+1);
+				result.addAll(getGaps(input, partStart, partEnd, maxGapSize));
+				if(absoluteTiming != null) {
+					partStart = AbsoluteTimeHelper.getIntervalStart(partEnd, absoluteTiming);
+				} else
+					partStart = partEnd;
+				partEnd = getEndBelowMaxSample(timeSeries, partStart, end, svNum);
+			}
+		}
 		List<SampledValue> input = timeSeries.getValues(start, end+1);
+		return getGaps(input, start, end, maxGapSize);
+	}
+	public static List<SampledValue> getGaps(ReadOnlyTimeSeries timeSeries, long start, long end, long maxGapSize) {
+		return getGaps(timeSeries, start, end, maxGapSize, AbsoluteTiming.WEEK);
+	}
+	public static List<SampledValue> getGaps(List<SampledValue> input, long start, long end, long maxGapSize) {*/
+	public static List<SampledValue> getGaps(ReadOnlyTimeSeries timeSeries, long start, long end, long maxGapSize) {
 		List<SampledValue> result = new ArrayList<>();
 		SampledValue lastVal = null;
-if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size()+" input timestamps in GAPs");
-		if(input.isEmpty() && ((end-start) > maxGapSize)) {
+if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries.size(start, end)+" input timestamps in GAPs");
+		if(timeSeries.isEmpty() && ((end-start) > maxGapSize)) {
 			result.add(new SampledValue(new FloatValue((float)((double)(end-start)/TimeProcUtil.MINUTE_MILLIS)), end, Quality.GOOD));
 			return result;
 		}
-		for(SampledValue sv: input) {
+		Iterator<SampledValue> it = timeSeries.iterator(start, end);
+		while(it.hasNext()) {
+			SampledValue sv = it.next();
+		//for(SampledValue sv: input) {
 			if(lastVal == null)
 				lastVal = sv;
 			else {
@@ -706,11 +752,14 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size
 	 */
 	public static BatteryEvalResult getBatteryRemainingLifetimeEstimation(ReadOnlyTimeSeries timeSeries, long start, long end,
 			boolean addFirstNonNaNValue) {
-		List<SampledValue> input = timeSeries.getValues(start, end+1);
+		//List<SampledValue> input = timeSeries.getValues(start, end+1);
 		BatteryEvalResult result = new BatteryEvalResult();
 		SampledValue lastUpSv = null;
-if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+input.size()+" input timestamps in BATtery");
-		for(SampledValue sv: input) {
+		if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries.size(start, end)+" input timestamps in BATtery");
+		Iterator<SampledValue> it = timeSeries.iterator(start, end);
+		while(it.hasNext()) {
+			SampledValue sv = it.next();
+		//for(SampledValue sv: input) {
 			if(lastUpSv == null) {
 				lastUpSv = sv;
 			} else if(Float.isNaN(lastUpSv.getValue().getFloatValue())) {

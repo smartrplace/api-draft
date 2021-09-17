@@ -22,7 +22,9 @@ import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
 
+import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
+import de.iwes.util.timer.AbsoluteTiming;
 
 public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTimeSeries {
 	/** This method is called to obtain the calculated values. The method may be called again for the same
@@ -55,6 +57,7 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	public void loadInitData() {}
 	
 	public TimedJobMemoryData timedJob = null;
+	public TimeseriesSetProcessor3 proc = null;
 	public TimeseriesUpdateListener listener = null;
 	@Override
 	protected void addValues(List<SampledValue> newVals) {
@@ -101,6 +104,9 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	public long getLastEndTime() {
 		return lastEndTime;
 	}
+	public void initLastEndTime(long lastEndTime) {
+		this.lastEndTime = lastEndTime;
+	}
 
 	public enum InputType {
 		NoneOrImplicit,
@@ -140,15 +146,15 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	}
 	
 	public ProcessedReadOnlyTimeSeries3(TimeSeriesNameProvider nameProvider,
-			AggregationMode mode) {
-		this(nameProvider, mode, !Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"));
+			AggregationMode mode, Integer absoluteTiming) {
+		this(nameProvider, mode, !Boolean.getBoolean("org.ogema.timeseries.eval.simple.api.noUpdateLastTimestampInSource"), absoluteTiming);
 		
 	}
-	public ProcessedReadOnlyTimeSeries3(TimeSeriesNameProvider nameProvider,
+	/*public ProcessedReadOnlyTimeSeries3(TimeSeriesNameProvider nameProvider,
 			AggregationMode mode,
 			boolean updateLastTimestampInSourceOnEveryCall) {
 		this(nameProvider, mode, updateLastTimestampInSourceOnEveryCall, null);
-	}
+	}*/
 
 	public ProcessedReadOnlyTimeSeries3(TimeSeriesNameProvider nameProvider,
 			AggregationMode mode,
@@ -166,15 +172,15 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		lastReCalc = getCurrentTime();
 	}
 	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput) {
-		this(dpInput, null);
+		this(dpInput, null, null);
 	}
-	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput, Map<String, Datapoint> dependentTimeseries) {
-		this(null, dpInput.info().getAggregationMode());
+	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput, Map<String, Datapoint> dependentTimeseries, Integer absoluteTiming) {
+		this(null, dpInput.info().getAggregationMode(), absoluteTiming);
 		inputType = InputType.SINGLE;
 		dpInSingle = dpInput;
 		this.dependentTimeseries = dependentTimeseries;
 	}
-	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput, Integer absoluteTiming, Long minIntervalForReCalc) {
+	/*public ProcessedReadOnlyTimeSeries3(Datapoint dpInput, Integer absoluteTiming, Long minIntervalForReCalc) {
 		this(dpInput, absoluteTiming, minIntervalForReCalc, null);
 	}
 	public ProcessedReadOnlyTimeSeries3(Datapoint dpInput, Integer absoluteTiming, Long minIntervalForReCalc,
@@ -184,7 +190,7 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		inputType = InputType.SINGLE;
 		dpInSingle = dpInput;
 		this.dependentTimeseries = dependentTimeseries;
-	}
+	}*/
 	
 	
 	
@@ -332,9 +338,11 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	}
 
 	public void initValuesFromFile(ProcTs3PersistentData fromFile) {
-		values = new ArrayList<>();
-		for(SampledValueSimple simple: fromFile.values) {
-			values.add(new SampledValue(new FloatValue(simple.v), simple.t, Quality.GOOD));
+		if(fromFile.values.length > 0) {
+			values = new ArrayList<>();
+			for(SampledValueSimple simple: fromFile.values) {
+				values.add(new SampledValue(new FloatValue(simple.v), simple.t, Quality.GOOD));
+			}
 		}
 		lastEndTime = fromFile.lastEndTime;
 		knownStart = fromFile.knownStart;
@@ -344,16 +352,18 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	}
 	
 	public ProcTs3PersistentData getPersistentData() {
-		if(values == null)
-			return null;
 		ProcTs3PersistentData result = new ProcTs3PersistentData();
-		int size = values.size();
-		result.values = new SampledValueSimple[size];
-		for(int i=0; i<size; i++) {
-			SampledValue sv = values.get(i);
-			result.values[i] = new SampledValueSimple();
-			result.values[i].t = sv.getTimestamp();
-			result.values[i].v = sv.getValue().getFloatValue();
+		if(values == null) {
+			result.values = new SampledValueSimple[0];
+		} else {
+			int size = values.size();
+			result.values = new SampledValueSimple[size];
+			for(int i=0; i<size; i++) {
+				SampledValue sv = values.get(i);
+				result.values[i] = new SampledValueSimple();
+				result.values[i].t = sv.getTimestamp();
+				result.values[i].v = sv.getValue().getFloatValue();
+			}
 		}
 		result.lastEndTime = lastEndTime;
 		result.knownStart = knownStart;
@@ -369,4 +379,20 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	public void addValuesPublic(List<SampledValue> newVals) {
 		addValues(newVals);
 	}
+	
+	@Override
+	public String getSummaryColumn() {
+		String result = StringFormatHelper.getTimeDateInLocalTimeZone(knownStart)+"/"+
+				(knownEnd != Long.MAX_VALUE ? StringFormatHelper.getTimeDateInLocalTimeZone(knownEnd) : " MAX ")+
+				"/"+StringFormatHelper.getTimeDateInLocalTimeZone(lastEndTime);
+		if(proc != null && proc.getAbsoluteTiming() != null) {
+			String name = AbsoluteTiming.INTERVAL_NAME_MAP.get(""+proc.getAbsoluteTiming());
+			if(name != null)
+				result += "/"+name;
+			else
+				result += "/ (?"+proc.getAbsoluteTiming()+"?)";
+			result += "/"+StringFormatHelper.getFormattedValue(proc.getMinIntervalForReCalc());
+		} return result;
+	}
+
 }
