@@ -65,6 +65,12 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 		if(listener != null)
 			listener.updated(newVals);
 	}
+	@Override
+	protected void addValues(List<SampledValue> newVals, long removeFirst, long removeLast) {
+		super.addValues(newVals, removeFirst, removeLast);
+		if(listener != null)
+			listener.updated(newVals);
+	}
 	
 	/** Implement one of these three OR use constructor that sets input type SINGLE directly*/
 	public Datapoint getInputDp() {return dpInSingle;}
@@ -277,17 +283,17 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 		lastReCalc = getCurrentTime();
 		lastEndTime = end;
 		if(newVals != null)
-			addValues(newVals);
+			addValues(newVals, start, end);
 		else
 			System.out.println("Warning: newVals null!");
 		return newVals;
 	}
 	
-	public List<SampledValue> updateValuesStoredForcedForDependentTimeseries(long end, List<SampledValue> newVals) {
+	public List<SampledValue> updateValuesStoredForcedForDependentTimeseries(long start, long end, List<SampledValue> newVals) {
 		lastReCalc = getCurrentTime();
 		lastEndTime = end;
 		if(newVals != null)
-			addValues(newVals);
+			addValues(newVals, start, end);
 		else
 			System.out.println("Warning: newVals null!");
 		return newVals;		

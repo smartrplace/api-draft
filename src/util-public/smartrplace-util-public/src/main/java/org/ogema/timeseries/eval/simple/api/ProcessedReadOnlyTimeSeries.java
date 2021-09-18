@@ -312,17 +312,22 @@ if(subTsBuildLog != null) subTsBuildLog.logEvent((endOfAgg-startCalc), "Calculat
 		return result;		
 	}
 	
+	/** Remove all existing values between first and last values in newVals and removeLast and add newVals*/
 	protected void addValues(List<SampledValue> newVals) {
 		if(newVals.isEmpty())
 			return;
-long startCalc =  getCurrentTime();
 		if(Boolean.getBoolean("evaldebug")) {
 			TimeProcUtil.checkConsistency(newVals, "NEW::"+dpLabel());
 		}
-		List<SampledValue> existing = null;
 		long newFirst = newVals.get(0).getTimestamp();
 		long newLast = newVals.get(newVals.size()-1).getTimestamp();
-		List<SampledValue> existingLoc = getValuesWithoutUpdate(newFirst, newLast+1);
+		addValues(newVals, newFirst, newLast);
+	}
+	/** Remove all existing values between removeFirst and removeLast and add newVals*/
+	protected void addValues(List<SampledValue> newVals, long removeFirst, long removeLast) {
+		long startCalc =  getCurrentTime();
+		List<SampledValue> existing = null;
+		List<SampledValue> existingLoc = getValuesWithoutUpdate(removeFirst, removeLast+1);
 		if(!existingLoc.isEmpty()) {
 if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for "+dpLabel()+" without registration in getIntervalsToUpdate - now accepted");
 			existing = existingLoc;
@@ -335,14 +340,14 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for
 				if(existing != null)
 					values.removeAll(existing);
 				//values.addAll(newVals);
-				insertNewValues(newVals, newFirst);
+				insertNewValues(newVals, removeFirst);
 			} catch(UnsupportedOperationException e) {
 				//TODO: Should not occur
 				List<SampledValue> concat = new ArrayList<SampledValue>(values);
 				if(existing != null)
 					concat.removeAll(existing);
 				values = concat;
-				insertNewValues(newVals, newFirst);
+				insertNewValues(newVals, removeFirst);
 			}
 		} else {
 			List<SampledValue> concat = (values!=null)?new ArrayList<SampledValue>(values):new ArrayList<>();
@@ -350,7 +355,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("  Overwriting values for
 				concat.removeAll(existing);
 			//concat.addAll(newVals);
 			values = concat;
-			insertNewValues(newVals, newFirst);
+			insertNewValues(newVals, removeFirst);
 			isOwnList = true;
 		}
 		updateValueLimits();
@@ -362,6 +367,8 @@ if(Boolean.getBoolean("evaldebug")) {
 	}
 	
 	protected void insertNewValues(List<SampledValue> newVals, long newFirst) {
+		if(newVals.isEmpty())
+			return;
 		if(values.isEmpty()) {
 			values.addAll(newVals);
 			return;
