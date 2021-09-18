@@ -604,8 +604,8 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 			else {
 				long gap = sv.getTimestamp() - lastVal.getTimestamp();
 				if(gap > maxGapSize) {
-if(timeSeries instanceof RecordedData && ((RecordedData)timeSeries).getPath().startsWith("homematic192_168_2_105_ip/interfaceInfo/dutyCycle/reading"))
-System.out.println("Add XXXGCCU3GAP "+(float)((double)gap/TimeProcUtil.MINUTE_MILLIS)+ " at "+StringFormatHelper.getTimeDateInLocalTimeZone(sv.getTimestamp()));
+//if(timeSeries instanceof RecordedData && ((RecordedData)timeSeries).getPath().startsWith("homematic192_168_2_105_ip/interfaceInfo/dutyCycle/reading"))
+//System.out.println("Add XXXG3GAP "+(float)((double)gap/TimeProcUtil.MINUTE_MILLIS)+ " at "+StringFormatHelper.getTimeDateInLocalTimeZone(sv.getTimestamp()));
 					result.add(new SampledValue(new FloatValue((float)((double)gap/TimeProcUtil.MINUTE_MILLIS)), sv.getTimestamp(), Quality.GOOD));
 				}
 				lastVal = sv;
