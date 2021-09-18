@@ -91,7 +91,7 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 	}
 	
 	public static Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result, DatapointService dpService) {
-		if(res.isActive()) {
+		if(res != null && res.isActive()) {
 			Datapoint dp = dpService.getDataPointStandard(res);
 			result.add(dp);
 			return dp;
