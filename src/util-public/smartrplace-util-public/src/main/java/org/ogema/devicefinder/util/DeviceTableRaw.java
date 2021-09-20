@@ -630,7 +630,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static boolean isWallThermostat(String resourceLocation) {
-		if(resourceLocation.contains("HM_HmIP_WTH_2"))
+		if(resourceLocation.contains("HM_HmIP_WTH_"))
 			return true;
 		if(resourceLocation.contains("HM_HM_TC_IT_WM_W_EU"))
 			return true;
