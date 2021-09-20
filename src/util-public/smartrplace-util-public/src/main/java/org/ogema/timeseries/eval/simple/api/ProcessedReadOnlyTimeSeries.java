@@ -280,6 +280,8 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 			return Collections.emptyList();
 		if(endTime < firstValueInList)
 			return Collections.emptyList();
+		if(values == null)
+			return Collections.emptyList();
 		if(startTime <= firstValueInList && endTime > lastValueInList) {
 			return new ArrayList<SampledValue>(values);
 		}
