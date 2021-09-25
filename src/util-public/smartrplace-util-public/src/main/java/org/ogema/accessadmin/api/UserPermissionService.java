@@ -69,7 +69,6 @@ public interface UserPermissionService {
 			UPDATE_DEFINITION_PERM};
 	
 	public static final String MONITORING = "KPIs and Charts";
-	public static final String ROOM_STATUS_CONTROL = "Room Status Control";
 	public static final String INSTALLATION_SETUP = "Setup&Installation";
 	public static final String ALARMING = "Alarming";
 	public static final String USER_MANAGEMENT = "User Management";
@@ -77,10 +76,25 @@ public interface UserPermissionService {
 	public static final String APPSTORE = "Appstore";
 	public static final String BACNET = "BACnet Admin";
 	
+	//Permission under development
+	public static final String DASHBOARD_GENERAL = "Dashboad General";
+	public static final String DASHBOARD_SAVINGS = "Savings Dashboad";
+	public static final String ROOMCONTROL_WE = "Roomcontrol WE";
+	public static final String ROOMCONTROL_2D = "Roomcontrol 2D";
+	public static final String ROOM_STATUS_CONTROL = "Room Status Control";
+	public static final String MODBUS_SERVER = "Modbus/Bacnet Server";
+	
+	public static final String[] APP_ACCESS_PERMISSIONS_ALL = {MONITORING, INSTALLATION_SETUP, ALARMING,
+			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT, APPSTORE,
+			DASHBOARD_GENERAL, DASHBOARD_SAVINGS,
+			ROOMCONTROL_WE, ROOMCONTROL_2D, ROOM_STATUS_CONTROL, MODBUS_SERVER};
+
 	public static final String[] APP_ACCESS_PERMISSIONS = {MONITORING, INSTALLATION_SETUP, ALARMING,
 			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT};
 	public static final String[] APP_ACCESS_PERMISSIONS_WITHAPPSTORE = {MONITORING, INSTALLATION_SETUP, ALARMING,
 			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT, APPSTORE};
+	public static final String[] APP_ACCESS_PERMISSIONS_FOR_SUPERADMIN = {DASHBOARD_GENERAL, DASHBOARD_SAVINGS,
+			ROOMCONTROL_WE, ROOMCONTROL_2D, ROOM_STATUS_CONTROL, MODBUS_SERVER};
 	
 	/** Permissions for which the building property units rooms per user and per app or app permission type
 	 * shall be chosen via Multiselect. So the table will most likely only show one app or app permission type
@@ -113,7 +127,7 @@ public interface UserPermissionService {
 	/** Returns the permission value that may be greater than one for a permission granted*/
 	int getUserSystemPermission(String userName, String permissionType);
 
-	/** Permission types allowed here are from APP_ACCESS_PERMISSIONS*/
+	/** Permission types allowed here are from APP_ACCESS_PERMISSIONS_ALL*/
 	int getUserStatusAppPermission(UserStatus userStatus, String permissionType, boolean useWorkingCopy);
 	
 	/** Returns the permission value that may be greater than one for a permission granted*/
