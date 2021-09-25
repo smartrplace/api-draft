@@ -125,6 +125,11 @@ public class TimeProcPrint {
 			return ((Schedule)ts).getLocation();
 		else if(ts instanceof RecordedData)
 			return ((RecordedData)ts).getPath();
+		else if(ts instanceof ProcessedReadOnlyTimeSeries) {
+			Datapoint dp = ((ProcessedReadOnlyTimeSeries)ts).datapointForChangeNotification;
+			if(dp != null)
+				return dp.getLocation();
+		} 
 		if(forceName)
 			return ts.getClass().getSimpleName()+"("+ts.size()+")";
 		return null;

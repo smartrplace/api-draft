@@ -474,16 +474,18 @@ logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocatio
 		List<Datapoint> result = new ArrayList<>();
 		//boolean started = false;
 		Datapoint hourlySum = null;
-		if(startLevel.toLowerCase().contains("hour")) {
+		if(startLevel.toLowerCase().contains("hour") || startLevel.toLowerCase().contains("15min")) {
 			//started = true;
-			hourlySum = util.processMultiToSingle(TimeProcUtil.SUM_PER_HOUR_EVAL, inputEnergy);
+			hourlySum = util.processMultiToSingle(
+					startLevel.toLowerCase().contains("hour")?TimeProcUtil.SUM_PER_HOUR_EVAL:TimeProcUtil.SUM_PER_15M_EVAL,
+					inputEnergy);
 			if(hourlySum == null) {
 				System.out.println("    !!!! WARNING: No hourly sum for inputSize:"+inputEnergy.size()+ "First:"+
 						(inputEnergy.isEmpty()?"--":inputEnergy.get(0).getLocation()));
 				return Collections.emptyList();
 			}
 			result.add(hourlySum);
-			hourlySum.setLabelDefault("kWhHourly");
+			hourlySum.setLabelDefault(startLevel.toLowerCase().contains("hour")?"kWhHourly":"kWh15min");
 			if(registerForTransferViaHeartbeatAsMainMeter)
 				hourlySum.addAlias(Datapoint.ALIAS_MAINMETER_HOURLYCONSUMPTION);		
 		}

@@ -15,7 +15,6 @@
  */
 package org.smartrplace.widget.extensions;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,17 +23,18 @@ import javax.servlet.http.HttpSession;
 
 import org.ogema.accesscontrol.Constants;
 import org.ogema.accesscontrol.SessionAuth;
+import org.ogema.core.administration.UserAccount;
+import org.ogema.core.administration.UserConstants;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.user.NaturalPerson;
+import org.ogema.tools.app.useradmin.impl.UserDataAccessImpl;
 import org.ogema.tools.resource.util.ResourceUtils;
 
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.util.resourcelist.ResourceListHelper;
-import de.iwes.widgets.api.widgets.WidgetApp;
-import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 
 public class GUIUtilHelper {
@@ -80,6 +80,7 @@ public class GUIUtilHelper {
 		return ud;
 	}
 	
+	/** Version using resource data*/
 	public static String getRealName(String userName, ResourceAccess ra) {
 		NaturalPerson ud = getUserData(userName, ra);
 		if(ud == null)
@@ -95,15 +96,33 @@ public class GUIUtilHelper {
 		return null;
 	}
 	
-	public static NaturalPerson setRealName(String userName, ResourceAccess ra) {
-		NaturalPerson ud = getUserData(userName, ra);
+	/** Version using the admin data*/
+	public static String getRealName(UserAccount userAccount) {
+		String realName =userAccount.getProperties().getOrDefault(UserConstants.FORMATTED_NAME, "--").toString();
+		return realName;	
+	}
+	
+	public static NaturalPerson setRealName(String realName, ResourceAccess ra, UserAccount userAccount) {
+		userAccount.getProperties().put(UserConstants.FORMATTED_NAME, realName);
+		String userName = userAccount.getName();
+		ResourceList<NaturalPerson> userData = ra.getResource("userAdminData/userData");
+		NaturalPerson ud = getOrCreateUserPropertyResource(userName, userData); //getUserData(userName, ra);
 		if(ud == null)
 			return null;
-		ValueResourceHelper.setCreate(ud.userName(), userName);
+		ValueResourceHelper.setCreate(ud.userName(), realName);
 		return ud;
 	}
 
-	/*public static void registerStyleSheet(String cssFileName, String baseURL, WidgetApp wApp,
+    public static NaturalPerson getOrCreateUserPropertyResource(String userId, ResourceList<NaturalPerson> userData) {
+        //Resource userDataRes = data.userData().addDecorator(userId, NaturalPerson.class);
+        NaturalPerson userDataRes = ResourceListHelper.getOrCreateNamedElementFlex(userId, userData);
+        userDataRes.create();
+        userData.activate(false);
+        userDataRes.activate(false);
+        return userDataRes;
+    }
+
+    /*public static void registerStyleSheet(String cssFileName, String baseURL, WidgetApp wApp,
 			ApplicationManager appMan) {
 		final String stylesheet_URL = baseURL + "/"+ cssFileName;
 		final String stylesheet_LINK = "<link rel=\"stylesheet\" href=\""+ stylesheet_URL + "\">";

@@ -3,6 +3,7 @@ package org.ogema.tools.app.useradmin.impl;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.ogema.core.administration.AdministrationManager;
 import org.ogema.core.administration.UserAccount;
 import org.ogema.core.application.Application;
@@ -18,6 +19,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.util.resourcelist.ResourceListHelper;
 
@@ -73,12 +75,7 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
             data = appman.getResourceManagement().createResource(TOPLEVELNAME, UserAdminData.class);
             data.activate(false);
         }
-        //Resource userDataRes = data.userData().addDecorator(userId, NaturalPerson.class);
-        Resource userDataRes = ResourceListHelper.getOrCreateNamedElementFlex(userId, data.userData());
-        userDataRes.create();
-        data.userData().activate(false);
-        userDataRes.activate(false);
-        return userDataRes;
+    	return GUIUtilHelper.getOrCreateUserPropertyResource(userId, data.userData());
     }
     
     private ResourceList<MessagingAddress> getAddressList(String userId) {

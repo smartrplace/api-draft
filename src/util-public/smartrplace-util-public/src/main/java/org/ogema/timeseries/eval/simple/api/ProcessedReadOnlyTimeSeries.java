@@ -427,7 +427,7 @@ if(Boolean.getBoolean("evaldebug")) {
 			return asList.get(0);
 	}
 
-	@Override
+	@Override  //TODO: We need a more efficient implementation here
 	public SampledValue getNextValue(long time) {
 		if(time < 0)
 			time = 0;
