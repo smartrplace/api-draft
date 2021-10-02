@@ -9,6 +9,10 @@ import org.ogema.core.application.AppID;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.recordeddata.RecordedData;
+import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.devicefinder.util.BatteryEvalBase.BatteryStatus;
+import org.ogema.devicefinder.util.BatteryEvalBase.BatteryStatusPlus;
+import org.ogema.devicefinder.util.BatteryEvalBase.BatteryStatusResult;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.message.MessageImpl;
@@ -58,10 +62,10 @@ public class BatteryEvalBase {
 	}
 	
 	public static BatteryStatus getBatteryStatus(float val, boolean changeInfoRelevant) {
-		if(Float.isNaN(val))
+		if(Float.isNaN(val) || val == 0)
 			return BatteryStatus.UNKNOWN;
 		if(val <= DEFAULT_BATTERY_URGENT_VOLTAGE)
-			return BatteryStatus.OK;
+			return BatteryStatus.URGENT;
 		else if(val <= DEFAULT_BATTERY_WARN_VOLTAGE)
 			return BatteryStatus.WARNING;
 		else if(changeInfoRelevant && (val <= DEFAULT_BATTERY_CHANGE_VOLTAGE))
@@ -93,6 +97,19 @@ public class BatteryEvalBase {
 		return result;
 	}
 	
+	public static String getBatteryHTMLColor(BatteryStatus stat) {
+		String result = null;
+		if(stat == BatteryStatus.URGENT || stat == BatteryStatus.EMPTY)
+			result = "red";
+		else if(stat == BatteryStatus.WARNING)
+			result = "orange";
+		else if(stat == BatteryStatus.CHANGE_RECOMMENDED)
+			result = "blue";
+		else if(stat == BatteryStatus.UNKNOWN || stat == BatteryStatus.NO_BATTERY)
+			result = "grey";
+		return result;
+	}
+
 	public static Map<Integer, Long> batteryDurationsFromLast = new HashMap<>();
 	static {
 		//batteryDurationsFromLast.put(33, 300*TimeProcUtil.DAY_MILLIS);
@@ -139,5 +156,59 @@ public class BatteryEvalBase {
 		long preTime = getRemainingLifeTimeEstimation(preVal);
 		return now + (curTime+preTime)/2;
 	}
-
+	
+	public static BatteryStatus getBatteryStatus(VoltageResource batRes, boolean changeInfoRelevant, Long now) {
+		return getBatteryStatusPlus(batRes, changeInfoRelevant, now).status;
+	}
+	public static BatteryStatusPlus getBatteryStatusPlus(VoltageResource batRes, boolean changeInfoRelevant, Long now) {
+		BatteryStatusPlus result = new BatteryStatusPlus();
+		result.batRes = batRes;
+		if(batRes == null) {
+			result.status = BatteryStatus.NO_BATTERY;
+			return result;
+		}
+		result.voltage = batRes.getValue();
+		Long lastTs = null;
+		if(Float.isNaN(result.voltage)) {
+			RecordedData ts = batRes.getHistoricalData();
+			if(ts != null) {
+				SampledValue sv = ts.getPreviousValue(now!=null?now:Long.MAX_VALUE);
+				if(sv != null) {
+					result.voltage = sv.getValue().getFloatValue();
+					lastTs = sv.getTimestamp();
+				}
+			}
+		} else
+			lastTs = batRes.getLastUpdateTime();
+		result.status = getBatteryStatus(result.voltage, changeInfoRelevant);
+		if(result.status != BatteryStatus.URGENT)
+			return result;
+		if(lastTs != null && now != null && (now - lastTs) > TIME_TO_ASSUME_EMPTY)
+			result.status = BatteryStatus.EMPTY;
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param iad
+	 * @param changeInfoRelevant
+	 * @param now may be null, only required to find last value before now and to detect EMPTY by duration without value
+	 * @return
+	 */
+	public static BatteryStatus getBatteryStatus(InstallAppDevice iad, boolean changeInfoRelevant, Long now) {
+		return getBatteryStatusPlus(iad, changeInfoRelevant, now).status;
+	}
+	public static BatteryStatusPlus getBatteryStatusPlus(InstallAppDevice iad, boolean changeInfoRelevant, Long now) {
+		VoltageResource sres = DeviceHandlerBase.getBatteryVoltage(iad.device().getLocationResource());
+		if(iad.knownFault().assigned().exists()) {
+			int kni = iad.knownFault().assigned().getValue();
+			if(kni == AlarmingConfigUtil.ASSIGNMENT_BATTERYLOW) {
+				BatteryStatusPlus result = new BatteryStatusPlus();
+				result.status = BatteryStatus.EMPTY;
+				result.batRes = sres;
+				return result;
+			}
+		}
+		return getBatteryStatusPlus(sres, changeInfoRelevant, now);
+	}	
 }
