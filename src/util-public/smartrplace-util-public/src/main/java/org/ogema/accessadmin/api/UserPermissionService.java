@@ -79,6 +79,7 @@ public interface UserPermissionService {
 	//Permission under development
 	public static final String DASHBOARD_GENERAL = "Dashboad General";
 	public static final String DASHBOARD_SAVINGS = "Savings Dashboad";
+	public static final String DASHBOARD_CUSTOMERDOC = "FAQ Dashboad";
 	public static final String ROOMCONTROL_WE = "Roomcontrol WE";
 	public static final String ROOMCONTROL_2D = "Roomcontrol 2D";
 	public static final String ROOM_STATUS_CONTROL = "Room Status Control";
@@ -86,14 +87,14 @@ public interface UserPermissionService {
 	
 	public static final String[] APP_ACCESS_PERMISSIONS_ALL = {MONITORING, INSTALLATION_SETUP, ALARMING,
 			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT, APPSTORE,
-			DASHBOARD_GENERAL, DASHBOARD_SAVINGS,
+			DASHBOARD_GENERAL, DASHBOARD_SAVINGS, DASHBOARD_CUSTOMERDOC,
 			ROOMCONTROL_WE, ROOMCONTROL_2D, ROOM_STATUS_CONTROL, MODBUS_SERVER};
 
 	public static final String[] APP_ACCESS_PERMISSIONS = {MONITORING, INSTALLATION_SETUP, ALARMING,
 			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT};
 	public static final String[] APP_ACCESS_PERMISSIONS_WITHAPPSTORE = {MONITORING, INSTALLATION_SETUP, ALARMING,
 			USER_MANAGEMENT, GROUP_AND_PERMISSION_MANAGEMENT, APPSTORE};
-	public static final String[] APP_ACCESS_PERMISSIONS_FOR_SUPERADMIN = {DASHBOARD_GENERAL, DASHBOARD_SAVINGS,
+	public static final String[] APP_ACCESS_PERMISSIONS_FOR_SUPERADMIN = {DASHBOARD_GENERAL, DASHBOARD_SAVINGS, DASHBOARD_CUSTOMERDOC,
 			ROOMCONTROL_WE, ROOMCONTROL_2D, ROOM_STATUS_CONTROL, MODBUS_SERVER};
 	
 	/** Permissions for which the building property units rooms per user and per app or app permission type
