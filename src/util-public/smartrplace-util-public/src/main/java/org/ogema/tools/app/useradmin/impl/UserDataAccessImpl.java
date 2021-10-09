@@ -1,5 +1,6 @@
 package org.ogema.tools.app.useradmin.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,7 +11,6 @@ import org.ogema.core.application.Application;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
-import org.ogema.model.user.NaturalPerson;
 import org.ogema.tools.app.useradmin.api.UserDataAccess;
 import org.ogema.tools.app.useradmin.config.MessagingAddress;
 import org.ogema.tools.app.useradmin.config.UserAdminData;
@@ -20,8 +20,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
-
-import de.iwes.util.resourcelist.ResourceListHelper;
 
 /**
  *
@@ -82,8 +80,10 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
         Resource userRes = getUserPropertyResource(userId);
         @SuppressWarnings("unchecked")
         ResourceList<MessagingAddress> l = userRes.getSubResource(MESSAGINGDECORATOR, ResourceList.class);
-        l.create();
-        l.activate(false);
+        if(!l.exists()) {
+        	l.create();
+        	l.activate(false);
+        }
         if (l.getElementType() == null) {
             l.setElementType(MessagingAddress.class);
         }
@@ -92,7 +92,12 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
     
     @Override
     public List<MessagingAddress> getMessagingAddresses(String userId, String addressType) {
+        return getMessagingAddresses(userId, addressType, false);
+    }
+    public List<MessagingAddress> getMessagingAddresses(String userId, String addressType, boolean returnAlsoInactive) {
         ResourceList<MessagingAddress> addresses = getAddressList(userId);
+        if((!returnAlsoInactive) && (!addresses.isActive()))
+        	return Collections.emptyList();
         return addresses.getAllElements().stream()
                 .filter(a -> addressType == null || addressType.equalsIgnoreCase(a.addressType().getValue()))
                 .collect(Collectors.toList());
@@ -103,11 +108,10 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
         if (userId == null || addressType == null || address == null) {
             throw new IllegalArgumentException("null argument");
         }
-        if (getMessagingAddresses(userId, addressType).stream()
+        if (getMessagingAddresses(userId, addressType, true).stream()
                 .filter(addr -> address.equals(addr.address().getValue())).findAny().isPresent()) {
             return;
         }
-        @SuppressWarnings("unchecked")
         ResourceList<MessagingAddress> l = getAddressList(userId);
         String resname = ResourceUtils.getValidResourceName(addressType + "/" + address);
         MessagingAddress newAddr = l.getSubResource(resname) != null
@@ -125,7 +129,7 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
         if (userId == null || addressType == null || address == null) {
             throw new IllegalArgumentException("null argument");
         }
-        Optional<MessagingAddress> addressRes = getMessagingAddresses(userId, addressType).stream()
+        Optional<MessagingAddress> addressRes = getMessagingAddresses(userId, addressType, true).stream()
                 .filter(addr -> address.equals(addr.address().getValue())).findAny();
         addressRes.ifPresent(MessagingAddress::delete);
         return addressRes.isPresent();
