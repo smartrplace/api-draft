@@ -141,7 +141,18 @@ public interface DatapointService {
 	/** Device information*/
 	Collection<Class<? extends Resource>> getManagedDeviceResoureceTypes();
 	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
+	
+	/** Get resources managed by deviceHandler
+	 * 
+	 * @param deviceHandlerId
+	 * @param shortId if true the deviceId only has to end with the shortId, otherwise it has
+	 * 		to be equal to be added to the result
+	 * @return
+	 */
+	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId);
+	
 	InstallAppDevice getMangedDeviceResource(PhysicalElement device);
+	
 	/** This handler also provides access to Driver Properties*/
 	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
 	
