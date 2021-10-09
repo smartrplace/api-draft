@@ -609,6 +609,7 @@ public class AlarmingConfigUtil {
 			return result;
 		result = templates.add();
 		ValueResourceHelper.setCreate(result.devHandlerInfo(), iad.devHandlerInfo().getValue());
+		result.device().setAsReference(iad.device());
 		OGEMAResourceCopyHelper.copySubResourceIntoDestination(result.alarms(), iad.alarms(), appMan, true);
 		result.activate(false);
 		return result;
