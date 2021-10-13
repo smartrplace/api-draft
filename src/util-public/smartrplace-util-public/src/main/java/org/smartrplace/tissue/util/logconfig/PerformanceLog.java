@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.simple.FloatResource;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.gateway.device.MemoryTimeseriesPST;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -59,11 +60,7 @@ public abstract class PerformanceLog {
 		}
 		MemoryTimeseriesPST gw = null;
 		if(singleEvent == null) {
-			gw = ResourceHelper.getEvalCollection(appMan).getSubResource("memoryTimeseriesPST", MemoryTimeseriesPST.class);
-			if(!gw.exists()) {
-				gw.create();
-				gw.activate(false);
-			}
+			gw = getPSTResource(appMan);
 			singleEvent = getEventResource(gw);
 		}
 		ValueResourceHelper.setCreate(singleEvent, value);
@@ -78,6 +75,16 @@ public abstract class PerformanceLog {
 				counter.getAndAdd(value);
 		}
 	}
+	
+	public static MemoryTimeseriesPST getPSTResource(ApplicationManager appMan) {
+		MemoryTimeseriesPST logResource = ResourceHelper.getEvalCollection(appMan).getSubResource("memoryTimeseriesPST", MemoryTimeseriesPST.class);
+		if(!logResource.exists()) {
+			logResource.create();
+			logResource.activate(false);
+		}
+		return logResource;
+	}
+
 	
 	protected final static Map<String, PerformanceLog> knownLogs = new HashMap<>();
 	public static interface GwSubResProvider {

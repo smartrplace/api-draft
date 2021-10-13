@@ -98,6 +98,14 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		}
 		return null;
 	}
+	public static Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result, DatapointService dpService,
+			boolean addSubLocationByResourceName) {
+		if(addSubLocationByResourceName) {
+			String subLocation = res.getName();
+			return addDatapoint(res, result, subLocation, dpService);
+		}
+		return addDatapoint(res, result, dpService);
+	}
 	protected static Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result,
 			String subLocation, DatapointService dpService) {
 		Datapoint dp = addDatapoint(res, result, dpService);

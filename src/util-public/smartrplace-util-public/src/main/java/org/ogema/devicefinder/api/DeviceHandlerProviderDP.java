@@ -46,16 +46,18 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * @return sensor resource to be displayed in the overview table. If the device has no sensor this should be
 	 * 		a feedback or status value of an actor or most relevant configuration value
 	 */
-	default SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration) {
+	SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration);
+	/*default SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration) {
 		try {
 			Collection<Datapoint> all = getDatapoints(deviceConfiguration, null);
 			if(all.isEmpty())
 				return null;
 			return (SingleValueResource) all.iterator().next().getResource();
 		} catch(Exception e) {
+			e.printStackTrace();
 			return null;
 		}
-	}
+	}*/
 	default SingleValueResource getMainSensorValue(InstallAppDevice deviceConfiguration) {
 		@SuppressWarnings("unchecked")
 		T device = (T) deviceConfiguration.device();

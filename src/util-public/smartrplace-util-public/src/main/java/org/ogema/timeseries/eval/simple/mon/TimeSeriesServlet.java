@@ -859,7 +859,5 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 			}
 		}
 		return result;
-
 	}
-
 }

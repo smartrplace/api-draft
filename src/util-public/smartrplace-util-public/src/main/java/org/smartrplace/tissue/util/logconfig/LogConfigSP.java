@@ -18,6 +18,7 @@ package org.smartrplace.tissue.util.logconfig;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.schedule.Schedule;
@@ -28,9 +29,11 @@ import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.recordeddata.DataRecorder;
 import org.ogema.recordeddata.DataRecorderException;
 import org.ogema.recordeddata.RecordedDataStorage;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.slf4j.Logger;
 
 import de.iwes.util.resource.ResourceHelper;
+import de.iwes.util.resource.ValueResourceHelper;
 
 /** Intended to move to {@link LogConfig} in the future
  *
@@ -204,4 +207,15 @@ public class LogConfigSP {
         }
     }
 
+	private static long lastTrafficTime = -1;
+	private static int heartbeatTrafficCounter = 0;
+	public static void reportHeartbeatTraffic(int newTrafficBytes, ApplicationManager appMan) {
+		long now = appMan.getFrameworkTime();
+		if(now - lastTrafficTime > 15*TimeProcUtil.MINUTE_MILLIS) {
+			ValueResourceHelper.setCreate(ResourceHelper.getLocalDevice(appMan).heartbeatTraffic(), heartbeatTrafficCounter/1024.0f);
+			heartbeatTrafficCounter = 0;
+			lastTrafficTime = now;
+		}
+		heartbeatTrafficCounter += newTrafficBytes;
+	}
 }
