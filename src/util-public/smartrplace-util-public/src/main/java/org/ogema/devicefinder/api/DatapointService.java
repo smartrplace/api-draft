@@ -156,6 +156,8 @@ public interface DatapointService {
 	/** This handler also provides access to Driver Properties*/
 	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
 	
+	List<DeviceHandlerProviderDP<?>> getDeviceHandlerProviders();
+	
 	/** Get all groups for which {@link #getGroup(String)} has been called at least once<br>
 	 * Note that each DatapointGroup for a DEVICE has the device() resource location as id<br>
 	 * groups of type DEVICE_TYPE have the DeviceHandler id as id*/

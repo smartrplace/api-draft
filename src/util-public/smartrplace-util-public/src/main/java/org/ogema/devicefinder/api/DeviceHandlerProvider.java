@@ -183,6 +183,4 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	default void addMoreWidgetsExpert(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh,
 			String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {};
 			
-	/** Set title of table listing the devices processed by the DeviceHandlerProvider*/
-	String getTableTitle();
 }

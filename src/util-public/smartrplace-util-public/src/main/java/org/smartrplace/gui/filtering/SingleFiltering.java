@@ -68,6 +68,11 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 	/** Only relevant if options update is configured, default implementation can just return 0*/
 	protected abstract long getFrameworkTime( ); // {return 0;}
 	
+	/** Overwrite to disable all option for too many elements*/
+	protected boolean isAllOptionAllowed(OgemaHttpRequest req) {
+		return true;
+	}
+	
 	/**If null is returned the default options set via {@link #addOption(GenericFilterOption, Map)} etc.
 	 * are used. Otherwise only the dynamic options are displayed
 	 * 
@@ -300,6 +305,9 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 						filteringOptions = new ArrayList<>();
 						filteringOptions.add(defaultItem);
 					}
+					else {
+						defaultItem = getPreselectedItem(defaultItem, req);
+					}
 					checkFilteringOptions();
 					setDefaultItems(filteringOptions);
 					selectDefaultItem(defaultItem);
@@ -311,11 +319,21 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 		if(saveOptionMode == OptionSavingMode.PER_USER) {
 			String user = GUIUtilHelper.getUserLoggedIn(req);
 			GenericFilterOption<A> presel = getFilterOption(preSelectionPerUser.get(user));
+			presel = getPreselectedItem(presel, req);
 			selectItem(presel, req);
 		} else if(saveOptionMode == OptionSavingMode.GENERAL) {
 			GenericFilterOption<A> presel = getFilterOption(preSelectionGeneralEnglish);
+			presel = getPreselectedItem(presel, req);
 			selectItem(presel, req);
 		}
+	}
+	
+	protected GenericFilterOption<A> getPreselectedItem(GenericFilterOption<A> initialGuess,
+			OgemaHttpRequest req) {
+		if(initialGuess == ALL_OPTION && (filteringOptions.size()>1) && (!isAllOptionAllowed(req))) {
+			return filteringOptions.get(1);
+		}
+		return initialGuess;
 	}
 	
 	protected GenericFilterOption<A> getFilterOption(String englishLabel) {

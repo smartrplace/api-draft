@@ -58,17 +58,17 @@ public class OnOffSwitchMgmt {
 	 * this is determined via {@link #toBeUsed(OnOffSwitch)}. Additional exclusions and inclusions
 	 * can be defined via the String-based lists 
 	 * @param appMan
-	 * @param normallyExcludedFromProperty exclude even if toBeUsed says something different
-	 * @param normallyExcludedButInclusionForcedFromProperty if a String in this list is part of the
+	 * @param normallyExcludedFromListAsString exclude even if toBeUsed says something different
+	 * @param normallyExcludedButInclusionForcedFromListAsString if a String in this list is part of the
 	 * 		location of an OnOffSwitch then it will be included for sure no matter what the other indicators say
 	 * 		(if it is assigned to the room requested)
 	 */
-	public OnOffSwitchMgmt(ApplicationManager appMan, String normallyExcludedFromProperty,
-			String normallyExcludedButInclusionForcedFromProperty,
+	public OnOffSwitchMgmt(ApplicationManager appMan, String normallyExcludedFromListAsString,
+			String normallyExcludedButInclusionForcedFromListAsString,
 			boolean maintainListIfNumberOfSwitchesUnchanged) {
 		this.appMan = appMan;
-		normallyExcluded = StringFormatHelper.getListFromString(normallyExcludedFromProperty);
-		normallyExcludedButInclusionForced = StringFormatHelper.getListFromString(normallyExcludedButInclusionForcedFromProperty);
+		normallyExcluded = StringFormatHelper.getListFromString(normallyExcludedFromListAsString);
+		normallyExcludedButInclusionForced = StringFormatHelper.getListFromString(normallyExcludedButInclusionForcedFromListAsString);
 		this.maintainListIfNumberOfSwitchesUnchanged = maintainListIfNumberOfSwitchesUnchanged;
 	}
 

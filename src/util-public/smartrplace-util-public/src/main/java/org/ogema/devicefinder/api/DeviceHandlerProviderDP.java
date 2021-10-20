@@ -131,4 +131,7 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default ComType getComType() {
 		return ComType.OTHER_UNKNOWN;
 	}
+	
+	/** Set title of table listing the devices processed by the DeviceHandlerProvider*/
+	String getTableTitle();
 }
