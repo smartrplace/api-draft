@@ -88,7 +88,7 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		public FloatResource relativeLoadEff;
 		
 		//setpoint location -> data
-		Map<String, SensorData> sensorResendMan = new HashMap<>();
+		//Map<String, SensorData> sensorResendMan = new HashMap<>();
 	}
 	public static abstract class SensorData {
 		abstract Sensor sensor();
@@ -101,7 +101,7 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		
 		//Resend data
 		long lastSent = 1;
-		SensorData sensor;
+		//final SensorData sensor;
 		Float valuePending;
 		long valuePendingSince;
 		
@@ -113,11 +113,22 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 
 		public SensorData(SetpointControlManager<TemperatureResource> ctrl) {
 			this.ctrl = ctrl;
+			//this.sensor = sensor;
 		}
 	}
 	protected final ApplicationManager appMan;
 	protected final DatapointService dpService;
-	protected final Map<String, SensorData> knownSensors = new HashMap<>();
+	
+	protected final RouterInstance nullRouterInstance = new RouterInstance();
+	protected boolean nullRouterInstanceUsed = false;
+	protected final Map<RouterInstance, Map<String, SensorData>> knownSensors = new HashMap<>();
+	protected List<SensorData> knownSensorsAll() {
+		List<SensorData> result = new ArrayList<>();
+		for(Map<String, SensorData> mapInner: knownSensors.values()) {
+			result.addAll(mapInner.values());
+		}
+		return result ;
+	}
 	
 	long nextEvalInterval;
 	long intervalStart;
@@ -137,17 +148,36 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		log.info("Started timer for SetpointControlManager:"+this.getClass().getSimpleName());
 	}
 	
-	public SensorData registerSensor(T setp) {
+	public Sensor getSensor(T setp) {
+		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
+		return sensor;
+	}
+	
+	public SensorData registerSensor(T setp, Sensor sensor, Map<String, SensorData> knownSensorsInner) {
 		String loc = setp.getLocation();
-		SensorData result = knownSensors.get(loc);
+		SensorData result = knownSensorsInner.get(loc);
 		if(result != null)
 			return result;
-		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
 		result = getSensorDataInstance(sensor); //new SensorData(sensor, this);
-		knownSensors.put(loc, result);
+		knownSensorsInner.put(loc, result);
 		return result;
 	}
 	
+	public SensorData registerSensor(T setp) {
+		Sensor sensor = getSensor(setp);
+		RouterInstance router = getCCU(sensor);
+		if(router == null) {
+			nullRouterInstanceUsed = true;
+			router = nullRouterInstance;
+		}
+		Map<String, SensorData> mapInner = knownSensors.get(router);
+		if(mapInner == null) {
+			mapInner = new HashMap<>();
+			knownSensors.put(router, mapInner);
+		}
+		SensorData sens = registerSensor(setp, sensor, mapInner);
+		return sens;
+	}
 	/** Request to send new setpoint value to device
 	 * 
 	 * @param setp
@@ -169,6 +199,8 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 				sens.lastSent = now;
 			}
 			sens.writeSetpoint(setpoint);
+			if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.noresend"))
+				return true;
 			if(sens.valueFeedbackPending == null || (sens.valueFeedbackPending != setpoint))
 				sens.valuePendingSince = now;
 			sens.valueFeedbackPending = setpoint;
@@ -194,7 +226,7 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	}
 	
 	protected void stopInternal() {
-		for(SensorData sens: knownSensors.values()) {
+		for(SensorData sens: knownSensorsAll()) {
 			if(sens.setpointListener() != null && sens.setpoint() != null) {
 				sens.setpoint().removeValueListener(sens.setpointListener());
 				sens.stop();
@@ -268,12 +300,16 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	}
 	
 	//TODO: Shall be flexible in the future
-	long pendingTimeForMissingFeedback = 4*TimeProcUtil.MINUTE_MILLIS;
+	long pendingTimeForMissingFeedback = Long.getLong("org.smartrplace.util.virtualdevice.maxfeedbacktime", 8*TimeProcUtil.MINUTE_MILLIS);
 	long pendingTimeForRetry = 8*TimeProcUtil.MINUTE_MILLIS;
 	long lastSentAgoForRetry = 15*TimeProcUtil.MINUTE_MILLIS;
 	@SuppressWarnings("unchecked")
 	protected void resendTimerUpdate() {
 		Collection<RouterInstance> routers = getRouters();
+		if(nullRouterInstanceUsed) {
+			routers = new ArrayList<>(routers);
+			routers.add(nullRouterInstance);
+		}
 		long now = appMan.getFrameworkTime();
 		log.info("In timer of "+this.getClass().getSimpleName()+" found "+routers.size()+" routers to update.");
 		Long deltaT;
@@ -288,40 +324,45 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		} else
 			deltaT = null;
 		for(RouterInstance cd: routers) {
-			if(deltaT != null)
+			if(deltaT != null && (cd != nullRouterInstance))
 				writeDataReporting(cd, deltaT);
 			//checkForDataReporting(cd);
 			
-			if(isRouterInOverload(cd, CONDITIONAL_PRIO))
+			if((cd != nullRouterInstance) && isRouterInOverload(cd, CONDITIONAL_PRIO))
 				continue;
-			List<SensorData> allresend = new ArrayList<>(cd.sensorResendMan.values());
+			Map<String, SensorData> subMap = knownSensors.get(cd);
+			if(subMap == null)
+				continue;
+			List<SensorData> allresend = new ArrayList<>(subMap.values());
 			for(SensorData resenddata: allresend) {
 				if(resenddata.valueFeedbackPending != null) {
 					long timePendingFb = now - resenddata.valuePendingSince;
 					//long sentAgoFb = now - resenddata.lastSent;
 					if((timePendingFb > pendingTimeForMissingFeedback)) { // && (sentAgoFb > lastSentAgoForRetry)) {
-						log.warn("Feedback missing for "+resenddata.sensor.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
+						log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
 						cd.resendMissingFbCount++;
-						boolean success = requestSetpointWrite((T) resenddata.sensor.setpoint(), resenddata.valueFeedbackPending, CONDITIONAL_PRIO);
-						if(success) {
+						boolean success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valueFeedbackPending, CONDITIONAL_PRIO);
+						if(!success) {
+							//we stop the chain due to overload
 							resenddata.valueFeedbackPending = null;
 							resenddata.lastSent = now;
-						} else
-							break;
+						} //else
+						//	break;
 					}
 					continue;
 				}
+				//valuePending is for processing requests postponed due to overload
 				if(resenddata.valuePending == null)
 					continue;
 				long timePending = now - resenddata.valuePendingSince;
 				long sentAgo = now - resenddata.lastSent;
 				if((timePending > pendingTimeForRetry) && (sentAgo > lastSentAgoForRetry)) {
-					boolean success = requestSetpointWrite((T) resenddata.sensor.setpoint(), resenddata.valuePending, CONDITIONAL_PRIO);
+					boolean success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valuePending, CONDITIONAL_PRIO);
 					if(success) {
 						resenddata.valuePending = null;
 						resenddata.lastSent = now;
-					} else
-						break;
+					} /*else
+					break;*/
 				}
 			}
 		}

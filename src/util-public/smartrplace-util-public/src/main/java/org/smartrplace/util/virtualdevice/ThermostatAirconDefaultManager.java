@@ -3,6 +3,7 @@ package org.smartrplace.util.virtualdevice;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.model.simple.FloatResource;
@@ -11,6 +12,7 @@ import org.ogema.model.sensors.Sensor;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.util.virtualdevice.SetpointControlManager.SensorData;
 
 import de.iwes.util.resource.ResourceHelper;
 
@@ -45,14 +47,20 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 	}
 	
 	@Override
-	public SensorDataTemperatureDefault registerSensor(TemperatureResource setp) {
+	public Sensor getSensor(TemperatureResource setp) {
+		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
+		return sensor;
+	}
+	
+	@Override
+	public SensorDataTemperatureDefault registerSensor(TemperatureResource setp, Sensor sensor,
+			Map<String, SensorData> knownSensorsInner) {
 		String loc = setp.getLocation();
-		SensorDataTemperatureDefault result = (SensorDataTemperatureDefault) knownSensors.get(loc);
+		SensorDataTemperatureDefault result = (SensorDataTemperatureDefault) knownSensorsInner.get(loc);
 		if(result != null)
 			return result;
-		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
-		result = new SensorDataTemperatureDefault(sensor, this);
-		knownSensors.put(loc, result);
+		result = new SensorDataTemperatureDefault((TemperatureSensor) sensor, this);
+		knownSensorsInner.put(loc, result);
 		return result;
 	}
 	

@@ -48,9 +48,9 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 		@Override
 		public RouterInstance ccu() {
 			if(ccu == null) {
-				ccu = (CCUInstance) ctrl.getCCU(sensor);
+				ccu = (CCUInstance) ctrl.getCCU(sensorRes);
 				if(ccu == null) {
-					System.out.println("WARNING: No CCU found for setpoint sensor:"+sensor.getLocation());
+					System.out.println("WARNING: No CCU found for setpoint sensor:"+sensorRes.getLocation());
 				}
 			}
 			return ccu;
@@ -86,14 +86,20 @@ public class HmCentralManager extends SetpointControlManager<TemperatureResource
 	}
 	
 	@Override
-	public SensorDataHm registerSensor(TemperatureResource setp) {
+	public Sensor getSensor(TemperatureResource setp) {
+		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
+		return sensor;
+	}
+	
+	@Override
+	public SensorDataHm registerSensor(TemperatureResource setp, Sensor sensor,
+			Map<String, SensorData> knownSensorsInner) {
 		String loc = setp.getLocation();
-		SensorDataHm result = (SensorDataHm) knownSensors.get(loc);
+		SensorDataHm result = (SensorDataHm) knownSensorsInner.get(loc);
 		if(result != null)
 			return result;
-		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
-		result = new SensorDataHm(sensor, this);
-		knownSensors.put(loc, result);
+		result = new SensorDataHm((TemperatureSensor) sensor, this);
+		knownSensorsInner.put(loc, result);
 		return result;
 	}
 	

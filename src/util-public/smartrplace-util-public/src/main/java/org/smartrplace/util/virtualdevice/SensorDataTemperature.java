@@ -6,19 +6,19 @@ import org.ogema.model.sensors.TemperatureSensor;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.SensorData;
 
 public abstract class SensorDataTemperature extends SensorData {
-	TemperatureSensor sensor;
+	TemperatureSensor sensorRes;
 	TemperatureResource setpoint;
 	TemperatureResource feedback;
 	//CCUInstance ccu;
 	ResourceValueListener<TemperatureResource> setpointListener;
 	ResourceValueListener<TemperatureResource> feedbackListener;
 	
-	public SensorDataTemperature(TemperatureSensor sensor, SetpointControlManager<TemperatureResource> ctrl) {
+	public SensorDataTemperature(TemperatureSensor sensorRes, SetpointControlManager<TemperatureResource> ctrl) {
 		super(ctrl);
-		sensor = sensor.getLocationResource();
-		this.sensor = sensor;
-		this.setpoint = sensor.settings().setpoint();
-		this.feedback = sensor.deviceFeedback().setpoint();
+		sensorRes = sensorRes.getLocationResource();
+		this.sensorRes = sensorRes;
+		this.setpoint = sensorRes.settings().setpoint();
+		this.feedback = sensorRes.deviceFeedback().setpoint();
 		this.setpointListener = new ResourceValueListener<TemperatureResource>() {
 			@Override
 			public void resourceChanged(TemperatureResource resource) {
@@ -50,7 +50,7 @@ public abstract class SensorDataTemperature extends SensorData {
 
 	@Override
 	public TemperatureSensor sensor() {
-		return sensor;
+		return sensorRes;
 	}
 
 	@Override
