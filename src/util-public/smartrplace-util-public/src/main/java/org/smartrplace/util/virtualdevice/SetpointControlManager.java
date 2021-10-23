@@ -346,8 +346,10 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 							//we stop the chain due to overload
 							resenddata.valueFeedbackPending = null;
 							resenddata.lastSent = now;
-						} //else
-						//	break;
+						} else { 
+							resenddata.valuePendingSince = now;
+							//	break;
+						}
 					}
 					continue;
 				}
