@@ -298,9 +298,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static String getName(InstallAppDevice object, ApplicationManagerPlus appManPlus) {
-		//final Resource device;
-		//device = object.device();
-		return DatapointImpl.getDeviceLabel(object, null, appManPlus.dpService(), null);
+		String result = DatapointImpl.getDeviceLabel(object, null, appManPlus.dpService(), null);
+		String devLoc = object.device().getLocation();
+		if(DeviceTableBase.isHomematic(devLoc)) {
+			String id = ScheduleViewerOpenButtonEval.getDeviceShortId(devLoc);
+			if(!id.startsWith("?"))
+				result += "-"+id;
+		}
+		return result;
 		//return getNameForDevice(device, appManPlus.dpService());
 	}
 	@Deprecated //use DatapointImpl.getDeviceLabelPlus instead

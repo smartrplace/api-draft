@@ -5,6 +5,8 @@ import java.util.List;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.core.model.simple.TimeResource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
@@ -12,7 +14,6 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
-import de.iwes.util.linkingresource.RoomHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -28,12 +29,14 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	
 	protected final InstalledAppsSelector appSelector;
 	protected final DeviceHandlerProvider<?> devHand;
+	protected final TimeResource deviceIdManipulationUntil;
 	
 	public DeviceTableBase(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
 			InstalledAppsSelector appSelector,
 			DeviceHandlerProvider<?> devHand) {
 		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class));
 		this.devHand = devHand;
+		this.deviceIdManipulationUntil = appMan.getResourceAccess().getResource("hardwareInstallConfig/deviceIdManipulationUntil");
 		if(appSelector != null)
 			this.appSelector = appSelector;
 		else if(this instanceof InstalledAppsSelector)
@@ -79,7 +82,18 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
         }
 		if(!showOnlyBaseCols)
 			vh.stringLabel("Name", id, name, row);
-		vh.stringLabel("ID", id, deviceId, row);
+		boolean provideEdit = false;
+		if(deviceIdManipulationUntil != null && (deviceIdManipulationUntil.getValue() != 0)) {
+			long now = appMan.getFrameworkTime();
+			if(deviceIdManipulationUntil.getValue() < now)
+				deviceIdManipulationUntil.setValue(0);
+			else
+				provideEdit = true;
+		}
+		if(provideEdit)
+			vh.stringEdit("ID", id, object.deviceId(), row, null);
+		else
+			vh.stringLabel("ID", id, deviceId, row);
 		
 		final Resource device;
 		if(req == null)
