@@ -727,8 +727,14 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 		for(SampledValue sv: req) {
 			SampledValue fbVal = setpFb.getNextValue(sv.getTimestamp());
 			nextDiffResult = getNextReqDiffVal(sv, req, idx);
+			long maxTsSeen = 0;
 			while((fbVal != null) && (Math.abs(sv.getValue().getFloatValue() - fbVal.getValue().getFloatValue()) > 0.1f) &&
 					((nextDiffResult.svNext == null) || (fbVal.getTimestamp() < nextDiffResult.svNext.getTimestamp())) ) {
+				if(fbVal.getTimestamp() <= maxTsSeen) {
+					log.error("Timestamps are not ordered correctly in "+TimeProcPrint.getTimeseriesName(setpFb, true)+" before "+maxTsSeen);
+					break;
+				}
+				maxTsSeen = fbVal.getTimestamp();
 				fbVal = setpFb.getNextValue(fbVal.getTimestamp()+1);
 			}
 			if(fbVal == null) {

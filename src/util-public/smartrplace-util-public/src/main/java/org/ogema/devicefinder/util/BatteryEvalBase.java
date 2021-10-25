@@ -104,7 +104,7 @@ public class BatteryEvalBase {
 		else if(stat == BatteryStatus.WARNING)
 			result = "orange";
 		else if(stat == BatteryStatus.CHANGE_RECOMMENDED)
-			result = "blue";
+			result = "LightBlue";
 		else if(stat == BatteryStatus.UNKNOWN || stat == BatteryStatus.NO_BATTERY)
 			result = "grey";
 		return result;
