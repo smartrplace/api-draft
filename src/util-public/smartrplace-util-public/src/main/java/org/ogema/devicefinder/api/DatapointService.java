@@ -145,7 +145,7 @@ public interface DatapointService {
 	/** Get resources managed by deviceHandler
 	 * 
 	 * @param deviceHandlerId
-	 * @param shortId if true the deviceId only has to end with the shortId, otherwise it has
+	 * @param shortId if true the deviceHandlerId only has to end with the shortId, otherwise it has
 	 * 		to be equal to be added to the result
 	 * @return
 	 */
