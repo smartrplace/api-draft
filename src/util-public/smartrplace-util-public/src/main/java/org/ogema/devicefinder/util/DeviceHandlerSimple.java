@@ -200,7 +200,7 @@ if(Boolean.getBoolean("jobdebug")) {
 	 * @param result
 	 * @return
 	 */
-	protected Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result) {
+	public Datapoint addDatapoint(SingleValueResource res, List<Datapoint> result) {
 		return super.addDatapoint(res, result, dpService);
 	}
 	protected Datapoint addDatapoint(SingleValueResource res, String subLocation, List<Datapoint> result) {
