@@ -51,26 +51,35 @@ public class AlarmingConfigUtil {
 	
 	public static final int MAIN_ASSIGNEMENT_ROLE_NUM = 8; //including unassigned (0)
 	public static final Map<String, String> ASSIGNEMENT_ROLES = new LinkedHashMap<>();
+	public static final int ASSIGNMENT_OTHER = 1000;
+	public static final int ASSIGNMENT_OPERATION = 2000;
 	public static final int ASSIGNMENT_BATTERYLOW = 2100;
 	public static final int ASSIGNMENT_DEVICE_NOT_REACHEABLE = 2150;
 	public static final int ASSIGNMENT_SIGNALSTRENGTH = 2200;
+	public static final int ASSIGNMENT_OPERATRION_EXTERNAL = 2500;
+	public static final int ASSIGNMENT_DEVELOPMENT = 3000;
+	public static final int ASSIGNMENT_DEVELOPMENT_EXTERNAL = 3500;
+	public static final int ASSIGNMENT_CUSTOMER = 4000;
+	public static final int ASSIGNMENT_BACKLOG = 5000;
+	public static final int ASSIGNMENT_DEPDENDENT = 6000;
+	public static final int ASSIGNMENT_SPECIALSETS = 7000;
 	static {
 		ASSIGNEMENT_ROLES.put("0", "None");
 		//ASSIGNEMENT_ROLES.put("1", "requires more analysis");
-		ASSIGNEMENT_ROLES.put("1000", "Other");	
-		ASSIGNEMENT_ROLES.put("2000", "Operation");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_OTHER, "Other");	
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_OPERATION, "Operation");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_BATTERYLOW, "Op Battery");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVICE_NOT_REACHEABLE, "Op Device not Reacheable");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_SIGNALSTRENGTH, "Op Signal strength");
-		ASSIGNEMENT_ROLES.put("2500", "Op External");
-		ASSIGNEMENT_ROLES.put("3000", "Development");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_OPERATRION_EXTERNAL, "Op External");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVELOPMENT, "Development");
 		//ASSIGNEMENT_ROLES.put("2100", "Development Logic");
 		//ASSIGNEMENT_ROLES.put("2200", "Development HW Driver");
-		ASSIGNEMENT_ROLES.put("3500", "Dev External");
-		ASSIGNEMENT_ROLES.put("4000", "Customer");
-		ASSIGNEMENT_ROLES.put("5000", "Backlog");
-		ASSIGNEMENT_ROLES.put("6000", "Dependent");
-		ASSIGNEMENT_ROLES.put("7000", "Special Settings (Non Blocking)");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVELOPMENT_EXTERNAL, "Dev External");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_CUSTOMER, "Customer");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_BACKLOG, "Backlog");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEPDENDENT, "Dependent");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_SPECIALSETS, "Special Settings (Non Blocking)");
 	}
 	public static String assignedText(int value) {
 		String result = ASSIGNEMENT_ROLES.get(""+value);
