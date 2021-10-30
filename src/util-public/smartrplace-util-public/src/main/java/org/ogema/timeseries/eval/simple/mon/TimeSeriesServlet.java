@@ -728,7 +728,7 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 			SampledValue fbVal = setpFb.getNextValue(sv.getTimestamp());
 			nextDiffResult = getNextReqDiffVal(sv, req, idx);
 			long maxTsSeen = 0;
-			while((fbVal != null) && (Math.abs(sv.getValue().getFloatValue() - fbVal.getValue().getFloatValue()) > 0.1f) &&
+			while((fbVal != null) && (Math.abs(sv.getValue().getFloatValue() - fbVal.getValue().getFloatValue()) > 0.3f) &&
 					((nextDiffResult.svNext == null) || (fbVal.getTimestamp() < nextDiffResult.svNext.getTimestamp())) ) {
 				if(fbVal.getTimestamp() <= maxTsSeen) {
 					log.error("Timestamps are not ordered correctly in "+TimeProcPrint.getTimeseriesName(setpFb, true)+" before "+maxTsSeen);
