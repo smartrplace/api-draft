@@ -67,6 +67,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 
 	private static final float DAILY_METERMIN_DEFAULT = -1000;
 	private static final float DAILY_METERMAX_DEFAULT = 1.0e8f;
+
+	private static final float MAX_DIF_FOR_EQUAL_SETP = 0.3f;
 	public TimeSeriesServlet(ApplicationManager appMan) {
 		this.appMan = appMan;
 	}
@@ -713,7 +715,7 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 	
 	/** Return setpoint reaction gap durations in minutes as FloatValues*/
 	public static List<SampledValue> getSensReact(ReadOnlyTimeSeries setpReq, ReadOnlyTimeSeries setpFb, long start, long end, long maxReactTime) {
-		List<SampledValue> req = setpReq.getValues(start, end+1);
+		//List<SampledValue> req = setpReq.getValues(start, end+1);
 		//List<SampledValue> fb = setpFb.getValues(start, end+1);
 		List<SampledValue> result = new ArrayList<>();
 		//SampledValue lastVal = null;
@@ -723,13 +725,27 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 		//}
 		int idxNext = 1;
 		int idx = 0;
-		NextReqValResult nextDiffResult = null;
-		for(SampledValue sv: req) {
+		SampledValue nextDiffResult = null;
+		long startTime = System.currentTimeMillis();
+		Iterator<SampledValue> itReq = setpReq.iterator(start, end+1);
+		while(itReq.hasNext()) {
+			SampledValue sv = itReq.next();
+			long conNow = System.currentTimeMillis();
+			if(conNow - startTime > 5*TimeProcUtil.MINUTE_MILLIS) {
+				log.error("Stopping setpReact from "+TimeProcPrint.getTimeseriesName(setpFb, true)+" due to time after samples:"+idx);
+				return result;
+			}
 			SampledValue fbVal = setpFb.getNextValue(sv.getTimestamp());
-			nextDiffResult = getNextReqDiffVal(sv, req, idx);
+			if(nextDiffResult == null || nextDiffResult.getTimestamp() <= sv.getTimestamp())
+				nextDiffResult = getNextReqDiffVal(sv, setpReq, idx);
 			long maxTsSeen = 0;
-			while((fbVal != null) && (Math.abs(sv.getValue().getFloatValue() - fbVal.getValue().getFloatValue()) > 0.3f) &&
-					((nextDiffResult.svNext == null) || (fbVal.getTimestamp() < nextDiffResult.svNext.getTimestamp())) ) {
+			while((fbVal != null) && (Math.abs(sv.getValue().getFloatValue() - fbVal.getValue().getFloatValue()) > MAX_DIF_FOR_EQUAL_SETP) &&
+					((nextDiffResult == null) || (fbVal.getTimestamp() < nextDiffResult.getTimestamp())) ) {
+				long conNow2 = System.currentTimeMillis();
+				if(conNow2 - startTime > 5*TimeProcUtil.MINUTE_MILLIS) {
+					log.error("Stopping setpReact(2) from "+TimeProcPrint.getTimeseriesName(setpFb, true)+" due to time after samples:"+idx);
+					return result;
+				}
 				if(fbVal.getTimestamp() <= maxTsSeen) {
 					log.error("Timestamps are not ordered correctly in "+TimeProcPrint.getTimeseriesName(setpFb, true)+" before "+maxTsSeen);
 					break;
@@ -753,10 +769,6 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 		return result;
 	}
 
-	protected static class NextReqValResult {
-		SampledValue svNext;
-		int idx;
-	}
 	/** Get next setpoint request with a different value requested. From this point on we accept any feedback as we cannot 
 	 * expect to receive the original value anymore
 	 * @param sv
@@ -764,18 +776,41 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 	 * @param idx
 	 * @return
 	 */
-	protected static NextReqValResult getNextReqDiffVal(SampledValue sv, List<SampledValue> req, int idx) {
+	protected static SampledValue getNextReqDiffVal(SampledValue sv, ReadOnlyTimeSeries req, int idx) {
+		SampledValue result = req.getNextValue(sv.getTimestamp()+1);
+		if(result == null)
+			return null;
+		long maxTsSeen = 0;
+		while(Math.abs(sv.getValue().getFloatValue() - result.getValue().getFloatValue()) < MAX_DIF_FOR_EQUAL_SETP) {
+			if(result.getTimestamp() <= maxTsSeen) {
+				log.error("Timestamps are not ordered correctly in "+TimeProcPrint.getTimeseriesName(req, true)+" before "+maxTsSeen);
+				break;
+			}
+			maxTsSeen = result.getTimestamp();
+			result = req.getNextValue(result.getTimestamp()+1);
+			if(result == null) {
+				return null;
+			}
+		}
+		return result;
+	}
+	/*
+	protected static class NextReqValResult {
+		SampledValue svNext;
+		int idx;
+	}
+	 protected static NextReqValResult getNextReqDiffVal(SampledValue sv, List<SampledValue> req, int idx) {
 		NextReqValResult result = new NextReqValResult();
 		result.idx = idx+1;
 		while(result.idx < req.size()) {
 			result.svNext = req.get(result.idx);
-			if(Math.abs(sv.getValue().getFloatValue() - result.svNext.getValue().getFloatValue()) > 0.1f) {
+			if(Math.abs(sv.getValue().getFloatValue() - result.svNext.getValue().getFloatValue()) > MAX_DIF_FOR_EQUAL_SETP) {
 				return result;
 			}
 		}
 		result.svNext = null;
 		return result ;
-	}
+	}*/
 	
 	public static List<SampledValue> getValueChanges(ReadOnlyTimeSeries timeSeries, long start, long end,
 			Float minChange, boolean addFirstNonNaNValue) {
