@@ -2,6 +2,7 @@ package org.ogema.tools.app.useradmin.config;
 
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.core.model.simple.StringResource;
 import org.ogema.model.prototypes.Data;
 import org.ogema.model.user.NaturalPerson;
 
@@ -16,4 +17,7 @@ public interface UserAdminData extends Data {
 	 * A negative value indicates a temporary switch off. Invites will not be sent out automatically when enabled again.
 	 */
 	IntegerResource enableInviteMessagesForUserCreation();
+	
+	/** Deeplink for the savings page of the gateway including ssik*/
+	StringResource ssik_facilityDeepLink();
 }
