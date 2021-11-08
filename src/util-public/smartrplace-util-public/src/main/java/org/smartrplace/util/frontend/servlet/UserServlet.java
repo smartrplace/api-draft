@@ -128,8 +128,9 @@ public class UserServlet extends HttpServlet {
 		 */
 		Collection<T> getAllObjects(String user);
 		
-		/** Page may provide object based on ID. In this case data for a single object can be read via the servlet*/
-		default T getObject(String objectId) {return null;}
+		/** Page may provide object based on ID. In this case data for a single object can be read via the servlet
+		 * @param user */
+		default T getObject(String objectId, String user) {return null;}
 		
 		default T createObject(String objectId) {return null;}
 		
@@ -545,7 +546,7 @@ public class UserServlet extends HttpServlet {
 			}
 		}
 		if(result.objectId != null) {
-			T obj = pageprov.getObject(result.objectId);
+			T obj = pageprov.getObject(result.objectId, user);
 			if(obj == null && allowToCreate)
 				obj = pageprov.createObject(result.objectId);
 			if(obj != null) {
@@ -564,7 +565,7 @@ public class UserServlet extends HttpServlet {
 			//we try to find the object once more with the new information
 			result.objectId = num2stringObjects.get(numId);
 			if(result.objectId != null) {
-				T obj = pageprov.getObject(result.objectId);
+				T obj = pageprov.getObject(result.objectId, user);
 				result.objects = new ArrayList<T>();
 				result.objects.add(obj);
 				return result;				

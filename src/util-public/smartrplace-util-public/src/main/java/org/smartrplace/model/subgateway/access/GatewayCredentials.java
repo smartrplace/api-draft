@@ -5,6 +5,7 @@ import java.util.Map;
 /** Access data for a single data. Note that this data shall be stored as JSON encrypted
  * in a StringResource
  */
+@Deprecated
 public class GatewayCredentials {
 	/** Same id as in {@link RestApiAccessGateway#gatewayId()}
 	 */

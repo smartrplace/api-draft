@@ -119,7 +119,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	}
 	
 	@Override
-	public TimeSeriesDataImpl getObject(String objectIdin) {
+	public TimeSeriesDataImpl getObject(String objectIdin, String user) {
 		String label = objectIdin.substring(0, 3);
 		String objectId = objectIdin.substring(4);
 		if(objectId.startsWith("S:"))

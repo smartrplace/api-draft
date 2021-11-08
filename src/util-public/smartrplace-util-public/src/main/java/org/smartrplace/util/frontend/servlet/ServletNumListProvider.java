@@ -9,14 +9,14 @@ import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 public class ServletNumListProvider<T> implements ServletValueProvider {
-	protected final List<T> floatVal;
+	protected final List<T> valListFinal;
 	protected final String nullValue;
 
 	public ServletNumListProvider(List<T> valList) {
 		this(valList, null);
 	}
 	public ServletNumListProvider(List<T> valList, String nullValue) {
-		floatVal = valList;
+		this.valListFinal = valList;
 		this.nullValue = nullValue;
 	}
 	
@@ -29,7 +29,7 @@ public class ServletNumListProvider<T> implements ServletValueProvider {
 	public JSONVarrRes getJSON(String user, String key) {
 		//JSONObject result = new JSONObject();
 		JSONArray arr = new JSONArray();
-		for(T obj: floatVal) {
+		for(T obj: valListFinal) {
 			if(obj == null) {
 				if(nullValue != null)
 					arr.put(nullValue);

@@ -3,6 +3,7 @@ package org.smartrplace.model.subgateway.access;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.model.prototypes.Data;
 
+@Deprecated
 public interface RestApiAccessGateway extends Data {
 	/** ID of the gateway. Note that the URL relevant for connecting to the
 	 * gateway is only stored in {@link #credentials()} */

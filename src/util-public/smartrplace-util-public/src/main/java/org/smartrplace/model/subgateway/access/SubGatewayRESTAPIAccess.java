@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 
 import org.json.JSONObject;
 
+@Deprecated
 public interface SubGatewayRESTAPIAccess {
 	/** Perform GET request. See {@link #performHTTPRequest(String, String, JSONObject)} for more details
 	 * 
