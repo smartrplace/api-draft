@@ -1,21 +1,20 @@
 package org.smartrplace.util.frontend.servlet;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 public class ServletNumListProvider<T> implements ServletValueProvider {
-	protected final List<T> valListFinal;
+	protected final Collection<T> valListFinal;
 	protected final String nullValue;
 
-	public ServletNumListProvider(List<T> valList) {
+	public ServletNumListProvider(Collection<T> valList) {
 		this(valList, null);
 	}
-	public ServletNumListProvider(List<T> valList, String nullValue) {
+	public ServletNumListProvider(Collection<T> valList, String nullValue) {
 		this.valListFinal = valList;
 		this.nullValue = nullValue;
 	}

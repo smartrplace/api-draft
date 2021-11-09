@@ -15,11 +15,13 @@ public interface UserPermissionService {
 	/** Rooms marked as priority are the primary rooms displayed to the user. Other rooms may be viewed, but
 	 * are not shown by default. Implies USER_ROOM_PERM*/
 	public static final String USER_PRIORITY_PERM = "UserRoomPriority";	
+	//public static final String SUBCUSTOMER_PRIORITY_PERM = "UserSubcustomerPriority";	
 	
 	/** General access permission to the room. If this is granted then checking for read or write
 	 * shall return true for both. If read/write are set separately then the integer of the most
 	 * specific permission set shall be returned. */
 	public static final String USER_ROOM_PERM = "UserRoomPermission";
+	//public static final String USER_SUBCUSTOMER_PERM = "UserSubcustomerPermission";
 	
 	/** Permission to read the data point*/
 	public static final String USER_READ_PERM = "UserReadPermission";
@@ -57,7 +59,8 @@ public interface UserPermissionService {
 	 */
 	public static final String UPDATE_DEFINITION_PERM = "UpdateDefinitionPermission";
 
-	/** Permissions for which the rooms per user shall be chosen via Multiselect*/
+	/** Permissions for which the rooms per user shall be chosen via Multiselect. Currently USER_READ_HISTORICALDATA_PERM, USER_ADMIN_PERM
+	 * are not processed per room, but just per user. So APPCONFIG_ permission types are used.*/
 	public static final String[] ROOMPERMISSONS = {USER_PRIORITY_PERM, USER_ROOM_PERM,
 			USER_READ_HISTORICALDATA_PERM, USER_ADMIN_PERM };
 	/** The extended version is currently not used*/
@@ -68,6 +71,9 @@ public interface UserPermissionService {
 	public static final String[] PROPUNITPERMISSIONS = {RESTORE_SAFE_PERM, UPDATE_INSTALL_PERM, UPDATE_RATING_PERM,
 			UPDATE_DEFINITION_PERM};
 	
+	/** Permissions for which the subcustomers per user shall be chosen via Multiselect*/
+	//public static final String[] SUBCUSTOMER_PERMISSONS = {SUBCUSTOMER_PRIORITY_PERM, USER_SUBCUSTOMER_PERM};
+
 	public static final String MONITORING = "KPIs and Charts";
 	public static final String INSTALLATION_SETUP = "Setup&Installation";
 	public static final String ALARMING = "Alarming";
@@ -75,6 +81,14 @@ public interface UserPermissionService {
 	public static final String GROUP_AND_PERMISSION_MANAGEMENT = "Groups and Permissions";
 	public static final String APPSTORE = "Appstore";
 	public static final String BACNET = "BACnet Admin";
+	
+	public static final String APPCONFIG_LOGOUT = "Logout";
+	public static final String APPCONFIG_OTHER_APPS = "Other Apps";
+	public static final String APPCONFIG_MEASUREMENTS = "Measuremt.";
+	public static final String APPCONFIG_ECOMODE = "Ecomode";
+	public static final String APPCONFIG_DETAILPAGE = "Detailpage";
+	public static final String APPCONFIG_SETPOINT_CURVE = "Setpoint Curve";
+	public static final String APPCONFIG_SETUPPAGE = "Setup Page";
 	
 	//Permission under development
 	public static final String DASHBOARD_GENERAL = "Dashboad General";
@@ -97,6 +111,9 @@ public interface UserPermissionService {
 	public static final String[] APP_ACCESS_PERMISSIONS_FOR_SUPERADMIN = {DASHBOARD_GENERAL, DASHBOARD_SAVINGS, DASHBOARD_CUSTOMERDOC,
 			ROOMCONTROL_WE, ROOMCONTROL_2D, ROOM_STATUS_CONTROL, MODBUS_SERVER};
 	
+	public static final String[] APP_CONFIG_PERMISSIONS = {APPCONFIG_LOGOUT, APPCONFIG_OTHER_APPS, APPCONFIG_MEASUREMENTS,
+			APPCONFIG_ECOMODE, APPCONFIG_SETPOINT_CURVE, APPCONFIG_DETAILPAGE, APPCONFIG_SETUPPAGE};
+
 	/** Permissions for which the building property units rooms per user and per app or app permission type
 	 * shall be chosen via Multiselect. So the table will most likely only show one app or app permission type
 	 * to be edited at once.
