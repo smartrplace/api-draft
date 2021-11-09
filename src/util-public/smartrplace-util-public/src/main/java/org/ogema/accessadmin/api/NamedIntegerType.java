@@ -40,6 +40,8 @@ public class NamedIntegerType implements LabelledItem {
 	
 	@Override
 	public String id() {
+		if(idPrefix != null)
+			return idPrefix+id;
 		return ""+id;
 	}
 

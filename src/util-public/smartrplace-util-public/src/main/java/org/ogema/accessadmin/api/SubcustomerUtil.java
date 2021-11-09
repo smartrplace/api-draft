@@ -82,8 +82,8 @@ public class SubcustomerUtil {
 		public String id;
 		public String name;
 		public List<String> rooms = new ArrayList<>();
-		public int roomNumHeating;
-		public int roomNumCooling;
+		public int roomNumHeating = 0;
+		public int roomNumCooling = 0;
 		public HeatCoolData heatingData;
 		public HeatCoolData coolingData;
 	}
@@ -101,29 +101,8 @@ public class SubcustomerUtil {
 		public int specialSettingsNonUsageTemperature;
 		public int specialSettingsComfortTemperature;
 		public int specialSettingsEcoTemperature;
-	}
-	public static List<RoomTypeGroupData> getRoomTypeData(SubCustomerData subCustomer, ApplicationManager appMan,
-			boolean includeEmptyStandardTypes) {
-		RoomTypeGroupData result1 = new RoomTypeGroupData();
-		List<RoomTypeGroupData> result = new ArrayList<>();
-		result.add(result1);
-		return result ;
-	}
-	
-	/** Set room heating/cooling data of a room type group
-	 * 
-	 * @param rooms rooms of the subType
-	 * @param newSettings newSettings to be applied
-	 * @param isCooling
-	 * @param overwriteNonStandard if true then all settings in the rooms given in the list are overwritten even
-	 * 		if they are special settings
-	 * @param currentSettings Only relevant if overwriteNonStandard=false. Then
-	 * 		current settings in each room a compared to the settings provided here.
-	 * 		Only if a setting is equal then it is overwritten, otherwise it is considered
-	 * 		special to preserve.
-	 */
-	public static void setRoomTypeData(List<String> rooms, HeatCoolData newSettings, boolean isCooling,
-			boolean overwriteNonStandard, HeatCoolData currentSettings) {
-		//TODO
+		
+		public float minSetpointAuto = 4.5f;
+		public float maxSetpointAuto = 30.5f;
 	}
 }
