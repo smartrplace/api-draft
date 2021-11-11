@@ -143,6 +143,7 @@ public class SubcustomerUtil {
 		public float nonUsageTemperature;
 		public float comfortTemperature;
 		public float ecoTemperature;
+		public float setSingleSetpoint_Window_open;
 		public int specialSettingsStartTime;
 		public int specialSettingsEndTime;
 		public int specialSettingsUsageTemperature;
