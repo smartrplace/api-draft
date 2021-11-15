@@ -135,26 +135,37 @@ public class SubcustomerUtil {
 		public HeatCoolData heatingData;
 		public HeatCoolData coolingData;
 	}
-	public static class HeatCoolData {
+	public static final int STARTTIME_IDX = 0;
+	public static final int ENDTIME_IDX = 1;
+	public static final int USAGETEMP_IDX = 2;
+	public static final int NON_USAGETEMP_IDX = 3;
+	public static final int COMFORTTEMP_IDX = 4;
+	public static final int ECOTEMP_IDX = 5;
+	public static final int WINDOWTEMP_IDX = 6;
+	public static final int MIN_SETPOINT_IDX = 7;
+	public static final int MAX_SETPOINT_IDX = 8;
+	public static final int VALUE_IDX_NUM = 9;
+	public static class ValueVariance {
+		public ValueVariance(int valueIdx) {
+			this.valueIdx = valueIdx;
+		}
+		/** IDX of the choices above*/
+		public int valueIdx;
+		/** Values found among the input values*/
+		public Map<Float, Integer> valuesFound = new HashMap<>();
+	
+		/** Most common value found*/
+		public float standardValue;
+		/** Number of occurences of special settings*/
+		public int specialSettings;
+	}
+	public static class SettingsBaseData {
 		/** get general heating start time in */
 		public long startTime;
 		public long endTime;
 		public float usageTemperature;
-		public float nonUsageTemperature;
-		public float comfortTemperature;
-		public float ecoTemperature;
-		public float setSingleSetpoint_Window_open;
-		public int specialSettingsStartTime;
-		public int specialSettingsEndTime;
-		public int specialSettingsUsageTemperature;
-		public int specialSettingsNonUsageTemperature;
-		public int specialSettingsComfortTemperature;
-		public int specialSettingsEcoTemperature;
-		
-		public float minSetpointAuto = 4.5f;
-		public float maxSetpointAuto = 30.5f;
+		public float nonUsageTemperature;		
 	}
-	
 	/** COPIED FROM UserPermissionUtil 
 	 * We have to check whether an existing value has to be overwritten or not
 	 * @return true if a new entry was added*/
