@@ -31,23 +31,30 @@ public enum UserStatus {
 	//GUEST,
 	/** Like ADMIN, also access to simulation GUI*/
 	//TESTER
+	public static final String DISABLED_NAME = "Disabled";
+	public static final String PUBLIC_NAME = "Public Access";
+	public static final String DISPLAY_NAME = "Display User";
+	public static final String USER_STD_NAME = "User Standard";
+	public static final String SECRETARY_NAME = "Secretary";
+	public static final String FACILITY_MAN_NAME = "Facility Manager";
+	public static final String SUPERADMIN_NAME = "Master Administrator";
 	
 	public static String getLabel(UserStatus obj, OgemaLocale locale) {
 		switch(obj) {
 		case DISABLED:
-			return "Disabled";
+			return DISABLED_NAME;
 		case PUBLIC:
-			return "Public Access";
+			return PUBLIC_NAME;
 		case DISPLAY:
-			return "Display User";
+			return DISPLAY_NAME;
 		case USER_STD:
-			return "User Standard";
+			return USER_STD_NAME;
 		case SECRETARY:
-			return "Secretary";
+			return SECRETARY_NAME;
 		case ADMIN:
-			return "Facility Manager";
+			return FACILITY_MAN_NAME;
 		case SUPERADMIN:
-			return "Master Administrator";
+			return SUPERADMIN_NAME;
 		default:
 			throw new IllegalStateException("Unknown type:"+obj);
 		}

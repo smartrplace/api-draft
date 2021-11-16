@@ -8,7 +8,6 @@ import java.util.Map;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
-import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 import org.smartrplace.external.accessadmin.config.AccessConfigBase;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
@@ -107,7 +106,7 @@ public class SubcustomerUtil {
 		roomGroup.getSubResource(DECORATOR_NAME, SubCustomerData.class).setAsReference(result);
 		result.roomGroup().setAsReference(roomGroup);
 		AccessConfigBase configRes = userAttr.roompermissionData();
-		addPermission(roomGroup.getLocation(), UserPermissionService.USER_ROOM_PERM, configRes);
+		UserPermissionUtil.addPermission(roomGroup.getLocation(), UserPermissionService.USER_ROOM_PERM, configRes);
 		
 		for(Room room: rooms) {
 			addRoomToGroup(room, roomGroup);
@@ -169,7 +168,7 @@ public class SubcustomerUtil {
 	/** COPIED FROM UserPermissionUtil 
 	 * We have to check whether an existing value has to be overwritten or not
 	 * @return true if a new entry was added*/
-	public static boolean addPermission(String resourceId, String permissionType, AccessConfigBase configRes) {
+	/*public static boolean addPermission(String resourceId, String permissionType, AccessConfigBase configRes) {
 		return addPermission(resourceId, permissionType, configRes, 1);
 	}
 	public static boolean addPermission(String resourceId, String permissionType, AccessConfigBase configRes, int value) {
@@ -208,7 +207,7 @@ public class SubcustomerUtil {
 			idx++;
 		}
 		return null;
-	}
+	}*/
 
 	public static void addRoomToGroup(Room object, BuildingPropertyUnit bu) {
 		ResourceListHelper.addReferenceUnique(bu.rooms(), object);
