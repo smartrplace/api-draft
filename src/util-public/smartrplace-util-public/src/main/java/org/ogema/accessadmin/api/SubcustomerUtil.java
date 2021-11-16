@@ -163,7 +163,20 @@ public class SubcustomerUtil {
 		public long startTime;
 		public long endTime;
 		public float usageTemperature;
-		public float nonUsageTemperature;		
+		public float nonUsageTemperature;
+		
+		public long getStartTime() {
+			return startTime;
+		}
+		public long getEndTime() {
+			return endTime;
+		}
+		public float getUsageTemperature() {
+			return usageTemperature;
+		}
+		public float getNonUsageTemperature() {
+			return nonUsageTemperature;
+		}		
 	}
 	/** COPIED FROM UserPermissionUtil 
 	 * We have to check whether an existing value has to be overwritten or not
