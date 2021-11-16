@@ -172,7 +172,7 @@ public class UserServletUtil {
 			if(method.getParameters().length != 0)
 				continue;
 			String name = method.getName();
-			if(name.equals("getClass") || name.equals("hashCode"))
+			if(name.equals("getClass") || name.equals("hashCode") || name.equals("toString"))
 				continue;
 			if(name.startsWith("get"))
 				name = name.substring(3, 4).toLowerCase()+name.substring(4);
