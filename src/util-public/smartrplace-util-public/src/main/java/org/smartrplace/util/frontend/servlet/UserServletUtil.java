@@ -191,9 +191,10 @@ public class UserServletUtil {
 				else
 					result.put(name, value);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | JSONException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			} catch(Exception e) {
-				result.put(name, e.getMessage());				
+				result.put(name, e.getMessage());
+				e.printStackTrace();
 			}
 		}
 		return result ;
