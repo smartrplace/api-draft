@@ -1,9 +1,12 @@
 package org.smartrplace.util.frontend.servlet;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.StringValue;
 import org.ogema.core.model.Resource;
@@ -15,7 +18,6 @@ import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
-import org.ogema.model.prototypes.PhysicalElement;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 
@@ -163,4 +165,37 @@ public class UserServletUtil {
 			return preFix+"N"+Math.abs(hash);
 	}
 
+	public static JSONObject getJSONObjectOfPublic(Object obj) {
+		JSONObject result = new JSONObject();
+		Method[] methods = obj.getClass().getMethods();
+		for(Method method: methods) {
+			if(method.getParameters().length != 0)
+				continue;
+			String name = method.getName();
+			if(name.equals("getClass") || name.equals("hashCode"))
+				continue;
+			if(name.startsWith("get"))
+				name = name.substring(3, 4).toLowerCase()+name.substring(4);
+			try {
+				Object value = method.invoke(obj);
+				if(value instanceof Float)
+					result.put(name, (Float)value);
+				else if(value instanceof Double)
+					result.put(name, (Double)value);
+				else if(value instanceof Integer)
+					result.put(name, (Integer)value);
+				else if(value instanceof Boolean)
+					result.put(name, (Boolean)value);
+				else if(value instanceof Long)
+					result.put(name, (Long)value);
+				else
+					result.put(name, value);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | JSONException e) {
+				e.printStackTrace();
+			} catch(Exception e) {
+				result.put(name, e.getMessage());				
+			}
+		}
+		return result ;
+	}
 }
