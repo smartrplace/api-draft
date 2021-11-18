@@ -629,6 +629,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return true;
 		return false;
 	}
+	public static boolean isHMIECDevice(String resourceLocation) {
+		if(resourceLocation.contains("HM_HM_ES_TX_WM"))
+			return true;
+		return false;
+	}
 	
 	public static boolean isVirtualThermostat(Resource model) {
 		return !(model.getSubResources(VirtualThermostatConfig.class, false).isEmpty());

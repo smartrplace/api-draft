@@ -24,6 +24,7 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DatapointDesc.ScalingProvider;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.util.BatteryEvalBase;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
@@ -398,6 +399,12 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 long startCalc = System.currentTimeMillis();
 long lastProgress = startCalc;
 String inputName = TimeProcPrint.getTimeseriesName(timeSeries, true);
+
+if((timeSeries instanceof ProcessedReadOnlyTimeSeries3) && (((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification != null) &&
+		((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.id().contains("serverMirror/__19139/mirrorDevices/iota_10_19_31_200_S1/elConn/subPhaseConnections/L1/energySensor/reading_proTag")) {
+	System.out.println("  DPDEBUG UPD:"+((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.id());
+}
+
 if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries.size(start, end)+" input timestamps in "+
 mode+ ", DAYITV_VALUEs, inp:"+inputName);
 		while(nextDayStart <= end) {
