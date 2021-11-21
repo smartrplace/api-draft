@@ -241,7 +241,12 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 			else {
 				//new interval
 				List<SampledValue> result = updateValuesStored(lastIntervalCalculated, end, force);
-				lastIntervalCalculated = startItv;
+				if((!result.isEmpty())) {
+					SampledValue lastSv = result.get(result.size()-1);
+					long lastTs = lastSv.getTimestamp();
+					if(lastTs >= startItv && !Float.isNaN(lastSv.getValue().getFloatValue()))
+						lastIntervalCalculated = startItv;
+				}
 				return result;
 			}
 		}

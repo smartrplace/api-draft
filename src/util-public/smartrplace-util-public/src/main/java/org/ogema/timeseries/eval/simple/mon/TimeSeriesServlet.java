@@ -24,7 +24,6 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DatapointDesc.ScalingProvider;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.util.BatteryEvalBase;
-import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
@@ -167,15 +166,10 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	
 	/** This method is only applicable for AggregationMode.Meter2Meter*/
 	public static float getDiffForDay(long timeStamp, ReadOnlyTimeSeries ts,
+			int intervalType,
 			Float minAllowed, Float maxAllowed, boolean deleteOutside) {
 		return getDiffForDay(timeStamp, ts, Boolean.getBoolean("org.smartrplace.app.monbase.dointerpolate"),
-				minAllowed, maxAllowed, deleteOutside);
-	}
-	/** This method is only applicable for AggregationMode.Meter2Meter*/
-	public static float getDiffForDay(long timeStamp, ReadOnlyTimeSeries ts,
-			boolean interpolate,
-			Float minAllowed, Float maxAllowed, boolean deleteOutside) {
-		return getDiffForDay(timeStamp, ts, interpolate, AbsoluteTiming.DAY, minAllowed, maxAllowed, deleteOutside);
+				intervalType, minAllowed, maxAllowed, deleteOutside, false);
 	}
 	
 	/**
@@ -187,11 +181,13 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	 * @param minAllowed if null then no minimum checking is performed
 	 * @param maxAllowed if null then no maximum checking is performed
 	 * @param deleteOutside if false then values outside limit are set to limit, otherwise they are set to NaN
+	 * @param calculateValueForLastInterval 
 	 * @return
 	 */
 	public static float getDiffForDay(long timeStamp, ReadOnlyTimeSeries ts,
 			boolean interpolate, int intervalType,
-			Float minAllowed, Float maxAllowed, boolean deleteOutside) {
+			Float minAllowed, Float maxAllowed, boolean deleteOutside,
+			boolean calculateValueForLastInterval) {
 		long start = AbsoluteTimeHelper.getIntervalStart(timeStamp, intervalType);
 		long end = start + AbsoluteTimeHelper.getStandardInterval(intervalType); //TimeProcUtil.DAY_MILLIS;
 		final float startFloat;
@@ -204,7 +200,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		}
 		//NOTE: getNextValue performs MUCH faster than getPreviousValue on larger RecordedData input
 		SampledValue startval = ts.getNextValue(start);
-		long startDistance = startval==null?Long.MAX_VALUE:(start - startval.getTimestamp());
+		long startDistance = startval==null?Long.MAX_VALUE:(startval.getTimestamp() - start);
 		long specificAcceptedDistance = AbsoluteTimeHelper.getStandardInterval(intervalType)/2;
 		if((!interpolate) || Float.isNaN(startFloat1) || Float.isNaN(endFloat1) ||
 				(!allowInterpolation(startDistance, intervalType, specificAcceptedDistance))) {
@@ -212,9 +208,16 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				return Float.NaN; //-1
 			}
 			SampledValue endval = ts.getNextValue(end);
-			if(endval == null)
-				return Float.NaN;
-				//return Float.NaN;
+			if(endval == null) {
+				if(calculateValueForLastInterval) {
+					endval = ts.getPreviousValue(end);
+				} else
+					return Float.NaN;
+			} else {
+				long endDistance = endval.getTimestamp() - end;
+				if(endDistance > specificAcceptedDistance)
+					return Float.NaN;				
+			}
 			try {
 				startFloat = startval.getValue().getFloatValue();
 				endFloat = endval.getValue().getFloatValue();
@@ -262,7 +265,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		if(now>=start && now<=end)
 			return getDiffOfLast24h(ts, interpolate, appMan);
 		else
-			return getDiffForDay(timeStamp, ts, interpolate, null, null, false);
+			return getDiffForDay(timeStamp, ts, interpolate, AbsoluteTiming.DAY, null, null, false, false);
 	}
 	
 	public static float specialEvaluation(String label, ReadOnlyTimeSeries timeSeries, ApplicationManager appMan,
@@ -277,7 +280,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			return getDiffForDayOrLast24(ts, timeSeries, appMan);
 		} else	if(label.equals("D24")) {
 			long ts = Long.parseLong(paramMap.get("time")[0]);
-			return getDiffForDay(ts, timeSeries, null, null, false);
+			return getDiffForDay(ts, timeSeries, AbsoluteTiming.DAY, null, null, false);
 		} else if(label.equals("I24")) {
 			return getIntegralOfLast24h(timeSeries, appMan);
 		}
@@ -389,21 +392,43 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	public static List<SampledValue> getDayValues(ReadOnlyTimeSeries timeSeries, long start, long end,
 			AggregationMode mode, ScalingProvider scale, boolean interpolate, int intervalType) {
 		return getDayValues(timeSeries, start, end, mode, scale, interpolate, intervalType,
-				getMinDefault(intervalType), getMaxDefault(intervalType), true);
+				getMinDefault(intervalType), getMaxDefault(intervalType), true, true);
 	}
+	
+	/** Calculate sum of consumption for an aligned interval like an hour, a day etc.
+	 * @param timeSeries
+	 * @param start
+	 * @param end
+	 * @param mode
+	 * @param scale
+	 * @param interpolate
+	 * @param intervalType
+	 * @param minAllowed if null then no minimum checking is performed, only relevant for mode METER2METER
+	 * @param maxAllowed if null then no maximum checking is performed, only relevant for mode METER2METER
+	 * @param deleteOutside if false then values outside limit are set to limit, otherwise they are set to NaN, only relevant for mode METER2METER
+	 * @param calculateValueForLastInterval if true then the last interval (typically the current interval) will be calculated
+	 * 		up to the last input value available. If false then the result may be NaN if not enough values are available.
+	 * 		Currently only relevant for METER2METER.
+	 * @return
+	 */
 	public static List<SampledValue> getDayValues(ReadOnlyTimeSeries timeSeries, long start, long end,
 			AggregationMode mode, ScalingProvider scale, boolean interpolate, int intervalType,
-			Float minAllowed, Float maxAllowed, boolean deleteOutside) {
+			Float minAllowed, Float maxAllowed, boolean deleteOutside,
+			boolean calculateValueForLastInterval) {
 		long nextDayStart = AbsoluteTimeHelper.getIntervalStart(start, intervalType);
 		List<SampledValue> result = new ArrayList<>();
 long startCalc = System.currentTimeMillis();
 long lastProgress = startCalc;
 String inputName = TimeProcPrint.getTimeseriesName(timeSeries, true);
 
-if((timeSeries instanceof ProcessedReadOnlyTimeSeries3) && (((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification != null) &&
-		((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.id().contains("serverMirror/__19139/mirrorDevices/iota_10_19_31_200_S1/elConn/subPhaseConnections/L1/energySensor/reading_proTag")) {
-	System.out.println("  DPDEBUG UPD:"+((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.id());
+String tsFilter = System.getProperty("org.ogema.timeseries.eval.simple.api.tsfilter");
+if((tsFilter != null) && (timeSeries instanceof RecordedData) && ((RecordedData)timeSeries).getPath().contains(tsFilter)) {
+	System.out.println("  DPDEBUG UPD:"+((RecordedData)timeSeries).getPath());
 }
+//if((timeSeries instanceof ProcessedReadOnlyTimeSeries3) && (((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification != null) &&
+//		((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.id().contains("IotaWattConnections/iota_10_19_31_200_S1/elConn/subPhaseConnections/L1/energySensor/reading")) {
+//	System.out.println("  DPDEBUG UPD:"+((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.id());
+//}
 
 if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries.size(start, end)+" input timestamps in "+
 mode+ ", DAYITV_VALUEs, inp:"+inputName);
@@ -420,7 +445,7 @@ if(Boolean.getBoolean("evaldebug2")) {
 			float newDayVal;
 			if(mode == AggregationMode.Meter2Meter) {
 				newDayVal = getDiffForDay(startCurrentDay, timeSeries, interpolate, intervalType,
-						minAllowed, maxAllowed, deleteOutside);
+						minAllowed, maxAllowed, deleteOutside, calculateValueForLastInterval);
 			} else {
 				float newCounter = TimeProcUtil.getInterpolatedValue(timeSeries, startCurrentDay);
 				switch(mode) {
