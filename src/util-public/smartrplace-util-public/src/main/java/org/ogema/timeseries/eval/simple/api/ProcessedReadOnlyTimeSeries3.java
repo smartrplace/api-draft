@@ -1,6 +1,7 @@
 package org.ogema.timeseries.eval.simple.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -100,7 +101,7 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	final protected AggregationMode mode;
 
 	/** For {@link ProcessedReadOnlyTimeSeries2} this is always true*/
-	private boolean updateLastTimestampInSourceOnEveryCall;
+	//private boolean updateLastTimestampInSourceOnEveryCall;
 
 	/*protected long lastUpdateTime = -1;
 	public long getLastUdpateTime() {
@@ -172,7 +173,7 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 				absoluteTiming);
 		this.nameProvider = nameProvider;
 		this.mode = mode;
-		this.updateLastTimestampInSourceOnEveryCall = updateLastTimestampInSourceOnEveryCall;
+		//this.updateLastTimestampInSourceOnEveryCall = updateLastTimestampInSourceOnEveryCall;
 		knownStart = 0;
 		knownEnd = Long.MAX_VALUE;
 		lastReCalc = getCurrentTime();
@@ -237,25 +238,40 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 				//at the beginning we just calculate from the current interval
 				lastIntervalCalculated = startItv;
 			if(startItv == lastIntervalCalculated)
-				return updateValuesStored(startItv, end, force);
+				return updateValuesStored(startItv, end, force).newVals;
 			else {
 				//new interval
-				List<SampledValue> result = updateValuesStored(lastIntervalCalculated, end, force);
-				if((!result.isEmpty())) {
+				UpdateValuesStoredResult result = updateValuesStored(lastIntervalCalculated, end, force);
+				boolean allInputIsNewOrFarBehind = true;
+				if(result.lastInputTimestamp != null) for(Long last: result.lastInputTimestamp) {
+					if((last < startItv) && (last >= lastIntervalCalculated)) {
+						allInputIsNewOrFarBehind = false;
+						break;
+					}
+				}
+				if(allInputIsNewOrFarBehind)
+					lastIntervalCalculated = startItv;
+				/*if((!result.newVals.isEmpty())) {
 					SampledValue lastSv = result.get(result.size()-1);
 					long lastTs = lastSv.getTimestamp();
 					if(lastTs >= startItv && !Float.isNaN(lastSv.getValue().getFloatValue()))
 						lastIntervalCalculated = startItv;
-				}
-				return result;
+				}*/
+				return result.newVals;
 			}
 		}
-		return updateValuesStored(start, end, force);
+		return updateValuesStored(start, end, force).newVals;
+	}
+	
+	public static class UpdateValuesStoredResult {
+		List<SampledValue> newVals;
+		/** list of valid last input timestamps found*/
+		List<Long> lastInputTimestamp;
 	}
 	
 	/** Call this to update or add values that are stored internally
 	 * @return sampled values calculated (usually should not be neeeded to be used)*/
-	public List<SampledValue> updateValuesStored(long start, long end, boolean force) {
+	public UpdateValuesStoredResult updateValuesStored(long start, long end, boolean force) {
 		if(force)
 			return updateValuesStoredForced(start, end);
 		//TODO check input, time since last update
@@ -264,34 +280,46 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	}
 	/** Call this to update or add values that are stored internally
 	 * @return sampled values calculated (usually should not be neeeded to be used)*/
-	public List<SampledValue> updateValuesStoredForced(long start, long end) {
-		List<SampledValue> newVals;
+	public UpdateValuesStoredResult updateValuesStoredForced(long start, long end) {
+		//List<SampledValue> newVals;
+		UpdateValuesStoredResult result = new UpdateValuesStoredResult();
 		switch(getInputType()) {
 		case NoneOrImplicit:
-			newVals = getResultValues(null, start, end, mode);
+			result.newVals = getResultValues(null, start, end, mode);
 			break;
 		case SINGLE:
 			ReadOnlyTimeSeries ts = getSingleInputDp().getTimeSeries();
-			newVals = getResultValues(ts, start, end, mode);
+			result.newVals = getResultValues(ts, start, end, mode);
+			SampledValue svLast = ts.getPreviousValue(Long.MAX_VALUE);
+			if(svLast != null)
+				result.lastInputTimestamp = Arrays.asList(new Long[] {svLast.getTimestamp()});
+			else
+				result.lastInputTimestamp = Arrays.asList(new Long[] {-1l});
 			break;
 		case MULTI:
 			List<Datapoint> dps = getMultiInputDp();
 			List<ReadOnlyTimeSeries> tss = new ArrayList<>();
+			result.lastInputTimestamp = new ArrayList<>();
 			for(Datapoint dp: dps) {
-				tss.add(dp.getTimeSeries());
+				ts = dp.getTimeSeries();
+				tss.add(ts);
+				svLast = ts.getPreviousValue(Long.MAX_VALUE);
+				if(svLast != null) {
+					result.lastInputTimestamp.add(svLast.getTimestamp());
+				}
 			}
-			newVals = getResultValuesMulti(tss, start, end, mode);
+			result.newVals = getResultValuesMulti(tss, start, end, mode);
 			break;
 		default:
 			throw new IllegalStateException("Unknonw input type: "+getInputType());
 		}
 		lastReCalc = getCurrentTime();
 		lastEndTime = end;
-		if(newVals != null)
-			addValues(newVals, start, end);
+		if(result.newVals != null)
+			addValues(result.newVals, start, end);
 		else
 			System.out.println("Warning: newVals null!");
-		return newVals;
+		return result;
 	}
 	
 	public List<SampledValue> updateValuesStoredForcedForDependentTimeseries(long start, long end, List<SampledValue> newVals) {
