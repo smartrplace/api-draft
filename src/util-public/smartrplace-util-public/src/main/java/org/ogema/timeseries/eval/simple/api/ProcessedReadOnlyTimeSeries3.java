@@ -290,20 +290,22 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 		case SINGLE:
 			ReadOnlyTimeSeries ts = getSingleInputDp().getTimeSeries();
 			result.newVals = getResultValues(ts, start, end, mode);
-			SampledValue svLast = ts.getPreviousValue(Long.MAX_VALUE);
-			if(svLast != null)
-				result.lastInputTimestamp = Arrays.asList(new Long[] {svLast.getTimestamp()});
-			else
-				result.lastInputTimestamp = Arrays.asList(new Long[] {-1l});
+			if(ts != null) {
+				SampledValue svLast = ts.getPreviousValue(Long.MAX_VALUE);
+				if(svLast != null)
+					result.lastInputTimestamp = Arrays.asList(new Long[] {svLast.getTimestamp()});
+				else
+					result.lastInputTimestamp = Arrays.asList(new Long[] {-1l});
+			}
 			break;
 		case MULTI:
 			List<Datapoint> dps = getMultiInputDp();
 			List<ReadOnlyTimeSeries> tss = new ArrayList<>();
 			result.lastInputTimestamp = new ArrayList<>();
-			for(Datapoint dp: dps) {
+			if(dps != null) for(Datapoint dp: dps) {
 				ts = dp.getTimeSeries();
 				tss.add(ts);
-				svLast = ts.getPreviousValue(Long.MAX_VALUE);
+				SampledValue svLast = ts.getPreviousValue(Long.MAX_VALUE);
 				if(svLast != null) {
 					result.lastInputTimestamp.add(svLast.getTimestamp());
 				}
