@@ -1,5 +1,6 @@
 package org.ogema.devicefinder.api;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -134,4 +135,9 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	
 	/** Set title of table listing the devices processed by the DeviceHandlerProvider*/
 	String getTableTitle();
+	
+	/** Devices controlled that e.g. need to be deactivated when device is set to trash*/
+	default List<Resource> devicesControlled(InstallAppDevice iad) {
+		return Arrays.asList(new Resource[] {iad.device()});
+	}
 }
