@@ -26,6 +26,9 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	public final Room room = model.location().room();
 	
 	@Existence(required = CreateMode.OPTIONAL)
+	public final TemperatureSensor tempSensor = model.temperatureSensor();
+
+	@Existence(required = CreateMode.OPTIONAL)
 	public final TemperatureResource tempSens = model.temperatureSensor().reading();
 	
 	@Existence(required = CreateMode.OPTIONAL) 

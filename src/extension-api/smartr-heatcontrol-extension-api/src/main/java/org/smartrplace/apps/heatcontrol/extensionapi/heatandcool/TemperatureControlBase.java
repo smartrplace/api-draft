@@ -4,6 +4,7 @@ import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.MechanicalFan;
 import org.ogema.model.locations.Room;
+import org.ogema.model.sensors.TemperatureSensor;
 
 /** This interface can be implemented by single devices and by room control units that control all heating and
  * cooling units within a room
@@ -43,7 +44,7 @@ public interface TemperatureControlBase {
      * 
      * @return null if no suitable device is available in the room
      */
-    public TemperatureResource  getTemperatureMeasurement();
+    public TemperatureSensor getTemperatureMeasurement();
     
     /** 
      * 
