@@ -27,82 +27,80 @@ import org.smartrplace.widget.extensions.GUIUtilHelper;
  */
 @Component(service = Application.class)
 public class UserDataAccessImpl implements UserDataAccess, Application {
-    
+
     final static String TOPLEVELNAME = "userAdminData";
     final static String MESSAGINGDECORATOR = "messagingAddresses";
     final static String PROPERTIESDECORATOR = "properties";
-    
+
     ApplicationManager appman;
     AdministrationManager admin;
     UserAdminData data;
-    
+
     BundleContext ctx;
     ServiceRegistration<UserDataAccess> sreg;
-    
+
     @Activate
     void activate(BundleContext ctx) {
         this.ctx = ctx;
     }
-    
+
     @Override
     public void start(ApplicationManager appManager) {
         this.appman = appManager;
         this.admin = appman.getAdministrationManager();
         sreg = ctx.registerService(UserDataAccess.class, this, null);
     }
-    
+
     @Override
     public void stop(AppStopReason reason) {
         if (sreg != null) {
             sreg.unregister();
         }
     }
-    
+
     @Override
     public List<String> getAllUsers() {
         return appman.getAdministrationManager().getAllUsers()
                 .stream().map(UserAccount::getName).collect(Collectors.toList());
     }
-    
+
     @Override
     public synchronized Resource getUserPropertyResource(String userId) {
         if (userId == null || !getAllUsers().contains(userId)) {
             throw new IllegalArgumentException("invalid user ID: " + userId);
         }
-        if (data == null) {
-            data = appman.getResourceManagement().createResource(TOPLEVELNAME, UserAdminData.class);
-            data.activate(false);
-        }
-    	return GUIUtilHelper.getOrCreateUserPropertyResource(userId, data.userData());
+        return GUIUtilHelper.getOrCreateUserPropertyResource(userId, getBaseResource().userData());
     }
-    
+
     private ResourceList<MessagingAddress> getAddressList(String userId) {
         Resource userRes = getUserPropertyResource(userId);
         @SuppressWarnings("unchecked")
         ResourceList<MessagingAddress> l = userRes.getSubResource(MESSAGINGDECORATOR, ResourceList.class);
-        if(!l.exists()) {
-        	l.create();
-        	l.activate(false);
+        if (!l.exists()) {
+            l.create();
+            l.activate(false);
         }
         if (l.getElementType() == null) {
             l.setElementType(MessagingAddress.class);
         }
         return l;
     }
-    
+
     @Override
     public List<MessagingAddress> getMessagingAddresses(String userId, String addressType) {
         return getMessagingAddresses(userId, addressType, false);
     }
+
     public List<MessagingAddress> getMessagingAddresses(String userId, String addressType, boolean returnAlsoInactive) {
         ResourceList<MessagingAddress> addresses = getAddressList(userId);
-        if((!returnAlsoInactive) && (!addresses.isActive()))
-        	return Collections.emptyList();
+        if ((!returnAlsoInactive) && (!addresses.isActive())) {
+            return Collections.emptyList();
+        }
         return addresses.getAllElements().stream()
                 .filter(a -> addressType == null || addressType.equalsIgnoreCase(a.addressType().getValue()))
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public synchronized void addMessagingAddress(String userId, String addressType, String address) {
         if (userId == null || addressType == null || address == null) {
@@ -123,7 +121,7 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
         newAddr.addressType().setValue(addressType);
         newAddr.activate(true);
     }
-    
+
     @Override
     public boolean removeMessagingAddress(String userId, String addressType, String address) {
         if (userId == null || addressType == null || address == null) {
@@ -134,5 +132,14 @@ public class UserDataAccessImpl implements UserDataAccess, Application {
         addressRes.ifPresent(MessagingAddress::delete);
         return addressRes.isPresent();
     }
-    
+
+    @Override
+    public synchronized UserAdminData getBaseResource() {
+        if (data == null) {
+            data = appman.getResourceManagement().createResource(TOPLEVELNAME, UserAdminData.class);
+            data.activate(false);
+        }
+        return data;
+    }
+
 }

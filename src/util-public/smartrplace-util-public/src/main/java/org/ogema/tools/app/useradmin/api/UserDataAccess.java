@@ -3,12 +3,15 @@ package org.ogema.tools.app.useradmin.api;
 import java.util.List;
 import org.ogema.core.model.Resource;
 import org.ogema.tools.app.useradmin.config.MessagingAddress;
+import org.ogema.tools.app.useradmin.config.UserAdminData;
 
 /**
  *
  * @author jlapp
  */
 public interface UserDataAccess {
+    
+    UserAdminData getBaseResource();
 
     List<String> getAllUsers();
 
