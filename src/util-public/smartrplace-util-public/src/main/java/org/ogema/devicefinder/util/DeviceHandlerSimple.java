@@ -124,24 +124,29 @@ if(Boolean.getBoolean("jobdebug")) {
 				@SuppressWarnings("unchecked")
 				final T box = (T)addNameWidget(object, vh, id, req, row, appMan, config.showOnlyBaseCols());
 
-				SingleValueResource sampleSensor = getMainSensorValue(box, object);
-				if(sampleSensor != null) {
-					Label valueLabel;
-					if(sampleSensor instanceof FloatResource)
-						valueLabel = vh.floatLabel("Value", id, (FloatResource)sampleSensor, row, "%.1f");
-					else if(sampleSensor instanceof IntegerResource)
-						valueLabel = vh.intLabel("Value", id, (IntegerResource)sampleSensor, row, 0);
-					else if(sampleSensor instanceof TimeResource)
-						valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 0);
-					else if(sampleSensor instanceof BooleanResource)
-						valueLabel = vh.booleanLabel("Value", id, (BooleanResource)sampleSensor, row, 0);
-					else
-						throw new IllegalStateException("Unsupported sensor type: "+sampleSensor.getResourceType().getName());
-					Label lastContact = addLastContact(vh, id, req, row, sampleSensor);
-					
-					if(req != null) {
-						valueLabel.setPollingInterval(DEFAULT_POLL_RATE, req);
-						lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
+				if(req == null) {
+					vh.registerHeaderEntry("Value");
+					vh.registerHeaderEntry("Last Contact");
+				} else {
+					SingleValueResource sampleSensor = getMainSensorValue(box, object);
+					if(sampleSensor != null) {
+						Label valueLabel;
+						if(sampleSensor instanceof FloatResource)
+							valueLabel = vh.floatLabel("Value", id, (FloatResource)sampleSensor, row, "%.1f");
+						else if(sampleSensor instanceof IntegerResource)
+							valueLabel = vh.intLabel("Value", id, (IntegerResource)sampleSensor, row, 0);
+						else if(sampleSensor instanceof TimeResource)
+							valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 0);
+						else if(sampleSensor instanceof BooleanResource)
+							valueLabel = vh.booleanLabel("Value", id, (BooleanResource)sampleSensor, row, 0);
+						else
+							throw new IllegalStateException("Unsupported sensor type: "+sampleSensor.getResourceType().getName());
+						Label lastContact = addLastContact(vh, id, req, row, sampleSensor);
+						
+						if(req != null) {
+							valueLabel.setPollingInterval(DEFAULT_POLL_RATE, req);
+							lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
+						}
 					}
 				}
 				
