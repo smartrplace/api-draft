@@ -141,15 +141,17 @@ public interface DatapointService {
 	/** Device information*/
 	Collection<Class<? extends Resource>> getManagedDeviceResoureceTypes();
 	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
+	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId);
 	
 	/** Get resources managed by deviceHandler
 	 * 
 	 * @param deviceHandlerId
 	 * @param shortId if true the deviceHandlerId only has to end with the shortId, otherwise it has
 	 * 		to be equal to be added to the result
+	 * @param returnAlsoTrash if false then trash resources will be filtered out. Default is false.
 	 * @return
 	 */
-	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId);
+	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId, boolean returnAlsoTrash);
 	
 	InstallAppDevice getMangedDeviceResource(PhysicalElement device);
 	InstallAppDevice getMangedDeviceResourceForSubresource(Resource subRes);
