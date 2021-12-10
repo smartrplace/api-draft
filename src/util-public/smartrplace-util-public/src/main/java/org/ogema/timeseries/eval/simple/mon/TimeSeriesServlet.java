@@ -172,6 +172,14 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				intervalType, minAllowed, maxAllowed, deleteOutside, false);
 	}
 	
+	public static float getDiffForDay(long timeStamp, ReadOnlyTimeSeries ts,
+			boolean interpolate, int intervalType,
+			Float minAllowed, Float maxAllowed, boolean deleteOutside,
+			boolean calculateValueForLastInterval) {
+		long specificAcceptedDistance = AbsoluteTimeHelper.getStandardInterval(intervalType)/2;
+		return getDiffForDay(timeStamp, ts, interpolate, intervalType, minAllowed, maxAllowed, deleteOutside,
+				calculateValueForLastInterval, specificAcceptedDistance);
+	}
 	/**
 	 * 
 	 * @param timeStamp
@@ -187,7 +195,8 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	public static float getDiffForDay(long timeStamp, ReadOnlyTimeSeries ts,
 			boolean interpolate, int intervalType,
 			Float minAllowed, Float maxAllowed, boolean deleteOutside,
-			boolean calculateValueForLastInterval) {
+			boolean calculateValueForLastInterval,
+			long specificAcceptedDistance) {
 		long start = AbsoluteTimeHelper.getIntervalStart(timeStamp, intervalType);
 		long end = start + AbsoluteTimeHelper.getStandardInterval(intervalType); //TimeProcUtil.DAY_MILLIS;
 		final float startFloat;
@@ -201,7 +210,6 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		//NOTE: getNextValue performs MUCH faster than getPreviousValue on larger RecordedData input
 		SampledValue startval = ts.getNextValue(start);
 		long startDistance = startval==null?Long.MAX_VALUE:(startval.getTimestamp() - start);
-		long specificAcceptedDistance = AbsoluteTimeHelper.getStandardInterval(intervalType)/2;
 		if((!interpolate) || Float.isNaN(startFloat1) || Float.isNaN(endFloat1) ||
 				(!allowInterpolation(startDistance, intervalType, specificAcceptedDistance))) {
 			if(startval == null || (startDistance > specificAcceptedDistance)) { //ACCEPTED_PREVIOUS_VALUE_DISTANCE_FOR_DAY_EVAL)) {
@@ -417,6 +425,10 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			boolean calculateValueForLastInterval) {
 		long nextDayStart = AbsoluteTimeHelper.getIntervalStart(start, intervalType);
 		List<SampledValue> result = new ArrayList<>();
+		long specificAcceptedDistance = AbsoluteTimeHelper.getStandardInterval(intervalType)/2;
+		if(specificAcceptedDistance < 15*TimeProcUtil.MINUTE_MILLIS)
+			specificAcceptedDistance = AbsoluteTimeHelper.getStandardInterval(intervalType);
+
 long startCalc = System.currentTimeMillis();
 long lastProgress = startCalc;
 String inputName = TimeProcPrint.getTimeseriesName(timeSeries, true);
@@ -445,7 +457,8 @@ if(Boolean.getBoolean("evaldebug2")) {
 			float newDayVal;
 			if(mode == AggregationMode.Meter2Meter) {
 				newDayVal = getDiffForDay(startCurrentDay, timeSeries, interpolate, intervalType,
-						minAllowed, maxAllowed, deleteOutside, calculateValueForLastInterval);
+						minAllowed, maxAllowed, deleteOutside, calculateValueForLastInterval,
+						specificAcceptedDistance);
 			} else {
 				float newCounter = TimeProcUtil.getInterpolatedValue(timeSeries, startCurrentDay);
 				switch(mode) {

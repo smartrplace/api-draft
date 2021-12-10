@@ -188,7 +188,7 @@ public abstract class VirtualSensorKPIMgmtBase<D extends Resource, S extends Sin
 		return addVirtualDatapoint(dpSource, newSubResName, device, intervalToStayBehindNow, registerGovernedSchedule,
 				registerRemoteScheduleViaHeartbeat, result, null);
 	}
-	/**
+	/** Note: For Standard evaluations use StandardEvalAccess#addVirtualDatapoint
 	 * 
 	 * @param dpSource the list may not be empty. The first element is used as pivot relevant for identification
 	 * @param setupProvider
