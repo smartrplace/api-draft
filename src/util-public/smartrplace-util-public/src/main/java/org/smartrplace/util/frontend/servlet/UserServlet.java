@@ -52,6 +52,14 @@ public class UserServlet extends HttpServlet {
 	public static final String TIMEPREFIX = "&time=";
 	public final String servletSubUrl;
 	
+	/** This is the default property check that may be used also by other servlets if no special property is needed*/
+	protected String getPropertyToCheck() {
+		return "org.smartrplace.apps.heatcontrol.servlet.istestinstance";
+	}
+    public boolean isTestInstance(final HttpServletResponse resp) {
+    	return (Boolean.getBoolean(getPropertyToCheck())||Boolean.getBoolean("org.smartrplace.util.frontend.servlet.istestinstance"));
+    }
+
 	/** May be null*/
 	private final ApplicationManagerPlus appManPlus;
 
@@ -202,6 +210,21 @@ public class UserServlet extends HttpServlet {
 		addProvider(prov.getClass().getName(), pageId, prov);
 	}
 	
+    @Override
+    protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+		@SuppressWarnings("unused")
+		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
+		if(isTestInstance(resp)) {
+			resp.setCharacterEncoding("UTF-8");
+	    	resp.setContentType("application/json");
+	    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
+	        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+	        resp.addHeader("Access-Control-Allow-Headers", "*");
+	        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
+	        resp.addHeader("Access-Control-Allow-Credentials", "true");
+		}
+    }
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -209,6 +232,15 @@ public class UserServlet extends HttpServlet {
 		//if(user == null || user.startsWith("["))
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
 		doGet(req, resp, user, false);
+		if(isTestInstance(resp)) {
+			resp.setCharacterEncoding("UTF-8");
+	    	resp.setContentType("application/json");
+	    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
+	        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+	        resp.addHeader("Access-Control-Allow-Headers", "*");
+	        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
+	        resp.addHeader("Access-Control-Allow-Credentials", "true");
+		}
 	}
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
@@ -647,6 +679,15 @@ public class UserServlet extends HttpServlet {
 		//if(user == null) return;
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
 		doPost(req, resp, user, false);
+		if(isTestInstance(resp)) {
+			resp.setCharacterEncoding("UTF-8");
+	    	resp.setContentType("application/json");
+	    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
+	        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+	        resp.addHeader("Access-Control-Allow-Headers", "*");
+	        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
+	        resp.addHeader("Access-Control-Allow-Credentials", "true");
+		}
 	}		
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
