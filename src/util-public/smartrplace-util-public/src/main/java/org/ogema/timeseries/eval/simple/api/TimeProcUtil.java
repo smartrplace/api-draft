@@ -19,6 +19,15 @@ public class TimeProcUtil {
 	public static final long DAY_MILLIS = 24*HOUR_MILLIS;
 	public static final long YEAR_MILLIS = (long)(365.25*DAY_MILLIS);
 
+	public static final String PER_DAY_AV_EVAL = "AV_DAY";
+	public static final String PER_DAY_AV_SUFFIX = "_avPerDay";
+	//public static final String PER_WEEK_AV_EVAL = "AV_WEEK";
+	//public static final String PER_WEEK_AV_SUFFIX = "_avPerWeek";
+	public static final String PER_MONTH_AV_EVAL = "AV_MONTH";
+	public static final String PER_MONTH_AV_SUFFIX = "_avPerMonth";
+	public static final String PER_YEAR_AV_EVAL = "AV_YEAR";
+	public static final String PER_YEAR_AV_SUFFIX = "_avPerYear";
+
 	public static final String PER_DAY_EVAL = "DAY";
 	public static final String PER_DAY_SUFFIX = "_proTag";
 	public static final String PER_HOUR_EVAL = "HOUR";

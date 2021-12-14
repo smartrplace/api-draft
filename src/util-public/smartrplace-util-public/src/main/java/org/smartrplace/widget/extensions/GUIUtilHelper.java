@@ -30,7 +30,6 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.user.NaturalPerson;
-import org.ogema.tools.app.useradmin.impl.UserDataAccessImpl;
 import org.ogema.tools.resource.util.ResourceUtils;
 
 import de.iwes.util.resource.ValueResourceHelper;

@@ -53,6 +53,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	public static final long ACCEPTED_PREVIOUS_VALUE_DISTANCE_FOR_DAY_EVAL = TimeProcUtil.HOUR_MILLIS*12;
 	public static final double MILLIJOULE_TO_KWH = 0.001/TimeProcUtil.HOUR_MILLIS;
 	public static final float JOULE_TO_KWH = (float) (1.0/TimeProcUtil.HOUR_MILLIS);
+	public static final double KWH_TO_MILLIJOULE = TimeProcUtil.HOUR_MILLIS*1000;
 	
 	Map<String, ReadOnlyTimeSeries> knownSpecialTs = new HashMap<>();
 	protected final ApplicationManager appMan;
@@ -368,7 +369,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				startLoc = ref.referenceTime;
 				endLoc = start;			
 			}
-			double counter = aggregateValuesForMeter(timeSeries, mode, startLoc, endLoc, prevVal, null, 0);
+			double counter = aggregateValuesForMeter(timeSeries, mode, startLoc, endLoc, prevVal, null, 0)*MILLIJOULE_TO_KWH;
 			if(ref.referenceTime > start)
 				myRefValue = counter;
 			else
@@ -392,6 +393,22 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 		}
 		return result;
 	}
+
+	public static List<SampledValue> getAverageValues(ReadOnlyTimeSeries timeSeries, long start, long end,
+			ScalingProvider scale, boolean interpolate, int intervalType) {
+		AggregationMode mode = AggregationMode.Power2Meter;
+		List<SampledValue> integral = getDayValues(timeSeries, start, end, mode, scale, interpolate, intervalType,
+				getMinDefault(intervalType), getMaxDefault(intervalType), true, true);
+		List<SampledValue> result = new ArrayList<>();
+		float integral2averge = (float) (KWH_TO_MILLIJOULE /
+				AbsoluteTimeHelper.getStandardInterval(intervalType));
+		for(SampledValue intg_val: integral) {
+			float val = intg_val.getValue().getFloatValue() *integral2averge;
+			result.add(new SampledValue(new FloatValue(val), intg_val.getTimestamp(), intg_val.getQuality()));
+		}
+		return result;
+	}
+	
 	public static List<SampledValue> getDayValues(ReadOnlyTimeSeries timeSeries, long start, long end,
 			AggregationMode mode, ScalingProvider scale) {
 		return getDayValues(timeSeries, start, end, mode, scale,
@@ -558,7 +575,7 @@ if(Boolean.getBoolean("evaldebug2")) {
 	protected static double getPowerStep(Power2MeterPrevValues internalVals, SampledValue sv, long evalStart) {
 		double result;
 		if(internalVals.value != null) {
-			result = (internalVals.value * (sv.getTimestamp() - internalVals.timestamp)) * MILLIJOULE_TO_KWH;
+			result = (internalVals.value * (sv.getTimestamp() - internalVals.timestamp)); // * MILLIJOULE_TO_KWH;
 			internalVals.timestamp = sv.getTimestamp();
 		} else {
 			result = 0;
@@ -570,7 +587,7 @@ if(Boolean.getBoolean("evaldebug2")) {
 	protected static double getFinalPowerStep(Power2MeterPrevValues internalVals, long evalEnd) {
 		double result;
 		if(internalVals.value != null) {
-			result = (internalVals.value * (evalEnd - internalVals.timestamp)) * MILLIJOULE_TO_KWH;
+			result = (internalVals.value * (evalEnd - internalVals.timestamp)); // * MILLIJOULE_TO_KWH;
 		} else {
 			result = 0;
 		}
@@ -594,7 +611,7 @@ if(Boolean.getBoolean("evaldebug2")) {
 			else
 				firstTs = svFirst.getTimestamp();
 			if(svBefore != null && (!Float.isNaN(svBefore.getValue().getFloatValue())))
-				counter = svBefore.getValue().getFloatValue()*(firstTs - startLoc) * MILLIJOULE_TO_KWH;
+				counter = svBefore.getValue().getFloatValue()*(firstTs - startLoc); // * MILLIJOULE_TO_KWH;
 			else
 				counter = 0;
 		}
