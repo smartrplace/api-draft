@@ -24,6 +24,7 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DatapointDesc.ScalingProvider;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.util.BatteryEvalBase;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
@@ -451,8 +452,11 @@ long lastProgress = startCalc;
 String inputName = TimeProcPrint.getTimeseriesName(timeSeries, true);
 
 String tsFilter = System.getProperty("org.ogema.timeseries.eval.simple.api.tsfilter");
-if((tsFilter != null) && (timeSeries instanceof RecordedData) && ((RecordedData)timeSeries).getPath().contains(tsFilter)) {
-	System.out.println("  DPDEBUG UPD:"+((RecordedData)timeSeries).getPath());
+if((tsFilter != null) && (
+		((timeSeries instanceof RecordedData) && ((RecordedData)timeSeries).getPath().contains(tsFilter)) ||
+		((timeSeries instanceof ProcessedReadOnlyTimeSeries3) && ((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.getLocation().contains(tsFilter))
+		)) {
+	System.out.println("  DPDEBUG UPD:"+TimeProcPrint.getTimeseriesName(timeSeries, true));
 }
 //if((timeSeries instanceof ProcessedReadOnlyTimeSeries3) && (((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification != null) &&
 //		((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.id().contains("IotaWattConnections/iota_10_19_31_200_S1/elConn/subPhaseConnections/L1/energySensor/reading")) {
@@ -477,12 +481,7 @@ if(Boolean.getBoolean("evaldebug2")) {
 						minAllowed, maxAllowed, deleteOutside, calculateValueForLastInterval,
 						specificAcceptedDistance);
 			} else {
-				float newCounter = TimeProcUtil.getInterpolatedValue(timeSeries, startCurrentDay);
 				switch(mode) {
-				//case Meter2Meter:
-				//	newDayVal = newCounter - prevCounter;
-				//	prevCounter = newCounter;
-				//	break;
 				case Power2Meter:
 					//TODO: not really tested => integrate from kW*(milliseconds) to kWh
 					//newDayVal = (float) (TimeSeriesUtils.integrate(
@@ -493,14 +492,17 @@ if(Boolean.getBoolean("evaldebug2")) {
 					double counter = 0; //getPartialConsumptionValue(timeSeries, startCurrentDay, true);
 					List<SampledValue> svList = timeSeries.getValues(startCurrentDay, nextDayStart);
 					for(SampledValue sv: svList) {
-						counter += sv.getValue().getFloatValue();
+						float val = sv.getValue().getFloatValue();
+						if(!Float.isNaN(val))
+							counter += val;
 					}
 					//TODO: correct start / end value usage
 					//counter += getPartialConsumptionValue(timeSeries, end, false);
 					newDayVal = (float) counter;
 					break;
 				default:
-					newDayVal = newCounter;
+					//TODO: This should never occur, unclear what this really does, maybe change to exception?
+					newDayVal = TimeProcUtil.getInterpolatedValue(timeSeries, startCurrentDay);
 				}
 			}
 			if(scale != null)
@@ -617,12 +619,12 @@ if(Boolean.getBoolean("evaldebug2")) {
 		}
 		final List<SampledValue> svList;
 		svList = timeSeries.getValues(startLoc, endLoc);
-if(timeSeries instanceof RecordedData) {
+/*if(timeSeries instanceof RecordedData) {
 	RecordedData rec = (RecordedData) timeSeries;
 	log.error("Read from "+rec.getPath()+" values:"+svList.size());
 } else
 	log.error("Read from no-RecordedData values:"+svList.size()+" : "+timeSeries.toString());
-log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(endLoc));
+log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(endLoc));*/
 		for(SampledValue sv: svList) {
 			if(Float.isNaN(sv.getValue().getFloatValue()))
 				continue;
