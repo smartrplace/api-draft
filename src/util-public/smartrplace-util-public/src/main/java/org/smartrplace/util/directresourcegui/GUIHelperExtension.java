@@ -32,6 +32,20 @@ import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.object.widget.popup.WidgetEntryData;
 
 public class GUIHelperExtension {
+	/** Add button to delete object in a ObjectResourceGUIHelper table
+	 * 
+	 * @param <T>
+	 * @param objectList if non-null then deleting of the object will be prevented for the last object in the 
+	 * 		ResourceList
+	 * @param object
+	 * @param mainTable
+	 * @param id
+	 * @param alert
+	 * @param row
+	 * @param vh
+	 * @param req
+	 * @return
+	 */
 	public static <T extends Resource> ButtonConfirm addDeleteButton(
 			ResourceList<T> objectList, T object, OgemaWidget mainTable,
 			String id, Alert alert, Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req) {
