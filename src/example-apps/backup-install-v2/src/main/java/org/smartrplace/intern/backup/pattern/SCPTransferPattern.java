@@ -31,6 +31,8 @@ import org.ogema.util.action.ActionPattern;
 import org.smartrplace.intern.backup.BackupInstallController;
 import org.smartrplace.intern.backup.logic.SCPTransfer;
 
+import de.iwes.util.format.StringFormatHelper;
+
 /**
  * A variant of a ResourcePattern, which is context sensitive. This means, that a context object
  * is injected upon creation. 
@@ -102,6 +104,14 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 		final LocalGatewayInformation gateway = context.getGateway();
 		final GatewayTransferInfo remoteSupervision = context.getRemoteSupervision();
 		final ApplicationManager appMan = context.getAppMan();
+		
+		//TODO: Remove, just for testing
+		Long test = Long.getLong("org.smartrplace.intern.backup.pattern.testdate");
+		if(test != null) {
+			System.out.println("   !!! TEST !!!!");
+			StringFormatHelper.getCurrentDateForPath(test);
+			System.out.println("   !!! TEST !!!!");
+		}
 		/*
 		if (controlByMaxSizeKb.isActive()) {
 			appMan.getLogger().info("Sending Log Data configured by {}", model.getLocation());
