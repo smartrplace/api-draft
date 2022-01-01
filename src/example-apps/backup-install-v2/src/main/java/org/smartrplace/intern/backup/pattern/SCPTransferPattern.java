@@ -13,6 +13,9 @@ package org.smartrplace.intern.backup.pattern;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
@@ -109,7 +112,11 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 		Long test = Long.getLong("org.smartrplace.intern.backup.pattern.testdate");
 		if(test != null) {
 			System.out.println("   !!! TEST !!!!");
-			StringFormatHelper.getCurrentDateForPath(test);
+			//StringFormatHelper.getCurrentDateForPath(test);
+			Date date = new Date(test);
+			DateFormat formatter = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
+	    	String strDate = formatter.format(date);
+	    	System.out.println("Converted "+test+" to "+strDate+" via YYYY-MM-dd-HH-mm-ss");
 			System.out.println("   !!! TEST !!!!");
 		}
 		/*
