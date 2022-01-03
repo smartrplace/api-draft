@@ -16,6 +16,7 @@ import org.ogema.internationalization.util.LocaleHelper;
 import org.ogema.model.prototypes.PhysicalElement;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.template.LabelledItem;
 
@@ -238,6 +239,9 @@ public class PropType implements LabelledItem {
 			return getSubFloat(master, "TEMPERATURE_WINDOW_OPEN", feedback);
 		else if(type == PropType.THERMOSTAT_VALVE_MAXPOSITION)
 			return getSubFloat(master, "VALVE_MAXIMUM_POSITION", feedback);
+		else if(type == PropType.BUTTON_LOCK)
+			return ResourceHelper.getSubResourceOfSibbling(hmDevice,
+					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "globalButtonLock", BooleanResource.class);
 		else
 			throw new IllegalStateException("PropType not supported as resource:"+type.id);
 	}
