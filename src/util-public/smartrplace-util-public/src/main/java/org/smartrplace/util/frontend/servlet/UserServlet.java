@@ -212,6 +212,10 @@ public class UserServlet extends HttpServlet {
 	
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+if(req.getRequestURL().toString().contains("/apiweb")) {
+String fullURL = req.getRequestURL().toString();
+System.out.println("STARTING UsServ OPTIONS for:"+fullURL);
+}
 		@SuppressWarnings("unused")
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
 		if(isTestInstance(resp)) {
@@ -223,6 +227,22 @@ public class UserServlet extends HttpServlet {
 	        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
 	        resp.addHeader("Access-Control-Allow-Credentials", "true");
 		}
+    }
+
+    @Override
+    protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+if(req.getRequestURL().toString().contains("/apiweb")) {
+String fullURL = req.getRequestURL().toString();
+System.out.println("STARTING UsServ HEAD for:"+fullURL);
+}
+
+		resp.setCharacterEncoding("UTF-8");
+		resp.setContentType("application/json");
+		resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
+		resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+		resp.addHeader("Access-Control-Allow-Headers", "*");
+		resp.addHeader("Access-Control-Allow-Credentials", "true");
+    	super.doHead(req, resp);
     }
 
 	@Override
@@ -314,6 +334,14 @@ System.out.println("For "+req.getRequestURL().toString()+" check header:"+resp.c
 			logger.trace("GET Response:"+out);
 		}
 		resp.setStatus(200);
+if(req.getRequestURL().toString().contains("/apiweb")) {
+String fullURL = req.getRequestURL().toString();
+String paramStr = req.getQueryString();
+if(paramStr != null)
+System.out.println("Finished GET for:"+fullURL+"?"+paramStr);
+else
+System.out.println("Finished GET for:"+fullURL);
+}
 	}
 	
 	protected Map<String, String[]> getParamMap(HttpServletRequest req) {
