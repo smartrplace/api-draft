@@ -114,9 +114,9 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 			System.out.println("   !!! TEST !!!!");
 			//StringFormatHelper.getCurrentDateForPath(test);
 			Date date = new Date(test);
-			DateFormat formatter = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
+			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 	    	String strDate = formatter.format(date);
-	    	System.out.println("Converted "+test+" to "+strDate+" via YYYY-MM-dd-HH-mm-ss");
+	    	System.out.println("Converted "+test+" to "+strDate+" via yyyy-MM-dd-HH-mm-ss");
 			System.out.println("   !!! TEST !!!!");
 		}
 		/*

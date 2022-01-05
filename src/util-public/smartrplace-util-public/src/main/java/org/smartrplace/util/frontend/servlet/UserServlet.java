@@ -240,7 +240,11 @@ public class UserServlet extends HttpServlet {
 	        resp.addHeader("Access-Control-Allow-Headers", "*");
 	        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
 	        resp.addHeader("Access-Control-Allow-Credentials", "true");
+if(req.getRequestURL().toString().contains("/apiweb"))
+System.out.println("For "+req.getRequestURL().toString()+" setting Access-Control-Allow-Headers:"+resp.containsHeader("Access-Control-Allow-Headers"));
 		}
+if(req.getRequestURL().toString().contains("/apiweb"))
+System.out.println("For "+req.getRequestURL().toString()+" check header:"+resp.containsHeader("Access-Control-Allow-Headers"));
 	}
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
@@ -687,7 +691,11 @@ public class UserServlet extends HttpServlet {
 	        resp.addHeader("Access-Control-Allow-Headers", "*");
 	        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
 	        resp.addHeader("Access-Control-Allow-Credentials", "true");
+if(req.getRequestURL().toString().contains("/apiweb"))
+System.out.println("For "+req.getRequestURL().toString()+" POST-add Access-Control-Allow-Headers header:"+resp.containsHeader("Access-Control-Allow-Headers"));
 		}
+if(req.getRequestURL().toString().contains("/apiweb"))
+System.out.println("For "+req.getRequestURL().toString()+" check header:"+resp.containsHeader("Access-Control-Allow-Headers"));
 	}		
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
