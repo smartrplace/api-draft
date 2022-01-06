@@ -45,10 +45,6 @@ public abstract class UserServletTest extends HttpServlet {
 
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-if(req.getRequestURL().toString().contains("/apiweb")) {
-String fullURL = req.getRequestURL().toString();
-System.out.println("STARTING UsServTEST OPTIONS for:"+fullURL);
-}
 		if(!checkAccessAllowedAndSendError(req, resp)) return;
     	resp.setCharacterEncoding("UTF-8");
     	resp.setContentType("application/json");
@@ -87,14 +83,6 @@ System.out.println("STARTING UsServTEST OPTIONS for:"+fullURL);
 	@Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     	String user = getUser(req, resp);
-if(req.getRequestURL().toString().contains("/apiweb")) {
-String fullURL = req.getRequestURL().toString();
-String paramStr = req.getQueryString();
-if(paramStr != null)
-System.out.println("STARTING UsServTEST GET for:"+fullURL+"?"+paramStr);
-else
-System.out.println("STARTING UsServTEST GET for:"+fullURL);
-}
     	if(user == null) {
     		sendError(resp);
     		return;
@@ -181,10 +169,6 @@ System.out.println("STARTING UsServTEST GET for:"+fullURL);
     
     @Override
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-if(req.getRequestURL().toString().contains("/apiweb")) {
-String fullURL = req.getRequestURL().toString();
-System.out.println("STARTING UsServTEST HEAD for:"+fullURL);
-}
        	if(!checkAccessAllowedAndSendError(req, resp)) return;
     	
     	resp.setCharacterEncoding("UTF-8");

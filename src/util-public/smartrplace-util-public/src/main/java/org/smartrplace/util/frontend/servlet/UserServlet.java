@@ -212,13 +212,11 @@ public class UserServlet extends HttpServlet {
 	
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-if(req.getRequestURL().toString().contains("/apiweb")) {
-String fullURL = req.getRequestURL().toString();
-System.out.println("STARTING UsServ OPTIONS for:"+fullURL);
-}
 		@SuppressWarnings("unused")
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
 		if(isTestInstance(resp)) {
+			//NOTE: This is not really relevant here as /apiweb/ is accessed via sessin and thus
+			//cannot be accessed cross-site
 			resp.setCharacterEncoding("UTF-8");
 	    	resp.setContentType("application/json");
 	    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
@@ -231,11 +229,8 @@ System.out.println("STARTING UsServ OPTIONS for:"+fullURL);
 
     @Override
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-if(req.getRequestURL().toString().contains("/apiweb")) {
-String fullURL = req.getRequestURL().toString();
-System.out.println("STARTING UsServ HEAD for:"+fullURL);
-}
-
+		//NOTE: This is not really relevant here as /apiweb/ is accessed via sessin and thus
+		//cannot be accessed cross-site
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("application/json");
 		resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
@@ -251,8 +246,9 @@ System.out.println("STARTING UsServ HEAD for:"+fullURL);
 		//String user = req.getParameter("user");
 		//if(user == null || user.startsWith("["))
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
-		doGet(req, resp, user, false);
 		if(isTestInstance(resp)) {
+			//NOTE: This is not really relevant here as /apiweb/ is accessed via sessin and thus
+			//cannot be accessed cross-site
 			resp.setCharacterEncoding("UTF-8");
 	    	resp.setContentType("application/json");
 	    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
@@ -260,11 +256,8 @@ System.out.println("STARTING UsServ HEAD for:"+fullURL);
 	        resp.addHeader("Access-Control-Allow-Headers", "*");
 	        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
 	        resp.addHeader("Access-Control-Allow-Credentials", "true");
-if(req.getRequestURL().toString().contains("/apiweb"))
-System.out.println("For "+req.getRequestURL().toString()+" setting Access-Control-Allow-Headers:"+resp.containsHeader("Access-Control-Allow-Headers"));
 		}
-if(req.getRequestURL().toString().contains("/apiweb"))
-System.out.println("For "+req.getRequestURL().toString()+" check header:"+resp.containsHeader("Access-Control-Allow-Headers"));
+		doGet(req, resp, user, false);
 	}
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
@@ -334,14 +327,6 @@ System.out.println("For "+req.getRequestURL().toString()+" check header:"+resp.c
 			logger.trace("GET Response:"+out);
 		}
 		resp.setStatus(200);
-if(req.getRequestURL().toString().contains("/apiweb")) {
-String fullURL = req.getRequestURL().toString();
-String paramStr = req.getQueryString();
-if(paramStr != null)
-System.out.println("Finished GET for:"+fullURL+"?"+paramStr);
-else
-System.out.println("Finished GET for:"+fullURL);
-}
 	}
 	
 	protected Map<String, String[]> getParamMap(HttpServletRequest req) {
@@ -712,6 +697,8 @@ System.out.println("Finished GET for:"+fullURL);
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
 		doPost(req, resp, user, false);
 		if(isTestInstance(resp)) {
+			//NOTE: This is not really relevant here as /apiweb/ is accessed via sessin and thus
+			//cannot be accessed cross-site
 			resp.setCharacterEncoding("UTF-8");
 	    	resp.setContentType("application/json");
 	    	resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
@@ -719,11 +706,7 @@ System.out.println("Finished GET for:"+fullURL);
 	        resp.addHeader("Access-Control-Allow-Headers", "*");
 	        //resp.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
 	        resp.addHeader("Access-Control-Allow-Credentials", "true");
-if(req.getRequestURL().toString().contains("/apiweb"))
-System.out.println("For "+req.getRequestURL().toString()+" POST-add Access-Control-Allow-Headers header:"+resp.containsHeader("Access-Control-Allow-Headers"));
 		}
-if(req.getRequestURL().toString().contains("/apiweb"))
-System.out.println("For "+req.getRequestURL().toString()+" check header:"+resp.containsHeader("Access-Control-Allow-Headers"));
 	}		
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
