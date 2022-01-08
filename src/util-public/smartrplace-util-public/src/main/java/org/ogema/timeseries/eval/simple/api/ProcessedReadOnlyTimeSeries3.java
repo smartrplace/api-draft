@@ -244,7 +244,7 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 				UpdateValuesStoredResult result = updateValuesStored(lastIntervalCalculated, end, force);
 				boolean allInputIsNewOrFarBehind = true;
 				if(result.lastInputTimestamp != null) for(Long last: result.lastInputTimestamp) {
-					if((last < startItv) && (last >= lastIntervalCalculated)) {
+					if((last <= startItv) && (last >= lastIntervalCalculated)) {
 						allInputIsNewOrFarBehind = false;
 						break;
 					}

@@ -24,7 +24,7 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DatapointDesc.ScalingProvider;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.util.BatteryEvalBase;
-import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
@@ -451,10 +451,10 @@ long startCalc = System.currentTimeMillis();
 long lastProgress = startCalc;
 String inputName = TimeProcPrint.getTimeseriesName(timeSeries, true);
 
-String tsFilter = System.getProperty("org.ogema.timeseries.eval.simple.api.tsfilter");
-if((tsFilter != null) && (
-		((timeSeries instanceof RecordedData) && ((RecordedData)timeSeries).getPath().contains(tsFilter)) ||
-		((timeSeries instanceof ProcessedReadOnlyTimeSeries3) && ((ProcessedReadOnlyTimeSeries3)timeSeries).datapointForChangeNotification.getLocation().contains(tsFilter))
+String tsFilterIN = System.getProperty("org.ogema.timeseries.eval.simple.api.tsfilter_IN");
+if((tsFilterIN != null) && (
+		((timeSeries instanceof RecordedData) && ((RecordedData)timeSeries).getPath().contains(tsFilterIN)) ||
+		((timeSeries instanceof ProcessedReadOnlyTimeSeries) && ((ProcessedReadOnlyTimeSeries)timeSeries).datapointForChangeNotification.getLocation().contains(tsFilterIN))
 		)) {
 	System.out.println("  DPDEBUG UPD:"+TimeProcPrint.getTimeseriesName(timeSeries, true));
 }
