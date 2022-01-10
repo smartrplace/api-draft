@@ -292,6 +292,8 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 			result.newVals = getResultValues(ts, start, end, mode);
 			if(ts != null) {
 				SampledValue svLast = ts.getPreviousValue(Long.MAX_VALUE);
+				if(svLast != null && Float.isNaN(svLast.getValue().getFloatValue()))
+					svLast = ts.getPreviousValue(svLast.getTimestamp()-1);
 				if(svLast != null)
 					result.lastInputTimestamp = Arrays.asList(new Long[] {svLast.getTimestamp()});
 				else
