@@ -9,7 +9,7 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.units.PowerResource;
-import org.ogema.devicefinder.util.DpGroupUtil;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.model.actors.OnOffSwitch;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.PowerSensor;
@@ -33,12 +33,14 @@ public class OnOffSwitchMgmt {
 			return swtch.getLocation();
 		}
 		
-		public InstallAppDevice getIAD(ApplicationManager appMan) {
-			InstallAppDevice result = DpGroupUtil.getInstallAppDeviceForSubCashed(swtch, appMan);
+		public InstallAppDevice getIAD(DatapointService dpService) {
+			InstallAppDevice result = dpService.getMangedDeviceResourceForSubresource(swtch);
+			//InstallAppDevice result = DpGroupUtil.getInstallAppDeviceForSubCashed(swtch, appMan);
 			if(result != null)
 				return result;
 			if(parent != null)
-				return DpGroupUtil.getInstallAppDeviceForSubCashed(parent, appMan);
+				return dpService.getMangedDeviceResourceForSubresource(parent);
+				//return DpGroupUtil.getInstallAppDeviceForSubCashed(parent, appMan);
 			return null;
 		}
 	}
