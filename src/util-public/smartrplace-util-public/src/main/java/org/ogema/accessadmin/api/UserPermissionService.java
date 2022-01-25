@@ -89,6 +89,7 @@ public interface UserPermissionService {
 	public static final String APPCONFIG_DETAILPAGE = "Detailpage";
 	public static final String APPCONFIG_SETPOINT_CURVE = "Setpoint Curve";
 	public static final String APPCONFIG_SETUPPAGE = "Setup Page";
+	public static final String APPCONFIG_SHOW_ISSUES = "Show Customer Issues";
 	
 	//Permission under development
 	public static final String DASHBOARD_GENERAL = "Dashboad General";
@@ -113,7 +114,7 @@ public interface UserPermissionService {
 			ROOMCONTROL_WE, ROOMCONTROL_2D, ROOM_STATUS_CONTROL, MODBUS_SERVER, MONTORING_CHART_EXPERT};
 	
 	public static final String[] APP_CONFIG_PERMISSIONS = {APPCONFIG_LOGOUT, APPCONFIG_OTHER_APPS, APPCONFIG_MEASUREMENTS,
-			APPCONFIG_ECOMODE, APPCONFIG_SETPOINT_CURVE, APPCONFIG_DETAILPAGE, APPCONFIG_SETUPPAGE};
+			APPCONFIG_ECOMODE, APPCONFIG_SETPOINT_CURVE, APPCONFIG_DETAILPAGE, APPCONFIG_SETUPPAGE, APPCONFIG_SHOW_ISSUES};
 
 	/** Permissions for which the building property units rooms per user and per app or app permission type
 	 * shall be chosen via Multiselect. So the table will most likely only show one app or app permission type

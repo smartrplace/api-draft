@@ -18,6 +18,7 @@ import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.smartrplace.util.frontend.servlet.UserServlet.ServletPageProvider;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 
@@ -92,7 +93,7 @@ public class UserServletUtil {
 		if(pdata.tsData != null) {
 			tsd = pdata.tsData;
 		} else if(pdata.tsDataRaw != null && pdata.tsLocationOrBaseId != null) {
-			String hash = ""+pdata.tsLocationOrBaseId.hashCode();
+			String hash = ServletPageProvider.getNumericalIdString(pdata.tsLocationOrBaseId);
 			tsd = new TimeSeriesDataImpl(pdata.tsDataRaw, hash, hash, InterpolationMode.NONE);
 		}
 		return getOrAddTimeSeriesData(tsd);
@@ -102,7 +103,7 @@ public class UserServletUtil {
 		if(pdata.tsData != null) {
 			tsd = pdata.tsData;
 		} else if(pdata.tsDataRaw != null && pdata.tsLocationOrBaseId != null) {
-			String hash = ""+pdata.tsLocationOrBaseId.hashCode();
+			String hash = ServletPageProvider.getNumericalIdString(pdata.tsLocationOrBaseId); //pdata.tsLocationOrBaseId.hashCode();
 			tsd = new TimeSeriesDataImpl(pdata.tsDataRaw, hash, hash, InterpolationMode.NONE);
 		}
 		getOrAddTimeSeriesData(tsd);
@@ -118,12 +119,12 @@ public class UserServletUtil {
 	}
 
 	public static String getOrAddTimeSeriesData(ReadOnlyTimeSeries tsDataRaw, String tsLocationOrBaseId) {
-		String hash = ""+tsLocationOrBaseId.hashCode();
+		String hash = ServletPageProvider.getNumericalIdString(tsLocationOrBaseId);
 		TimeSeriesDataImpl tsd = new TimeSeriesDataImpl(tsDataRaw, hash, hash, InterpolationMode.NONE);
 		return getOrAddTimeSeriesData(tsd);
 	}
 	public static TimeSeriesDataImpl getOrAddTimeSeriesDataPlus(ReadOnlyTimeSeries tsDataRaw, String tsLocationOrBaseId) {
-		String hash = ""+tsLocationOrBaseId.hashCode();
+		String hash = ServletPageProvider.getNumericalIdString(tsLocationOrBaseId);
 		TimeSeriesDataImpl tsd = new TimeSeriesDataImpl(tsDataRaw, hash, hash, InterpolationMode.NONE);
 		getOrAddTimeSeriesData(tsd);
 		return tsd;

@@ -46,7 +46,7 @@ import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 /** Core class to provide servlets based on widgets pages
- * TODO: Entire package to be moved to smartrplace-util-proposed or similar location for Utils*/
+ */
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
@@ -96,12 +96,12 @@ public class UserServlet extends HttpServlet {
 	
 	/** Management of numerical IDs*/
 	protected static final Map<Integer, String> num2stringObjects = new HashMap<>();
-	protected static void num2StringPut(String value) {
+	protected static void num2StringPut(String value, boolean objectIdPostiveOnly) {
 		try {
 			int num = Integer.parseInt(value);
 			num2stringObjects.put(num, value);
 		} catch(NumberFormatException e) {
-			int num = value.hashCode();
+			int num = ServletPageProvider.getNumericalId(value, objectIdPostiveOnly); //value.hashCode();
 			num2stringObjects.put(num, value);
 		}
 		
@@ -156,9 +156,24 @@ public class UserServlet extends HttpServlet {
 		 * @return
 		 */
 		default String getObjectName() { return null;}
+		default boolean objectIdPostiveOnly() {
+			return false;
+		}
 		
-		default int getNumericalId(String stringId) {
-			return stringId.hashCode();
+		static int getNumericalId(String stringId) {
+			return getNumericalId(stringId, false);
+		}
+		static int getNumericalId(String stringId, boolean isRoomOrUser) {
+			if(isRoomOrUser)
+				return Math.abs(stringId.hashCode());
+			else
+				return stringId.hashCode();
+		}
+		static String getNumericalIdString(String stringId) {
+			return getNumericalIdString(stringId, false);
+		}
+		static String getNumericalIdString(String stringId, boolean isRoomOrUser) {
+			return ""+getNumericalId(stringId, isRoomOrUser);
 		}
 	}
 	public interface ServletValueProvider {
@@ -591,7 +606,7 @@ public class UserServlet extends HttpServlet {
 				result.objectId = num2stringObjects.get(numId);
 			} catch(NumberFormatException e) {
 				//int numIdNew = result.objectId.hashCode();
-				num2StringPut(result.objectId);
+				num2StringPut(result.objectId, pageprov.objectIdPostiveOnly());
 			}
 		}
 		if(result.objectId != null) {
@@ -608,7 +623,7 @@ public class UserServlet extends HttpServlet {
 		for(T obj: allObj) {
 			String id = pageprov.getObjectId(obj);
 			//int numIdNew = id.hashCode();
-			num2StringPut(id);			
+			num2StringPut(id, pageprov.objectIdPostiveOnly());			
 		}
 		if(numId != 0) {
 			//we try to find the object once more with the new information
