@@ -833,6 +833,7 @@ public class UserServlet extends HttpServlet {
 			String timeString,
 			Map<String, String[]> paramMap) {
 		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap, true);
+		//postData.remove("params");
 		postJSON(user, postData, pageprov, timeString, paramMap, odata);
 	}
 	protected static <T> void postJSON(String user, JSONObject postData,
@@ -860,6 +861,8 @@ public class UserServlet extends HttpServlet {
 				throw new IllegalStateException("Object not part of result in POST for "+pageprov.toString());			
 		}
 		for(String key: postData.keySet()) {
+			if(key.equals("params"))
+				continue;
 			ServletValueProvider prov = userMap.get(key);
 			if(prov == null)
 				throw new IllegalStateException(key+" not available for "+pageprov.toString());
