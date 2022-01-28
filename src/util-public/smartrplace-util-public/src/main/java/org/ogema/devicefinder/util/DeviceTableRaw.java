@@ -17,6 +17,7 @@ import org.ogema.core.model.units.VoltageResource;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.devicefinder.api.DeviceHandlerProviderDP;
 import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
@@ -658,14 +659,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	 * @param devHand may be null, in this case we just check if a non-empty value is given for the handler id
 	 * @return
 	 */
-	public static boolean isTemplate(InstallAppDevice object, DeviceHandlerProvider<?> devHand) {
+	public static boolean isTemplate(InstallAppDevice object, DeviceHandlerProviderDP<?> devHand) {
 		if(devHand == null)
 			return  object.isTemplate().isActive() && (!object.isTemplate().getValue().isEmpty());
 		final boolean isTemplate = object.isTemplate().isActive() && object.isTemplate().getValue().equals(devHand.id());
 		return isTemplate;
 	}
 	
-	public static void setTemplateStatus(InstallAppDevice object, DeviceHandlerProvider<?> devHand, boolean newStatus) {
+	public static void setTemplateStatus(InstallAppDevice object, DeviceHandlerProviderDP<?> devHand, boolean newStatus) {
 		if(newStatus) {
 			ValueResourceHelper.setCreate(object.isTemplate(), devHand.id());
 			if(!object.isTemplate().isActive())

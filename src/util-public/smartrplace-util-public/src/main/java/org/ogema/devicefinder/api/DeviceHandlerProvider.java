@@ -156,18 +156,6 @@ public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandler
 	/** Required for hardware installation. Provided by DeviceHandlerBase*/
 	List<ResourcePattern<T>> getAllPatterns();
 	
-	/** This method is called when the first resource of a type is created. The handler shall then
-	 * fill in the {@link InstallAppDevice} resource and the device resource as a template, e.g. for
-	 * alarming. If not template filling is relevant or is not supported then the method does not
-	 * need to be overwritten.<br>
-	 * You should call org.ogema.eval.timeseries.simple.smarteff.AlarmingUtiH#setTemplateValues for each
-	 * value for which alarming shall be configurable with the relevant default alarming limit parameters.
-	 * @param appDevice
-	 * @param appConfigData
-	 */
-	default void initAlarmingForDevice(InstallAppDevice appDevice,
-			HardwareInstallConfig appConfigData) {}
-
 	/** Provide version of alarming initializiation. If a new version is provided then
 	 * {@link #initAlarmingForDevice(InstallAppDevice, HardwareInstallConfig)}
 	 * is called once more. Implementation should take care then that existing special configurations

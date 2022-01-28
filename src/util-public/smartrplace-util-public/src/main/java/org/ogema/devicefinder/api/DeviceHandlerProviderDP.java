@@ -7,6 +7,7 @@ import java.util.List;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.util.DatapointImpl;
+import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.widgets.template.LabelledItem;
@@ -140,4 +141,18 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default List<Resource> devicesControlled(InstallAppDevice iad) {
 		return Arrays.asList(new Resource[] {iad.device()});
 	}
+
+	/** This method is called when the first resource of a type is created. The handler shall then
+	 * fill in the {@link InstallAppDevice} resource and the device resource as a template, e.g. for
+	 * alarming. If not template filling is relevant or is not supported then the method does not
+	 * need to be overwritten.<br>
+	 * You should call org.ogema.eval.timeseries.simple.smarteff.AlarmingUtiH#setTemplateValues for each
+	 * value for which alarming shall be configurable with the relevant default alarming limit parameters.
+	 * @param appDevice
+	 * @param appConfigData
+	 */
+	default void initAlarmingForDevice(InstallAppDevice appDevice,
+			HardwareInstallConfig appConfigData) {}
+
+
 }

@@ -2,6 +2,7 @@ package org.ogema.accessadmin.api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class SubcustomerUtil {
 		/**Id is written into the {@link Room#type()} field and should this be aligned with the
 		 * standard room types if possible
 		 */
-		public final Map<Integer, NamedIntegerType> roomTypes = new HashMap<>();
+		public final Map<Integer, NamedIntegerType> roomTypes = new LinkedHashMap<>();
 		public int[] defaultWorkingDays = new int[] {1,2,3,4,5};
 		public float defaultEcoTemperatureHeating = 273.15f+16f;
 		public float defaultEcoTemperatureCooling = 273.15f+30f;
@@ -125,12 +126,16 @@ public class SubcustomerUtil {
 		return accessAdminConfigRes.subCustomers().getAllElements();
 	}
 	
+	/** Master and standard setting data for a room type within a subcustomer*/
 	public static class RoomTypeGroupData {
+		// Master data
 		public String id;
 		public String name;
 		public List<String> rooms = new ArrayList<>();
 		public int roomNumHeating = 0;
 		public int roomNumCooling = 0;
+		
+		// Standard setting data. This is also containted in MultiRoomSettingEval
 		public HeatCoolData heatingData;
 		public HeatCoolData coolingData;
 	}
@@ -178,49 +183,6 @@ public class SubcustomerUtil {
 			return nonUsageTemperature;
 		}		
 	}
-	/** COPIED FROM UserPermissionUtil 
-	 * We have to check whether an existing value has to be overwritten or not
-	 * @return true if a new entry was added*/
-	/*public static boolean addPermission(String resourceId, String permissionType, AccessConfigBase configRes) {
-		return addPermission(resourceId, permissionType, configRes, 1);
-	}
-	public static boolean addPermission(String resourceId, String permissionType, AccessConfigBase configRes, int value) {
-		Integer idx = getIndexOfExisting(resourceId, permissionType, configRes);
-		if(idx != null) {
-			configRes.permissionValues().setElementValue(value, idx);
-			return false;
-		}
-		try {
-			Thread.sleep(0);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		boolean isNew = false;
-		if(!configRes.isActive()) {
-			configRes.create();
-			configRes.resourceIds().create();
-			configRes.permissionTypes().create();
-			configRes.permissionValues().create();
-			isNew = true;
-		}
-		ValueResourceUtils.appendValue(configRes.resourceIds(), resourceId);
-		ValueResourceUtils.appendValue(configRes.permissionTypes(), permissionType);
-		ValueResourceUtils.appendValue(configRes.permissionValues(), value);
-		if(isNew)
-			configRes.activate(true);
-		return true;
-	}
-	public static Integer getIndexOfExisting(String resourceId, String permissionType, AccessConfigBase configRes) {
-		int idx = 0;
-		String[] types = configRes.permissionTypes().getValues();
-		for(String id: configRes.resourceIds().getValues()) {
-			if(id.contentEquals(resourceId) && types[idx].equals(permissionType)) {
-				return idx;
-			}
-			idx++;
-		}
-		return null;
-	}*/
 
 	public static void addRoomToGroup(Room object, BuildingPropertyUnit bu) {
 		ResourceListHelper.addReferenceUnique(bu.rooms(), object);

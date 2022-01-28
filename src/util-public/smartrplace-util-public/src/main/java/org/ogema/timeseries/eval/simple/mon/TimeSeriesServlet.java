@@ -370,7 +370,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 				startLoc = ref.referenceTime;
 				endLoc = start;			
 			}
-			double counter = aggregateValuesForMeter(timeSeries, mode, startLoc, endLoc, prevVal, null, 0)*MILLIJOULE_TO_KWH;
+			double counter = aggregateValuesForMeter(timeSeries, mode, startLoc, endLoc, prevVal, null, 0, null)*MILLIJOULE_TO_KWH;
 			if(ref.referenceTime > start)
 				myRefValue = counter;
 			else
@@ -378,7 +378,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 			delta = ref.referenceMeterValue - myRefValue;
 			if(mode == AggregationMode.Power2Meter && (ref.referenceTime > start))
 				prevVal = new Power2MeterPrevValues();
-			aggregateValuesForMeter(timeSeries, mode, start, end, prevVal, result, delta);
+			aggregateValuesForMeter(timeSeries, mode, start, end, prevVal, result, delta, MILLIJOULE_TO_KWH);
 			return result;
 		} else {
 			myRefValue = TimeProcUtil.getInterpolatedValue(timeSeries, ref.referenceTime);
@@ -598,10 +598,13 @@ if(Boolean.getBoolean("evaldebug2")) {
 	
 	protected static double aggregateValuesForMeter(ReadOnlyTimeSeries timeSeries, AggregationMode mode,
 			long startLoc, long endLoc, Power2MeterPrevValues prevVal,
-			 List<SampledValue> result, double delta) {
+			 List<SampledValue> result, double delta, Double factor) {
 		double counter;
 		if(mode == AggregationMode.Consumption2Meter) {
-			counter = getPartialConsumptionValue(timeSeries, startLoc, true);
+			if(factor != null)
+				counter = getPartialConsumptionValue(timeSeries, startLoc, true)*factor;
+			else
+				counter = getPartialConsumptionValue(timeSeries, startLoc, true);
 			if(Double.isNaN(counter))
 				log.warn("NAN for agg from"+timeSeries.toString()+" at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc));
 		} else {
@@ -612,9 +615,13 @@ if(Boolean.getBoolean("evaldebug2")) {
 				firstTs = endLoc;
 			else
 				firstTs = svFirst.getTimestamp();
-			if(svBefore != null && (!Float.isNaN(svBefore.getValue().getFloatValue())))
-				counter = svBefore.getValue().getFloatValue()*(firstTs - startLoc); // * MILLIJOULE_TO_KWH;
-			else
+			if(svBefore != null && (!Float.isNaN(svBefore.getValue().getFloatValue()))) {
+				//TODO: Check if factor makes sense here
+				if(factor != null)
+					counter = svBefore.getValue().getFloatValue()*(firstTs - startLoc)*factor;// * MILLIJOULE_TO_KWH;
+				else
+					counter = svBefore.getValue().getFloatValue()*(firstTs - startLoc); 
+			} else
 				counter = 0;
 		}
 		final List<SampledValue> svList;
@@ -628,10 +635,17 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		for(SampledValue sv: svList) {
 			if(Float.isNaN(sv.getValue().getFloatValue()))
 				continue;
-			if(mode == AggregationMode.Power2Meter)
-				counter += getPowerStep(prevVal, sv, startLoc);
-			else
-				counter += sv.getValue().getFloatValue();
+			if(mode == AggregationMode.Power2Meter) {
+				if(factor != null)
+					counter += (getPowerStep(prevVal, sv, startLoc)*factor);
+				else
+					counter += getPowerStep(prevVal, sv, startLoc);
+			} else {
+				if(factor != null)
+					counter += (sv.getValue().getFloatValue()*factor);
+				else
+					counter += sv.getValue().getFloatValue();
+			}
 			if(result != null) {
 				result.add(new SampledValue(new FloatValue((float) (counter+delta)), sv.getTimestamp(), sv.getQuality()));
 			}
@@ -640,14 +654,21 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		}
 		if(mode == AggregationMode.Power2Meter) {
 			SampledValue firstValueBehind = timeSeries.getNextValue(endLoc);
-			if(firstValueBehind != null)
-				counter += getFinalPowerStep(prevVal, endLoc);
+			if(firstValueBehind != null) {
+				if(factor != null)
+					counter += (getFinalPowerStep(prevVal, endLoc)*factor);
+				else
+					counter += getFinalPowerStep(prevVal, endLoc);
+			}
 			if(result != null)
 				result.add(new SampledValue(new FloatValue((float) (counter+delta)), prevVal.timestamp, Quality.GOOD));
 			if(Double.isNaN(counter))
 				log.warn("NAN for agg from"+timeSeries.toString()+" at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc));
 		} else if(result == null)
-			counter += getPartialConsumptionValue(timeSeries, endLoc, false);
+			if(factor != null)
+				counter += (getPartialConsumptionValue(timeSeries, endLoc, false)*factor);
+			else
+				counter += getPartialConsumptionValue(timeSeries, endLoc, false);
 		return counter;
 	}
 	
@@ -662,7 +683,7 @@ log.error("From "+StringFormatHelper.getFullTimeDateInLocalTimeZone(startLoc)+" 
 		double sum = 0;
 		
 		Power2MeterPrevValues prevVal = new Power2MeterPrevValues();
-		sum += aggregateValuesForMeter(timeseries, AggregationMode.Power2Meter, start, end, prevVal , null, 0);
+		sum += aggregateValuesForMeter(timeseries, AggregationMode.Power2Meter, start, end, prevVal , null, 0, null);
 		return sum;
 	}
 
