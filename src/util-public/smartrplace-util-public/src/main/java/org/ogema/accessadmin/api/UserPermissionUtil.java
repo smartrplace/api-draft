@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 import org.smartrplace.external.accessadmin.config.AccessConfigBase;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
 
+import de.iwes.util.resource.OGEMAResourceCopyHelper;
 import de.iwes.util.resource.ValueResourceHelper;
+import de.iwes.util.resource.OGEMAResourceCopyHelper.CopyParams;
 
 public class UserPermissionUtil {
 	public static final String SYSTEM_RESOURCE_ID = "system";
@@ -217,6 +220,26 @@ public class UserPermissionUtil {
 			PermissionCellData acc = UserPermissionUtil.getAccessConfig(object, userTypePermissionLabel);
 			acc.setOwnStatus(value);
 		}
+	}
+	
+	public static ConfigurablePermission getUserAppAccessConfig(AccessAdminConfig appConfigData, String permissionID, UserStatus object,
+			boolean useWorkingCopy) {
+		ConfigurablePermission result = new ConfigurablePermission() {
+			@Override
+			public void setOwnStatus(Boolean newStatus) {
+				super.setOwnStatus(newStatus);
+				appConfigData.userStatusPermissionChanged().<BooleanResource>create().setValue(true);
+			}
+			@Override
+			public boolean supportsUnset() {
+				return false;
+			}
+		};
+		result.accessConfig = useWorkingCopy?appConfigData.userStatusPermissionWorkingCopy():appConfigData.userStatusPermission(); //userAcc.roompermissionData();
+		result.resourceId = object.name();
+		result.permissionId = permissionID;
+		result.defaultStatus = false; //controller.userPermService.getUserStatusAppPermission(object, permissionID, true) > 0;
+		return result;
 	}
 
 }

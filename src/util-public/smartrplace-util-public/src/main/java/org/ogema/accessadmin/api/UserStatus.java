@@ -60,4 +60,25 @@ public enum UserStatus {
 		}
 	}
 
+	public static UserStatus getbyLabel(String label) {
+		switch(label) {
+		case DISABLED_NAME:
+			return DISABLED;
+		case PUBLIC_NAME:
+			return PUBLIC;
+		case DISPLAY_NAME:
+			return DISPLAY;
+		case USER_STD_NAME:
+			return USER_STD;
+		case SECRETARY_NAME:
+			return SECRETARY;
+		case FACILITY_MAN_NAME:
+			return ADMIN;
+		case SUPERADMIN_NAME:
+			return SUPERADMIN;
+		default:
+			return null;		
+		}
+	}
+	
 }
