@@ -126,6 +126,75 @@ public class SubcustomerUtil {
 		return accessAdminConfigRes.subCustomers().getAllElements();
 	}
 	
+	public static AccessConfigUser addUserToSubcustomer(String userName, SubCustomerData data,
+			ApplicationManager appMan) {
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
+				accessAdminConfigRes.userPermissions());
+		if(subcustGroup == null)
+			throw new IllegalStateException("User Group for Subcustomer "+data.getLocation() + " missing!");
+		
+		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
+				accessAdminConfigRes.userPermissions());
+		if(userEntry == null)
+			return null;
+		ResourceListHelper.addReferenceUnique(userEntry.superGroups(), subcustGroup);
+		/*boolean alreadyIn = false;
+		for(AccessConfigUser grp: userEntry.superGroups().getAllElements()) {
+			if(grp.equalsLocation(subcustGroup)) {
+				alreadyIn = true;
+				break;
+			}
+		}
+		if(!alreadyIn)
+			userEntry.superGroups().add(subcustGroup);*/
+		return userEntry;
+	}
+	
+	public static AccessConfigUser removeUserFromSubcustomer(String userName, SubCustomerData data,
+			ApplicationManager appMan) {
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
+				accessAdminConfigRes.userPermissions());
+		if(subcustGroup == null)
+			throw new IllegalStateException("User Group for Subcustomer "+data.getLocation() + " missing!");
+		
+		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
+				accessAdminConfigRes.userPermissions());
+		if(userEntry == null)
+			return null;
+		
+		ResourceListHelper.removeReferenceOrObject(userEntry.superGroups(), subcustGroup);	
+
+		return userEntry;
+	}
+	
+	public static BuildingPropertyUnit addRoomToSubcustomer(Room room, SubCustomerData data,
+			ApplicationManager appMan) {
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		BuildingPropertyUnit subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
+				accessAdminConfigRes.roomGroups());
+		if(subcustGroup == null)
+			throw new IllegalStateException("User Group for Subcustomer "+data.getLocation() + " missing!");
+		
+		addRoomToGroup(room, subcustGroup);
+		
+		return subcustGroup;
+	}
+	
+	public static BuildingPropertyUnit removeRoomFromSubcustomer(Room room, SubCustomerData data,
+			ApplicationManager appMan) {
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		BuildingPropertyUnit subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
+				accessAdminConfigRes.roomGroups());
+		if(subcustGroup == null)
+			throw new IllegalStateException("User Group for Subcustomer "+data.getLocation() + " missing!");
+		
+		ResourceListHelper.removeReferenceOrObject(subcustGroup.rooms(), room);
+		
+		return subcustGroup;
+	}
+
 	/** Master and standard setting data for a room type within a subcustomer*/
 	public static class RoomTypeGroupData {
 		// Master data
