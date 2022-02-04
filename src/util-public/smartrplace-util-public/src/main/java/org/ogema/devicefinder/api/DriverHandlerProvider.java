@@ -1,5 +1,6 @@
 package org.ogema.devicefinder.api;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.ogema.core.model.Resource;
@@ -58,7 +59,10 @@ public interface DriverHandlerProvider extends LabelledItem, DocumentationLinkPr
 	 *      framework may not perform registration as OSGi service but may just use the service directly.
 	 * @return
 	 */
-	List<DeviceHandlerProvider<?>> getDeviceHandlerProviders(boolean registerByFramework);
+	@Deprecated // do not override anymore
+	default List<DeviceHandlerProvider<?>> getDeviceHandlerProviders(boolean registerByFramework) {
+		return Collections.emptyList();
+	};
 	
 	/** This table usually only has a single line
 	 * @return null if no init configurations for the driver that are independent of single devices

@@ -58,6 +58,9 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	// FIXME this is a room property, not a thermostat property -> the thermostat location may change indeed
 //	public RoomTemperatureSetting rts;
 
+	@Existence(required = CreateMode.OPTIONAL)
+	public	IntegerResource setManualMode = model.getSubResource("controlMode", IntegerResource.class);
+
 	/** keep feedbackValues and setPoint values from last 20 seconds to determine values
 	 * not relevant for manual setting*/
 	//public List<KnownValue> knownValues = new ArrayList<>();
