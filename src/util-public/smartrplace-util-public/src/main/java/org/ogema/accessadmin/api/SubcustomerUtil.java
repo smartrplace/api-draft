@@ -195,11 +195,32 @@ public class SubcustomerUtil {
 		return subcustGroup;
 	}
 
+	/** Data for a single room (pro forma base, real data in roomcontrol)*/
+	public static class SingleRoomSettingEvalBase {
+		public float[] workingSpecialTemperature;
+		public long[] workingSpecialTime;
+		public boolean isNonWorkingSpecial;
+	}
+
+	/** Evaluation data for all rooms of a subcustomer regarding heating or cooling*/
+	public static class MultiRoomSettingEval {
+		/** Single room data*/
+		public List<SingleRoomSettingEvalBase> roomData = new ArrayList<>();
+		public boolean isHeating;
+		/** Standard settings for the subcustomer*/
+		public HeatCoolData standardSettings;
+	}
+
 	/** Master and standard setting data for a room type within a subcustomer*/
 	public static class RoomTypeGroupData {
 		// Master data
-		public String id;
-		public String name;
+		public final NamedIntegerType roomType;
+		//public final String id;
+		//public final int type;
+		//public final String name;
+		public RoomTypeGroupData(NamedIntegerType roomType) {
+			this.roomType = roomType;
+		}
 		public List<String> rooms = new ArrayList<>();
 		public int roomNumHeating = 0;
 		public int roomNumCooling = 0;
@@ -207,6 +228,11 @@ public class SubcustomerUtil {
 		// Standard setting data. This is also containted in MultiRoomSettingEval
 		public HeatCoolData heatingData;
 		public HeatCoolData coolingData;
+
+		/** Heating evaluation including data per room */
+		public MultiRoomSettingEval multiHeat;
+		/** Cooling evaluation including data per room */
+		public MultiRoomSettingEval multiCool;
 	}
 	public static final int STARTTIME_IDX = 0;
 	public static final int ENDTIME_IDX = 1;

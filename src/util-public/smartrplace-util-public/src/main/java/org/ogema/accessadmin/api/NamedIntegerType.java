@@ -40,6 +40,11 @@ public class NamedIntegerType implements LabelledItem {
 	
 	@Override
 	public String id() {
+		if(id == -1) {
+			if(idPrefix != null)
+				return idPrefix+"All";
+			return "All";
+		}
 		if(idPrefix != null)
 			return idPrefix+id;
 		return ""+id;
@@ -61,5 +66,9 @@ public class NamedIntegerType implements LabelledItem {
 	public String labelReq(OgemaHttpRequest req) {
 		OgemaLocale locale = UserLocaleUtil.getLocale(req);
 		return label(locale);
+	}
+	
+	public int getType() {
+		return id;
 	}
 }

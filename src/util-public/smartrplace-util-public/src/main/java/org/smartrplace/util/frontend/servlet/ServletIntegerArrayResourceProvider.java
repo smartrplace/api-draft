@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.array.IntegerArrayResource;
@@ -49,20 +51,34 @@ public class ServletIntegerArrayResourceProvider implements ServletValueProvider
 	
 	@Override
 	public void setValue(String user, String key, String value) {
+		int[] values = null;
 		try  {
+			JSONObject json = new JSONObject(value);
+			if(json.has("values")) {
+				JSONArray valobj = json.getJSONArray("values");
+				values = new int[valobj.length()];
+				for(int idx=0; idx<valobj.length(); idx++) {
+					Integer val = valobj.getInt(idx);
+					values[idx] = val;
+				}
+			}
+		} catch(JSONException | NumberFormatException e) {
+			return;
+		}
+		if(values == null) try {
 			List<String> strs = StringFormatHelper.getListFromString(value);
-			int[] values = new int[strs.size()];
+			values = new int[strs.size()];
 			int idx = 0;
 			for(String str: strs) {
 				int val = Integer.parseInt(str);
 				values[idx] = val;
 				idx++;
 			}
-			ValueResourceHelper.setCreate(res, values);
-			res.setValues(values);
 		} catch(NumberFormatException e) {
-			//do nothing
+			return;
 		}
+		ValueResourceHelper.setCreate(res, values);
+		res.setValues(values);
 	}
 
 	@Override
