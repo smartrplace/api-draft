@@ -82,5 +82,5 @@ public interface TemperatureControlBase {
 	default Integer getOperationMode() {return null;}
 	default Boolean getSwingMode() {return null;}
 	default boolean setSwingMode(boolean newState) {return false;}
-	default public void setAutoSetpoints(boolean useAutoMode) {};
+	default public void setAutoSetpoints(boolean useAutoMode, boolean force) {};
 }
