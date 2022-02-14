@@ -205,6 +205,16 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "communicationStatus/communicationDisturbed", BooleanResource.class);
 		if(comDisturbed != null && comDisturbed.exists())
 			addDatapoint(comDisturbed, result, dpService);
+		IntegerResource errorCode = ResourceHelper.getSubResourceOfSibbling(dev,
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "errorCode", IntegerResource.class);
+		if(errorCode != null && errorCode.exists()) {
+			addDatapoint(errorCode, result, dpService);			
+		}
+		BooleanResource configPending = ResourceHelper.getSubResourceOfSibbling(dev,
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "configPending", BooleanResource.class);
+		if(configPending != null && configPending.exists()) {
+			addDatapoint(configPending, result, dpService);			
+		}
 		IntegerResource rssiDevice = ResourceHelper.getSubResourceOfSibbling(dev,
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
 		if(rssiDevice != null && rssiDevice.exists())
