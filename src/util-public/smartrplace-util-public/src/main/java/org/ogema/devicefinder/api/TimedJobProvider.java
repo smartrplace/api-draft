@@ -40,6 +40,7 @@ public interface TimedJobProvider extends LabelledItem {
 	boolean initConfigResource(TimedJobConfig config);
 	
 	/** Change the result of this to trigger another call to {@link #initConfigResource(TimedJobConfig)}
+	 * If "XXX" is returned then initConfigResource is called on every startup and no initversion control is used
 	 * @return
 	 */
 	public String getInitVersion();
