@@ -150,7 +150,7 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 					remoteSupervision.lastBackupTransferError().setValue(appMan.getFrameworkTime());				
 				}
 			} else {
-				 success = SCPTransfer.collectViaSCP(this, appMan, true, gateway, null, "generalBackup");
+				 success = SCPTransfer.collectViaSCP(this, appMan, true, gateway, null, "generalBackup", Boolean.getBoolean("org.smartrplace.intern.backup.pattern.zipOnly"));
 			}
 //		}
 		/*if(context.remoteSupervision != null) {

@@ -27,9 +27,17 @@ public class LogTransferUtil {
 		return dataLogs;
 	}
 	
+	static boolean warningDone = false;
 	public static void startTransmitLogData(SingleValueResource resource,
 			ResourceList<DataLogTransferInfo> dataLogs) {
 		DataLogTransferInfo log = null;
+		if(dataLogs == null) {
+			if(!warningDone) {
+				System.out.println("No DataLogTransferInfo available! Skipping transfer...");
+				warningDone = true;
+			}
+			return;
+		}
 		for(DataLogTransferInfo dl : dataLogs.getAllElements()) {
 			if(dl.clientLocation().getValue().equals(resource.getPath()))
 				log = dl;

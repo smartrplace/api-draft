@@ -98,6 +98,11 @@ System.out.println("  INIT DEMANDS FOR BackupInstall V2");
 	private final GatewayTransferInfo initTransferList() {
 		ResourceList<GatewayTransferInfo> rsl = ResourceHelper.getTopLevelResource("RemoteSuperVisionList", ResourceList.class,
 				appMan.getResourceAccess());
+		if(Boolean.getBoolean("org.smartrplace.intern.backup.deleteremotesupervisionlist")) {
+			if(rsl != null && rsl.exists())
+				rsl.delete();
+			return null;
+		}
 		if (gateway != null && (rsl == null || rsl.size() == 0)) {
 			rsl = appMan.getResourceManagement().createResource("RemoteSuperVisionList", ResourceList.class);
 			rsl.setElementType(GatewayTransferInfo.class);
