@@ -23,9 +23,11 @@ import org.ogema.devicefinder.api.DriverPropertySuccessHandler;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.devicefinder.api.PatternListenerExtended;
+import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericBinarySensor;
+import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -228,6 +230,55 @@ public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHan
 		if(dutyCycle != null && dutyCycle.reading().exists())
 			addDatapoint(dutyCycle.reading(), result, dpService);
 		return result;
+	}
+	
+	/** Check if Auto-mode is allowed based on configPending
+	 * 
+	 * @return true if AutoMode is allowed for the thermostat, which will only be used if no ecoMode is active etc.
+	 */
+	public static boolean isAutoModeAllowed(Thermostat dev, HardwareInstallConfig hwConfig) {
+		BooleanResource configPending = ResourceHelper.getSubResourceOfSibbling(dev,
+				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "configPending", BooleanResource.class);
+		return isAutoModeAllowed(dev, configPending, hwConfig.autoThermostatMode());
+	}
+	public static boolean isAutoModeAllowed(Thermostat dev,
+			BooleanResource configPending, IntegerResource autoThermostatMode) {
+		IntegerResource autoThermostatModeSingle = getAutoThermostatModeSingle(dev);
+		int overallState = autoThermostatMode.getValue();
+		if(overallState == 3)
+			return false;
+		int state = autoThermostatModeSingle.getValue();
+		switch(state) {
+		case 0:
+			switch(overallState) {
+			case 0:
+				//evaluate configPending
+				break;			
+			case 1:
+				return true;
+			case 2:
+				return false;
+			}
+			//evaluate configPending
+			break;
+		case 1:
+			return true;
+		case 2:
+			return false;
+		case 3:
+			//evaluate configPending
+			break;
+		default:
+			//Should never occur
+			break;
+		}
+		if(configPending != null && configPending.exists() && configPending.getValue()) {
+			return false;			
+		}					
+		return true;
+	}
+	public static IntegerResource getAutoThermostatModeSingle(Thermostat th) {
+		return th.getSubResource("autoThermostatModeSingle", IntegerResource.class);
 	}
 
 	/** Get anchor resource for homematic property access

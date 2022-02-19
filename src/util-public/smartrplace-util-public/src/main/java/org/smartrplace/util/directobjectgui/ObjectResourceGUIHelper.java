@@ -34,6 +34,7 @@ import org.ogema.tools.resource.util.TimeUtils;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.smartrplace.tissue.util.format.StringFormatHelperSP;
 import org.smartrplace.tissue.util.resource.ValueResourceHelperSP;
+import org.smartrplace.util.directobjectgui.LabelFormatter.OnGETData;
 import org.smartrplace.util.directresourcegui.LabelLongValue;
 import org.smartrplace.util.directresourcegui.SingleValueResourceAccess;
 import org.smartrplace.util.file.ApacheFileAdditions;
@@ -55,6 +56,7 @@ import de.iwes.widgets.html.form.button.TemplateInitSingleEmpty;
 import de.iwes.widgets.html.form.button.TemplateRedirectButton;
 import de.iwes.widgets.html.form.dropdown.DropdownData;
 import de.iwes.widgets.html.form.label.Label;
+import de.iwes.widgets.html.form.label.LabelData;
 import de.iwes.widgets.html.form.textfield.TextField;
 import de.iwes.widgets.resource.widget.calendar.DatepickerTimeResource;
 import de.iwes.widgets.resource.widget.dropdown.ResourceDropdown;
@@ -115,36 +117,60 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	public Label stringLabel(String widgetId, String lineId, final StringResource source, Row row) {
 		if(checkLineId(widgetId)) return null;
 		widgetId = WidgetHelper.getValidWidgetId(widgetId);
-		Label result = stringLabel(widgetId + lineId, source, null, null);
+		Label result = stringLabel(widgetId + lineId, source, null, null, null);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
 	}
 	public Label stringLabel(String widgetId, String lineId, final String text, Row row) {
 		if(checkLineId(widgetId)) return null;
 		widgetId = WidgetHelper.getValidWidgetId(widgetId);
-		Label result = stringLabel(widgetId + lineId, null, null, text);
+		Label result = stringLabel(widgetId + lineId, null, null, text, null);
+		finishRowSnippet(row, widgetId, result);	
+		return result;
+	}
+	public Label stringLabel(String widgetId, String lineId, LabelFormatter formatter, Row row) {
+		if(checkLineId(widgetId)) return null;
+		widgetId = WidgetHelper.getValidWidgetId(widgetId);
+		Label result = stringLabel(widgetId + lineId, null, null, null, formatter);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
 	}
 	public Label stringLabel(final StringResource source) {
 		counter++;
-		return stringLabel("stringLabel"+counter, source, null, null);
+		return stringLabel("stringLabel"+counter, source, null, null, null);
 	}
 	public Label stringLabel(final String subResourceName) {
 		counter++;
-		return stringLabel("stringLabel"+counter, (StringResource)null, subResourceName, null);
+		return stringLabel("stringLabel"+counter, (StringResource)null, subResourceName, null, null);
 	}
-	private Label stringLabel(String widgetId, final StringResource optSource, String altId, final String text) {
+	private Label stringLabel(String widgetId, final StringResource optSource, String altId, final String text,
+			LabelFormatter formatter) {
 		final SingleValueResourceAccess<StringResource> sva;
-		if(text != null) {
+		if(text != null || formatter != null) {
 			sva = null;
 		} else {
 			sva = new SingleValueResourceAccess<StringResource>(optSource, altId);
 			
 		}
 		LabelFlex result = new LabelFlex(widgetId, this) {
+			boolean hasStyle = false;
+			
 			public void onGET(OgemaHttpRequest req) {
-				if(text != null) {
+				if(formatter != null) {
+					OnGETData data = formatter.getData(req);
+					if(data.state == 0) {
+						myLabel.addStyle(LabelData.BOOTSTRAP_ORANGE, req);
+						hasStyle = true;
+					} else if(data.state == 2) {
+						myLabel.addStyle(LabelData.BOOTSTRAP_RED, req);
+						hasStyle = true;
+					} else if(hasStyle && data.state == 1) {
+						myLabel.removeStyle(LabelData.BOOTSTRAP_ORANGE, req);
+						myLabel.removeStyle(LabelData.BOOTSTRAP_RED, req);
+						myLabel.addStyle(LabelData.BOOTSTRAP_GREEN, req);
+					}
+					myLabel.setText(data.text, req);
+				} else if(text != null) {
 					myLabel.setText(text, req);
 				} else {
 					StringResource source = getResource(sva, req, null);
@@ -154,6 +180,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					}
 					myLabel.setText(source.getValue(), req);
 				}
+				if(formatter != null)
+					formatter.onGETAdditional(myLabel, req);
 			};
 		};
 		return result.myLabel;
@@ -161,19 +189,23 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 
 	public Label floatLabel(String widgetId, String lineId, final FloatResource source, Row row,
 			 String format) {
+		return floatLabel(widgetId, lineId, source, row, format, null);
+	}
+	public Label floatLabel(String widgetId, String lineId, final FloatResource source, Row row,
+			 String format, LabelFormatterFloatRes formatter) {
 		if(checkLineId(widgetId)) return null;
 		widgetId = WidgetHelper.getValidWidgetId(widgetId);
-		Label result = floatLabel(widgetId + lineId, source, null, format);
+		Label result = floatLabel(widgetId + lineId, source, null, format, formatter);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
 	}
 	public Label floatLabel(final FloatResource source, String format) {
 		counter++;
-		return floatLabel("floatLabel"+counter, source, null, format);
+		return floatLabel("floatLabel"+counter, source, null, format, null);
 	}
 	public Label floatLabel(final String subResourceName, String format) {
 		counter++;
-		return floatLabel("floatLabel"+counter, null, subResourceName, format);
+		return floatLabel("floatLabel"+counter, null, subResourceName, format, null);
 	}
 	/**
 	 * 
@@ -185,7 +217,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	 * @param fomat: if null "%.1f" is used
 	 * @return
 	 */
-	private Label floatLabel(final String widgetId, final FloatResource optSource, String altId, final String formatIn) {
+	private Label floatLabel(final String widgetId, final FloatResource optSource, String altId, final String formatIn,
+			LabelFormatterFloatRes formatter) {
 		final SingleValueResourceAccess<FloatResource> sva = new SingleValueResourceAccess<FloatResource>(optSource, altId);
 		Float minValue;
 		String format;
@@ -198,6 +231,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		}
 		
 		LabelFlex result = new LabelFlex(widgetId, this) {
+			boolean hasStyle = false;
+			
 			public void onGET(OgemaHttpRequest req) {
 				FloatResource source = getResource(sva, req, null);
 				if ((source == null)||(!source.isActive())) {
@@ -221,7 +256,25 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				} else {
 					valStr = String.format("%.1f", val);
 				}
+				
+				if(formatter != null) {
+					int state = formatter.getState(val, req);
+					if(state == 0) {
+						myLabel.addStyle(LabelData.BOOTSTRAP_ORANGE, req);
+						hasStyle = true;
+					} else if(state == 2) {
+						myLabel.addStyle(LabelData.BOOTSTRAP_RED, req);
+						hasStyle = true;
+					} else if(hasStyle && state == 1) {
+						myLabel.removeStyle(LabelData.BOOTSTRAP_ORANGE, req);
+						myLabel.removeStyle(LabelData.BOOTSTRAP_RED, req);
+						myLabel.addStyle(LabelData.BOOTSTRAP_GREEN, req);
+					}
+				}
+				
 				myLabel.setText(valStr, req);
+				if(formatter != null)
+					formatter.onGETAdditional(myLabel, req);
 			}
 		};
 		return result.myLabel;
