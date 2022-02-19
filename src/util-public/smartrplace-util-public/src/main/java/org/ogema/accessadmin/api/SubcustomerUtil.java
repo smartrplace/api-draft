@@ -169,6 +169,45 @@ public class SubcustomerUtil {
 		return userEntry;
 	}
 	
+	/** Get primary subcustomer for user*/
+	public static SubCustomerData getDataForUser(String userName, ApplicationManager appMan,
+			boolean acceptAggregated, boolean preferAggregated) {
+		SubCustomerData selected = null;
+		SubCustomerData agg = null;
+		List<SubCustomerData> subcs = getSubcustomers(appMan);
+
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		
+		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
+				accessAdminConfigRes.userPermissions());
+		if(userEntry == null)
+			return null;
+		
+		for(SubCustomerData subc: subcs) {
+			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
+					accessAdminConfigRes.userPermissions());
+			if(subcustGroup == null)
+				throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
+
+			if(ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
+				if(subc.aggregationType().getValue() > 0)
+					agg = subc;
+				else {
+					selected = subc;
+					if(!preferAggregated)
+						break;
+				}
+			}
+		}
+		if(preferAggregated && (agg != null))
+			return agg;
+		if(selected == null && (!acceptAggregated))
+			return null;
+		if(selected == null && agg != null)
+			selected = agg;
+		return selected;
+	}
+
 	public static BuildingPropertyUnit addRoomToSubcustomer(Room room, SubCustomerData data,
 			ApplicationManager appMan) {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
@@ -319,18 +358,41 @@ public class SubcustomerUtil {
 	}
 	
 	public static SubCustomerData getDataForRoom(Room room, ApplicationManager appMan) {
+		return getDataForRoom(room, appMan, true);
+	}
+	public static SubCustomerData getDataForRoom(Room room, ApplicationManager appMan,
+			boolean acceptAggregated) {
 		SubCustomerData selected = null;
+		SubCustomerData agg = null;
+		SubCustomerData aggGen = null;
 		List<SubCustomerData> subcs = getSubcustomers(appMan);
 		for(SubCustomerData subc: subcs) {
 			if(ResourceHelper.containsLocation(subc.roomGroup().rooms().getAllElements(), room)) {
-				selected = subc;
-				break;
-			}
+				if(subc.aggregationType().getValue() > 0)
+					agg = subc;
+				else {
+					selected = subc;
+					break;
+				}
+			} else if(subc.aggregationType().getValue() > 0)
+				aggGen = subc;
 		}
-		if(selected == null && (!subcs.isEmpty())) {
-			selected = subcs.get(0);
-			SubcustomerUtil.addRoomToGroup(room, subcs.get(0).roomGroup());
-		}
+		if(selected == null && (!acceptAggregated))
+			return null;
+		if(selected == null && agg != null)
+			selected = agg;
+		if(selected == null && aggGen != null)
+			selected = aggGen;
 		return selected;
+	}
+
+	/** TODO: There may be more than one aggregation subcustomer in the future, then this method needs to be adapted*/
+	public static SubCustomerData getEntireBuildingSubcustomer(ApplicationManager appMan) {
+		List<SubCustomerData> all = getSubcustomers(appMan);
+		for(SubCustomerData sub: all) {
+			if(sub.aggregationType().getValue() > 0)
+				return sub;
+		}
+		return null;
 	}
 }
