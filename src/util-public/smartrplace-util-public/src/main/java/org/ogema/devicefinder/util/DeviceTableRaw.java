@@ -194,6 +194,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static void addRoomWidgetStatic(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
+		addRoomWidgetStatic(vh, id, req, row, appMan, deviceRoom, "Room");
+	}
+	public static void addRoomWidgetStatic(ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan,
+			Room deviceRoom, String columnName) {
 		long now = appMan.getFrameworkTime();
 		if(now - lastUpdate > 10000) {
 			List<Room> allRooms = KPIResourceAccess.getRealRooms(appMan.getResourceAccess()); //.getResources(Room.class);
@@ -204,7 +209,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			roomsToSet = roomsToSetLoc;
 			lastUpdate = now;
 		}
-		vh.referenceDropdownFixedChoice("Room", id, deviceRoom, row, roomsToSet, 3);
+		vh.referenceDropdownFixedChoice(columnName, id, deviceRoom, row, roomsToSet, 3);
 	}
 	
 	protected void addSubLocation(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,

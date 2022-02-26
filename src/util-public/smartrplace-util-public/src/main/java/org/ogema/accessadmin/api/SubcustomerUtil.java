@@ -9,6 +9,7 @@ import java.util.Map;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
+import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 import org.smartrplace.external.accessadmin.config.AccessConfigBase;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
@@ -148,6 +149,9 @@ public class SubcustomerUtil {
 		}
 		if(!alreadyIn)
 			userEntry.superGroups().add(subcustGroup);*/
+		if(data.aggregationType().getValue() > 0)
+			ValueResourceHelper.setCreate(accessAdminConfigRes.subcustomerUserMode(), 1);
+		
 		return userEntry;
 	}
 	
@@ -177,6 +181,9 @@ public class SubcustomerUtil {
 		List<SubCustomerData> subcs = getSubcustomers(appMan);
 
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		int mode = accessAdminConfigRes.subcustomerUserMode().getValue();
+		if(mode == 0)
+			return getEntireBuildingSubcustomer(appMan);
 		
 		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
 				accessAdminConfigRes.userPermissions());
@@ -190,9 +197,9 @@ public class SubcustomerUtil {
 				throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
 
 			if(ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
-				if(subc.aggregationType().getValue() > 0)
+				if(subc.aggregationType().getValue() > 0) {
 					agg = subc;
-				else {
+				} else {
 					selected = subc;
 					if(!preferAggregated)
 						break;
@@ -208,6 +215,52 @@ public class SubcustomerUtil {
 		return selected;
 	}
 
+	/** This method always returns the sub customers configured for a user independently of
+	 * {@link AccessAdminConfig#subcustomerUserMode()}
+	 * @param userName
+	 * @param appMan
+	 * @return
+	 */
+	public static List<SubCustomerData> getAllDataForUser(String userName, ApplicationManager appMan) {
+		List<SubCustomerData> result = new ArrayList<>();
+		
+		List<SubCustomerData> subcs = getSubcustomers(appMan);
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		
+		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
+				accessAdminConfigRes.userPermissions());
+		if(userEntry == null)
+			return null;
+		
+		for(SubCustomerData subc: subcs) {
+			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
+					accessAdminConfigRes.userPermissions());
+			if(subcustGroup == null)
+				throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
+
+			if(ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
+				result.add(subc);
+			}
+		}
+		return result ;
+	}
+
+	public static List<AccessConfigUser> getAllUsersForSubcustomer(SubCustomerData subc, ApplicationManager appMan) {
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
+				accessAdminConfigRes.userPermissions());
+		if(subcustGroup == null)
+			throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
+
+		List<AccessConfigUser> result = new ArrayList<>();
+		for(AccessConfigUser userEntry: accessAdminConfigRes.userPermissions().getAllElements()) {
+			if(ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
+				result.add(userEntry);
+			}			
+		}
+		return result;
+	}
+	
 	public static BuildingPropertyUnit addRoomToSubcustomer(Room room, SubCustomerData data,
 			ApplicationManager appMan) {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");

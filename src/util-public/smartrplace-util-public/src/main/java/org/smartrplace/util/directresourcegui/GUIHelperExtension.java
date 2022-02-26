@@ -20,6 +20,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.StringResource;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
+import org.smartrplace.util.format.WidgetHelper;
 
 import de.iwes.util.resource.OGEMAResourceCopyHelper;
 import de.iwes.util.resourcelist.ResourceListHelper;
@@ -49,6 +50,12 @@ public class GUIHelperExtension {
 	public static <T extends Resource> ButtonConfirm addDeleteButton(
 			ResourceList<T> objectList, T object, OgemaWidget mainTable,
 			String id, Alert alert, Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req) {
+		return addDeleteButton(objectList, object, mainTable, id, alert, "delete", row, vh, req);
+	}
+	public static <T extends Resource> ButtonConfirm addDeleteButton(
+			ResourceList<T> objectList, T object, OgemaWidget mainTable,
+			String id, Alert alert, String columnName,
+			Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req) {
 		if(req != null) {
 			ButtonConfirm deleteButton = new ButtonConfirm(mainTable, "deleteButton_"+id, req) {
 				private static final long serialVersionUID = 1L;
@@ -66,13 +73,13 @@ public class GUIHelperExtension {
 			deleteButton.setCancelBtnMsg("Cancel", req);
 			deleteButton.setConfirmPopupTitle("Delete element", req);
 			deleteButton.setConfirmMsg("Really delete item "+object.getLocation()+" ?", req);
-			if(row != null) row.addCell("delete", deleteButton);
+			if(row != null) row.addCell(WidgetHelper.getValidWidgetId(columnName), deleteButton);
 			else vh.popTableData.add(new WidgetEntryData("delete", deleteButton));
 			deleteButton.registerDependentWidget(mainTable);
 			if(alert != null) deleteButton.registerDependentWidget(alert);
 			return deleteButton;
 		} else {
-			vh.registerHeaderEntry("delete");
+			vh.registerHeaderEntry(columnName);
 			return null;
 		}
 	}
