@@ -969,21 +969,6 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 			public void onPOSTComplete(String data, OgemaHttpRequest req) {
 				StringResource source = getResource(sva, req, StringResource.class);
 				String val = myField.getValue(req);
-				/*String value;
-				try {
-					value  = Float.parseFloat(val);
-				} catch (NumberFormatException | NullPointerException e) {
-					if(alert != null) alert.showAlert(notAllowedMessageUsed, false, req);
-					return;
-				}
-				if (value < minimumAllowed) {
-					if(alert != null) alert.showAlert(notAllowedMessageUsed, false, req);
-					return;
-				}
-				if (value > maximumAllowed) {
-					if(alert != null) alert.showAlert(notAllowedMessageUsed, false, req);
-					return;
-				}*/
 				if(!source.exists()) {
 					source.create();
 					source.setValue(val);
