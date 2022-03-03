@@ -145,7 +145,7 @@ public interface DatapointService {
 	
 	/** Get resources managed by deviceHandler
 	 * 
-	 * @param deviceHandlerId
+	 * @param deviceHandlerId if null devices for all DeviceHandlers will be returned
 	 * @param shortId if true the deviceHandlerId only has to end with the shortId, otherwise it has
 	 * 		to be equal to be added to the result
 	 * @param returnAlsoTrash if false then trash resources will be filtered out. Default is false.

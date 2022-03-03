@@ -682,9 +682,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		}
 	}
 	
-	public static InstallAppDevice getTemplateForType(List<InstallAppDevice> devsOfhandler,
+	public static InstallAppDevice getTemplateForType(Collection<InstallAppDevice> collection,
 			DeviceHandlerProvider<?> devHand) {
-		for(InstallAppDevice dev: devsOfhandler) {
+		for(InstallAppDevice dev: collection) {
 			if(isTemplate(dev, devHand))
 				return dev;
 		}
