@@ -20,6 +20,7 @@ import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
+import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -186,17 +187,21 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	 * @param setp
 	 * @param setpoint
 	 * @param priority
-	 * @return true if resource is written that triggers sending setpoint to device. False if request is dropped or postponed
+	 * @return true if resource is written that triggers sending setpoint to device. False if request is dropped or postponed.
+	 * 		If request is dropped because setpoint and feedback already have the value requested true is returned (success)
 	 */
 	public boolean requestSetpointWrite(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
-		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional);
+		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, false);
+	}
+	public boolean requestSetpointWrite(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint) {
+		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint);
 	}
 	/** Method to be called to write to String and ArrayResources and other cases that cannot be covered with a float argument.*/
-	public boolean requestSetpointWrite(T setp, Object setpointData, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
-		return requestSetpointWrite(setp, Float.NaN, setpointData, prioLevel, resendEvenIfConditional);
+	public boolean requestSetpointWrite(T setp, Object setpointData, WritePrioLevel prioLevel, boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint) {
+		return requestSetpointWrite(setp, Float.NaN, setpointData, prioLevel, resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint);
 	}
 	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData, WritePrioLevel prioLevel,
-			boolean resendEvenIfConditional) {
+			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint) {
 		SensorData sens = registerSensor(setp);
 
 		float maxDC;
@@ -220,6 +225,22 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			throw new IllegalStateException("Unknown prio level:"+prioLevel);
 		}
 		boolean isOverload = isSensorInOverload(sens, maxDC);
+		if((!writeEvenIfNochChangeForFeedbackAndSetpoint) && (setpointData == null)) {
+			//we do not support this for array resources etc. yet
+			boolean done = true;
+			if(sens.setpoint() instanceof SingleValueResource) {
+				float curSetp = ValueResourceUtils.getFloatValue((SingleValueResource) sens.setpoint());
+				if(!ValueResourceHelper.isAlmostEqual(curSetp, setpoint))
+					done = false;
+				if(done && (sens.feedback() instanceof SingleValueResource)) {
+					float curFb = ValueResourceUtils.getFloatValue((SingleValueResource) sens.feedback());
+					if(!ValueResourceHelper.isAlmostEqual(curFb, setpoint))
+						done = false;					
+				}
+				if(done)
+					return true;
+			}
+		}
 		if(!isOverload) {
 			long now = appMan.getFrameworkTime();
 			if(sens.ccu() != null) {
@@ -382,10 +403,10 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 						boolean success;
 						if(resenddata.valueFeedbackPendingObject != null) {
 							success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valueFeedbackPendingObject,
-									WritePrioLevel.CONDITIONAL, false);							
+									WritePrioLevel.CONDITIONAL, false, false);							
 						} else
 							success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valueFeedbackPending,
-								WritePrioLevel.CONDITIONAL, false);
+								WritePrioLevel.CONDITIONAL, false, false);
 						if(!success) {
 							//we stop the chain due to overload
 							resenddata.valueFeedbackPending = null;
@@ -407,10 +428,10 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					boolean success;
 					if(resenddata.valueFeedbackPendingObject != null)
 						success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valuePendingObject,
-								WritePrioLevel.CONDITIONAL, false);
+								WritePrioLevel.CONDITIONAL, false, false);
 					else
 						success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valuePending,
-							WritePrioLevel.CONDITIONAL, false);
+							WritePrioLevel.CONDITIONAL, false, false);
 					if(success) {
 						resenddata.valuePending = null;
 						resenddata.lastSent = now;

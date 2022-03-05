@@ -137,7 +137,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 		return setpMan;
 	}
 	public SetpointControlManager<IntegerResource> getSetpManControlMode(ApplicationManagerPlus appManPlus) {
-		if(setpMan == null) {
+		if(controlModeMan == null) {
 			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
 			if(type == SetpointControlType.HmThermostat)
 				controlModeMan = HmSetpCtrlManagerTHControlMode.getInstance(appManPlus);
@@ -145,7 +145,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 		return controlModeMan;
 	}
 	public SetpointControlManager<IntegerResource> getSetpManAutoUpdate(ApplicationManagerPlus appManPlus) {
-		if(setpMan == null) {
+		if(autoUpdateMan == null) {
 			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
 			if(type == SetpointControlType.HmThermostat)
 				autoUpdateMan = HmSetpCtrlManagerTHIntTrigger.getInstance(appManPlus);
