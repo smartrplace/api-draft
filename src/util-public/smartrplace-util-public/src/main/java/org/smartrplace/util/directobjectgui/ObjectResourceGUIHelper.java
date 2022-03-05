@@ -28,6 +28,7 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.core.model.units.PercentageResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.tools.resource.util.TimeUtils;
@@ -884,6 +885,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					myField.setValue("0",req);
 				else if(mode == 3 && (!source.exists()))
 					myField.setValue("0.0",req);
+				else if((source instanceof PercentageResource)&&(mode == 0))
+					myField.setValue(((PercentageResource)source).getValue()*100+"",req);
 				else if((source instanceof TemperatureResource)&&(mode == 0))
 					myField.setValue(((TemperatureResource)source).getCelsius()+"",req);
 				else {
@@ -894,6 +897,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 			private void setValue(FloatResource source, float value) {
 				if((source instanceof TemperatureResource)&&(mode == 0))
 					((TemperatureResource)source).setCelsius(value);
+				else if((source instanceof PercentageResource)&&(mode == 0))
+					((PercentageResource)source).setValue(value*0.01f);
 				else
 					source.setValue(value);
 				

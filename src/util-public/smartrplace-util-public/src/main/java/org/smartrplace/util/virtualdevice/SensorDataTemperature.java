@@ -3,7 +3,6 @@ package org.smartrplace.util.virtualdevice;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.model.sensors.TemperatureSensor;
-import org.smartrplace.util.virtualdevice.SetpointControlManager.SensorData;
 
 public abstract class SensorDataTemperature extends SensorData {
 	TemperatureSensor sensorRes;

@@ -6,13 +6,13 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.model.sensors.Sensor;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
-import org.smartrplace.util.virtualdevice.SetpointControlManager.SensorData;
 
 import de.iwes.util.resource.ResourceHelper;
 
@@ -53,7 +53,7 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 	}
 	
 	@Override
-	public SensorDataTemperatureDefault registerSensor(TemperatureResource setp, Sensor sensor,
+	public SensorDataTemperatureDefault registerSensor(TemperatureResource setp, Resource sensor,
 			Map<String, SensorData> knownSensorsInner) {
 		String loc = setp.getLocation();
 		SensorDataTemperatureDefault result = (SensorDataTemperatureDefault) knownSensorsInner.get(loc);
@@ -65,17 +65,18 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 	}
 	
 	@Override
-	public boolean isSensorInOverload(SensorData data, float priority) {
+	public boolean isSensorInOverload(SensorData data, float maxDC) {
 		RouterInstance ccu = data.ccu();
 		if(ccu == null)
 			return false;
-		return isRouterInOverload(ccu, priority);
+		return isRouterInOverload(ccu, maxDC);
 	}
 	
 	//Float maxWritePerInterval = null;
 
 	@Override
-	protected boolean isRouterInOverloadForced(RouterInstance ccu, float priority) {
+	/** Simplified implementation for air conditioners*/
+	protected boolean isRouterInOverloadForced(RouterInstance ccu, float maxDC) {
 		float maxWritePerInterval;
 		if(maxWriteOnDefaultPerHour != null && maxWriteOnDefaultPerHour.isActive()) {
 			maxWritePerInterval =  maxWriteOnDefaultPerHour.getValue() * DEFAULT_EVAL_INTERVAL / TimeProcUtil.HOUR_MILLIS;
@@ -85,7 +86,6 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 			return true;
 
 		float curDC;
-		float maxDC = priority;
 		if(maxWriteOnDefaultPerHour != null && maxWriteOnDefaultPerHour.isActive()) {
 			curDC = ccu.totalWritePerHour.getValue() / maxWriteOnDefaultPerHour.getValue();
 		} else {
@@ -103,13 +103,13 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 		initRouterStandardValues(gateway, iad);
 	}
 	
-	@Override
-	protected SensorData getSensorDataInstance(Sensor sensor) {
+	/*@Override
+	protected SensorData getSensorDataInstance(Resource sensor) {
 		return new SensorDataTemperatureDefault((TemperatureSensor) sensor, this);
-	}
+	}*/
 
 	@Override
-	public RouterInstance getCCU(Sensor sensor) {
+	public RouterInstance getCCU(Resource sensor) {
 		return gateway;
 	}
 

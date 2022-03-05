@@ -128,9 +128,9 @@ if(Boolean.getBoolean("jobdebug")) {
 					vh.registerHeaderEntry("Value");
 					vh.registerHeaderEntry("Last Contact");
 				} else {
+					Label valueLabel = getMainSensorLabel(box, object, vh, id);
 					SingleValueResource sampleSensor = getMainSensorValue(box, object);
-					if(sampleSensor != null) {
-						Label valueLabel;
+					if((valueLabel == null) && (sampleSensor != null)) {
 						if(sampleSensor instanceof FloatResource)
 							valueLabel = vh.floatLabel("Value", id, (FloatResource)sampleSensor, row, "%.1f");
 						else if(sampleSensor instanceof IntegerResource)
@@ -141,12 +141,14 @@ if(Boolean.getBoolean("jobdebug")) {
 							valueLabel = vh.booleanLabel("Value", id, (BooleanResource)sampleSensor, row, 0);
 						else
 							throw new IllegalStateException("Unsupported sensor type: "+sampleSensor.getResourceType().getName());
+					} else {
+						row.addCell("Value", valueLabel);
+					}
+					if(sampleSensor != null) {
 						Label lastContact = addLastContact(vh, id, req, row, sampleSensor);
 						
-						if(req != null) {
-							valueLabel.setPollingInterval(DEFAULT_POLL_RATE, req);
-							lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
-						}
+						valueLabel.setPollingInterval(DEFAULT_POLL_RATE, req);
+						lastContact.setPollingInterval(DEFAULT_POLL_RATE, req);
 					}
 				}
 				

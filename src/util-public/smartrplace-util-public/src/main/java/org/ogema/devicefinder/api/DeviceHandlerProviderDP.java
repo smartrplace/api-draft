@@ -9,7 +9,9 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
+import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.template.LabelledItem;
 
 /** View to {@link DeviceHandlerProvider} that is relevant for datapoint processing of
@@ -49,17 +51,11 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * 		a feedback or status value of an actor or most relevant configuration value
 	 */
 	SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration);
-	/*default SingleValueResource getMainSensorValue(T device, InstallAppDevice deviceConfiguration) {
-		try {
-			Collection<Datapoint> all = getDatapoints(deviceConfiguration, null);
-			if(all.isEmpty())
-				return null;
-			return (SingleValueResource) all.iterator().next().getResource();
-		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}*/
+	default Label getMainSensorLabel(T device, InstallAppDevice deviceConfiguration,
+			ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh, String id_vh) {
+		return null;
+	}
+
 	default SingleValueResource getMainSensorValue(InstallAppDevice deviceConfiguration) {
 		@SuppressWarnings("unchecked")
 		T device = (T) deviceConfiguration.device();

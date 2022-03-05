@@ -10,34 +10,33 @@ import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.application.Timer;
 import org.ogema.core.application.TimerListener;
+import org.ogema.core.model.Resource;
+import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
-import org.ogema.core.model.units.TemperatureResource;
-import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.prototypes.PhysicalElement;
-import org.ogema.model.sensors.Sensor;
-import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.util.virtualdevice.HmSetpCtrlManager.WritePrioLevel;
 
 import de.iwes.util.logconfig.LogHelper;
-import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
-public abstract class SetpointControlManager<T extends SingleValueResource> {
+public abstract class SetpointControlManager<T extends ValueResource> {
 	public static final long CCU_UPDATE_INTERVAL = 10000;
 	public static final long DEFAULT_EVAL_INTERVAL = Long.getLong("org.smartrplace.util.virtualdevice.evalinterval", 5*TimeProcUtil.MINUTE_MILLIS);
 	private static final long RESEND_TIMER_INTERVAL = 60000;
-	public static final float CONDITIONAL_PRIO = 0.6f;
-	public static final float PRIORITY_PRIO = 0.9f;
+	public static final float CONDITIONAL_PRIO_DEFAULT = 0.3f;
+	public static final float PRIORITY_PRIO_DEFAULT = 0.75f;
 	public static final int FORCE_PRIO = 1000;
 	public static final long KEEPKNOWNTEMPERATURES_DURATION_DEFAULT = 30000;
+	public static final long PENDING_TimeForMissingFeedback_DEFAULT = Long.getLong("org.smartrplace.util.virtualdevice.maxfeedbacktime", 8*TimeProcUtil.MINUTE_MILLIS);
 
 	public static final String totalWritePerHour = "totalWritePerHour";
 	public static final String conditionalWritePerHour = "conditionalWritePerHour";
@@ -54,18 +53,30 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		HmThermostat
 	}
 	
-	public abstract boolean isSensorInOverload(SensorData data, float priority);
+	public abstract boolean isSensorInOverload(SensorData data, float maxDC);
 	protected abstract boolean isRouterInOverloadForced(RouterInstance ccu, float priority);
-	public abstract RouterInstance getCCU(Sensor sensor);
+	public abstract RouterInstance getCCU(Resource sensor);
 	protected abstract void updateCCUListForced();
-	protected abstract SensorData getSensorDataInstance(Sensor sensor);
+	//protected abstract SensorData getSensorDataInstance(Resource sensor);
 	protected abstract Collection<RouterInstance> getRouters();
-	public long knownSetpointValueOmitDuration(TemperatureResource temperatureSetpoint) {
+	public long knownSetpointValueOmitDuration(T temperatureSetpoint) {
 		return KEEPKNOWNTEMPERATURES_DURATION_DEFAULT;
-	}	
+	}
+	protected boolean resendIfNoFeedback() {
+		return true;
+	}
 	
 	protected final Timer resendTimer;
 	protected Logger log = LoggerFactory.getLogger(this.getClass());
+
+	/** Resend if no first sending was successful, but no fitting feedback is available*/
+	protected final long pendingTimeForMissingFeedback;
+	/** Retry sending after this time if feedback does not fit request */
+	protected final long pendingTimeForRetry;
+	/** If a request has actually been sent then wait this time. After pendingTimeForRetry we check again if router is not in overload 
+	 * TODO: May be settable in constructor also in the future*/
+	protected final long lastSentAgoForRetry = 15*TimeProcUtil.MINUTE_MILLIS;
+	
 
 	public static class RouterInstance {
 		volatile int totalWriteCount = 0;
@@ -87,33 +98,12 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		public FloatResource resendMissingFbPerHour;
 		public FloatResource relativeLoadEff;
 		
-		//setpoint location -> data
-		//Map<String, SensorData> sensorResendMan = new HashMap<>();
-	}
-	public static abstract class SensorData {
-		abstract Sensor sensor();
-		abstract SingleValueResource setpoint();
-		abstract SingleValueResource feedback();
-		abstract RouterInstance ccu();
-		abstract ResourceValueListener<?> setpointListener();
-		abstract void stop();
-		abstract void writeSetpoint(float value);
-		
-		//Resend data
-		long lastSent = 1;
-		//final SensorData sensor;
-		Float valuePending;
-		long valuePendingSince;
-		
-		//Check feedback
-		volatile Float valueFeedbackPending = null;
-		
-		//CCU finding
-		final SetpointControlManager<TemperatureResource> ctrl;
-
-		public SensorData(SetpointControlManager<TemperatureResource> ctrl) {
-			this.ctrl = ctrl;
-			//this.sensor = sensor;
+		/** Overwrite for real CCU*/
+		float dutyCycleWarningYellow() {
+			return CONDITIONAL_PRIO_DEFAULT;
+		}
+		float dutyCycleWarningRed() {
+			return PRIORITY_PRIO_DEFAULT;
 		}
 	}
 	protected final ApplicationManager appMan;
@@ -134,8 +124,13 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	long intervalStart;
 		
 	protected SetpointControlManager(ApplicationManagerPlus appManPlus) {
+		this(appManPlus, PENDING_TimeForMissingFeedback_DEFAULT);
+	}
+	protected SetpointControlManager(ApplicationManagerPlus appManPlus, long pendingTimeForRetry) {
 		this.appMan = appManPlus.appMan();
 		this.dpService = appManPlus.dpService();
+		this.pendingTimeForRetry = pendingTimeForRetry;
+		this.pendingTimeForMissingFeedback = pendingTimeForRetry;
 		intervalStart = appMan.getFrameworkTime();
 		nextEvalInterval = intervalStart + DEFAULT_EVAL_INTERVAL;
 		resendTimer = appMan.createTimer(RESEND_TIMER_INTERVAL, new TimerListener() {
@@ -148,12 +143,9 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		log.info("Started timer for SetpointControlManager:"+this.getClass().getSimpleName());
 	}
 	
-	public Sensor getSensor(T setp) {
-		TemperatureSensor sensor = ResourceHelper.getFirstParentOfType(setp, TemperatureSensor.class);
-		return sensor;
-	}
+	public abstract Resource getSensor(T setp);
 	
-	public SensorData registerSensor(T setp, Sensor sensor, Map<String, SensorData> knownSensorsInner) {
+	public abstract SensorData registerSensor(T setp, Resource sensor, Map<String, SensorData> knownSensorsInner); /* {
 		String loc = setp.getLocation();
 		SensorData result = knownSensorsInner.get(loc);
 		if(result != null)
@@ -161,10 +153,10 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		result = getSensorDataInstance(sensor); //new SensorData(sensor, this);
 		knownSensorsInner.put(loc, result);
 		return result;
-	}
+	}*/
 	
 	public SensorData registerSensor(T setp) {
-		Sensor sensor = getSensor(setp);
+		Resource sensor = getSensor(setp);
 		RouterInstance router = getCCU(sensor);
 		if(router == null) {
 			nullRouterInstanceUsed = true;
@@ -178,6 +170,17 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		SensorData sens = registerSensor(setp, sensor, mapInner);
 		return sens;
 	}
+	
+	public SensorData getSensorData(T setp) {
+		Resource sensor = getSensor(setp);
+		RouterInstance router = getCCU(sensor);
+		if(router == null)
+			return null;
+		Map<String, SensorData> mapInner = knownSensors.get(router);
+		if(mapInner == null)
+			return null;
+		return mapInner.get(setp.getLocation());
+	}
 	/** Request to send new setpoint value to device
 	 * 
 	 * @param setp
@@ -185,41 +188,80 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 	 * @param priority
 	 * @return true if resource is written that triggers sending setpoint to device. False if request is dropped or postponed
 	 */
-	public boolean requestSetpointWrite(T setp, float setpoint, float priority) {
+	public boolean requestSetpointWrite(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
+		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional);
+	}
+	/** Method to be called to write to String and ArrayResources and other cases that cannot be covered with a float argument.*/
+	public boolean requestSetpointWrite(T setp, Object setpointData, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
+		return requestSetpointWrite(setp, Float.NaN, setpointData, prioLevel, resendEvenIfConditional);
+	}
+	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData, WritePrioLevel prioLevel,
+			boolean resendEvenIfConditional) {
 		SensorData sens = registerSensor(setp);
 
-		boolean isOverload = isSensorInOverload(sens, priority);
+		float maxDC;
+		switch(prioLevel) {
+		case MUST_WRITE:
+			maxDC = 1.1f;
+			break;
+		case PRIORITY:
+			if(sens.ccu() != null)
+				maxDC = sens.ccu().dutyCycleWarningRed();
+			else
+				maxDC = PRIORITY_PRIO_DEFAULT;
+			break;
+		case CONDITIONAL:
+			if(sens.ccu() != null)
+				maxDC = sens.ccu().dutyCycleWarningYellow();
+			else
+				maxDC = CONDITIONAL_PRIO_DEFAULT;
+			break;
+		default:
+			throw new IllegalStateException("Unknown prio level:"+prioLevel);
+		}
+		boolean isOverload = isSensorInOverload(sens, maxDC);
 		if(!isOverload) {
 			long now = appMan.getFrameworkTime();
 			if(sens.ccu() != null) {
-				if(priority <= CONDITIONAL_PRIO)
+				if(maxDC <= sens.ccu().dutyCycleWarningYellow())
 					sens.ccu().conditionalWriteCount++;
 				else
 					sens.ccu().priorityWriteCount++;
 				sens.lastSent = now;
 			}
-			sens.writeSetpoint(setpoint);
+			if(setpointData != null)
+				sens.writeSetpointData(setpointData);
+			else
+				sens.writeSetpoint(setpoint);
 			if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.noresend"))
+				return true;
+			if(!resendIfNoFeedback())
 				return true;
 			if(sens.valueFeedbackPending == null || (sens.valueFeedbackPending != setpoint))
 				sens.valuePendingSince = now;
+			if(setpointData != null)
+				sens.valueFeedbackPendingObject = setpointData;
 			sens.valueFeedbackPending = setpoint;
 			sens.valuePending = null;
 			return true;
 		}
 		if(sens.ccu() != null) {
 			sens.valueFeedbackPending = null;
-			if(priority <= CONDITIONAL_PRIO)
+			if(maxDC <= sens.ccu().dutyCycleWarningYellow()) {
 				sens.ccu().conditionalDropCount++;
-			else {
-				long now = appMan.getFrameworkTime();
-				if(sens.valuePending == null) {
-					sens.valuePending = setpoint;
-					sens.valuePendingSince = now;
-				} else if(setpoint != sens.valuePending) {
-					sens.valuePendingSince = now;					
-				}
+				if(!resendEvenIfConditional)
+					return false;
+			} else {
 				sens.ccu().priorityDropCount++;
+			}
+			long now = appMan.getFrameworkTime();
+			if(sens.valuePending == null) {
+				if(setpointData != null)
+					sens.valuePendingObject = setpointData;
+				sens.valuePending = setpoint;
+				sens.valuePendingSince = now;
+			} else if(setpoint != sens.valuePending) {
+				sens.valuePendingSince = now;					
 			}
 		}
 		return false;
@@ -299,10 +341,6 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 		}
 	}
 	
-	//TODO: Shall be flexible in the future
-	long pendingTimeForMissingFeedback = Long.getLong("org.smartrplace.util.virtualdevice.maxfeedbacktime", 8*TimeProcUtil.MINUTE_MILLIS);
-	long pendingTimeForRetry = 8*TimeProcUtil.MINUTE_MILLIS;
-	long lastSentAgoForRetry = 15*TimeProcUtil.MINUTE_MILLIS;
 	@SuppressWarnings("unchecked")
 	protected void resendTimerUpdate() {
 		Collection<RouterInstance> routers = getRouters();
@@ -328,7 +366,7 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 				writeDataReporting(cd, deltaT);
 			//checkForDataReporting(cd);
 			
-			if((cd != nullRouterInstance) && isRouterInOverload(cd, CONDITIONAL_PRIO))
+			if((cd != nullRouterInstance) && isRouterInOverload(cd, cd.dutyCycleWarningYellow()))
 				continue;
 			Map<String, SensorData> subMap = knownSensors.get(cd);
 			if(subMap == null)
@@ -341,7 +379,13 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 					if((timePendingFb > pendingTimeForMissingFeedback)) { // && (sentAgoFb > lastSentAgoForRetry)) {
 						log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
 						cd.resendMissingFbCount++;
-						boolean success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valueFeedbackPending, CONDITIONAL_PRIO);
+						boolean success;
+						if(resenddata.valueFeedbackPendingObject != null) {
+							success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valueFeedbackPendingObject,
+									WritePrioLevel.CONDITIONAL, false);							
+						} else
+							success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valueFeedbackPending,
+								WritePrioLevel.CONDITIONAL, false);
 						if(!success) {
 							//we stop the chain due to overload
 							resenddata.valueFeedbackPending = null;
@@ -359,7 +403,14 @@ public abstract class SetpointControlManager<T extends SingleValueResource> {
 				long timePending = now - resenddata.valuePendingSince;
 				long sentAgo = now - resenddata.lastSent;
 				if((timePending > pendingTimeForRetry) && (sentAgo > lastSentAgoForRetry)) {
-					boolean success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valuePending, CONDITIONAL_PRIO);
+					//NOTE: valuePending is set already so we do not have to indicate resend, will take place anyways if no success.
+					boolean success;
+					if(resenddata.valueFeedbackPendingObject != null)
+						success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valuePendingObject,
+								WritePrioLevel.CONDITIONAL, false);
+					else
+						success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valuePending,
+							WritePrioLevel.CONDITIONAL, false);
 					if(success) {
 						resenddata.valuePending = null;
 						resenddata.lastSent = now;

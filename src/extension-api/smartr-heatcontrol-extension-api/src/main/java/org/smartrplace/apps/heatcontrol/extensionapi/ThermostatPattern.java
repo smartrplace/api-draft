@@ -14,7 +14,9 @@ import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.tools.resource.util.ResourceUtils;
-import org.smartrplace.util.virtualdevice.HmCentralManager;
+import org.smartrplace.util.virtualdevice.HmSetpCtrlManagerTHControlMode;
+import org.smartrplace.util.virtualdevice.HmSetpCtrlManagerTHIntTrigger;
+import org.smartrplace.util.virtualdevice.HmSetpCtrlManagerTHSetp;
 import org.smartrplace.util.virtualdevice.SetpointControlManager;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.SetpointControlType;
 import org.smartrplace.util.virtualdevice.ThermostatAirconDefaultManager;
@@ -116,14 +118,38 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	public SetpointControlManager<TemperatureResource> getSetpMan() {
 		return setpMan;
 	}
+	private SetpointControlManager<IntegerResource> controlModeMan = null;
+	public SetpointControlManager<IntegerResource> getSetpManControlMode() {
+		return controlModeMan;
+	}
+	private SetpointControlManager<IntegerResource> autoUpdateMan = null;
+	public SetpointControlManager<IntegerResource> getSetpManAutoUpdate() {
+		return autoUpdateMan;
+	}
 	public SetpointControlManager<TemperatureResource> getSetpMan(ApplicationManagerPlus appManPlus) {
 		if(setpMan == null) {
 			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
 			if(type == SetpointControlType.HmThermostat)
-				setpMan = HmCentralManager.getInstance(appManPlus);
+				setpMan = HmSetpCtrlManagerTHSetp.getInstance(appManPlus);
 			else
 				setpMan = ThermostatAirconDefaultManager.getInstance(appManPlus);
 		}
 		return setpMan;
+	}
+	public SetpointControlManager<IntegerResource> getSetpManControlMode(ApplicationManagerPlus appManPlus) {
+		if(setpMan == null) {
+			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
+			if(type == SetpointControlType.HmThermostat)
+				controlModeMan = HmSetpCtrlManagerTHControlMode.getInstance(appManPlus);
+		}
+		return controlModeMan;
+	}
+	public SetpointControlManager<IntegerResource> getSetpManAutoUpdate(ApplicationManagerPlus appManPlus) {
+		if(setpMan == null) {
+			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
+			if(type == SetpointControlType.HmThermostat)
+				autoUpdateMan = HmSetpCtrlManagerTHIntTrigger.getInstance(appManPlus);
+		}
+		return autoUpdateMan;
 	}
 }
