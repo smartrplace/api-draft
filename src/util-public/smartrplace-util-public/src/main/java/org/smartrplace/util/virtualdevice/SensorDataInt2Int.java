@@ -2,7 +2,6 @@ package org.smartrplace.util.virtualdevice;
 
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
-import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 
 /** Generic setpoint-feedback data e.g. used for thermostat controlMode*/

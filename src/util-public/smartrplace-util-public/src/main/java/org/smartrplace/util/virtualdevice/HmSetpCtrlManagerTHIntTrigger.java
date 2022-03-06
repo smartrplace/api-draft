@@ -5,9 +5,7 @@ import java.util.Map;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
-import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
-import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
 /** Depends on HmSetpCtrlManagerTHSetp */
 public class HmSetpCtrlManagerTHIntTrigger extends HmSetpCtrlManager<IntegerResource> {
@@ -95,9 +93,4 @@ public class HmSetpCtrlManagerTHIntTrigger extends HmSetpCtrlManager<IntegerReso
 			return false;
 		return isRouterInOverload(ccu, maxDC);
 	}
-	
-	/*@Override
-	protected SensorData getSensorDataInstance(Resource sensor) {
-		return new SensorDataHmInt((TemperatureSensor) sensor, this);
-	}*/
 }

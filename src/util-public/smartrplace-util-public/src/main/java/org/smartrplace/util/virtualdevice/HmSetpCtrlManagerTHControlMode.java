@@ -5,7 +5,6 @@ import java.util.Map;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
-import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 
 /** Depends on HmSetpCtrlManagerTHSetp */
@@ -84,7 +83,7 @@ public class HmSetpCtrlManagerTHControlMode extends HmSetpCtrlManager<IntegerRes
 		if(result != null)
 			return result;
 		IntegerResource fb = getFeeedback(setp);
-		result = new SensorDataHmInt((TemperatureSensor) sensor, setp, fb, this);
+		result = new SensorDataHmInt(sensor, setp, fb, this);
 		knownSensorsInner.put(loc, result);
 		return result;
 	}
@@ -96,9 +95,4 @@ public class HmSetpCtrlManagerTHControlMode extends HmSetpCtrlManager<IntegerRes
 			return false;
 		return isRouterInOverload(ccu, maxDC);
 	}
-	
-	/*@Override
-	protected SensorData getSensorDataInstance(Resource sensor) {
-		return new SensorDataHmInt((TemperatureSensor) sensor, this);
-	}*/
 }
