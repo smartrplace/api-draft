@@ -156,7 +156,7 @@ if(Boolean.getBoolean("jobdebug")) {
 					addMoreValueWidgets(object, box, vh, id, req, row, appMan, alert);
 				
 				if(isInRoom) {
-					Room deviceRoom = box.location().room();
+					Room deviceRoom =  box.location().room();
 					addRoomWidget(vh, id, req, row, appMan, deviceRoom);
 				}
 				addSubLocation(object, vh, id, req, row);

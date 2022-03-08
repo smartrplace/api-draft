@@ -20,7 +20,7 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public abstract class HmSetpCtrlManager<T extends ValueResource> extends SetpointControlManager<T> {
-	private static final float DEFAULT_MAX_WRITE_PER_HOUR = 720;
+	public static final float DEFAULT_MAX_WRITE_PER_HOUR = 720;
 
 	//public static final String paramMaxDutyCycle = "maxDutyCycle";
 	public static final String paramMaxWritePerCCUperHour = "maxWritePerCCUperHour";

@@ -34,7 +34,7 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
-public abstract class DeviceHandlerBase<T extends Resource> implements DeviceHandlerProvider<T> {
+public abstract class DeviceHandlerBase<T extends PhysicalElement> implements DeviceHandlerProvider<T> {
 
 	/** You have to provide a resource pattern to find the devices that shall be processed by the
 	 * {@link DeviceHandlerProvider}. If there are also other DeviceHandlerProviders working on the

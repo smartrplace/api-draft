@@ -136,12 +136,16 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			return "";
 			//return "?X?";
 		}
+		if(parts.length < 2)
+			return getLastCharsWithDigitsPreferred(parts[0], 4);
 		if(!parts[1].equals("devices")) return "?Y?";
+		if(parts.length == 2)
+			return getLastCharsWithDigitsPreferred(parts[1], 4);
 		if(parts[2].length() < 5) return parts[2];
 		return getLastCharsWithDigitsPreferred(parts[2], 4);	
 	}
 
-	protected static String getLastCharsWithDigitsPreferred(String str, int num) {
+	public static String getLastCharsWithDigitsPreferred(String str, int num) {
 		if(str.isEmpty())
 			return str;
 		String baseResult;

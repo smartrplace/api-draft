@@ -9,6 +9,7 @@ import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.devicefinder.util.DeviceHandlerSimple;
 import org.ogema.devicefinder.util.DeviceTableBase;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
@@ -56,7 +57,7 @@ import de.iwes.widgets.html.complextable.RowTemplate.Row;
  * 
  * @param <T> resource type of the device for which data is provided by the implementation
  */
-public interface DeviceHandlerProvider<T extends Resource> extends DeviceHandlerProviderDP<T> {
+public interface DeviceHandlerProvider<T extends PhysicalElement> extends DeviceHandlerProviderDP<T> {
 	/** Provide implementation of {@link PatternListenerExtended} that adds exactly those devices that
 	 * shall be part of the table. If the same resource type is also provided by other drivers that require
 	 * a different table in the hardware installation app or a different simulation then separate 

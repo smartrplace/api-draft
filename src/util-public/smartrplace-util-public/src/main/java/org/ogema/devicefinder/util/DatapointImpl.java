@@ -259,7 +259,11 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	
 	public static void getDeviceLabelPlus(PhysicalElement devRes, OgemaLocale locale, DatapointService dpService,
 			InstallAppDevice appDev, DeviceLabelPlus result) {
-		Room roomRes = devRes.location().room();
+		final Room roomRes;
+		if(devRes instanceof Room)
+			roomRes = (Room) devRes;
+		else
+			roomRes = devRes.location().room();
 		//final DPRoom room;
 		if(roomRes.exists()) {
 			result.room = dpService.getRoom(roomRes.getLocation());

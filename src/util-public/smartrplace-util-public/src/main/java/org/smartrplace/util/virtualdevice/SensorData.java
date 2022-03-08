@@ -40,11 +40,11 @@ public abstract class SensorData {
 	
 	public static String getStatus(SensorData sd) {
 		if(sd == null)
-			return "-";
+			return "--";
 		if(sd.valuePending != null)
-			return "1";
+			return "Ct";
 		if(sd.valueFeedbackPending != null)
-			return "2";
-		return "0";
+			return "Fb";
+		return "ok";
 	}
 }

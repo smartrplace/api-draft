@@ -3,12 +3,12 @@ package org.ogema.devicefinder.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.PatternListenerExtended;
+import org.ogema.model.prototypes.PhysicalElement;
 
-public class PatternListenerExtendedImpl<P extends ResourcePattern<R>, R extends Resource> implements PatternListenerExtended<P, R>{
+public class PatternListenerExtendedImpl<P extends ResourcePattern<R>, R extends PhysicalElement> implements PatternListenerExtended<P, R>{
 
 	private final InstalledAppsSelector app;
 	private final DeviceHandlerBase<R> devHandler;
