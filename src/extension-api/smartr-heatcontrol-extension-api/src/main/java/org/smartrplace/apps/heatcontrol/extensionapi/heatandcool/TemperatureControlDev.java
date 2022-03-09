@@ -6,6 +6,7 @@ import java.util.List;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
+import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.smartrplace.apps.heatcontrol.extensionapi.KnownValue;
 import org.smartrplace.util.virtualdevice.SetpointControlManager;
 
@@ -21,7 +22,9 @@ public interface TemperatureControlDev extends TemperatureControlBase {
     	public float currentSetpointBeforeOffset;
     	public ResourceValueListener<TemperatureResource> feedbackListener = null;
     	public boolean receivedFirstFBValue = false;
-    	public Boolean lastBangBangState = null;    	
+    	public Boolean lastBangBangState = null;
+    	
+    	public CountDownDelayedExecutionTimer manualRetardTimer;
     }
     
     public ThermostatPatternExtension getExtension();

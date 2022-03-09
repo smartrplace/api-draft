@@ -214,12 +214,12 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 		ccuMy.dutyCycleValueMax = 0;		
 	}
 	
-	@Override
+	/*@Override
 	public long knownSetpointValueOmitDuration(T temperatureSetpoint) {
 		RouterInstance ccu = getCCU(temperatureSetpoint);
 		if(ccu != null && isRouterInOverload(ccu, ccu.dutyCycleWarningYellow())) {
 			return 5*TimeProcUtil.MINUTE_MILLIS;
 		}
 		return super.knownSetpointValueOmitDuration(temperatureSetpoint);
-	}
+	}*/
 }
