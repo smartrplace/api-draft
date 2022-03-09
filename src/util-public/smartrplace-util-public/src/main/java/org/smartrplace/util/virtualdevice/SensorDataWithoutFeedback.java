@@ -31,7 +31,8 @@ public abstract class SensorDataWithoutFeedback extends SensorData {
 
 	@Override
 	public ValueResource feedback() {
-		throw new IllegalStateException("Feedback not supported!");
+		return setpoint;
+		//throw new IllegalStateException("Feedback not supported!");
 	}
 
 	@Override

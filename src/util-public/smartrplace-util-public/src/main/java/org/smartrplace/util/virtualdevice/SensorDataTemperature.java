@@ -26,6 +26,7 @@ public abstract class SensorDataTemperature extends SensorData {
 					if((valueFeedbackPending != null) && (valueFeedbackPending != newVal)) {
 						//request from different source => we do not check for feedback
 						valueFeedbackPending = null;
+						reportSetpoint(newVal);
 					}
 					ctrl.reportSetpointRequest(ccu());
 				}
@@ -38,8 +39,10 @@ public abstract class SensorDataTemperature extends SensorData {
 			public void resourceChanged(TemperatureResource resource) {
 				if(valueFeedbackPending != null) {
 					float valFb = feedback.getValue();
-					if(valFb == valueFeedbackPending)
+					if(valFb == valueFeedbackPending) {
 						valueFeedbackPending = null;
+						reportFbConfirmed();
+					}
 				}
 			}
 		};

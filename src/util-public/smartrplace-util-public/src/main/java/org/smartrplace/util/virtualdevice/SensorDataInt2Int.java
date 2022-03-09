@@ -40,8 +40,10 @@ public abstract class SensorDataInt2Int extends SensorData {
 			public void resourceChanged(IntegerResource resource) {
 				if(valueFeedbackPending != null) {
 					float valFb = feedback.getValue();
-					if(valFb == valueFeedbackPending)
+					if(valFb == valueFeedbackPending) {
 						valueFeedbackPending = null;
+						reportFbConfirmed();
+					}
 				}
 			}
 		};

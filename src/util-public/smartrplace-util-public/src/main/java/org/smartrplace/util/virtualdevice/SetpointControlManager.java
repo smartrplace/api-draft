@@ -14,6 +14,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.simple.TimeResource;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
@@ -60,9 +61,17 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	protected abstract void updateCCUListForced();
 	//protected abstract SensorData getSensorDataInstance(Resource sensor);
 	protected abstract Collection<RouterInstance> getRouters();
+	
+	final TimeResource knownSetpointValBlockTime;
 	public long knownSetpointValueOmitDuration(T temperatureSetpoint) {
+		if(knownSetpointValBlockTime != null && knownSetpointValBlockTime.isActive())
+			return knownSetpointValBlockTime.getValue();
 		return KEEPKNOWNTEMPERATURES_DURATION_DEFAULT;
 	}
+	public long knownSetpointValueOmitDuration(SensorData sd) {
+		return knownSetpointValueOmitDuration((T)null);
+	}
+	
 	protected boolean resendIfNoFeedback() {
 		return true;
 	}
@@ -132,6 +141,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		this.dpService = appManPlus.dpService();
 		this.pendingTimeForRetry = pendingTimeForRetry;
 		this.pendingTimeForMissingFeedback = pendingTimeForRetry;
+		this.knownSetpointValBlockTime = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig/knownSetpointValBlockTime");
 		intervalStart = appMan.getFrameworkTime();
 		nextEvalInterval = intervalStart + DEFAULT_EVAL_INTERVAL;
 		resendTimer = appMan.createTimer(RESEND_TIMER_INTERVAL, new TimerListener() {
@@ -252,8 +262,10 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			}
 			if(setpointData != null)
 				sens.writeSetpointData(setpointData);
-			else
+			else {
 				sens.writeSetpoint(setpoint);
+				sens.reportSetpoint(setpoint);
+			}
 			if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.noresend"))
 				return true;
 			if(!resendIfNoFeedback())

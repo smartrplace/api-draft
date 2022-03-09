@@ -1,9 +1,15 @@
 package org.smartrplace.util.virtualdevice;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
+
+import de.iwes.util.resource.ValueResourceHelper;
 
 public abstract class SensorData {
 	abstract Resource sensor();
@@ -38,6 +44,13 @@ public abstract class SensorData {
 		this.ctrl = ctrl2;
 	}
 	
+	protected void reportSetpoint(float value) {
+		addKnownValue(value);
+	}
+	protected void reportFbConfirmed() {
+		lastSetpointFeedbackConfirmTime = ctrl.appMan.getFrameworkTime();
+	}
+	
 	public static String getStatus(SensorData sd) {
 		if(sd == null)
 			return "--";
@@ -47,4 +60,62 @@ public abstract class SensorData {
 			return "Fb";
 		return "ok";
 	}
+	
+	public static class KnownValue2 {
+		
+		public final long time;
+		public final float value;
+		
+		public KnownValue2(float value, long time) {
+			this.time = time;
+			this.value = value;
+		}
+		
+	}
+	boolean receivedFirstFBValue = false;
+	public List<KnownValue2> knownValues = new ArrayList<>();
+	public long lastSetpointFeedbackConfirmTime = -1;
+	public boolean isSetpointKnown(float fbReceived) {
+		if(!(setpoint() instanceof FloatResource))
+			return false;
+		FloatResource temperatureSetpoint = (FloatResource) setpoint();
+		FloatResource tempSetpointFeedbackValue = (FloatResource) setpoint();
+		synchronized (this) {
+			cleanKnownValues();
+			if(!receivedFirstFBValue) {
+				addKnownValue(tempSetpointFeedbackValue);
+				receivedFirstFBValue = true;
+				return true;
+			}
+			if(ValueResourceHelper.isAlmostEqual(temperatureSetpoint.getValue(), fbReceived))
+				return true;
+			for(KnownValue2 val: knownValues) {
+				if(ValueResourceHelper.isAlmostEqual(val.value, fbReceived)) {
+					return true;
+				}
+			}			
+		}
+		return false;
+	}
+	
+	public void cleanKnownValues() {
+		final long t0 = lastSetpointFeedbackConfirmTime-ctrl.knownSetpointValueOmitDuration(this); //ctrl.appMan.getFrameworkTime();
+		List<KnownValue2> remove = new ArrayList<>();
+		for (KnownValue2 val: knownValues) {
+			if (val.time < t0) {
+				remove.add(val);
+			}
+		}
+		knownValues.removeAll(remove);
+	}
+
+	public void addKnownValue(FloatResource tres) {
+		if(tres.isActive()) {
+			addKnownValue(tres.getValue());
+		}
+	}
+	public void addKnownValue(float value) {
+		knownValues.add(new KnownValue2(value, ctrl.appMan.getFrameworkTime()));
+	}
+
 }
