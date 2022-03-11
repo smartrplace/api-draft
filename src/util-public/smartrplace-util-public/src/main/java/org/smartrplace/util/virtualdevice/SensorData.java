@@ -1,7 +1,10 @@
 package org.smartrplace.util.virtualdevice;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
@@ -73,13 +76,14 @@ public abstract class SensorData {
 		
 	}
 	boolean receivedFirstFBValue = false;
-	public List<KnownValue2> knownValues = new ArrayList<>();
+	//public List<KnownValue2> knownValues = new ArrayList<>();
+	public Map<Float, Long> knownValues = new HashMap<>();
 	public long lastSetpointFeedbackConfirmTime = -1;
 	public boolean isSetpointKnown(float fbReceived) {
 		if(!(setpoint() instanceof FloatResource))
 			return false;
 		FloatResource temperatureSetpoint = (FloatResource) setpoint();
-		FloatResource tempSetpointFeedbackValue = (FloatResource) setpoint();
+		FloatResource tempSetpointFeedbackValue = (FloatResource) feedback();
 		synchronized (this) {
 			cleanKnownValues();
 			if(!receivedFirstFBValue) {
@@ -89,8 +93,8 @@ public abstract class SensorData {
 			}
 			if(ValueResourceHelper.isAlmostEqual(temperatureSetpoint.getValue(), fbReceived))
 				return true;
-			for(KnownValue2 val: knownValues) {
-				if(ValueResourceHelper.isAlmostEqual(val.value, fbReceived)) {
+			for(Float val: knownValues.keySet()) {
+				if(ValueResourceHelper.isAlmostEqual(val, fbReceived)) {
 					return true;
 				}
 			}			
@@ -100,13 +104,15 @@ public abstract class SensorData {
 	
 	public void cleanKnownValues() {
 		final long t0 = lastSetpointFeedbackConfirmTime-ctrl.knownSetpointValueOmitDuration(this); //ctrl.appMan.getFrameworkTime();
-		List<KnownValue2> remove = new ArrayList<>();
-		for (KnownValue2 val: knownValues) {
-			if (val.time < t0) {
-				remove.add(val);
+		//List<KnownValue2> remove = new ArrayList<>();
+		List<Float> remove = new ArrayList<>();
+		for (Entry<Float, Long> val: knownValues.entrySet()) {
+			if (val.getValue() < t0) {
+				remove.add(val.getKey());
 			}
 		}
-		knownValues.removeAll(remove);
+		for(Float rem: remove)
+			knownValues.remove(rem); //.removeAll(remove);
 	}
 
 	public void addKnownValue(FloatResource tres) {
@@ -115,7 +121,8 @@ public abstract class SensorData {
 		}
 	}
 	public void addKnownValue(float value) {
-		knownValues.add(new KnownValue2(value, ctrl.appMan.getFrameworkTime()));
+		knownValues.put(value, ctrl.appMan.getFrameworkTime());
+		//knownValues.add(new KnownValue2(value, ctrl.appMan.getFrameworkTime()));
 	}
 
 }

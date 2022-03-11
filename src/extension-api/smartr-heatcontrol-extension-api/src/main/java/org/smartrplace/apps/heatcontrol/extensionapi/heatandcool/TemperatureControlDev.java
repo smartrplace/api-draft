@@ -3,12 +3,15 @@ package org.smartrplace.apps.heatcontrol.extensionapi.heatandcool;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
-import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.smartrplace.apps.heatcontrol.extensionapi.KnownValue;
 import org.smartrplace.util.virtualdevice.SetpointControlManager;
+
+import de.iwes.util.logconfig.CountdownTimerMulti2Single;
 
 /** Interface to be implemented by resource pattern or other access of single devices*/
 public interface TemperatureControlDev extends TemperatureControlBase {
@@ -24,7 +27,28 @@ public interface TemperatureControlDev extends TemperatureControlBase {
     	public boolean receivedFirstFBValue = false;
     	public Boolean lastBangBangState = null;
     	
-    	public CountDownDelayedExecutionTimer manualRetardTimer;
+    	public final CountdownTimerMulti2Single manualRetardTimer;
+    	//public CountDownDelayedExecutionTimer manualRetardTimer;
+
+    	public LogicProviderTP logicProvider = null;
+		public ThermostatPatternExtension(ApplicationManager appMan, TimeResource manualRetard) {
+			if(appMan == null) {
+				this.manualRetardTimer = null;
+				return;
+			}
+			this.manualRetardTimer = new CountdownTimerMulti2Single(appMan, -1) {
+
+				@Override
+				public void delayedExecution() {
+					logicProvider.setRemoteManualSetting();
+				}
+				
+				@Override
+				protected long getVariableTimerDuration() {
+					return manualRetard.getValue();
+				}
+			};
+		}
     }
     
     public ThermostatPatternExtension getExtension();
