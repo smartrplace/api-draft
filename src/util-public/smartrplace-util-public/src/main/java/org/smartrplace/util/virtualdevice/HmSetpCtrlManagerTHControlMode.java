@@ -95,4 +95,11 @@ public class HmSetpCtrlManagerTHControlMode extends HmSetpCtrlManager<IntegerRes
 			return false;
 		return isRouterInOverload(ccu, maxDC);
 	}
+	
+	public boolean isValueFullySet(int value, IntegerResource setp) {
+		SensorDataInt2Int sd = (SensorDataInt2Int)getSensorData(setp);
+		if(sd == null)
+			return false;
+		return sd.isValueFullySet(value);
+	}
 }

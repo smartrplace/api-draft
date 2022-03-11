@@ -24,6 +24,7 @@ import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.devicefinder.api.PatternListenerExtended;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
+import org.ogema.model.devices.buildingtechnology.ThermostatProgram;
 import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericBinarySensor;
@@ -279,6 +280,12 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	}
 	public static IntegerResource getAutoThermostatModeSingle(Thermostat th) {
 		return th.getSubResource("autoThermostatModeSingle", IntegerResource.class);
+	}
+	public static ThermostatProgram getHmThermProgram(Thermostat th) {
+		ThermostatProgram hmThermProgram = th.getSubResource("program", ThermostatProgram.class);
+		if ((hmThermProgram == null) || (!hmThermProgram.isActive()))
+			return null;
+		return hmThermProgram;
 	}
 
 	/** Get anchor resource for homematic property access

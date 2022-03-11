@@ -118,8 +118,8 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	public SetpointControlManager<TemperatureResource> getSetpMan() {
 		return setpMan;
 	}
-	private SetpointControlManager<IntegerResource> controlModeMan = null;
-	public SetpointControlManager<IntegerResource> getSetpManControlMode() {
+	private HmSetpCtrlManagerTHControlMode controlModeMan = null;
+	public HmSetpCtrlManagerTHControlMode getSetpManControlMode() {
 		return controlModeMan;
 	}
 	private SetpointControlManager<IntegerResource> autoUpdateMan = null;

@@ -81,4 +81,11 @@ public abstract class SensorDataInt2Int extends SensorData {
 		setpoint.setValue((int)value);
 	}
 
+	public boolean isValueFullySet(int value) {
+		if(setpoint.getValue() != value)
+			return false;
+		if(feedback.getValue() != value)
+			return false;
+		return true;
+	}
 }
