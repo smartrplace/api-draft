@@ -96,7 +96,14 @@ public class ViaHeartbeartOGEMAInstanceDpTransfer {
 		}
 		ViaHeartbeatInfoProvider infoP = getOrCreateInfoProvider(dp, transferId, infoProvidersM);
 		infoP.checkMirrorResorce();
-		infoP.setValueReceived(value, dpService.getFrameworkTime()); //.setLastValueReceived(value);
+		if(infoP.getStrProv() != null) {
+			//We received a single value, but a StringProvider is registered here. Most likely this is an issue with startup and synchronization
+			//between clients and servers
+			//infoP.getStrProv().received(strValue, now);
+			logger.warn("Received value, expected StringProvider data for transferId: "+transferId+" Value:"+value);
+			return false;
+		} else
+			infoP.setValueReceived(value, dpService.getFrameworkTime()); //.setLastValueReceived(value);
 		return true;
 	}
 	
