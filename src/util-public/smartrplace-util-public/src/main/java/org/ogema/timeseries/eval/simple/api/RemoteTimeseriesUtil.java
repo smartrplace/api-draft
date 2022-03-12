@@ -1,5 +1,8 @@
 package org.ogema.timeseries.eval.simple.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
@@ -44,7 +47,8 @@ public class RemoteTimeseriesUtil {
 			dpLocEnd = check[1];
 		} else
 			dpLocEnd = gwLoc[1];
-		for(Datapoint dp: dpService.getAllDatapoints(gwLoc[0])) {
+		List<Datapoint> all = new ArrayList<>(dpService.getAllDatapoints(gwLoc[0]));
+		for(Datapoint dp: all) {
 			if(dp.getLocation().endsWith(dpLocEnd))
 				return dp;
 		}
