@@ -41,6 +41,10 @@ public class BatteryEvalBase {
 	protected static void reallySendMessage(String title, String message, MessagePriority prio,
 			ApplicationManagerPlus appManPlus) {
 		AppID appId = appManPlus.appMan().getAppID();
+		reallySendMessage(title, message, prio, appManPlus, appId);
+	}
+	public static void reallySendMessage(String title, String message, MessagePriority prio,
+			ApplicationManagerPlus appManPlus, AppID appId) {
 		appManPlus.guiService().getMessagingService().sendMessage(appId,
 				new MessageImpl(title, message, prio));		
 	}

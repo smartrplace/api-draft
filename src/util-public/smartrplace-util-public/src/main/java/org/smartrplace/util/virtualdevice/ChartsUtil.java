@@ -134,18 +134,18 @@ public class ChartsUtil {
 		if(res.isActive())
 			minYellow = res.getValue();
 		else
-			minYellow = SetpointControlManager.CONDITIONAL_PRIO_DEFAULT*100;
+			minYellow = SetpointControlManager.CONDITIONAL_PRIO_DEFAULT;
 		 res = deviceConfiguration.getSubResource(HmSetpCtrlManagerTHSetp.dutyCycleRedMin, PercentageResource.class);
 		if(res.isActive())
-			minRed = res.getValue();
+			minRed = res.getValue()*100;
 		else
-			minRed = SetpointControlManager.PRIORITY_PRIO_DEFAULT*100;
+			minRed = SetpointControlManager.PRIORITY_PRIO_DEFAULT;
 		Label dutyCycleLb = new Label(vh.getParent(), preId+id_vh, vh.getReq()) {
 			private static final long serialVersionUID = 6380831122071345220L;
 
 			@Override
 			public void onGET(OgemaHttpRequest req) {
-				float val = dutyCycleRes.getValue()*100;
+				float val = dutyCycleRes.getValue();
 				if(val > minRed) {
 					addStyle(LabelData.BOOTSTRAP_RED, req);
 				} else if(val > minYellow) {
@@ -155,7 +155,7 @@ public class ChartsUtil {
 					removeStyle(LabelData.BOOTSTRAP_RED, req);
 					addStyle(LabelData.BOOTSTRAP_GREEN, req);
 				}
-				setText(String.format("%.0f%%", val), req);
+				setText(String.format("%.0f%%", val*100), req);
 			}
 		};
 		return dutyCycleLb;		

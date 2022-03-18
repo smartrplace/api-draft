@@ -598,6 +598,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		}
 		return foundEnergy;
 	}
+	public static boolean isFaultMessageDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if((resourceLocation.toLowerCase().contains("/errors_")||resourceLocation.contains("/faults_")))
+			return true;
+		return false;
+	}
 	
 	//TODO: Add device handler for this type
 	public static boolean isCO2wMBUSDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
