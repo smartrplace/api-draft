@@ -13,9 +13,6 @@ package org.smartrplace.intern.backup.pattern;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
@@ -33,8 +30,6 @@ import org.ogema.model.gateway.remotesupervision.GatewayTransferInfo;
 import org.ogema.util.action.ActionPattern;
 import org.smartrplace.intern.backup.BackupInstallController;
 import org.smartrplace.intern.backup.logic.SCPTransfer;
-
-import de.iwes.util.format.StringFormatHelper;
 
 /**
  * A variant of a ResourcePattern, which is context sensitive. This means, that a context object
@@ -91,10 +86,6 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 	 * and depending on zipOnly property also send to server (or just perform zipping)
 	 */
 	public void performAction() {
-		if(System.getProperty("org.smartrplace.intern.backup.pattern.testdate") != null) {
-			new IllegalStateException().printStackTrace();
-		}
-
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
@@ -111,68 +102,26 @@ public class SCPTransferPattern extends ActionPattern<SCPDataCollectionAction, B
 		final GatewayTransferInfo remoteSupervision = context.getRemoteSupervision();
 		final ApplicationManager appMan = context.getAppMan();
 		
-		//TODO: Remove, just for testing
-		Long test = Long.getLong("org.smartrplace.intern.backup.pattern.testdate");
-		if(test != null) {
-			System.out.println("   !!! TEST !!!!");
-			//StringFormatHelper.getCurrentDateForPath(test);
-			Date date = new Date(test);
-			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-	    	String strDate = formatter.format(date);
-	    	System.out.println("Converted "+test+" to "+strDate+" via yyyy-MM-dd-HH-mm-ss");
-			System.out.println("   !!! TEST !!!!");
-		}
-		/*
-		if (controlByMaxSizeKb.isActive()) {
-			appMan.getLogger().info("Sending Log Data configured by {}", model.getLocation());
-			if (remoteSupervision != null) {
-				remoteSupervision.lastLogTransferTrial().setValue(appMan.getFrameworkTime());
-				success = SCPTransfer.collectViaSCP(this, appMan, true, gateway,
-						remoteSupervision.fileTransmissionTaskData(), "eventlog/logdata");
-				if(success) {
-					remoteSupervision.lastLogTransferSuccess().setValue(appMan.getFrameworkTime());
-				} else {
-					remoteSupervision.lastLogTransferError().setValue(appMan.getFrameworkTime());				
-				}
+		appMan.getLogger().info("Preparing Backup Data configured by {}", model.getLocation());
+		if(remoteSupervision != null) {
+			remoteSupervision.lastBackupTransferTrial().setValue(appMan.getFrameworkTime());
+			success = SCPTransfer.collectViaSCP(this, appMan, true, gateway,
+					remoteSupervision.fileTransmissionTaskData(), "generalBackup", Boolean.getBoolean("org.smartrplace.intern.backup.pattern.zipOnly"));
+			if(success) {
+				remoteSupervision.lastBackupTransferSuccess().setValue(appMan.getFrameworkTime());
 			} else {
-				 success = SCPTransfer.collectViaSCP(this, appMan, true, gateway, null, "eventlog/logdata");
+				remoteSupervision.lastBackupTransferError().setValue(appMan.getFrameworkTime());				
 			}
 		} else {
-		*/
-			appMan.getLogger().info("Preparing Backup Data configured by {}", model.getLocation());
-			if(remoteSupervision != null) {
-				remoteSupervision.lastBackupTransferTrial().setValue(appMan.getFrameworkTime());
-				success = SCPTransfer.collectViaSCP(this, appMan, true, gateway,
-						remoteSupervision.fileTransmissionTaskData(), "generalBackup", Boolean.getBoolean("org.smartrplace.intern.backup.pattern.zipOnly"));
-				if(success) {
-					remoteSupervision.lastBackupTransferSuccess().setValue(appMan.getFrameworkTime());
-				} else {
-					remoteSupervision.lastBackupTransferError().setValue(appMan.getFrameworkTime());				
-				}
-			} else {
-				 success = SCPTransfer.collectViaSCP(this, appMan, true, gateway, null, "generalBackup", Boolean.getBoolean("org.smartrplace.intern.backup.pattern.zipOnly"));
-			}
-//		}
-		/*if(context.remoteSupervision != null) {
-			context.incidentReporting.provideSingleRepeatingIncident("performSCPTransfer", 9);
-
-			Resource rest = context.remoteSupervision.getSubResource("restConfigGatewayTest");
-			if(rest == null) return;
-			BooleanResource run = rest.getSubResource("run", BooleanResource.class);
-			if((run!=null)&&(run.getLocationResource() != null)) {
-				run.setValue(true);
-			}
-		}*/
+			 success = SCPTransfer.collectViaSCP(this, appMan, true, gateway, null, "generalBackup", Boolean.getBoolean("org.smartrplace.intern.backup.pattern.zipOnly"));
+		}
 	}
 	
 	ResourceValueListener<IntegerResource> controlByKbListener = null;
 	@Override
 	public boolean accept() {
-System.out.println("  STARTING ACCEPT");
 		super.accept();
-		//IntegerResource cloc = controlByMaxSizeKb.getLocationResource();
-		//System.out.println("CloC:"+cloc.getLocation()+" active:"+cloc.isActive());
-		//if(cloc.isActive() && (controlByKbListener == null)) {
+
 		if(controlByMaxSizeKb.isActive() && (controlByKbListener == null)) {
 			controlByKbListener = new ResourceValueListener<IntegerResource>() {
 				@Override
@@ -182,10 +131,9 @@ System.out.println("  STARTING ACCEPT");
 					}
 				}
 			};
-			//cloc.addValueListener(controlByKbListener);
+
 			controlByMaxSizeKb.addValueListener(controlByKbListener, false);
 		}
-System.out.println("  ACCEPT RETURN TRUE");
 		return true;
 	}
 }
