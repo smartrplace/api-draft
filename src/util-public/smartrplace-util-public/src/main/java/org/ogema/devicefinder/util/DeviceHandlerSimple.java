@@ -20,6 +20,7 @@ import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
@@ -217,6 +218,22 @@ if(Boolean.getBoolean("jobdebug")) {
 		return super.addDatapoint(res, result, dpService);
 	}
 	
+	protected Datapoint addDatapointWithResOrSensorName(SingleValueResource res, List<Datapoint> result) {
+		String resName = res.getName();
+		final String subLocation;
+		if(!(resName.equals("reading") || resName.equals("stateFeedback") || resName.equals("stateControl")))
+			subLocation = resName;
+		else {
+			Resource parent = res.getParent();
+			if(parent != null)
+				subLocation = ResourceUtils.getHumanReadableShortName(parent);
+			else
+				subLocation = "TOP";
+		}
+		return addDatapoint(res, subLocation, result);
+	}
+	
+
 	/** Doubled from {@link DeviceTableRaw}
 	 */
 	protected Label addLastContact(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,

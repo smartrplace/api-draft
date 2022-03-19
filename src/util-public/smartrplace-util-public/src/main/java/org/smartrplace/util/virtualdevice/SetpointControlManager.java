@@ -201,17 +201,36 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	 * 		If request is dropped because setpoint and feedback already have the value requested true is returned (success)
 	 */
 	public boolean requestSetpointWrite(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
-		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, false);
+		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, false, false);
 	}
 	public boolean requestSetpointWrite(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint) {
-		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint);
+		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional,
+				writeEvenIfNochChangeForFeedbackAndSetpoint, false);
 	}
 	/** Method to be called to write to String and ArrayResources and other cases that cannot be covered with a float argument.*/
 	public boolean requestSetpointWrite(T setp, Object setpointData, WritePrioLevel prioLevel, boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint) {
-		return requestSetpointWrite(setp, Float.NaN, setpointData, prioLevel, resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint);
+		return requestSetpointWrite(setp, Float.NaN, setpointData, prioLevel, resendEvenIfConditional,
+				writeEvenIfNochChangeForFeedbackAndSetpoint, false);
 	}
+	public boolean requestSetpointFeedback(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
+		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, false, true);
+	}
+	
+	/**
+	 * 
+	 * @param setp
+	 * @param setpoint
+	 * @param setpointData
+	 * @param prioLevel
+	 * @param resendEvenIfConditional
+	 * @param writeEvenIfNochChangeForFeedbackAndSetpoint
+	 * @param requestConfirmationOnly if set true no real write operation is performed initially, but the manager only checks if the
+	 * 		requested value is confirmed by feedback. This can be used is the value setting is expected to be made by auto-settings
+	 * @return
+	 */
 	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData, WritePrioLevel prioLevel,
-			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint) {
+			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
+			boolean requestConfirmationOnly) {
 		SensorData sens = registerSensor(setp);
 
 		float maxDC;
@@ -251,25 +270,40 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					return true;
 			}
 		}
-		if(!isOverload) {
+		if((!isOverload) || requestConfirmationOnly) {
 			long now = appMan.getFrameworkTime();
-			if(sens.ccu() != null) {
-				if(maxDC <= sens.ccu().dutyCycleWarningYellow())
-					sens.ccu().conditionalWriteCount++;
-				else
-					sens.ccu().priorityWriteCount++;
-				sens.lastSent = now;
+			if(!requestConfirmationOnly) {
+				if(sens.ccu() != null) {
+					if(maxDC <= sens.ccu().dutyCycleWarningYellow())
+						sens.ccu().conditionalWriteCount++;
+					else
+						sens.ccu().priorityWriteCount++;
+					sens.lastSent = now;
+				}
+				if(setpointData != null)
+					sens.writeSetpointData(setpointData);
+				else {
+					sens.writeSetpoint(setpoint);
+					sens.reportSetpoint(setpoint);
+				}
+				if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.noresend"))
+					return true;
 			}
-			if(setpointData != null)
-				sens.writeSetpointData(setpointData);
-			else {
-				sens.writeSetpoint(setpoint);
-				sens.reportSetpoint(setpoint);
-			}
-			if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.noresend"))
-				return true;
 			if(!resendIfNoFeedback())
 				return true;
+
+			if((!writeEvenIfNochChangeForFeedbackAndSetpoint) && (setpointData == null)) {
+				//we do not support this for array resources etc. yet
+				boolean done = true;
+				if(sens.feedback() instanceof SingleValueResource) {
+					float curFb = ValueResourceUtils.getFloatValue((SingleValueResource) sens.feedback());
+					if(!ValueResourceHelper.isAlmostEqual(curFb, setpoint))
+						done = false;					
+				}
+				if(done)
+					return true;
+			}
+						
 			if(sens.valueFeedbackPending == null || (sens.valueFeedbackPending != setpoint))
 				sens.valuePendingSince = now;
 			if(setpointData != null)
