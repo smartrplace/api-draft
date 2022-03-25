@@ -50,10 +50,14 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 		public PercentageResource dutyCycleWarningRed;
 		@Override
 		float dutyCycleWarningYellow() {
+			if(dutyCycleWarningYello == null)
+				return super.dutyCycleWarningYellow();
 			return dutyCycleWarningYello.getValue();
 		}
 		@Override
 		float dutyCycleWarningRed() {
+			if(dutyCycleWarningRed == null)
+				return super.dutyCycleWarningRed();
 			return dutyCycleWarningRed.getValue();
 		}
 		
