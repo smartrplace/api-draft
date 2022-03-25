@@ -28,6 +28,7 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManager.WritePrioLevel;
 
 import de.iwes.util.logconfig.LogHelper;
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public abstract class SetpointControlManager<T extends ValueResource> {
@@ -508,11 +509,12 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	public static SetpointControlType getControlType(SingleValueResource setpoint) {
 		if(DeviceTableBase.isHomematic(setpoint.getLocation()))
 			return SetpointControlType.HmThermostat;
-		PhysicalElement device = LogHelper.getDeviceResource(setpoint, false, true);
-		if(device instanceof AirConditioner)
-			return SetpointControlType.AirconditionerDefault;
-		if(device instanceof Thermostat)
+		PhysicalElement device = ResourceHelper.getFirstParentOfType(setpoint, Thermostat.class); //LogHelper.getDeviceResource(setpoint, false, true);
+		if(device != null)
 			return SetpointControlType.ThermostatDefault;
+		device = ResourceHelper.getFirstParentOfType(setpoint, AirConditioner.class); //LogHelper.getDeviceResource(setpoint, false, true);		
+		if(device != null)
+			return SetpointControlType.AirconditionerDefault;
 		//TODO: Maybe we should just return null, but this is for fail-fast
 		throw new IllegalStateException("Unknown heat control type : "+setpoint.getLocation());
 	}
