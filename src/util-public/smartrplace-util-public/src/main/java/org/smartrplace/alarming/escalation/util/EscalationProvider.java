@@ -19,9 +19,10 @@ public interface EscalationProvider extends LabelledItem {
 	/** Called once on startup. Chooses the timers to use.
 	 * 
 	 * @param settings
-	 * @return if true the service shall be running from start, otherwise it is stopped from start
+	 * @return if true the service shall be running from start, otherwise it is stopped from start. If null is returned the
+	 * 		settings of the TimedJobs are used (default)
 	 */
-	boolean initProvider(AlarmingEscalationLevel persistData, AlarmingEscalationSettings settings,
+	Boolean initProvider(AlarmingEscalationLevel persistData, AlarmingEscalationSettings settings,
 			List<InstallAppDevice> knownIssueDevices);
 
 	/** Pre-configure especially {@link AlarmingEscalationLevel#timedJobData()}*/

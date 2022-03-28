@@ -1,5 +1,6 @@
 package org.smartrplace.tissue.util.resource;
 
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.gateway.LocalGatewayInformation;
 
@@ -22,5 +23,16 @@ public class GatewayUtil {
 			return idProp;
 		String idEnv = System.getenv("GATEWAY_ID");
 		return idEnv;
+	}
+
+	public static String getGatewayNameFromURL(ApplicationManager appMan) {
+		String baseUrl = ResourceHelper.getLocalGwInfo(appMan).gatewayBaseUrl().getValue();
+		String gwName = baseUrl;
+		if(gwName.startsWith("https://"))
+			gwName = gwName.substring("https://".length());
+		int idx = gwName.indexOf(".smartrplace.");
+		if(idx >= 0)
+			gwName = gwName.substring(0, idx);
+		return gwName;
 	}
 }
