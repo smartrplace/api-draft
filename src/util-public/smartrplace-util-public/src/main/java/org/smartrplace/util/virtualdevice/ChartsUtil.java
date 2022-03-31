@@ -137,7 +137,7 @@ public class ChartsUtil {
 			minYellow = SetpointControlManager.CONDITIONAL_PRIO_DEFAULT;
 		 res = deviceConfiguration.getSubResource(HmSetpCtrlManagerTHSetp.dutyCycleRedMin, PercentageResource.class);
 		if(res.isActive())
-			minRed = res.getValue()*100;
+			minRed = res.getValue();
 		else
 			minRed = SetpointControlManager.PRIORITY_PRIO_DEFAULT;
 		Label dutyCycleLb = new Label(vh.getParent(), preId+id_vh, vh.getReq()) {
@@ -147,8 +147,10 @@ public class ChartsUtil {
 			public void onGET(OgemaHttpRequest req) {
 				float val = dutyCycleRes.getValue();
 				if(val > minRed) {
+					removeStyle(LabelData.BOOTSTRAP_ORANGE, req);
 					addStyle(LabelData.BOOTSTRAP_RED, req);
 				} else if(val > minYellow) {
+					removeStyle(LabelData.BOOTSTRAP_RED, req);
 					addStyle(LabelData.BOOTSTRAP_ORANGE, req);
 				} else {
 					removeStyle(LabelData.BOOTSTRAP_ORANGE, req);

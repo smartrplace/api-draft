@@ -63,6 +63,7 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 		
 		public ResourceValueListener<FloatResource> dutyCycleListener;
 		public volatile float dutyCycleValueMax = 0;
+		public volatile float dutyCycleValueMaxNew = 0;
 		
 		public CCUInstance() {};
 	}
@@ -164,8 +165,13 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 					@Override
 					public void resourceChanged(FloatResource resource) {
 						float val = Boolean.getBoolean("org.smartrplace.util.virtualdevice.dutycycle100")?(cd.dutyCycle.getValue()*0.01f):cd.dutyCycle.getValue();
-						if(val > cd.dutyCycleValueMax)
+						if(val > cd.dutyCycleValueMaxNew)
+							cd.dutyCycleValueMaxNew = val;
+						if(val > cd.dutyCycleValueMax) {
 							cd.dutyCycleValueMax = val;
+							if(cd.dutyCycleMax != null)
+								ValueResourceHelper.setCreate(cd.dutyCycleMax, cd.dutyCycleValueMax);							
+						}
 					}
 				};
 				cd.dutyCycle.addValueListener(cd.dutyCycleListener);
@@ -212,10 +218,11 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 		
 		CCUInstance ccuMy = (CCUInstance)ccu;
 		
+		ccuMy.dutyCycleValueMax = ccuMy.dutyCycleValueMaxNew;		
 		if(ccuMy.dutyCycleMax != null) {
 			ValueResourceHelper.setCreate(ccuMy.dutyCycleMax, ccuMy.dutyCycleValueMax);
 		}
-		ccuMy.dutyCycleValueMax = 0;		
+		ccuMy.dutyCycleValueMaxNew = 0;		
 	}
 	
 	/*@Override

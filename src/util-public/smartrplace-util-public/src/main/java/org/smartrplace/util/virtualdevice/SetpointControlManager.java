@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManager.WritePrioLevel;
 
-import de.iwes.util.logconfig.LogHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
@@ -254,7 +253,6 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		default:
 			throw new IllegalStateException("Unknown prio level:"+prioLevel);
 		}
-		boolean isOverload = isSensorInOverload(sens, maxDC);
 		if((!writeEvenIfNochChangeForFeedbackAndSetpoint) && (setpointData == null)) {
 			//we do not support this for array resources etc. yet
 			boolean done = true;
@@ -271,6 +269,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					return true;
 			}
 		}
+		boolean isOverload = isSensorInOverload(sens, maxDC);
 		if((!isOverload) || requestConfirmationOnly) {
 			long now = appMan.getFrameworkTime();
 			if(!requestConfirmationOnly) {
@@ -314,7 +313,6 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			return true;
 		}
 		if(sens.ccu() != null) {
-			sens.valueFeedbackPending = null;
 			if(maxDC <= sens.ccu().dutyCycleWarningYellow()) {
 				sens.ccu().conditionalDropCount++;
 				if(!resendEvenIfConditional)
@@ -322,15 +320,26 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			} else {
 				sens.ccu().priorityDropCount++;
 			}
+
+			if(sens.valueFeedbackPending != null) {
+				if(sens.valueFeedbackPending == setpoint) {
+					//we stay in feedback mode
+					return false;
+				} else
+					sens.valueFeedbackPending = null;
+			}
+			
 			long now = appMan.getFrameworkTime();
 			if(sens.valuePending == null) {
-				if(setpointData != null)
-					sens.valuePendingObject = setpointData;
-				sens.valuePending = setpoint;
 				sens.valuePendingSince = now;
 			} else if(setpoint != sens.valuePending) {
 				sens.valuePendingSince = now;					
 			}
+
+			if(setpointData != null)
+				sens.valuePendingObject = setpointData;
+			else
+				sens.valuePending = setpoint;
 		}
 		return false;
 	}
