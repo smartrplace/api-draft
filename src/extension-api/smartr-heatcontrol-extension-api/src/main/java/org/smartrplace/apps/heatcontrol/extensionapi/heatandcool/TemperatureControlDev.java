@@ -32,6 +32,7 @@ public interface TemperatureControlDev extends TemperatureControlBase {
 
     	/** When auto-mode is activated we do not accept manual values for some time*/
     	public long blockedForRemoteManualUntil = -1;
+    	public boolean requestedManuMode = false;
     	
     	public LogicProviderTP logicProvider = null;
 		public ThermostatPatternExtension(ApplicationManager appMan, TimeResource manualRetard) {
