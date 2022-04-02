@@ -142,8 +142,9 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 	@Override
 	protected void updateCCUListForced() {
 		Collection<InstallAppDevice> ccus = ChartsUtil.getCCUs(dpService);
+		Map<String, CCUInstance> knownCCUs = knownCCUs();
 		for(InstallAppDevice ccu: ccus) {
-			if(knownCCUs().containsKey(ccu.getLocation()))
+			if(knownCCUs.containsKey(ccu.getLocation()))
 				continue;
 			CCUInstance cd = new CCUInstance();
 			initRouterStandardValues(cd, ccu);
@@ -192,7 +193,8 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 	
 	public RouterInstance getCCU(PhysicalElement device) {
 		updateCCUList();
-		for(RouterInstance ccu: knownCCUs().values()) {
+		Map<String, CCUInstance> kccus = knownCCUs();
+		for(RouterInstance ccu: kccus.values()) {
 			Resource parent = ccu.device.device().getLocationResource().getParent();
 			if(parent == null)
 				continue;

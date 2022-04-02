@@ -45,6 +45,7 @@ public abstract class SensorData {
 
 	public SensorData(SetpointControlManager<?> ctrl2) {
 		this.ctrl = ctrl2;
+		ctrl.appMan.getLogger().debug("  CREATING SensorData for: "+ctrl.getClass().getSimpleName());
 	}
 	
 	protected void reportSetpoint(float value) {
@@ -75,7 +76,7 @@ public abstract class SensorData {
 		}
 		
 	}
-	boolean receivedFirstFBValue = false;
+	private volatile boolean receivedFirstFBValue = false;
 	//public List<KnownValue2> knownValues = new ArrayList<>();
 	public Map<Float, Long> knownValues = new HashMap<>();
 	public long lastSetpointFeedbackConfirmTime = -1;

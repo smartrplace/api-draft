@@ -103,7 +103,7 @@ public class DpGroupUtil {
 	}
 	
 	public static Collection<InstallAppDevice> managedDeviceResoures(String resourceClassName, DatapointService dpService) {
-		Collection<Class<? extends Resource>> all = dpService.getManagedDeviceResoureceTypes();
+		Collection<Class<? extends Resource>> all = dpService.getManagedDeviceResourceTypes(false);
 		for(Class<? extends Resource> type: all) {
 			if(type.getName().equals(resourceClassName) || type.getSimpleName().equals(resourceClassName)) {
 				return dpService.managedDeviceResoures(type);

@@ -189,7 +189,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			return null;
 		Map<String, SensorData> mapInner = knownSensors.get(router);
 		if(mapInner == null)
-			return null;
+			return registerSensor(setp);
 		return mapInner.get(setp.getLocation());
 	}
 	/** Request to send new setpoint value to device

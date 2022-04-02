@@ -138,8 +138,14 @@ public interface DatapointService {
 	 */
 	List<DpConnection> getConnections(UtilityType type);
 	
-	/** Device information*/
-	Collection<Class<? extends Resource>> getManagedDeviceResoureceTypes();
+	/** Device information
+	 * 
+	 * @param basedOnDeviceHandlers if true only types supported by active DeviceHandlers are returned, otherwise
+	 * 		all types used in knownDevices are returned. This may make a particular difference during startup,
+	 * 		but also if DeviceHandlers are not registered anymore and if not device has been found by a DeviceHandler.
+	 * @return
+	 */
+	Collection<Class<? extends Resource>> getManagedDeviceResourceTypes(boolean basedOnDeviceHandlers);
 	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
 	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId);
 	
