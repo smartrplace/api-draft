@@ -83,6 +83,7 @@ public class HmSetpCtrlManagerTHControlMode extends HmSetpCtrlManager<IntegerRes
 		if(result != null)
 			return result;
 		IntegerResource fb = getFeeedback(setp);
+		appMan.getLogger().debug("Create and register SensorDataHmInt for "+loc);
 		result = new SensorDataHmInt(sensor, setp, fb, this);
 		knownSensorsInner.put(loc, result);
 		return result;

@@ -156,15 +156,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	
 	public abstract Resource getSensor(T setp);
 	
-	public abstract SensorData registerSensor(T setp, Resource sensor, Map<String, SensorData> knownSensorsInner); /* {
-		String loc = setp.getLocation();
-		SensorData result = knownSensorsInner.get(loc);
-		if(result != null)
-			return result;
-		result = getSensorDataInstance(sensor); //new SensorData(sensor, this);
-		knownSensorsInner.put(loc, result);
-		return result;
-	}*/
+	public abstract SensorData registerSensor(T setp, Resource sensor, Map<String, SensorData> knownSensorsInner);
 	
 	public SensorData registerSensor(T setp) {
 		Resource sensor = getSensor(setp);

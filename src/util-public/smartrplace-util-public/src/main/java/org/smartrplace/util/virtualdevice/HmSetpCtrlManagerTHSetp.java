@@ -66,6 +66,7 @@ public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResour
 		SensorDataHmTemperature result = (SensorDataHmTemperature) knownSensorsInner.get(loc);
 		if(result != null)
 			return result;
+		appMan.getLogger().debug("Create and register SensorDataHmTemperature for "+loc);
 		result = new SensorDataHmTemperature((TemperatureSensor) sensor, this);
 		knownSensorsInner.put(loc, result);
 		return result;

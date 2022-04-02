@@ -81,7 +81,8 @@ public class HmSetpCtrlManagerTHIntTrigger extends HmSetpCtrlManager<IntegerReso
 		SensorDataHmIntTrigger result = (SensorDataHmIntTrigger) knownSensorsInner.get(loc);
 		if(result != null)
 			return result;
-			result = new SensorDataHmIntTrigger(setp, this);
+		appMan.getLogger().debug("Create and register SensorDataHmIntTrigger for "+loc);
+		result = new SensorDataHmIntTrigger(setp, this);
 		knownSensorsInner.put(loc, result);
 		return result;
 	}
