@@ -165,12 +165,21 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			nullRouterInstanceUsed = true;
 			router = nullRouterInstance;
 		}
+		synchronized (knownSensors) {
+			return registerSensorUnsynchronized(setp, sensor, router);
+		}
+	}
+	private SensorData registerSensorUnsynchronized(T setp, Resource sensor, RouterInstance router) {
 		Map<String, SensorData> mapInner = knownSensors.get(router);
 		if(mapInner == null) {
 			mapInner = new HashMap<>();
 			knownSensors.put(router, mapInner);
 		}
 		SensorData sens = registerSensor(setp, sensor, mapInner);
+		if(sens == null) {
+			sens = registerSensor(setp, sensor, mapInner);
+			throw new IllegalStateException("Registered as null for "+setp.getLocation());		
+		}
 		return sens;
 	}
 	
@@ -179,10 +188,17 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		RouterInstance router = getCCU(sensor);
 		if(router == null)
 			return null;
-		Map<String, SensorData> mapInner = knownSensors.get(router);
-		if(mapInner == null)
-			return registerSensor(setp);
-		return mapInner.get(setp.getLocation());
+		synchronized (knownSensors) {
+			Map<String, SensorData> mapInner = knownSensors.get(router);
+			if(mapInner == null)
+				return registerSensorUnsynchronized(setp, sensor, router);
+			SensorData result = mapInner.get(setp.getLocation());
+			if(result == null) {
+				return registerSensorUnsynchronized(setp, sensor, router);
+				//throw new IllegalStateException(" Null entry for "+setp.getLocation()+" !!(gSD)");
+			}
+			return result;
+		}
 	}
 	/** Request to send new setpoint value to device
 	 * 
