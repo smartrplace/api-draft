@@ -35,6 +35,11 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 		return 0;
 	}
 	
+	/** Overwrite to modify the array received before processing elements*/
+	protected JSONArray checkArrayToWrite(JSONArray json) {
+		return json;
+	}
+
 	public enum POSTMODE {
 		/** In this mode every POST must contain the entire list with all data. The list will be
 		 * rewritten containing the new data. Existing elements will be reused, but the content may
@@ -98,6 +103,7 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 		if(postMode == POSTMODE.REWRITE_COMPLETE_LIST) try  {
 			JSONObject jsonobj = new JSONObject(value);
 			JSONArray json = jsonobj.getJSONArray(id);
+			json = checkArrayToWrite(json);
 			int len = json.length();
 			if(len < res.size()) {
 				int minSize = minimumSizeOfListAfterUpdate(json);
