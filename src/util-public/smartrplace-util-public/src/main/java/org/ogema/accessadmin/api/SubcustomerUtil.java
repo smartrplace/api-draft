@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.ResourceList;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
-import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
+import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 import org.smartrplace.external.accessadmin.config.AccessConfigBase;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
@@ -128,7 +129,7 @@ public class SubcustomerUtil {
 	}
 	
 	public static AccessConfigUser addUserToSubcustomer(String userName, SubCustomerData data,
-			ApplicationManager appMan) {
+			ApplicationManagerPlus appMan) {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
 		AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
 				accessAdminConfigRes.userPermissions());
@@ -152,7 +153,53 @@ public class SubcustomerUtil {
 		if(data.aggregationType().getValue() > 0)
 			ValueResourceHelper.setCreate(accessAdminConfigRes.subcustomerUserMode(), 1);
 		
+		//Set rooms not belonging to subcustomer to denied for user
+		List<Room> all = KPIResourceAccess.getRealRooms(appMan.getResourceAccess());
+		BuildingPropertyUnit subcustGroupRooms = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
+				accessAdminConfigRes.roomGroups());
+		if(subcustGroupRooms == null)
+			throw new IllegalStateException("Room Group for Subcustomer "+data.getLocation() + " missing!");
+		List<Room> subcustRooms = subcustGroupRooms.rooms().getAllElements();
+		for(Room room: all) {
+			boolean hasAccess;
+			if(ResourceHelper.containsLocation(subcustRooms, room))
+				hasAccess = true;
+			else
+				hasAccess = false;
+			PermissionCellData acc = getAccessConfig(room, UserPermissionService.USER_ROOM_PERM, userName, appMan);
+			acc.setOwnStatus(hasAccess?null:false);
+		}
+				
 		return userEntry;
+	}
+	
+	public static ConfigurablePermission getAccessConfig(Room object, String permissionID,
+			String userName, ApplicationManagerPlus appManPlus) {
+		AccessAdminConfig accessAdminConfigRes = appManPlus.getResourceAccess().getResource("accessAdminConfig");
+		ResourceList<AccessConfigUser> userPerms = accessAdminConfigRes.userPermissions();
+		return getAccessConfig(object, permissionID, userName, appManPlus, userPerms);
+	}
+	public static ConfigurablePermission getAccessConfig(Room object, String permissionID,
+			String userName, ApplicationManagerPlus appManPlus,
+			ResourceList<AccessConfigUser> userPerms) {
+		AccessConfigUser userAcc = UserPermissionUtil.getUserPermissions(
+				userPerms, userName);
+		ConfigurablePermission result = new ConfigurablePermission() {
+			@Override
+			public boolean supportsUnset() {
+				return true;
+			}
+		};
+		//We have to choose the right permission data for the page here
+		if(userAcc == null)
+			userAcc = UserPermissionUtil.getOrCreateUserPermissions(userPerms, userName);
+		result.accessConfig = userAcc.roompermissionData();
+		result.resourceId = object.getLocation();
+		result.permissionId = permissionID;
+		//String userName = userAcc.name().getValue();
+		result.defaultStatus = appManPlus.userPermService().getUserPermissionForRoom(userName, result.resourceId,
+				permissionID, true) > 0;
+		return result;
 	}
 	
 	public static AccessConfigUser removeUserFromSubcustomer(String userName, SubCustomerData data,
