@@ -63,6 +63,8 @@ public class SubcustomerUtil {
 		result.res = res;
 		result.type = subCustomerTypes.get(res.subCustomerType().getValue());
 		if(result.type == null)
+			result.type = subCustomerTypes.get(10);
+		if(result.type == null)
 			return null;
 		return result;
 	}
