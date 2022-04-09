@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.smartrplace.system.guiappstore.config.SystemUpdate;
+
 /** This service configures which artifacts from the Appstore Maven Artifactory are actually used on which
  * gateway connected to the Appstore.
  * TODO: The definition below assumes that all gateways of a project share a common Git configuration repository
@@ -60,4 +62,7 @@ public interface GatewayUpdateService {
 	AppstoreBundle updateOrSetVersion(GitRepository rundirPath, String fileName,
             String gatewayID, MavenBundleVersioned mavenBundle) throws IOException;
 
+	void updateBundle(SystemUpdate update, String gatewayID,
+			List<AppstoreBundle> appStoreBundlesSub,
+			GitRepository rundirRepo);	
 }
