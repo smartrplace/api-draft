@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
@@ -13,6 +14,7 @@ import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.gateway.EvalCollection;
 import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.resource.util.ResourceUtils;
 
 import de.iwes.util.logconfig.EvalHelper;
@@ -47,6 +49,16 @@ public class KPIResourceAccess {
 	}
 
 	public static List<Room> getRealRooms(ResourceAccess resAcc) {
+		if(Boolean.getBoolean("org.smartrplace.apps.heatcontrol.pattern.bacnet.roomcontrol")) {
+			List<Room> result = new ArrayList<>();
+			ResourceList<PhysicalElement> bacnetDevices = resAcc.getResource("BACnetDevices");
+			for(PhysicalElement el: bacnetDevices.getAllElements()) {
+				if(el.getName().startsWith("RoomControls_") && (el instanceof PhysicalElement)) {
+					result.add(el.location().room().getLocationResource());
+				}
+			}
+			return result;
+		}
 		List<Room> result = resAcc.getResources(Room.class);
 		List<Room> toRemove = new ArrayList<>();
 		for(Room room: result) {

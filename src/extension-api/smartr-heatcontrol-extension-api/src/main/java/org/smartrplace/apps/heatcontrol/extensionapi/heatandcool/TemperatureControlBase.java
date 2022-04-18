@@ -83,4 +83,57 @@ public interface TemperatureControlBase {
 	default Boolean getSwingMode() {return null;}
 	default boolean setSwingMode(boolean newState) {return false;}
 	default public void setAutoSetpoints(boolean useAutoMode, boolean force) {};
+	
+	/** This mode must be provided for heating and cooling*/
+	public enum HeatCoolFanMode {
+		WITHOUT_FAN,
+		FULL_WITH_FAN,
+		UNSUPPORTED,
+		/** The respective season (heating/cooling) is not supported, but fan control
+		 * is still available during the season.
+		 */
+		FAN_ONLY,
+		/** Not supported, but configuration shall be offered*/
+		CONFIGURARATION_ONLY
+	}
+	default HeatCoolFanMode isHeatingSupported() {
+		return HeatCoolFanMode.UNSUPPORTED;
+	}
+	default HeatCoolFanMode isCoolingSupported() {
+		return HeatCoolFanMode.UNSUPPORTED;
+	}
+	
+	/** Use the application specific methods. They may be overwritten with more
+	 * specific implmentations
+	 * @param isHeating
+	 * @return
+	 */
+	default boolean isFanSupported(boolean isHeating) {
+		HeatCoolFanMode mode;
+		if(isHeating)
+			mode = isHeatingSupported();
+		else
+			mode = isCoolingSupported();
+		return mode == HeatCoolFanMode.FULL_WITH_FAN ||
+				mode == HeatCoolFanMode.FAN_ONLY;
+	}
+
+	default boolean isTemperatureControlSupported(boolean isHeating) {
+		HeatCoolFanMode mode;
+		if(isHeating)
+			mode = isHeatingSupported();
+		else
+			mode = isCoolingSupported();
+		return mode == HeatCoolFanMode.FULL_WITH_FAN ||
+				mode == HeatCoolFanMode.WITHOUT_FAN;
+	}
+
+	default boolean isConfigurationSupported(boolean isHeating) {
+		HeatCoolFanMode mode;
+		if(isHeating)
+			mode = isHeatingSupported();
+		else
+			mode = isCoolingSupported();
+		return mode != HeatCoolFanMode.UNSUPPORTED;
+	}
 }
