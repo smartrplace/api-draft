@@ -42,7 +42,7 @@ public abstract class SensorDataInt2Int extends SensorData {
 					float valFb = feedback.getValue();
 					if(valFb == valueFeedbackPending) {
 						valueFeedbackPending = null;
-						reportFbConfirmed();
+						reportFbConfirmed(valFb);
 					}
 				}
 			}

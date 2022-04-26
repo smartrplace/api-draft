@@ -48,11 +48,13 @@ public abstract class SensorData {
 		ctrl.appMan.getLogger().debug("  CREATING SensorData for: "+ctrl.getClass().getSimpleName());
 	}
 	
+	/** Notify that setpoint control has changed*/
 	protected void reportSetpoint(float value) {
 		addKnownValue(value);
 	}
-	protected void reportFbConfirmed() {
+	protected void reportFbConfirmed(float feedbackValue) {
 		lastSetpointFeedbackConfirmTime = ctrl.appMan.getFrameworkTime();
+		addKnownValue(feedbackValue);
 	}
 	
 	public static String getStatus(SensorData sd) {
