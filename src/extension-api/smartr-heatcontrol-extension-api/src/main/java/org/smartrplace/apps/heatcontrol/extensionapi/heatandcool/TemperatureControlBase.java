@@ -6,6 +6,8 @@ import org.ogema.model.devices.buildingtechnology.MechanicalFan;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.TemperatureSensor;
 
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+
 /** This interface can be implemented by single devices and by room control units that control all heating and
  * cooling units within a room
  */
@@ -73,6 +75,15 @@ public interface TemperatureControlBase {
 	 */
 	default boolean setFanSpeed(int state) {return false;}
 	default Integer getFanSpeed() {return null;}
+	
+	default String[] fanSpeedLabels(OgemaLocale locale) { return null;}
+	/*default String[] fanSpeedLabels(OgemaLocale locale) {
+		if(locale == OgemaLocale.GERMAN)
+			return new String[]{"Auto", "Low", "Medium", "High"};
+		else
+			return new String[]{"Auto", "Niedrig", "Medium", "Hoch"};
+	}*/
+	
 	/** Set operation mode
 	 * 
 	 * @param state see {@link AirConditioner#operationMode()}

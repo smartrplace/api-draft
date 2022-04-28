@@ -384,7 +384,8 @@ public class SubcustomerUtil {
 	public static final int WINDOWTEMP_IDX = 6;
 	public static final int MIN_SETPOINT_IDX = 7;
 	public static final int MAX_SETPOINT_IDX = 8;
-	public static final int VALUE_IDX_NUM = 9;
+	public static final int ECO_EQUAlS_OFF_IDX = 9;
+	public static final int VALUE_IDX_NUM = 10;
 	public static class ValueVariance {
 		public ValueVariance(int valueIdx) {
 			this.valueIdx = valueIdx;

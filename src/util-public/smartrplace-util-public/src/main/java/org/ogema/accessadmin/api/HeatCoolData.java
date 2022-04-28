@@ -11,6 +11,8 @@ public class HeatCoolData extends SettingsBaseData {
 	public float minSetpointAuto;
 	public float maxSetpointAuto;
 	
+	public boolean ecoEqualsOff;
+	
 	public ValueVariance[] valueEval;
 	/** Number of rooms with special day settings*/ 
 	public int specialDaySettingsRooms = 0;
@@ -71,5 +73,7 @@ public class HeatCoolData extends SettingsBaseData {
 	public int getSpecialSettingsEcoTemperature() {
 		return specialSettingsEcoTemperature;
 	}
-
+	public boolean getEcoEqualsOff() {
+		return ecoEqualsOff;
+	}
 }
