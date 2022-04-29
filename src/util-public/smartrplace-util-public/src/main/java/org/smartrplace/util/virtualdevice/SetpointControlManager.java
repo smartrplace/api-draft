@@ -186,8 +186,12 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	public SensorData getSensorData(T setp) {
 		Resource sensor = getSensor(setp);
 		RouterInstance router = getCCU(sensor);
-		if(router == null)
-			return null;
+		if(router == null) {
+			nullRouterInstanceUsed = true;
+			router = nullRouterInstance;
+		}
+		//if(router == null)
+		//	return null;
 		synchronized (knownSensors) {
 			Map<String, SensorData> mapInner = knownSensors.get(router);
 			if(mapInner == null)
