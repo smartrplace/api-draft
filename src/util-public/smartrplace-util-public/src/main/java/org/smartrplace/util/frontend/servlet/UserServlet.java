@@ -860,6 +860,23 @@ public class UserServlet extends HttpServlet {
 			else
 				throw new IllegalStateException("Object not part of result in POST for "+pageprov.toString());			
 		}
+		
+		//FIXME: Remove this, do not send anymore from GUI
+		if(postData.has("airConState")) {
+			if(postData.has("manualTemperatureDuration"))
+				postData.remove("manualTemperatureDuration");
+		} else if(postData.has("manualTemperatureDuration")) {
+			String value;
+			try {
+				value = postData.get("manualTemperatureDuration").toString();
+			} catch(JSONException e) {
+				value = postData.getJSONObject("manualTemperatureDuration").toString();
+			}
+			if(value != null && value.equals("-1") && postData.has("setCurrentTemperature"))
+				postData.remove("setCurrentTemperature");
+		}
+		// END OF FIXME
+		
 		for(String key: postData.keySet()) {
 			if(key.equals("params"))
 				continue;
