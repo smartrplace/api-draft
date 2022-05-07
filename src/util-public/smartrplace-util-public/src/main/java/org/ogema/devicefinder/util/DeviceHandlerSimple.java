@@ -136,9 +136,12 @@ if(Boolean.getBoolean("jobdebug")) {
 							valueLabel = vh.floatLabel("Value", id, (FloatResource)sampleSensor, row, "%.1f");
 						else if(sampleSensor instanceof IntegerResource)
 							valueLabel = vh.intLabel("Value", id, (IntegerResource)sampleSensor, row, 0);
-						else if(sampleSensor instanceof TimeResource)
-							valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 0);
-						else if(sampleSensor instanceof BooleanResource)
+						else if(sampleSensor instanceof TimeResource) {
+							if(sampleSensor.getName().contains("cnt") || sampleSensor.getName().contains("count"))
+								valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 7);
+							else
+								valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 0);
+						} else if(sampleSensor instanceof BooleanResource)
 							valueLabel = vh.booleanLabel("Value", id, (BooleanResource)sampleSensor, row, 0);
 						else
 							throw new IllegalStateException("Unsupported sensor type: "+sampleSensor.getResourceType().getName());
