@@ -24,11 +24,14 @@ import org.ogema.externalviewer.extensions.IntervalConfiguration;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButton;
 import org.ogema.externalviewer.extensions.ScheduleViwerOpenUtil;
 import org.ogema.externalviewer.extensions.ScheduleViwerOpenUtil.SchedOpenDataProvider;
+import org.ogema.model.actors.OnOffSwitch;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.gateway.remotesupervision.DataLogTransferInfo;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.CO2Sensor;
 import org.ogema.model.sensors.GenericFloatSensor;
+import org.ogema.model.sensors.HumiditySensor;
+import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.tools.resource.util.LoggingUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.gateway.device.GatewayDevice;
@@ -119,6 +122,56 @@ public class ChartsUtil {
 			result.add(((CO2Sensor)sens.device()).reading());
 		}
 		return result ;
+	}
+	
+	public static class HmCO2SensorElements {
+		public CO2Sensor co2Sens;
+		public TemperatureSensor tempSens;
+		public HumiditySensor humSens;
+		public OnOffSwitch onOffSwitch;
+		
+		/** Null if directly acquired via {@link ChartsUtil#getElements(CO2Sensor)}*/
+		public InstallAppDevice iad;
+	}
+	public static HmCO2SensorElements getElements(CO2Sensor co2) {
+		Resource dev = co2.getLocationResource().getParent();
+		HmCO2SensorElements result = new HmCO2SensorElements();
+		result.co2Sens = co2;
+		if(dev == null)
+			return result;
+		//List<Resource> allSubs = dev.sensors().getSubResources(false);
+		List<TemperatureSensor> tss = dev.getSubResources(TemperatureSensor.class, false);
+		if(tss.size() == 1)
+			result.tempSens = tss.get(0);
+		List<HumiditySensor> hss = dev.getSubResources(HumiditySensor.class, false);
+		if(hss.size() == 1)
+			result.humSens = hss.get(0);
+		if(result.humSens == null && result.tempSens == null) {
+			List<SensorDevice> sensDev = dev.getSubResources(SensorDevice.class, false);
+			if(sensDev.size() == 1) {
+				tss = sensDev.get(0).getSubResources(TemperatureSensor.class, true);
+				if(tss.size() == 1)
+					result.tempSens = tss.get(0);
+				hss = sensDev.get(0).getSubResources(HumiditySensor.class, true);
+				if(hss.size() == 1)
+					result.humSens = hss.get(0);				
+			}
+		}
+		
+		List<OnOffSwitch> oos = dev.getSubResources(OnOffSwitch.class, false);
+		if(hss.size() == 1)
+			result.onOffSwitch = oos.get(0);
+		return result ;
+	}
+	public static List<HmCO2SensorElements> getHmCO2SensorData(DatapointService dpService) {
+		Collection<InstallAppDevice> input = dpService.managedDeviceResoures(CO2Sensor.class);
+		List<HmCO2SensorElements> result = new ArrayList<>();
+		for(InstallAppDevice co2: input) {
+			HmCO2SensorElements data = getElements((CO2Sensor)co2.device());
+			data.iad = co2;
+			result.add(data);
+		}
+		return result;
 	}
 	
 	public static Label getDutyCycleLabel(HmInterfaceInfo device, InstallAppDevice deviceConfiguration,
