@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -51,6 +52,17 @@ public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
 	public final String servletSubUrl;
+	/** Entries may be generated on first call if the pageId is part of the property
+	 * org.smartrplace.util.frontend.servlet.debugpageids . You may also generate entries
+	 * directly e.g. in the constructor.<br>
+	 * You can resend the value in this map if pageId id is part of the property
+	 * org.smartrplace.util.frontend.servlet.resendids .
+	 * You can also compare new results to the existing entry if the pageId is part of the
+	 * property org.smartrplace.util.frontend.servlet.compareids.<br>
+	 * Usually not all objects of a result are compared, only this listed in the property
+	 * org.smartrplace.util.frontend.servlet.compareobjects .
+	 */
+	protected final Map<String, JSONVarrRes> knownPageResultsForDebug = new HashMap<>();
 	
 	/** This is the default property check that may be used also by other servlets if no special property is needed*/
 	protected String getPropertyToCheck() {
@@ -307,7 +319,7 @@ public class UserServlet extends HttpServlet {
 			throw new IllegalStateException("No page found!!");
 		else if(pageList.size() == 1) {
 			ServletPageProvider<?> pageMap = pages.get(pageList.get(0));
-			result = getJSON(user, pollStr, timeStr, pageMap, returnStruct, paramMap);			
+			result = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageList.get(0));			
 
 			incrementAccessCounter(pageList.get(0), isMobile);			
 		} else {
@@ -315,7 +327,7 @@ public class UserServlet extends HttpServlet {
 			result.result = new JSONObject();
 			for(String pageId: pageList) {
 				ServletPageProvider<?> pageMap = pages.get(pageId);
-				JSONVarrRes resultSub = getJSON(user, pollStr, timeStr, pageMap, returnStruct, paramMap);
+				JSONVarrRes resultSub = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageId);
 				if(resultSub.result != null)
 					result.result.put(pageId, resultSub.result);
 				else
@@ -361,6 +373,27 @@ public class UserServlet extends HttpServlet {
 		public JSONArray resultArr = null;
 		public String message = null;
 	}
+	protected <T> JSONVarrRes getJSONWithPageIdDebugging(String user, String pollStr, String timeString,
+			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap,
+			String pageIdIn) {
+		String pageId = pageprov.getClass().getSimpleName()+"::"+pageIdIn;
+		if(StringFormatHelper.doesPropertyIdentifyString(pageId, "org.smartrplace.util.frontend.servlet.debugpageids")) {
+			JSONVarrRes existing = knownPageResultsForDebug.get(pageId);
+			if(existing == null) {
+				JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap);
+				knownPageResultsForDebug.put(pageId, result);
+				return result;
+			} else if(StringFormatHelper.doesPropertyIdentifyString(pageId, "org.smartrplace.util.frontend.servlet.resendids")) {
+				return existing;
+			} else if(StringFormatHelper.doesPropertyIdentifyString(pageId, "org.smartrplace.util.frontend.servlet.compareids")) {
+				JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap);
+				compareAndPrint(existing, result, pageId);
+				return result;
+			}
+		}
+		return getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap);
+	}
+
 	protected <T> JSONVarrRes getJSON(String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap) {
 		final ReturnStructure retStruct;
@@ -1004,5 +1037,40 @@ public class UserServlet extends HttpServlet {
 		int idx = ValueResourceUtils.appendValueIfUniqueIndex(gatewayData.apiMethods(), method, true);
 		ValueResourceHelper.setCreate(gatewayData.apiMethodAccess(), isMobile?(idx+0.5f):idx);
 		lastAccess.put(method, now);
+	}
+	
+	private static void compareAndPrint(JSONVarrRes existing, JSONVarrRes result, String pageId) {
+		JSONObject exTop = existing.result;
+		JSONObject resTop = result.result;
+		Set<String> objNames = exTop.keySet();
+		for(String objName: objNames) {
+			if(StringFormatHelper.doesPropertyIdentifyString(objName, "org.smartrplace.util.frontend.servlet.compareobjects")) {
+				JSONObject ex = exTop.getJSONObject(objName);
+				JSONObject res = resTop.getJSONObject(objName);
+				compareAndPrintForChangesAndMissing(ex, res, false, true, pageId+"::"+objName);
+				compareAndPrintForChangesAndMissing(res, ex, true, false, pageId+"::"+objName);
+			}
+		}
+	}
+	public static void compareAndPrintForChangesAndMissing(JSONObject ex, JSONObject res, boolean missingOnly,
+			boolean isResNewVersion, String compareId) {
+		Set<String> exKeys = ex.keySet();
+		Set<String> resKeys = res.keySet();
+		for(String exkey: exKeys) {
+			if(!resKeys.contains(exkey)) {
+				System.out.println("Key "+exkey+" missing in "+(isResNewVersion?"new":"old")+" result for "+compareId);
+			}
+		}
+		if(missingOnly)
+			return;
+		for(String exkey: exKeys) {
+			if(!resKeys.contains(exkey))
+				continue;
+			String exData = ex.get(exkey).toString();
+			String resData = res.get(exkey).toString();
+			if(!exData.equals(resData)) {
+				System.out.println("Key "+exkey+" differs in content for "+compareId);				
+			}
+		}
 	}
 }
