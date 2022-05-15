@@ -1064,12 +1064,17 @@ public class UserServlet extends HttpServlet {
 		if(missingOnly)
 			return;
 		for(String exkey: exKeys) {
+if(exkey.startsWith("seasonMode"))
+System.out.println("SUFIBSD");
 			if(!resKeys.contains(exkey))
 				continue;
 			String exData = ex.get(exkey).toString();
 			String resData = res.get(exkey).toString();
 			if(!exData.equals(resData)) {
-				System.out.println("Key "+exkey+" differs in content for "+compareId);				
+				if(exData.length() < 30 && resData.length() < 30)
+					System.out.println("Key "+exkey+" differs in content for "+compareId+"  Vals:"+exData+" / "+resData);
+				else
+					System.out.println("Key "+exkey+" differs in content for "+compareId+"  Lens:"+exData.length()+" / "+resData.length());
 			}
 		}
 	}
