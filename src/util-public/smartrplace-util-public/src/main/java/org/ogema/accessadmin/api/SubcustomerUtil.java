@@ -316,7 +316,7 @@ public class SubcustomerUtil {
 		BuildingPropertyUnit subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
 				accessAdminConfigRes.roomGroups());
 		if(subcustGroup == null)
-			throw new IllegalStateException("User Group for Subcustomer "+data.getLocation() + " missing!");
+			throw new IllegalStateException("Room Group for Subcustomer "+data.getLocation() + " missing!");
 		
 		addRoomToGroup(room, subcustGroup);
 		
@@ -329,13 +329,24 @@ public class SubcustomerUtil {
 		BuildingPropertyUnit subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
 				accessAdminConfigRes.roomGroups());
 		if(subcustGroup == null)
-			throw new IllegalStateException("User Group for Subcustomer "+data.getLocation() + " missing!");
+			throw new IllegalStateException("Room Group for Subcustomer "+data.getLocation() + " missing!");
 		
 		ResourceListHelper.removeReferenceOrObject(subcustGroup.rooms(), room);
 		
 		return subcustGroup;
 	}
 
+	public static List<Room> getAllRoomsForSubcustomer(SubCustomerData data,
+			ApplicationManager appMan) {
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		BuildingPropertyUnit subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
+				accessAdminConfigRes.roomGroups());
+		if(subcustGroup == null)
+			throw new IllegalStateException("Room Group for Subcustomer "+data.getLocation() + " missing!");
+		
+		return subcustGroup.rooms().getAllElements();
+	}
+	
 	/** Data for a single room (pro forma base, real data in roomcontrol)*/
 	public static class SingleRoomSettingEvalBase {
 		public float[] workingSpecialTemperature;
