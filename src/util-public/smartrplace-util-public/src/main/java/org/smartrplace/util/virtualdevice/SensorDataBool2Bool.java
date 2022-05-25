@@ -92,9 +92,9 @@ public class SensorDataBool2Bool extends SensorData {
 	public RouterInstance ccu() {
 		if(ccu == null) {
 			ccu = ctrl.getCCU(parentAsSensor);
-			if(ccu == null) {
-				System.out.println("WARNING: No Default Router found for setpoint sensor:"+parentAsSensor.getLocation());
-			}
+			//if(ccu == null) {
+			//	System.out.println("WARNING: No Default Router found for setpoint sensor:"+parentAsSensor.getLocation());
+			//}
 		}
 		return ccu;
 	}

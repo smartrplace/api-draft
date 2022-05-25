@@ -36,9 +36,9 @@ public class HmSetpCtrlManagerTHControlMode extends HmSetpCtrlManager<IntegerRes
 		public RouterInstance ccu() {
 			if(ccu == null) {
 				ccu = (CCUInstance) ctrl.getCCU(parentAsSensor);
-				if(ccu == null) {
-					System.out.println("WARNING: No CCU found for setpoint sensor:"+parentAsSensor.getLocation());
-				}
+				//if(ccu == null) {
+				//	System.out.println("WARNING: No CCU found for setpoint sensor:"+parentAsSensor.getLocation());
+				//}
 			}
 			return ccu;
 		}

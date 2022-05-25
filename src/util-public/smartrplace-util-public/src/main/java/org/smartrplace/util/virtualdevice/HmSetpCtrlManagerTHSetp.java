@@ -22,9 +22,9 @@ public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResour
 		public RouterInstance ccu() {
 			if(ccu == null) {
 				ccu = (CCUInstance) ctrl.getCCU(sensorRes);
-				if(ccu == null) {
-					System.out.println("WARNING: No CCU found for setpoint sensor:"+sensorRes.getLocation());
-				}
+				//if(ccu == null) {
+				//	System.out.println("WARNING: No CCU found for setpoint sensor:"+sensorRes.getLocation());
+				//}
 			}
 			return ccu;
 		}
