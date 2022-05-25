@@ -35,9 +35,9 @@ public class HmSetpCtrlManagerTHIntTrigger extends HmSetpCtrlManager<IntegerReso
 		public RouterInstance ccu() {
 			if(ccu == null) {
 				ccu = (CCUInstance) ctrl.getCCU(setpoint);
-				if(ccu == null) {
-					System.out.println("WARNING: No CCU found for setpoint sensor:"+setpoint.getLocation());
-				}
+				//if(ccu == null) {
+				//	System.out.println("WARNING: No CCU found for setpoint sensor:"+setpoint.getLocation());
+				//}
 			}
 			return ccu;
 		}
