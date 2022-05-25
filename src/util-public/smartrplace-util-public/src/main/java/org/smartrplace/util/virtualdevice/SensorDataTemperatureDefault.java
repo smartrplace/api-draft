@@ -15,9 +15,9 @@ public class SensorDataTemperatureDefault extends SensorDataTemperature {
 	public RouterInstance ccu() {
 		if(ccu == null) {
 			ccu = ctrl.getCCU(sensorRes);
-			if(ccu == null) {
-				System.out.println("WARNING: No Default Router found for setpoint sensor:"+sensorRes.getLocation());
-			}
+			//if(ccu == null) {
+			//	System.out.println("WARNING: No Default Router found for setpoint sensor:"+sensorRes.getLocation());
+			//}
 		}
 		return ccu;
 	}
