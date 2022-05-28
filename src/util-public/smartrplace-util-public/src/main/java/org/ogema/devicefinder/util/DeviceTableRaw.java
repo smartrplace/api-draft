@@ -646,8 +646,24 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 	
-	public static boolean isVirtualThermostat(Resource model) {
+    //public enum ControlMode { COOLING, HEATING, NONE; }
+    public static final int CTRLMODE_NONE = 0;
+    public static final int CTRLMODE_COOLING = 1;
+    public static final int CTRLMODE_HEATING = 2;
+    public static final int CTRLMODE_COOLING_FORCED = 3;
+    public static final int CTRLMODE_HEATING_FORCED = 4;
+    public static final int CTRLMODE_OFF = 5;
+
+    public static boolean isVirtualThermostat(Thermostat model) {
 		return !(model.getSubResources(VirtualThermostatConfig.class, false).isEmpty());
+	}
+	public static VirtualThermostatConfig getVirtualThermostatConfig(Thermostat model) {
+		List<VirtualThermostatConfig> resultPlus = model.getSubResources(VirtualThermostatConfig.class, false);
+		if(resultPlus.isEmpty())
+			return null;
+		if(resultPlus.size() > 1)
+			throw new IllegalStateException("More than one VirtualThermostatConfig for "+model.getLocation());
+		return resultPlus.get(0);
 	}
 	
 	public static boolean isWallThermostat(String resourceLocation) {
