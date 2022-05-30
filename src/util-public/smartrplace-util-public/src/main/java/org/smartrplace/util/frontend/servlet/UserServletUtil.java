@@ -21,6 +21,7 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletPageProvider;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
+import de.iwes.util.resource.ValueResourceHelper;
 
 public class UserServletUtil {
 	public static final Map<String, TimeSeriesDataImpl> knownTS = new HashMap<>();
@@ -54,8 +55,10 @@ public class UserServletUtil {
 		} else if(value == Float.NEGATIVE_INFINITY || value == -Float.MAX_VALUE) {
 			if(!suppressNan)
 				result.put(valueKey, -Float.MAX_VALUE);				
-		} else
-			result.put(valueKey, value);		
+		} else {
+			double dval = ValueResourceHelper.getFloatAsDouble(value);
+			result.put(valueKey, dval);
+		}
 	}
 	
 	/** In this method Nan values are suppressed in general*/
