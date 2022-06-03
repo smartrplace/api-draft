@@ -33,8 +33,8 @@ public class SubcustomerUtil {
 		 */
 		public final Map<Integer, NamedIntegerType> roomTypes = new LinkedHashMap<>();
 		public int[] defaultWorkingDays = new int[] {1,2,3,4,5};
-		public float defaultEcoTemperatureHeating = 273.15f+16f;
-		public float defaultEcoTemperatureCooling = 273.15f+30f;
+		//public float defaultEcoTemperatureHeating = 273.15f+16f;
+		//public float defaultEcoTemperatureCooling = 273.15f+30f;
 		
 		public SubCustomerType(int id, Map<OgemaLocale, String> name) {
 			super(id, name);
@@ -91,8 +91,8 @@ public class SubcustomerUtil {
 		ValueResourceHelper.setCreate(result.subCustomerType(), type);
 		ValueResourceHelper.setCreate(result.ecoModeActive(), false);
 		ValueResourceHelper.setCreate(result.workingDays(), typeData.defaultWorkingDays);
-		ValueResourceHelper.setCreate(result.defaultEcoTemperatureHeating(), typeData.defaultEcoTemperatureHeating);
-		ValueResourceHelper.setCreate(result.defaultEcoTemperatureCooling(), typeData.defaultEcoTemperatureCooling);
+		//ValueResourceHelper.setCreate(result.defaultEcoTemperatureHeating(), typeData.defaultEcoTemperatureHeating);
+		//ValueResourceHelper.setCreate(result.defaultEcoTemperatureCooling(), typeData.defaultEcoTemperatureCooling);
 		
 		//Note that the user group is intially empty
 		AccessConfigUser userAttr = ResourceListHelper.createNewNamedElement(
@@ -356,11 +356,19 @@ public class SubcustomerUtil {
 
 	/** Evaluation data for all rooms of a subcustomer regarding heating or cooling*/
 	public static class MultiRoomSettingEval {
+		public final NamedIntegerType roomType;
+		public final SubCustomerData subCustomerData;
+
+		public MultiRoomSettingEval(NamedIntegerType roomType, SubCustomerData scd) {
+			this.roomType = roomType;
+			this.subCustomerData = scd;
+		}
 		/** Single room data*/
 		public List<SingleRoomSettingEvalBase> roomData = new ArrayList<>();
 		public boolean isHeating;
 		/** Standard settings for the subcustomer*/
 		public HeatCoolData standardSettings;
+		
 	}
 
 	/** Master and standard setting data for a room type within a subcustomer*/
@@ -396,7 +404,12 @@ public class SubcustomerUtil {
 	public static final int MIN_SETPOINT_IDX = 7;
 	public static final int MAX_SETPOINT_IDX = 8;
 	public static final int ECO_EQUAlS_OFF_IDX = 9;
-	public static final int VALUE_IDX_NUM = 10;
+	
+	public static final int ECOTEMP_V2_IDX = 10;
+	public static final int WINDOWTEMP_V2_IDX = 11;
+	
+	public static final int VALUE_IDX_NUM = 12;
+
 	public static class ValueVariance {
 		public ValueVariance(int valueIdx) {
 			this.valueIdx = valueIdx;
@@ -413,17 +426,19 @@ public class SubcustomerUtil {
 	}
 	public static class SettingsBaseData {
 		/** get general heating start time in */
-		public long startTime;
-		public long endTime;
+		public long startTimeFromRoomData;
+		public long endTimeFromRoomData;
+		//public List<Long> startTimes;
+		//public List<Long> endTimes;
 		public float usageTemperature;
 		public float nonUsageTemperature;
 		
-		public long getStartTime() {
-			return startTime;
+		/*public List<Long> getStartTimes() {
+			return startTimes;
 		}
-		public long getEndTime() {
-			return endTime;
-		}
+		public List<Long> getEndTimes() {
+			return endTimes;
+		}*/
 		public float getUsageTemperature() {
 			return usageTemperature;
 		}

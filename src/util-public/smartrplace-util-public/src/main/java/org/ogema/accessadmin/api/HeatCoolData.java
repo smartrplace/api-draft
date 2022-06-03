@@ -1,17 +1,25 @@
 package org.ogema.accessadmin.api;
 
+import java.util.List;
+import java.util.Map;
+
 import org.ogema.accessadmin.api.SubcustomerUtil.SettingsBaseData;
 import org.ogema.accessadmin.api.SubcustomerUtil.ValueVariance;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 
 public class HeatCoolData extends SettingsBaseData {
 	public float comfortTemperature;
-	public float ecoTemperature;
+	public float ecoTemperatureV2;
+	public float windowOpenTemperatureV2;
+
+	public float ecoTemperatureV1;
 	public float setSingleSetpoint_Window_open;
 	/**Both minSetpoint and minSetpointAuto*/
 	public float minSetpointAuto;
 	public float maxSetpointAuto;
 	
 	public boolean ecoEqualsOff;
+	public Integer dayTypeSettingMode;
 	
 	public ValueVariance[] valueEval;
 	/** Number of rooms with special day settings*/ 
@@ -44,11 +52,14 @@ public class HeatCoolData extends SettingsBaseData {
 		return comfortTemperature;
 	}
 	public float getEcoTemperature() {
-		return ecoTemperature;
+		return ecoTemperatureV2;
 	}
 	public float getSetSingleSetpoint_Window_open() {
-		return setSingleSetpoint_Window_open;
+		return windowOpenTemperatureV2;
 	}
+	//public float getSetSingleSetpoint_Window_open() {
+	//	return setSingleSetpoint_Window_open;
+	//}
 	public float getMinSetpointAuto() {
 		return minSetpointAuto;
 	}
@@ -75,5 +86,56 @@ public class HeatCoolData extends SettingsBaseData {
 	}
 	public boolean getEcoEqualsOff() {
 		return ecoEqualsOff;
+	}
+	
+	public int getDayTypeSettingMode() {
+		return dayTypeSettingMode;
+	}
+	
+	public boolean getShowCalendarTemperature() {
+		//TODO
+		return false;
+	}
+	
+	public static int STARTEND_WORKINGDAY_IDX = 7;
+	public static int STARTEND_TIMES_SIZE = 8;
+	public Map<Integer, List<Long>> startEndTimes;
+	
+	public List<Long> startEndTimesMonday() {
+		return startEndTimes.get(0);
+	}
+	public List<Long> startEndTimesTuesday() {
+		return startEndTimes.get(1);
+	}
+	public List<Long> startEndTimesWednesday() {
+		return startEndTimes.get(2);
+	}
+	public List<Long> startEndTimesThursday() {
+		return startEndTimes.get(3);
+	}
+	public List<Long> startEndTimesFriday() {
+		return startEndTimes.get(4);
+	}
+	public List<Long> startEndTimesSaturday() {
+		return startEndTimes.get(5);
+	}
+	public List<Long> startEndTimesSunday() {
+		return startEndTimes.get(6);
+	}
+	public List<Long> startEndTimesWorkingday() {
+		return startEndTimes.get(STARTEND_WORKINGDAY_IDX);
+	}
+	
+	public long getStartTime() {
+		List<Long> workingdayTime = startEndTimes.get(STARTEND_WORKINGDAY_IDX);
+		if(workingdayTime == null || workingdayTime.isEmpty())
+			return 1440*TimeProcUtil.MINUTE_MILLIS;
+		return workingdayTime.get(0);
+	}
+	public long getEndTime() {
+		List<Long> workingdayTime = startEndTimes.get(STARTEND_WORKINGDAY_IDX);
+		if(workingdayTime == null || (workingdayTime.size() < 2))
+			return 1440*TimeProcUtil.MINUTE_MILLIS;
+		return workingdayTime.get(1);
 	}
 }
