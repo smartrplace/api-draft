@@ -138,4 +138,12 @@ public class HeatCoolData extends SettingsBaseData {
 			return 1440*TimeProcUtil.MINUTE_MILLIS;
 		return workingdayTime.get(1);
 	}
+	
+	/** Legacy support: receive startTime / endTime from GUI*/
+	public void setStartTime(long startTime) {
+		startTimeFromRoomData = startTime;
+	}
+	public void setEndTime(long endTime) {
+		endTimeFromRoomData = endTime;
+	}
 }
