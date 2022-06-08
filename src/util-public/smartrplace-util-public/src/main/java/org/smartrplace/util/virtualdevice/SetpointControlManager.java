@@ -228,6 +228,12 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, false, true);
 	}
 	
+	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData, WritePrioLevel prioLevel,
+			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
+			boolean requestConfirmationOnly) {
+		return requestSetpointWrite(setp, setpoint, setpointData, prioLevel, resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint,
+				requestConfirmationOnly, 5000l);
+	}
 	/**
 	 * 
 	 * @param setp
@@ -238,11 +244,11 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	 * @param writeEvenIfNochChangeForFeedbackAndSetpoint
 	 * @param requestConfirmationOnly if set true no real write operation is performed initially, but the manager only checks if the
 	 * 		requested value is confirmed by feedback. This can be used is the value setting is expected to be made by auto-settings
-	 * @return
+	 * @return false if the request is still pending e.g. as request could not be written due to high router load
 	 */
 	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData, WritePrioLevel prioLevel,
 			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
-			boolean requestConfirmationOnly) {
+			boolean requestConfirmationOnly, Long minRewriteTime) {
 		SensorData sens = registerSensor(setp);
 
 		float maxDC;
@@ -280,6 +286,12 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				if(done)
 					return true;
 			}
+		}
+		if(minRewriteTime != null) {
+			long now = appMan.getFrameworkTime();
+			long sentAgo = now - sens.lastSent;
+			if(sentAgo < minRewriteTime)
+				return true;
 		}
 		boolean isOverload = isSensorInOverload(sens, maxDC);
 		if((!isOverload) || requestConfirmationOnly) {
