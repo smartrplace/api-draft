@@ -993,6 +993,10 @@ public class UserServlet extends HttpServlet {
 			paramMap.put(paramName, newList.toArray(new String[0]));
 		}		
 	}
+
+	public static void setParameter(String paramName, String param, Map<String, String[]> paramMap) {
+		paramMap.put(paramName, new String[] {param});
+	}
 	
 	static GatewayDevice gatewayData = null;
 	Map<String, Long> lastAccess = new HashMap<>();
