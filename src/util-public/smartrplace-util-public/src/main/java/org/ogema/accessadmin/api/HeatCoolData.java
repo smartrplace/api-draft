@@ -1,5 +1,6 @@
 package org.ogema.accessadmin.api;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -100,7 +101,7 @@ public class HeatCoolData extends SettingsBaseData {
 	public static int STARTEND_WORKINGDAY_IDX = 7;
 	public static int STARTEND_WEEKEND_IDX = 8;
 	public static int STARTEND_TIMES_SIZE = 9;
-	public Map<Integer, List<Long>> startEndTimes;
+	public Map<Integer, List<Long>> startEndTimes = new HashMap<>();
 	
 	public List<Long> getStartEndTimesMonday() {
 		return startEndTimes.get(0);
