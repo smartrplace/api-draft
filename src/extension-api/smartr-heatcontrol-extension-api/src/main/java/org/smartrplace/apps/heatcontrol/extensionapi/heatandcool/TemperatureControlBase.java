@@ -1,5 +1,7 @@
 package org.smartrplace.apps.heatcontrol.extensionapi.heatandcool;
 
+import java.util.List;
+
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.MechanicalFan;
@@ -147,4 +149,19 @@ public interface TemperatureControlBase {
 			mode = isCoolingSupported();
 		return mode != HeatCoolFanMode.UNSUPPORTED;
 	}
+	
+	/** Provide Virtual Switches by devices*/
+	public static class SmartPlugData {
+		public boolean state;
+		public boolean online;
+		public String label;
+		public int stateNum = 2;
+		public int multiState;
+		public float power;
+		public String powerTsId = "";
+		
+		/** Override this if Controller shall use this*/
+		public void setState(int newState) {};
+	}
+	default List<SmartPlugData> additionalDevicesForSwitching(OgemaLocale locale) { return null;}
 }
