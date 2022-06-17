@@ -199,9 +199,8 @@ if(Boolean.getBoolean("jobdebug")) {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Datapoint> getDatapoints(InstallAppDevice installDeviceRes, DatapointService dpService) {
-		T device = (T)installDeviceRes.device();
+		T device = (T)installDeviceRes.device().getLocationResource();
 		Collection<Datapoint> result = getDatapoints(device, installDeviceRes);
-		checkDpSubLocations(installDeviceRes, result);
 		return result;
 	}
 	

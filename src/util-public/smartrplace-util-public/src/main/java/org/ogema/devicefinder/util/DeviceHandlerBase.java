@@ -141,15 +141,6 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	
 	protected void setInstallationLocation(InstallAppDevice device, String subLoc, DatapointService dpService) {
 		ValueResourceHelper.setCreate(device.installationLocation(), subLoc);
-		checkDpSubLocations(device, getDatapoints(device, dpService));
-	}
-	
-	@Deprecated
-	protected void checkDpSubLocations(InstallAppDevice device, Collection<Datapoint> dps) {
-		/*for(Datapoint dp: dps) {
-			if(dp.getSubRoomLocation(null, null) == null)
-				dp.addToSubRoomLocationAtomic(null, null, device.installationLocation().getValue(), true);
-		}*/		
 	}
 	
 	public Collection<Datapoint> addtStatusDatapointsHomematic(PhysicalElement dev, DatapointService dpService,
