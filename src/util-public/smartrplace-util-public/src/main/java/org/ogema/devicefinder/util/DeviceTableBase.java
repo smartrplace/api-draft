@@ -134,11 +134,14 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 		String tail;
 		if(parts[0].toLowerCase().startsWith("homematicip")) {
 			tail = parts[0].substring("homematicip".length());
-		} else {
-			if(!parts[0].startsWith("homematic")) return "n/a";
+		} else if(parts[0].startsWith("homematic")) {
 			tail = parts[0].substring("homematic".length());			
+		} else if(parts[0].startsWith("hm")){
+			tail = parts[0].substring("hm".length());						
+		} else {
+			tail = parts[0];						
 		}
-		if(tail.isEmpty()) return "102";
+		if(tail.isEmpty()) return "n/a";
 		else return tail;
 	}
 	

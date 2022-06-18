@@ -10,6 +10,7 @@ import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.PercentageResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
@@ -196,6 +197,17 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 		Map<String, CCUInstance> kccus = knownCCUs();
 		for(RouterInstance ccu: kccus.values()) {
 			Resource parent = ccu.device.device().getLocationResource().getParent();
+			if(parent == null)
+				continue;
+			if(device.getLocation().startsWith(parent.getLocation()))
+				return ccu;
+		}
+		return null;		
+	}
+	public static InstallAppDevice getCCU(PhysicalElement device, DatapointService dpService) {
+		Collection<InstallAppDevice> ccus = ChartsUtil.getCCUs(dpService);
+		for(InstallAppDevice ccu: ccus) {
+			Resource parent = ccu.device().getLocationResource().getParent();
 			if(parent == null)
 				continue;
 			if(device.getLocation().startsWith(parent.getLocation()))
