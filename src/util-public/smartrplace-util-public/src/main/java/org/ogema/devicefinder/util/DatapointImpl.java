@@ -230,6 +230,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		return (getGaroDataType() == null || getGaroDataType().equals(GaRoDataType.Unknown));		
 	}
 	
+	public static String getDeviceLabel(InstallAppDevice appDev, OgemaLocale locale, DatapointService dpService) {
+		DeviceHandlerProviderDP<?> tableProvider = dpService.getDeviceHandlerProvider(appDev);
+		return getDeviceLabel(appDev, locale, dpService, tableProvider);
+	}
 	public static String getDeviceLabel(InstallAppDevice appDev, OgemaLocale locale, DatapointService dpService,
 			DeviceHandlerProviderDP<?> tableProvider) {
 		return getDeviceLabelPlus(appDev, locale, dpService, tableProvider).deviceLabel;

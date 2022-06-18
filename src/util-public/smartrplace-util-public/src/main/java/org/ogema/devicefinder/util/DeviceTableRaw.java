@@ -23,6 +23,7 @@ import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
+import org.ogema.model.devices.connectiondevices.ThermalValve;
 import org.ogema.model.devices.generators.PVPlant;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.devices.sensoractordevices.SingleSwitchBox;
@@ -721,5 +722,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				return dev;
 		}
 		return null;
+	}
+	
+	public static String getSubNameAfterSeparator(Resource valve, int ch_separator) {
+		int idx = valve.getName().lastIndexOf(ch_separator);
+		if((idx < 0) || (idx >= (valve.getName().length()-1)))
+			return valve.getName();
+		else
+			return valve.getName().substring(idx+1);		
 	}
 }
