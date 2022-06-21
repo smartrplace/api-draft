@@ -37,7 +37,6 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.gateway.device.GatewayDevice;
 import org.smartrplace.gateway.device.KnownIssueDataGw;
 import org.smartrplace.gateway.device.MemoryTimeseriesPST;
-import org.smartrplace.tissue.util.logconfig.LogTransferUtil;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.timeseries.eval.api.TimeSeriesData;
@@ -270,8 +269,8 @@ public class ChartsUtil {
 						logged++;
 					if(Boolean.getBoolean("org.smartrplace.app.srcmon.isgateway")) {
 						Resource res = appMan.getResourceAccess().getResource(rec.getPath());
-						if(res != null && (res instanceof SingleValueResource) && (datalogs != null) &&
-								LogTransferUtil.isResourceTransferred((SingleValueResource) res, datalogs)) {
+						if(res != null && (res instanceof SingleValueResource) && (datalogs != null)) { // &&
+								//LogTransferUtil.isResourceTransferred((SingleValueResource) res, datalogs)) {
 							transferred++;
 						}
 					}

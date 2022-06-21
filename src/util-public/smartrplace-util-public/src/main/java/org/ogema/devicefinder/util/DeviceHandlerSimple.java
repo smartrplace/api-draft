@@ -196,12 +196,18 @@ if(Boolean.getBoolean("jobdebug")) {
 		return appMan.getResourcePatternAccess();
 	}
 	
+	Collection<Datapoint> knownDps = null;
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Datapoint> getDatapoints(InstallAppDevice installDeviceRes, DatapointService dpService) {
 		T device = (T)installDeviceRes.device().getLocationResource();
-		Collection<Datapoint> result = getDatapoints(device, installDeviceRes);
-		return result;
+		if(Boolean.getBoolean("org.ogema.devicefinder.util.updateDatapoints")) {
+			Collection<Datapoint> result = getDatapoints(device, installDeviceRes);
+			return result;
+		}
+		if(knownDps == null)
+			knownDps = getDatapoints(device, installDeviceRes);
+		return knownDps;			
 	}
 	
 	/** Wrapper for {@link #addDatapoint(SingleValueResource, List, String, DatapointService)}
