@@ -1,7 +1,9 @@
 package org.ogema.devicefinder.util;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
@@ -196,7 +198,7 @@ if(Boolean.getBoolean("jobdebug")) {
 		return appMan.getResourcePatternAccess();
 	}
 	
-	Collection<Datapoint> knownDps = null;
+	Map<String, Collection<Datapoint>> knownDpsMap = new HashMap<>();
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Datapoint> getDatapoints(InstallAppDevice installDeviceRes, DatapointService dpService) {
@@ -205,8 +207,11 @@ if(Boolean.getBoolean("jobdebug")) {
 			Collection<Datapoint> result = getDatapoints(device, installDeviceRes);
 			return result;
 		}
-		if(knownDps == null)
+		Collection<Datapoint> knownDps = knownDpsMap.get(installDeviceRes.getLocation());
+		if(knownDps == null) {
 			knownDps = getDatapoints(device, installDeviceRes);
+			knownDpsMap.put(installDeviceRes.getLocation(), knownDps);
+		}
 		return knownDps;			
 	}
 	
