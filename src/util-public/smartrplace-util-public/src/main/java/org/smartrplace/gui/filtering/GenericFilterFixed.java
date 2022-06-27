@@ -26,6 +26,10 @@ public class GenericFilterFixed<A> implements GenericFilterOption<A> {
 		baseOptions.addAll(objects);
 		this.optionLabel = optionLabel;
 	}
+	public GenericFilterFixed(List<A> objects, String optionLabel) {
+		baseOptions.addAll(objects);
+		this.optionLabel = LocaleHelper.getLabelMap(optionLabel);
+	}
 	public GenericFilterFixed(A[] objects, Map<OgemaLocale, String> optionLabel) {
 		baseOptions.addAll(Arrays.asList(objects));
 		this.optionLabel = optionLabel;

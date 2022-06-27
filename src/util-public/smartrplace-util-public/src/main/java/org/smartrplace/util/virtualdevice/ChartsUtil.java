@@ -42,6 +42,7 @@ import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import de.iwes.timeseries.eval.api.TimeSeriesData;
 import de.iwes.timeseries.eval.api.extended.util.TimeSeriesDataExtendedImpl;
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
+import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
@@ -175,10 +176,10 @@ public class ChartsUtil {
 	
 	public static Label getDutyCycleLabel(HmInterfaceInfo device, InstallAppDevice deviceConfiguration,
 			ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh, String id_vh) {
-		return getDutyCycleLabel(device, "dutyCycleLb", deviceConfiguration, vh, id_vh, device.dutyCycle().reading());
+		return getDutyCycleLabel(device, "dutyCycleLb", deviceConfiguration, vh.getParent(), vh.getReq(), id_vh, device.dutyCycle().reading());
 	}
 	public static Label getDutyCycleLabel(HmInterfaceInfo device, String preId, InstallAppDevice deviceConfiguration,
-			ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh, String id_vh,
+			OgemaWidget parent, OgemaHttpRequest req, String id_vh,
 			FloatResource dutyCycleRes) {
 		PercentageResource res = deviceConfiguration.getSubResource(HmSetpCtrlManagerTHSetp.dutyCycleYellowMin, PercentageResource.class);
 		float minYellow;
@@ -192,7 +193,7 @@ public class ChartsUtil {
 			minRed = res.getValue();
 		else
 			minRed = SetpointControlManager.PRIORITY_PRIO_DEFAULT;
-		Label dutyCycleLb = new Label(vh.getParent(), preId+id_vh, vh.getReq()) {
+		Label dutyCycleLb = new Label(parent, preId+id_vh, req) {
 			private static final long serialVersionUID = 6380831122071345220L;
 
 			@Override
@@ -213,6 +214,36 @@ public class ChartsUtil {
 			}
 		};
 		return dutyCycleLb;		
+	}
+	
+	public static void getDutyCycleLabelOnGET(InstallAppDevice deviceConfiguration,
+			FloatResource dutyCycleRes,
+			Label label, OgemaHttpRequest req) {
+		PercentageResource res = deviceConfiguration.getSubResource(HmSetpCtrlManagerTHSetp.dutyCycleYellowMin, PercentageResource.class);
+		float minYellow;
+		float minRed;
+		if(res.isActive())
+			minYellow = res.getValue();
+		else
+			minYellow = SetpointControlManager.CONDITIONAL_PRIO_DEFAULT;
+		 res = deviceConfiguration.getSubResource(HmSetpCtrlManagerTHSetp.dutyCycleRedMin, PercentageResource.class);
+		if(res.isActive())
+			minRed = res.getValue();
+		else
+			minRed = SetpointControlManager.PRIORITY_PRIO_DEFAULT;
+		float val = dutyCycleRes.getValue();
+		if(val > minRed) {
+			label.removeStyle(LabelData.BOOTSTRAP_ORANGE, req);
+			label.addStyle(LabelData.BOOTSTRAP_RED, req);
+		} else if(val > minYellow) {
+			label.removeStyle(LabelData.BOOTSTRAP_RED, req);
+			label.addStyle(LabelData.BOOTSTRAP_ORANGE, req);
+		} else {
+			label.removeStyle(LabelData.BOOTSTRAP_ORANGE, req);
+			label.removeStyle(LabelData.BOOTSTRAP_RED, req);
+			label.addStyle(LabelData.BOOTSTRAP_GREEN, req);
+		}
+		label.setText(String.format("%.0f%%", val*100), req);	
 	}
 	
 	public static class GetPlotButtonResult {

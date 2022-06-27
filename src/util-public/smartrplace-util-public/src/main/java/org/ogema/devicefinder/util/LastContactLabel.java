@@ -6,6 +6,8 @@ import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.widgets.api.widgets.OgemaWidget;
+import de.iwes.widgets.api.widgets.WidgetApp;
+import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.form.label.Label;
 
@@ -16,6 +18,12 @@ public class LastContactLabel extends Label {
 	protected final SingleValueResource resource;
 	protected final ApplicationManager appMan;
 	
+	public LastContactLabel(WidgetPage<?> page, String id, SingleValueResource resource, ApplicationManager appMan) {
+		super(page, id);
+		this.appMan = appMan;
+		this.resource = resource;
+	}
+
 	public LastContactLabel(SingleValueResource resource, ApplicationManager appMan,
 			OgemaWidget parent, String id, OgemaHttpRequest req) {
 		super(parent, id, req);

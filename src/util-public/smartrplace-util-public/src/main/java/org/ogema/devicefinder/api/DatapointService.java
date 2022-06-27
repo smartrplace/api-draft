@@ -196,4 +196,12 @@ public interface DatapointService {
 	default VirtualScheduleService virtualScheduleService() {
 		return null;
 	};
+	/** Get installation management service
+	 * 
+	 * @param comSystemId if null the default/primary com system for the gateway shall be returned
+	 * @return
+	 */
+	default InstallationProgressService installationService(String comSystemId) {
+		return null;
+	}
 }
