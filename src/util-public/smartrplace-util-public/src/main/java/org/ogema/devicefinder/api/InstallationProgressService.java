@@ -109,6 +109,12 @@ public interface InstallationProgressService {
 	 */
 	int getInstallationModeStatus();
 	
+	/** 0 = IP
+	 *  1 = CC
+	 *  2 = IP Analysis only (no teach in mode activated)
+	 *  3 = CC Analysis only (no teach in mode activated)
+	 * @return
+	 */
 	int getActiveSubType();
 	void setActiveSubType(int type);
 	
