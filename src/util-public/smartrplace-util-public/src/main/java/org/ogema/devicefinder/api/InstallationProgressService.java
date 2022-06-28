@@ -117,6 +117,9 @@ public interface InstallationProgressService {
 	 */
 	int getActiveSubType();
 	void setActiveSubType(int type);
+
+	/** Return true if active router indicates active teach-in mode */
+	boolean isTeachInModeActive();
 	
 	/*public interface RouterData {
 		String getAddress();
