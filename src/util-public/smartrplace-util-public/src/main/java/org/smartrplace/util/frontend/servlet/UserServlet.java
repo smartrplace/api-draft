@@ -319,6 +319,7 @@ public class UserServlet extends HttpServlet {
 			}
 			lastAcc.lastStartTimeRequested = start;
 			lastAcc.lastEndTimeRequested = end;
+			lastAcc.user = user;
 		}
 		
 		String timeStr = UserServlet.getParameter("time", paramMap);
