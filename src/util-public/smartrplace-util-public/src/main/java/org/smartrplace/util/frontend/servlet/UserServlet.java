@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.gateway.device.GatewayDevice;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider.ValueMode;
+import org.smartrplace.util.frontend.servlet.UserServletUtil.LastAccessData;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
@@ -292,9 +293,33 @@ public class UserServlet extends HttpServlet {
 		addParametersFromUrl(req, paramMap);
 		doGet(req, resp, user, paramMap, isMobile);
 	}
+	
+	/** Processed for any READING request if coming via GET or POST*/
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, Map<String, String[]> paramMap, boolean isMobile)
 			throws ServletException, IOException {
 		//String object = req.getParameter("object");
+		String fullURL = null;
+		if(logger.isDebugEnabled() && (user.equals("master_rest") ||
+				Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")))
+			fullURL = req.getRequestURL().toString();
+		if(user.equals("master_rest") ||
+				Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")) {
+			long now = appManPlus.getFrameworkTime();
+
+			String datapointPointPath = null;
+			LastAccessData lastAcc = UserServletUtil.getLastAccessDataForEvent(fullURL, datapointPointPath, now);
+
+			long start = -2;
+			long end = -1;
+			try {
+				start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
+				end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
+			} catch(NumberFormatException | NullPointerException e) {
+				start = -1;
+			}
+			lastAcc.lastStartTimeRequested = start;
+			lastAcc.lastEndTimeRequested = end;
+		}
 		
 		String timeStr = UserServlet.getParameter("time", paramMap);
 		String returnStruct = UserServlet.getParameter("structure", paramMap);
@@ -345,7 +370,7 @@ public class UserServlet extends HttpServlet {
 		}
 		resp.getWriter().write(out);
 		if(logger.isDebugEnabled()) {
-			String fullURL = req.getRequestURL().toString();
+			//String fullURL = req.getRequestURL().toString();
 			String paramStr = req.getQueryString();
 			if(paramStr != null)
 				logger.debug("Finished GET for:"+fullURL+"?"+paramStr);
