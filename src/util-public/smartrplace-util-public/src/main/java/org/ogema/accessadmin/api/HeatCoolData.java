@@ -30,6 +30,8 @@ public class HeatCoolData extends SettingsBaseData {
 	/** Number of rooms with that cannot be mapped to standard start/end setpoint curve characteristics*/
 	public int specialStructureRooms = 0;
 	
+	public boolean showComfortTemperature = false;
+	
 	public HeatCoolData() {
 		this(SubcustomerUtil.VALUE_IDX_NUM);
 	}
@@ -94,8 +96,7 @@ public class HeatCoolData extends SettingsBaseData {
 	}
 	
 	public boolean getShowCalendarTemperature() {
-		//TODO
-		return false;
+		return showComfortTemperature;
 	}
 	
 	public static int STARTEND_WORKINGDAY_IDX = 7;
