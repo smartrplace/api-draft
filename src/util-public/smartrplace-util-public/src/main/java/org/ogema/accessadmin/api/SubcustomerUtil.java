@@ -8,9 +8,11 @@ import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 import org.smartrplace.external.accessadmin.config.AccessConfigBase;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
@@ -23,6 +25,7 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public class SubcustomerUtil {
 	public static final String DECORATOR_NAME = "subcustomer";
+	public static final String ALL_ROOMS_GROUP_NAME = "All Rooms";
 	
 	/** The ids are stored in resources persistently, so on a certain system the meaning of each integer
 	 * value shall not be changed, although the exact name texts can be adapted.
@@ -523,5 +526,46 @@ public class SubcustomerUtil {
 				return sub;
 		}
 		return null;
+	}
+	
+	/** Initialize room regarding standard room groups
+	 * 
+	 * @param room
+	 * @param resAcc
+	 */
+	public static void initRoom(Room room, ResourceAccess resAcc) {
+		AccessAdminConfig appConfigData = resAcc.getResource("accessAdminConfig");
+		ResourceList<BuildingPropertyUnit> roomGroups = appConfigData.roomGroups();
+		initRoom(room, roomGroups, appConfigData);
+	}
+	public static void initRoom(Room object, ResourceList<BuildingPropertyUnit> roomGroups, AccessAdminConfig appConfigData) {
+		BuildingPropertyUnit allRoomsGroup = null;
+		for(BuildingPropertyUnit g: roomGroups.getAllElements()) {
+			if(ResourceUtils.getHumanReadableShortName(g).equals(ALL_ROOMS_GROUP_NAME)) {
+				allRoomsGroup = g;
+				break;
+			}
+		}
+		if(allRoomsGroup == null) {
+			//create
+			allRoomsGroup = ResourceListHelper.createNewNamedElement(
+					roomGroups,
+					ALL_ROOMS_GROUP_NAME, false);
+			allRoomsGroup.activate(true);
+			for(AccessConfigUser userPerm: appConfigData.userPermissions().getAllElements()) {
+				if(userPerm.isGroup().getValue() != 2)
+					continue;
+				switch(userPerm.name().getValue()) {
+				case "User Standard":
+				case "Secretary":
+				case "Facility Manager":
+				case "Master Administrator":
+					AccessConfigBase configRes = userPerm.roompermissionData();
+					UserPermissionUtil.addPermission(allRoomsGroup.getLocation(), UserPermissionService.USER_ROOM_PERM, configRes);
+				}
+			}
+		}
+		ResourceListHelper.addReferenceUnique(allRoomsGroup.rooms(), object);
+		//setGroups(object, Arrays.asList(new BuildingPropertyUnit[] {allRoomsGroup}), roomGroups.getAllElements());
 	}
 }
