@@ -306,8 +306,7 @@ public class UserServlet extends HttpServlet {
 				Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")) {
 			long now = appManPlus.getFrameworkTime();
 
-			String datapointPointPath = null;
-			LastAccessData lastAcc = UserServletUtil.getLastAccessDataForEvent(fullURL, datapointPointPath, now);
+			LastAccessData lastAcc = UserServletUtil.getLastAccessDataForEvent(fullURL, now);
 
 			long start = -2;
 			long end = -1;

@@ -16,10 +16,14 @@ import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.schedule.Schedule;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
+import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.util.frontend.servlet.UserServlet.JSONVarrRes;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
 
 import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.resource.ResourceHelper;
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 
@@ -174,8 +178,21 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			if(structureStr != null && structureStr.equals("tslist"))
 				structList = true;
 		}
-		json.put("values", smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
-				structList, shortXY, pData.suppressNan, factor, offset));
+		SampledToJSonResult mainRes = smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
+				structList, shortXY, pData.suppressNan, factor, offset, startEnd[1]+30*TimeProcUtil.DAY_MILLIS);
+		json.put("values", mainRes.arr);
+		if(mainRes.errorTs != null) {
+			String loc;
+			if(datapointForChangeNotification!=null) {
+				loc = datapointForChangeNotification.getLocation();
+			} else if(label != null)
+				loc = label+" / "+TimeProcPrint.getTimeseriesName(timeSeries, true);
+			else
+				loc = TimeProcPrint.getTimeseriesName(timeSeries, true);
+			appMan.getLogger().warn("Faulty timestamp "+mainRes.errorTs+" in "+loc);
+			ValueResourceHelper.setCreate(
+					ResourceHelper.getLocalDevice(appMan).logFileCheckNotification(), 1);
+		}
 		if(unit != null)
 			json.put("unit", unit);
 		if(align != null)
@@ -374,6 +391,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		boolean suppressNaN;
 	}
 
+	public static class SampledToJSonResult {
+		public JSONArray arr;
+		public Long errorTs = null;
+	}
 	/** Provides timeseries as JSON.
 	 * Performs downsampling with different modes if desired 
 	 * @param vals all values in the time series in the selected time range before downsampling
@@ -388,11 +409,13 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 * @param suppressNaN if true then any NaN and infinity values are removed from the result
 	 * @return JSON to be returned as value of the object result
 	 */
-	public static JSONArray smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
-			boolean structureList, boolean shortXY, boolean suppressNaN, Float factor, Float offset) {
+	public static SampledToJSonResult smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
+			boolean structureList, boolean shortXY, boolean suppressNaN, Float factor, Float offset, long maxTsAllowed) {
 		if(valueDist != null && mode != DownSamplingMode.MINMAX)
 			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
+		SampledToJSonResult mainRes = new SampledToJSonResult();
 		JSONArray result = new JSONArray();
+		mainRes.arr = result;
 		
 		DownSamplingData data = new DownSamplingData();
 		data.suppressNaN = suppressNaN;
@@ -404,7 +427,12 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			if(sv.getTimestamp() < lastBaseTs) {
 				//System.out.println("BASE Timestamp["+idx+"] in wrong order:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(sv.getTimestamp())+
 				//		" given after:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastBaseTs));
-				continue;				
+				if(mainRes.errorTs != null && lastBaseTs > mainRes.errorTs)
+					mainRes.errorTs = lastBaseTs;
+				continue;
+			} else if(sv.getTimestamp() > maxTsAllowed) {
+				mainRes.errorTs = lastBaseTs;
+				continue;
 			} else
 				lastBaseTs = sv.getTimestamp();
 			LinkedHashMap<Long, Float> svMap = new LinkedHashMap<>();
@@ -443,7 +471,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					result.put(svMap);
 			}
 		}
-		return result;
+		return mainRes;
 	}
 	
 	/** Make sure all values that are put into svMap have at least a distance of valueDist. If more than one value

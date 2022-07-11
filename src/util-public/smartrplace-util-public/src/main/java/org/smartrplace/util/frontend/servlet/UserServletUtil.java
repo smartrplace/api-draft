@@ -206,9 +206,6 @@ public class UserServletUtil {
 	
 	/** Access supervision*/
 	public static class LastAccessData {
-		/** null if no datapoint request*/
-		public String dpLocation;
-		
 		/** URL and servlet path*/
 		public String lastServletPath;
 		
@@ -216,35 +213,24 @@ public class UserServletUtil {
 		public long lastStartTimeRequested;
 		public long lastEndTimeRequested;
 		public String user;
-		
-		/** Usually null, but if impossible time stamp is detected it is written here*/
-		public Long lastErrorTimeStamp;
 	}
 	/** URL or datapoint location (for datapoint requests) -> LastAccessData*/
 	public static Map<String, LastAccessData> lastEndpointAccess = new HashMap<>();
-	public static LastAccessData getLastAccessData(String location, boolean isDatapoint) {
+	public static LastAccessData getLastAccessData(String location) {
 		LastAccessData result = lastEndpointAccess.get(location);
 		if(result == null) {
 			result = new LastAccessData();
-			if(isDatapoint)
-				result.dpLocation = location;
-			else
-				result.lastServletPath = location;
+			result.lastServletPath = location;
 			lastEndpointAccess.put(location, result);
 		}
 		return result;
 	}
 
 	/** Call this when the URL is accessed*/
-	public static LastAccessData getLastAccessDataForEvent(String servletPath, String datapointPointPath,
+	public static LastAccessData getLastAccessDataForEvent(String servletPath,
 			long now) {
 		LastAccessData result;
-		if(datapointPointPath != null) {
-			result = getLastAccessData(datapointPointPath, true);
-			result.lastServletPath = servletPath;
-		} else {
-			result = getLastAccessData(servletPath, false);			
-		}
+		result = getLastAccessData(servletPath);			
 		result.lastAccess = now;
 		return result;
 	}

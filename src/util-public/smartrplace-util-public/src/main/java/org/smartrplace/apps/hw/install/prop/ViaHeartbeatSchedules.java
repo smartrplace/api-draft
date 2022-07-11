@@ -15,9 +15,11 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatInfoProvider.StringProvider;
 import org.smartrplace.tissue.util.logconfig.VirtualSensorKPIMgmt;
 import org.smartrplace.util.frontend.servlet.ServletTimeseriesProvider;
+import org.smartrplace.util.frontend.servlet.ServletTimeseriesProvider.SampledToJSonResult;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
 
@@ -73,7 +75,7 @@ public class ViaHeartbeatSchedules implements StringProvider {
 		}
 //if(rot instanceof ProcessedReadOnlyTimeSeries2 && ((ProcessedReadOnlyTimeSeries2)rot).getInputDp().id().startsWith("EnergyServerReadings_ESE/ESE_location_39")) //39/connection/energyDaily/reading"))
 //System.out.println("vals#:"+vals.size()+" lastValueSent:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastValueSent));
-		JSONArray arr = ServletTimeseriesProvider.smapledValuesToJson(vals, null, null, true, false, true, null, null);
+		SampledToJSonResult mainRes = ServletTimeseriesProvider.smapledValuesToJson(vals, null, null, true, false, true, null, null, now+30*TimeProcUtil.DAY_MILLIS);
 		if(!vals.isEmpty()) {
 			SampledValue sv = vals.get(vals.size()-1);
 			lastValueSent = sv.getTimestamp();
@@ -81,7 +83,7 @@ public class ViaHeartbeatSchedules implements StringProvider {
 			if(absoluteTiming != null)
 				lastValueFloat = sv.getValue().getDoubleValue();
 		}
-		json.put("values", arr);
+		json.put("values", mainRes.arr);
 		if(doClean) {
 			json.put("clean", doClean);
 			doClean = false;

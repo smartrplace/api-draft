@@ -82,6 +82,36 @@ public class SubcustomerUtil {
 		return (prev != null)&&(!prev.label(null).equals(type.label(null)));
 	}
 
+	private static AccessConfigUser initUserGroup(SubCustomerData subc, AccessAdminConfig accessAdminConfigRes,
+			boolean linkToRoomGroup) {
+		//Note that the user group is intially empty
+		AccessConfigUser userAttr = ResourceListHelper.createNewNamedElement(
+				accessAdminConfigRes.userPermissions(),
+				"xxx", false);
+		ValueResourceHelper.setCreate(userAttr.isGroup(), 1);
+		userAttr.name().setAsReference(subc.name());
+		userAttr.activate(true);
+		subc.userAttribute().setAsReference(userAttr);
+		
+		if(linkToRoomGroup) {
+			BuildingPropertyUnit subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
+					accessAdminConfigRes.roomGroups());
+			if(subcustGroup == null) {
+				//Init also room group
+				BuildingPropertyUnit roomGroup = ResourceListHelper.createNewNamedElement(
+						accessAdminConfigRes.roomGroups(),
+						"xxy", false);
+				roomGroup.activate(true);
+				roomGroup.name().setAsReference(subc.name());
+				roomGroup.getSubResource(DECORATOR_NAME, SubCustomerData.class).setAsReference(subc);
+				subc.roomGroup().setAsReference(roomGroup);				
+			}
+			AccessConfigBase configRes = userAttr.roompermissionData();
+			UserPermissionUtil.addPermission(subcustGroup.getLocation(), UserPermissionService.USER_ROOM_PERM, configRes);			
+		}
+		return userAttr;
+	}
+	
 	public static SubCustomerData addSubcustomer(int type, String name, List<Room> rooms,
 			ApplicationManager appMan) {
 		SubCustomerType typeData = subCustomerTypes.get(type);
@@ -98,13 +128,14 @@ public class SubcustomerUtil {
 		//ValueResourceHelper.setCreate(result.defaultEcoTemperatureCooling(), typeData.defaultEcoTemperatureCooling);
 		
 		//Note that the user group is intially empty
-		AccessConfigUser userAttr = ResourceListHelper.createNewNamedElement(
+		AccessConfigUser userAttr = initUserGroup(result, accessAdminConfigRes, false);
+		/*AccessConfigUser userAttr = ResourceListHelper.createNewNamedElement(
 				accessAdminConfigRes.userPermissions(),
 				"xxx", false);
 		ValueResourceHelper.setCreate(userAttr.isGroup(), 1);
 		userAttr.name().setAsReference(result.name());
 		userAttr.activate(true);
-		result.userAttribute().setAsReference(userAttr);
+		result.userAttribute().setAsReference(userAttr);*/
 		
 		BuildingPropertyUnit roomGroup = ResourceListHelper.createNewNamedElement(
 				accessAdminConfigRes.roomGroups(),
@@ -138,8 +169,9 @@ public class SubcustomerUtil {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
 		AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
 				accessAdminConfigRes.userPermissions());
-		if(subcustGroup == null)
+		if(subcustGroup == null) {
 			throw new IllegalStateException("User Group for Subcustomer "+data.getLocation() + " missing!");
+		}
 		
 		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
 				accessAdminConfigRes.userPermissions());
@@ -287,9 +319,12 @@ public class SubcustomerUtil {
 		for(SubCustomerData subc: subcs) {
 			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
 					accessAdminConfigRes.userPermissions());
-			if(subcustGroup == null)
-				throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
-
+			if(subcustGroup == null) {
+				appMan.getLogger().warn("User Group for Subcustomer "+subc.getLocation() + " missing!");
+				subcustGroup = initUserGroup(subc, accessAdminConfigRes, true);
+				//throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
+			}
+			
 			if(ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
 				result.add(subc);
 			}
@@ -301,9 +336,11 @@ public class SubcustomerUtil {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
 		AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
 				accessAdminConfigRes.userPermissions());
-		if(subcustGroup == null)
-			throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
-
+		if(subcustGroup == null) {
+			appMan.getLogger().warn("User Group for Subcustomer "+subc.getLocation() + " missing!");
+			subcustGroup = initUserGroup(subc, accessAdminConfigRes, true);
+			//throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
+		}
 		List<AccessConfigUser> result = new ArrayList<>();
 		for(AccessConfigUser userEntry: accessAdminConfigRes.userPermissions().getAllElements()) {
 			if(ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
