@@ -13,7 +13,7 @@ public class HeatCoolData extends SettingsBaseData {
 	public float ecoTemperatureV2;
 	public float windowOpenTemperatureV2;
 
-	public float ecoTemperatureV1;
+	//public float ecoTemperatureV1;
 	public float setSingleSetpoint_Window_open;
 	/**Both minSetpoint and minSetpointAuto*/
 	public float minSetpointAuto;
