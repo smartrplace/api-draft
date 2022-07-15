@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.BooleanValue;
 import org.ogema.core.channelmanager.measurements.DoubleValue;
 import org.ogema.core.channelmanager.measurements.FloatValue;
@@ -60,7 +61,7 @@ public class UserServlet extends HttpServlet {
 	 * org.smartrplace.util.frontend.servlet.resendids .
 	 * You can also compare new results to the existing entry if the pageId is part of the
 	 * property org.smartrplace.util.frontend.servlet.compareids.<br>
-	 * Usually not all objects of a result are compared, only this listed in the property
+	 * Usually not all objects of a result are compared, only those listed in the property
 	 * org.smartrplace.util.frontend.servlet.compareobjects .
 	 */
 	protected final Map<String, JSONVarrRes> knownPageResultsForDebug = new HashMap<>();
@@ -434,7 +435,7 @@ public class UserServlet extends HttpServlet {
 				retStruct = ReturnStructure.DICTIONARY;
 		}
 
-		JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, retStruct, paramMap, logger, fullUrl);
+		JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, retStruct, paramMap, logger, fullUrl, appManPlus);
 		if(result.message != null) {
 			writeMessage(result, "exception", result.message);
 		}
@@ -442,7 +443,7 @@ public class UserServlet extends HttpServlet {
 	}
 	protected static <T> JSONVarrRes getJSON(String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, ReturnStructure retStruct, Map<String, String[]> paramMap,
-			Logger logger, String fullUrl) {
+			Logger logger, String fullUrl, ApplicationManagerPlus appManPlus) {
 		final boolean topArray = UserServlet.getBoolean("topArray", paramMap) || retStruct==ReturnStructure.TOPARRAY_DICTIONARY;
 		if(retStruct == ReturnStructure.TOPARRAY_DICTIONARY)
 			retStruct = ReturnStructure.DICTIONARY;
@@ -501,7 +502,7 @@ public class UserServlet extends HttpServlet {
 					continue;
 				objStr = pageprov.getObjectId(obj);
 			} catch(Exception e) {
-				logException(logger, e, fullUrl);
+				logException(logger, e, fullUrl, appManPlus);
 				/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 					e.printStackTrace();
 					if(fullUrl != null)
@@ -604,7 +605,7 @@ public class UserServlet extends HttpServlet {
 				}
 				} catch(Exception e) {
 					subJson.put(jsonkey, e.toString());
-					logException(logger, e, fullUrl);
+					logException(logger, e, fullUrl, appManPlus);
 					/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 						e.printStackTrace();
 					else
@@ -863,7 +864,7 @@ public class UserServlet extends HttpServlet {
 			status = HttpServletResponse.SC_OK;
 		} catch (Exception e) {
 			response = response + "An error occurred: " + e.toString();
-			logException(logger, e, "POST");
+			logException(logger, e, "POST", appManPlus);
 			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 			//	e.printStackTrace();
 			status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -1102,7 +1103,7 @@ System.out.println("SUFIBSD");
 		}
 	}
 	
-	private static void logException(Logger logger, Exception e, String fullUrl) {
+	private static void logException(Logger logger, Exception e, String fullUrl, ApplicationManagerPlus appManPlus) {
 		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			e.printStackTrace();
 			if(fullUrl != null)
@@ -1115,5 +1116,9 @@ System.out.println("SUFIBSD");
 			else
 				logger.info("Servlet provider exception: ", e);
 		}		
+		
+		if(appManPlus != null)
+			ValueResourceHelper.setCreate(
+					ResourceHelper.getLocalDevice(appManPlus.appMan()).logFileCheckNotification(), 2);
 	}
 }
