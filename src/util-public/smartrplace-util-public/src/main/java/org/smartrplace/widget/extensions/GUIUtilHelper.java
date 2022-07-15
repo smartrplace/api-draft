@@ -30,6 +30,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.user.NaturalPerson;
+import org.ogema.tools.app.useradmin.config.UserAdminData;
 import org.ogema.tools.resource.util.ResourceUtils;
 
 import de.iwes.util.resource.ValueResourceHelper;
@@ -119,6 +120,36 @@ public class GUIUtilHelper {
         userData.activate(false);
         userDataRes.activate(false);
         return userDataRes;
+    }
+
+    public static NaturalPerson deleteUser(String userName, ApplicationManager appMan) {
+		appMan.getAdministrationManager().removeUserAccount(userName);
+		UserAccount restAc = getRestUserAccount(userName, appMan);
+		if(restAc != null)
+			appMan.getAdministrationManager().removeUserAccount(restAc.getName());
+
+    	UserAdminData udd = appMan.getResourceAccess().getResource("userAdminData");
+    	NaturalPerson userDataRes = ResourceListHelper.getOrCreateNamedElementFlex(userName, udd.userData());
+    	if(userDataRes != null)
+    		userDataRes.delete();
+    	return userDataRes;
+    }
+    
+    /** Get user account or return null if not existing
+     * 
+     * @param userName
+     * @return
+     */
+    public static UserAccount getUserAccount(String userName, ApplicationManager appMan) {
+   		try {
+			return appMan.getAdministrationManager().getUser(userName);
+		} catch(RuntimeException e) {
+		}
+   		return null;
+    }
+    public static UserAccount getRestUserAccount(String naturalUserName, ApplicationManager appMan) {
+    	String restUsername = naturalUserName+"_rest";
+    	return getUserAccount(restUsername, appMan);
     }
 
     /*public static void registerStyleSheet(String cssFileName, String baseURL, WidgetApp wApp,
