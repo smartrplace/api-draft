@@ -299,7 +299,7 @@ public class UserServlet extends HttpServlet {
 			throws ServletException, IOException {
 		//String object = req.getParameter("object");
 		String fullURL = null;
-		if(logger.isDebugEnabled() && (user.equals("master_rest") ||
+		if(logger.isDebugEnabled() || (user.equals("master_rest") ||
 				Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")))
 			fullURL = req.getRequestURL().toString();
 		if(user.equals("master_rest") ||
@@ -344,7 +344,7 @@ public class UserServlet extends HttpServlet {
 			throw new IllegalStateException("No page found!!");
 		else if(pageList.size() == 1) {
 			ServletPageProvider<?> pageMap = pages.get(pageList.get(0));
-			result = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageList.get(0));			
+			result = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageList.get(0), fullURL);			
 
 			incrementAccessCounter(pageList.get(0), isMobile);			
 		} else {
@@ -352,7 +352,7 @@ public class UserServlet extends HttpServlet {
 			result.result = new JSONObject();
 			for(String pageId: pageList) {
 				ServletPageProvider<?> pageMap = pages.get(pageId);
-				JSONVarrRes resultSub = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageId);
+				JSONVarrRes resultSub = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageId, fullURL);
 				if(resultSub.result != null)
 					result.result.put(pageId, resultSub.result);
 				else
@@ -400,27 +400,28 @@ public class UserServlet extends HttpServlet {
 	}
 	protected <T> JSONVarrRes getJSONWithPageIdDebugging(String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap,
-			String pageIdIn) {
+			String pageIdIn, String fullUrl) {
 		String pageId = pageprov.getClass().getSimpleName()+"::"+pageIdIn;
 		if(StringFormatHelper.doesPropertyIdentifyString(pageId, "org.smartrplace.util.frontend.servlet.debugpageids")) {
 			JSONVarrRes existing = knownPageResultsForDebug.get(pageId);
 			if(existing == null) {
-				JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap);
+				JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap, fullUrl);
 				knownPageResultsForDebug.put(pageId, result);
 				return result;
 			} else if(StringFormatHelper.doesPropertyIdentifyString(pageId, "org.smartrplace.util.frontend.servlet.resendids")) {
 				return existing;
 			} else if(StringFormatHelper.doesPropertyIdentifyString(pageId, "org.smartrplace.util.frontend.servlet.compareids")) {
-				JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap);
+				JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap, fullUrl);
 				compareAndPrint(existing, result, pageId);
 				return result;
 			}
 		}
-		return getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap);
+		return getJSON(user, pollStr, timeString, pageprov, returnStruct, paramMap, fullUrl);
 	}
 
 	protected <T> JSONVarrRes getJSON(String user, String pollStr, String timeString,
-			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap) {
+			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap,
+			String fullUrl) {
 		final ReturnStructure retStruct;
 		if(returnStruct == null)
 			retStruct = pageprov.getGETStructure();
@@ -433,7 +434,7 @@ public class UserServlet extends HttpServlet {
 				retStruct = ReturnStructure.DICTIONARY;
 		}
 
-		JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, retStruct, paramMap, logger);
+		JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, retStruct, paramMap, logger, fullUrl);
 		if(result.message != null) {
 			writeMessage(result, "exception", result.message);
 		}
@@ -441,7 +442,7 @@ public class UserServlet extends HttpServlet {
 	}
 	protected static <T> JSONVarrRes getJSON(String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, ReturnStructure retStruct, Map<String, String[]> paramMap,
-			Logger logger) {
+			Logger logger, String fullUrl) {
 		final boolean topArray = UserServlet.getBoolean("topArray", paramMap) || retStruct==ReturnStructure.TOPARRAY_DICTIONARY;
 		if(retStruct == ReturnStructure.TOPARRAY_DICTIONARY)
 			retStruct = ReturnStructure.DICTIONARY;
@@ -500,13 +501,20 @@ public class UserServlet extends HttpServlet {
 					continue;
 				objStr = pageprov.getObjectId(obj);
 			} catch(Exception e) {
-				if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+				logException(logger, e, fullUrl);
+				/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 					e.printStackTrace();
-				else
-					logger.info("Servlet provider exception: ", e);
+					if(fullUrl != null)
+						logger.trace("Servlet provider exception for: "+fullUrl, e);
+					else
+						logger.trace("Servlet provider exception: ", e);
+				} else {
+					if(fullUrl != null)
+						logger.info("Servlet provider exception for: "+fullUrl, e);
+					else
+						logger.info("Servlet provider exception: ", e);
+				}*/
 				res.message = e.toString();
-				//writeMessage(res, "exception", e.toString());
-				//result.put("exception", e.toString());
 				return res;
 			}
 			JSONObject subJson;
@@ -596,10 +604,11 @@ public class UserServlet extends HttpServlet {
 				}
 				} catch(Exception e) {
 					subJson.put(jsonkey, e.toString());
-					if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+					logException(logger, e, fullUrl);
+					/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 						e.printStackTrace();
 					else
-						logger.info("Servlet exception: ", e);
+						logger.info("Servlet exception: ", e);*/
 				}
 				if(retStruct == ReturnStructure.LIST)
 					subJsonArr.put(subJson);
@@ -854,8 +863,9 @@ public class UserServlet extends HttpServlet {
 			status = HttpServletResponse.SC_OK;
 		} catch (Exception e) {
 			response = response + "An error occurred: " + e.toString();
-			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
-				e.printStackTrace();
+			logException(logger, e, "POST");
+			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+			//	e.printStackTrace();
 			status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
 		
@@ -1090,5 +1100,20 @@ System.out.println("SUFIBSD");
 					System.out.println("Key "+exkey+" differs in content for "+compareId+"  Lens:"+exData.length()+" / "+resData.length());
 			}
 		}
+	}
+	
+	private static void logException(Logger logger, Exception e, String fullUrl) {
+		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
+			e.printStackTrace();
+			if(fullUrl != null)
+				logger.trace("Servlet provider exception for: "+fullUrl, e);
+			else
+				logger.trace("Servlet provider exception: ", e);
+		} else {
+			if(fullUrl != null)
+				logger.info("Servlet provider exception for: "+fullUrl, e);
+			else
+				logger.info("Servlet provider exception: ", e);
+		}		
 	}
 }

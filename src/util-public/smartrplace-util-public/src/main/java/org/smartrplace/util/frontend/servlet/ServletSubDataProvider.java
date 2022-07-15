@@ -76,7 +76,7 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 		}
 		JSONVarrRes json = UserServlet.getJSON(user, null, paramD.timeString, provider,
 				returnStruct,
-				parameters, logger);
+				parameters, logger, "ServletSubDataProvider");
 		if(object != null && returnStruct == ReturnStructure.TOPARRAY_DICTIONARY) {
 			json.result = json.resultArr.getJSONObject(0);
 			json.resultArr = null;
