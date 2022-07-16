@@ -63,7 +63,7 @@ public abstract class UserServletTest extends HttpServlet {
         if(user.equals(DEFAULT_LOGIN_USER_NAME)) {
         	user = req.getParameter("user");
         } else {
-        	if(user.endsWith("_rest"))
+        	if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.restuserlegacymode") && user.endsWith("_rest"))
         		user = user.substring(0, user.length()-"_rest".length());
         	//else
         	//	user = "#REST#"+user;
