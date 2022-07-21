@@ -1,6 +1,7 @@
 package org.smartrplace.tissue.util.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import de.iwes.util.format.StringFormatHelper;
 
 public class OnOffSwitchMgmt {
-	public static final long CACHING_TIME = 10000;
+	public static final long CACHING_TIME = 60000;
 	
 	public static class OnOffSwitchData {
 		public OnOffSwitch swtch;
@@ -75,55 +76,84 @@ public class OnOffSwitchMgmt {
 	}
 
 	protected class CachedResult {
-		long created = -1;
-		List<OnOffSwitchData> data;
+		//long created = -1;
+		List<OnOffSwitchData> data = new ArrayList<>();
 		
 		/** All OnOffSwitches in the room, not sorted out*/
-		List<OnOffSwitch> dataRawAll;
+		List<OnOffSwitch> dataRawAll = new ArrayList<>();
 	}
 	Map<String, CachedResult> cashedResults = new HashMap<>();
+	long allCacheUpdateTime = -1;
+	
+	private void updateCache() {
+		List<? extends OnOffSwitch> list = appMan.getResourceAccess().getResources(OnOffSwitch.class);
+		cashedResults.clear();
+		for(OnOffSwitch onOff : list) {
+			try {
+				Room room = ResourceUtils.getDeviceRoom(onOff);
+				if(room == null)
+					continue;
+				
+				CachedResult cache = cashedResults.get(room.getLocation());
+				if(cache == null)
+					cache = new CachedResult();
+				//List<OnOffSwitch> onOffs = ResourceUtils.getDevicesFromRoom(appMan.getResourceAccess(), OnOffSwitch.class, room);
+				//if(maintainListIfNumberOfSwitchesUnchanged && cache.dataRawAll != null && cache.dataRawAll.size() == onOffs.size()) {
+				//	return cache.data;	
+				//}
+				cache.dataRawAll.add(onOff);
+				
+				List<OnOffSwitch> toUse = new ArrayList<>();
+				//for(OnOffSwitch onOff: onOffs) {
+					if(isMatchedByList(onOff.getLocation(), normallyExcludedButInclusionForced))
+						toUse.add(onOff);
+					if(isMatchedByList(onOff.getLocation(), normallyExcluded))
+						continue;
+					if(toBeUsed(onOff))
+						toUse.add(onOff);
+				//}
+				
+				List<OnOffSwitchData> result = cache.data;
+				//for(OnOffSwitch onOff: toUse) {
+					OnOffSwitchData el = new OnOffSwitchData();
+					el.swtch = onOff;
+					el.stateControl = onOff.stateControl();
+					el.stateFeedback = onOff.stateFeedback();
+					el.parent = onOff.getParent();
+					if(el.parent != null) {
+						List<PowerSensor> sens = el.parent.getSubResources(PowerSensor.class, false);
+						if(!sens.isEmpty())
+							el.powerSensor = sens.get(0).reading();
+					}
+					result.add(el);
+				//}
+				//cache.data = result;		
+			} catch (SecurityException ignore) {}
+		
+		}
+	}
 	
 	public List<OnOffSwitchData> getAllSwitches(Room room, boolean forceUpdate) {
-		CachedResult cache = cashedResults.get(room.getLocation());
-		if(cache == null) {
-			cache = new CachedResult();
-			cashedResults.put(room.getLocation(), cache);
-		}
-		long now = appMan.getFrameworkTime();
-		if((!forceUpdate) && (now - cache.created <= CACHING_TIME))
-			return cache.data;
-		List<OnOffSwitch> onOffs = ResourceUtils.getDevicesFromRoom(appMan.getResourceAccess(), OnOffSwitch.class, room);
-		if(maintainListIfNumberOfSwitchesUnchanged && cache.dataRawAll != null && cache.dataRawAll.size() == onOffs.size())
-			return cache.data;
-		cache.dataRawAll = onOffs;
-		
-		List<OnOffSwitch> toUse = new ArrayList<>();
-		for(OnOffSwitch onOff: onOffs) {
-			if(isMatchedByList(onOff.getLocation(), normallyExcludedButInclusionForced))
-				toUse.add(onOff);
-			if(isMatchedByList(onOff.getLocation(), normallyExcluded))
-				continue;
-			if(toBeUsed(onOff))
-				toUse.add(onOff);
-		}
-		
-		List<OnOffSwitchData> result = new ArrayList<>();
-		for(OnOffSwitch onOff: toUse) {
-			OnOffSwitchData el = new OnOffSwitchData();
-			el.swtch = onOff;
-			el.stateControl = onOff.stateControl();
-			el.stateFeedback = onOff.stateFeedback();
-			el.parent = onOff.getParent();
-			if(el.parent != null) {
-				List<PowerSensor> sens = el.parent.getSubResources(PowerSensor.class, false);
-				if(!sens.isEmpty())
-					el.powerSensor = sens.get(0).reading();
+		synchronized (cashedResults) {
+			CachedResult cache = cashedResults.get(room.getLocation());
+			//if(cache == null) {
+			//	cache = new CachedResult();
+			//	cashedResults.put(room.getLocation(), cache);
+			//}
+			long now = appMan.getFrameworkTime();
+			if((!forceUpdate) && (now - allCacheUpdateTime <= CACHING_TIME)) {
+				if(cache == null)
+					return Collections.emptyList();
+				return cache.data;
 			}
-			result.add(el);
+			
+			updateCache();
+			allCacheUpdateTime = now;
+			cache = cashedResults.get(room.getLocation());
+			if(cache == null)
+				return Collections.emptyList();
+			return cache.data;
 		}
-		cache.data = result;
-		cache.created = now;
-		return result;
 	}
 	
 	protected boolean isMatchedByList(String location, List<String> pats) {
