@@ -148,6 +148,8 @@ public class SubcustomerUtil {
 		UserPermissionUtil.addPermission(roomGroup.getLocation(), UserPermissionService.USER_ROOM_PERM, configRes);
 		
 		for(Room room: rooms) {
+			if(!room.exists())
+				continue;
 			addRoomToGroup(room, roomGroup);
 		}
 		

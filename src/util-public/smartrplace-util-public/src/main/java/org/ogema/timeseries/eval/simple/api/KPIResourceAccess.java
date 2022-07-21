@@ -54,7 +54,10 @@ public class KPIResourceAccess {
 			ResourceList<PhysicalElement> bacnetDevices = resAcc.getResource("BACnetDevices");
 			for(PhysicalElement el: bacnetDevices.getAllElements()) {
 				if(el.getName().startsWith("RoomControls_") && (el instanceof PhysicalElement)) {
-					result.add(el.location().room().getLocationResource());
+					Room room = el.location().room();
+					if(!room.exists())
+						continue;
+					result.add(room.getLocationResource());
 				}
 			}
 			return result;
