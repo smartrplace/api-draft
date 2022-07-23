@@ -35,6 +35,7 @@ public class SubcustomerUtil {
 		 * standard room types if possible
 		 */
 		public final Map<Integer, NamedIntegerType> roomTypes = new LinkedHashMap<>();
+		public NamedIntegerType defaultRoomType;
 		public int[] defaultWorkingDays = new int[] {1,2,3,4,5};
 		//public float defaultEcoTemperatureHeating = 273.15f+16f;
 		//public float defaultEcoTemperatureCooling = 273.15f+30f;
@@ -52,6 +53,8 @@ public class SubcustomerUtil {
 		}
 		
 		public void addRoomType(NamedIntegerType roomType) {
+			if(roomTypes.isEmpty())
+				defaultRoomType = roomType;
 			roomTypes.put(roomType.id, roomType);
 		}
 	}
