@@ -508,6 +508,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return "EnergyCam";
 		if(isHeatMeterDevice(resourceLocation, subResources))
 			return "HeatMeter";
+		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
+			return "HeatCostAllocator";
+		if(isWiredMBusMasterDevice(resourceLocation, subResources))
+			return "WiredMBusMaster";
 		if(isWaterMeterDevice(resourceLocation, subResources))
 			return "WaterMeter";
 		return "SensorDevice";
@@ -565,6 +569,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return false;
 		if(isHeatMeterDevice(resourceLocation, subResources))
 			return false;
+		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
+			return false;
+		if(isWiredMBusMasterDevice(resourceLocation, subResources))
+			return false;
 		int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
 		if(unsup != 1)
 			return false;
@@ -578,6 +586,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return foundVolume;
 	}
 	public static boolean isWaterMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if(resourceLocation.startsWith("MBusReadings/WATER_METER_"))
+			return true;
 		if(subResources == null)
 			return false;
 		//do not accept if subResource size fits GasEnergyCam
@@ -611,6 +621,16 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		}
 		return foundEnergy;
 	}
+	public static boolean isHeatCostAllocatorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if(resourceLocation.startsWith("MBusReadings/HEAT_COST_ALLOCATOR_"))
+			return true;
+		return false;
+	}
+	public static boolean isWiredMBusMasterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if(resourceLocation.startsWith("MBusReadings/BUS_SYSTEM_COMPONENT_"))
+			return true;
+		return false;
+	}
 	public static boolean isFaultMessageDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		if((resourceLocation.toLowerCase().contains("/errors_")||resourceLocation.contains("/faults_")))
 			return true;
@@ -625,6 +645,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if((!resourceLocation.toLowerCase().startsWith("jmbus")||resourceLocation.startsWith("serverMirror")))
 			return false;
 		if(isHeatMeterDevice(resourceLocation, subResources))
+			return false;
+		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
+			return false;
+		if(isWiredMBusMasterDevice(resourceLocation, subResources))
 			return false;
 		int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
 		if(unsup  > 0)
