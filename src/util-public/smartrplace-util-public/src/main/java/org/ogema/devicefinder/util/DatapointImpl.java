@@ -58,6 +58,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 	protected Map<String, Object> parameters = new HashMap<>();
 	
 	protected ReadOnlyTimeSeries tseries = null;
+	protected ReadOnlyTimeSeries alternativeTseries = null;
 	
 	protected final DatapointService dpService;
 	
@@ -514,6 +515,15 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			setTimeSeriesID(UserServletUtil.getOrAddTimeSeriesData(tseries, id()));
 		}
 	}
+	@Override
+	public void setAlternativeTimeSeries(ReadOnlyTimeSeries alternativeTseries) {
+		this.alternativeTseries = alternativeTseries;
+	}
+	@Override
+	public ReadOnlyTimeSeries getAlternativeTimeSeries() {
+		return alternativeTseries;
+	}
+	
 	@Override
 	public GenericFloatSensor registerAsVirtualSensor() {
 		return null;

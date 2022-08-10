@@ -110,6 +110,13 @@ public interface Datapoint extends DatapointDescAccess, GatewayResource {
 	 */
 	void setTimeSeries(ReadOnlyTimeSeries tseries, boolean publishViaServlet);
 	
+	/** Set timeseries to be used for timestamps before the first timestamp of the standard timeseries.
+	 * This can be used to provide data of devices replaced that represent the same location
+	 * @param replacementTimeseries
+	 */
+	void setAlternativeTimeSeries(ReadOnlyTimeSeries replacementTimeseries);
+	ReadOnlyTimeSeries getAlternativeTimeSeries();
+
 	/** Datapoints that are not based on a resource can be registered as virtual sensors. New
 	 * values shall be written to the Sensor.reading() resource. This functionality is intended for
 	 * debugging only and the sensor resource may be deleted at any time. The sensor will be added to

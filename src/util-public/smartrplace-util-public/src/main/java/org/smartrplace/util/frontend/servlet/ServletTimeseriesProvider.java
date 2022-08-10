@@ -2,6 +2,7 @@ package org.smartrplace.util.frontend.servlet;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,11 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	//Special evaluations
 	protected final ReadOnlyTimeSeries timeSeries;
 	protected final String evaluationMode;
+
+	/** Timeseries that may provide additional values for time spans before the beginning
+	 * of timeSeries. Set this diretly if relevant.
+	 */
+	public ReadOnlyTimeSeries replacementTimeseries;
 	
 	protected final ApplicationManager appMan;
 	protected final Map<String, String[]> paramMap;
@@ -169,8 +175,28 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				json.put("UTCoffset", ""+utcOffset.getTotalSeconds()*1000);
 			}
 			return realResult;
-		} else
-			vals = timeSeries.getValues(startEnd[0], startEnd[1]);
+		} else {
+			List<SampledValue> primaryVals = timeSeries.getValues(startEnd[0], startEnd[1]);
+			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.timesieres.addtrashreplacement") &&
+					replacementTimeseries != null) {
+				boolean checkReplacement = primaryVals.isEmpty();
+				long firstFound;
+				if(!checkReplacement) {
+					firstFound = primaryVals.get(0).getTimestamp();
+					if(firstFound - startEnd[0] > 7*TimeProcUtil.DAY_MILLIS)
+						checkReplacement = true;
+				} else
+					firstFound = startEnd[1];
+				if(checkReplacement) {
+					List<SampledValue> addVals = new ArrayList<>(
+							replacementTimeseries.getValues(startEnd[0], firstFound));
+					addVals.addAll(primaryVals);
+					vals = addVals;
+				} else
+					vals = primaryVals;
+			} else
+				vals = timeSeries.getValues(startEnd[0], startEnd[1]);
+		}
 		boolean shortXY = UserServlet.getBoolean("shortXY", paramMap);
 		boolean structList = pData.structureList;
 		if(!structList) {
