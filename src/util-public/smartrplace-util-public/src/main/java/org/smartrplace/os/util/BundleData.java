@@ -25,4 +25,5 @@ public class BundleData {
 	public Map<OgemaLocale, String> description = new HashMap<>();
 	
 	public AdminApplication entry;
+	public String urlStr;
 }
