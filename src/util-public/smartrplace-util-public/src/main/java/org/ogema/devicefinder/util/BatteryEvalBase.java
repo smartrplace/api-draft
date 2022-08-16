@@ -9,10 +9,6 @@ import org.ogema.core.application.AppID;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.recordeddata.RecordedData;
-import org.ogema.devicefinder.api.DatapointService;
-import org.ogema.devicefinder.util.BatteryEvalBase.BatteryStatus;
-import org.ogema.devicefinder.util.BatteryEvalBase.BatteryStatusPlus;
-import org.ogema.devicefinder.util.BatteryEvalBase.BatteryStatusResult;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.message.MessageImpl;
@@ -66,14 +62,26 @@ public class BatteryEvalBase {
 	}
 	
 	public static BatteryStatus getBatteryStatus(float val, boolean changeInfoRelevant) {
+		return getBatteryStatus(val, changeInfoRelevant, 2);
+	}
+	public static BatteryStatus getBatteryStatus(float val, boolean changeInfoRelevant, int batteryNum) {
 		if(Float.isNaN(val) || val == 0)
 			return BatteryStatus.UNKNOWN;
-		if(val <= DEFAULT_BATTERY_URGENT_VOLTAGE)
-			return BatteryStatus.URGENT;
-		else if(val <= DEFAULT_BATTERY_WARN_VOLTAGE)
-			return BatteryStatus.WARNING;
-		else if(changeInfoRelevant && (val <= DEFAULT_BATTERY_CHANGE_VOLTAGE))
-			return BatteryStatus.CHANGE_RECOMMENDED;
+		if(batteryNum == 2) {
+			if(val <= DEFAULT_BATTERY_URGENT_VOLTAGE)
+				return BatteryStatus.URGENT;
+			else if(val <= DEFAULT_BATTERY_WARN_VOLTAGE)
+				return BatteryStatus.WARNING;
+			else if(changeInfoRelevant && (val <= DEFAULT_BATTERY_CHANGE_VOLTAGE))
+				return BatteryStatus.CHANGE_RECOMMENDED;
+		} else {
+			if(val <= batteryNum*(DEFAULT_BATTERY_URGENT_VOLTAGE/2))
+				return BatteryStatus.URGENT;
+			else if(val <= batteryNum*(DEFAULT_BATTERY_WARN_VOLTAGE/2))
+				return BatteryStatus.WARNING;
+			else if(changeInfoRelevant && (val <= batteryNum*(DEFAULT_BATTERY_CHANGE_VOLTAGE/2)))
+				return BatteryStatus.CHANGE_RECOMMENDED;			
+		}
 		return BatteryStatus.OK;
 	}
 	
@@ -85,9 +93,10 @@ public class BatteryEvalBase {
 
 	
 	public static WidgetStyle<Label> addBatteryStyle(Label label, float val, boolean changeInfoRelevant,
-			OgemaHttpRequest req) {
+			String deviceLocation, OgemaHttpRequest req) {
 		WidgetStyle<Label> result = null;
-		BatteryStatus stat = getBatteryStatus(val, changeInfoRelevant);
+		boolean singleBattery = deviceLocation == null || deviceLocation.contains("HMIP_SWDO");
+		BatteryStatus stat = getBatteryStatus(val, changeInfoRelevant, singleBattery?1:2);
 		if(stat == BatteryStatus.URGENT || stat == BatteryStatus.EMPTY)
 			result = LabelData.BOOTSTRAP_RED;
 		else if(stat == BatteryStatus.WARNING)
@@ -184,7 +193,8 @@ public class BatteryEvalBase {
 			}
 		} else
 			lastTs = batRes.getLastUpdateTime();
-		result.status = getBatteryStatus(result.voltage, changeInfoRelevant);
+		boolean singleBattery = batRes.getLocation().contains("HMIP_SWDO");
+		result.status = getBatteryStatus(result.voltage, changeInfoRelevant, singleBattery?1:2);
 		if(result.status != BatteryStatus.URGENT)
 			return result;
 		if(lastTs != null && now != null && (now - lastTs) > TIME_TO_ASSUME_EMPTY)

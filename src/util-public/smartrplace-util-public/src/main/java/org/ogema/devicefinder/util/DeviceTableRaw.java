@@ -282,7 +282,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel("Battery", id, batteryVoltage, row, "%.1f#min:0.1"),
 					batteryVoltage);
 			float val = batteryVoltage.getValue();
-			BatteryEvalBase.addBatteryStyle(result.label, val, true, req);
+			BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req);
 			return result;
 		} else if(req == null)
 			vh.registerHeaderEntry("Battery");
