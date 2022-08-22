@@ -105,14 +105,19 @@ public class OnOffSwitchMgmt {
 				//}
 				cache.dataRawAll.add(onOff);
 				
-				List<OnOffSwitch> toUse = new ArrayList<>();
+				//List<OnOffSwitch> toUse = new ArrayList<>();
+				final boolean toUse;
 				//for(OnOffSwitch onOff: onOffs) {
 					if(isMatchedByList(onOff.getLocation(), normallyExcludedButInclusionForced))
-						toUse.add(onOff);
-					if(isMatchedByList(onOff.getLocation(), normallyExcluded))
+						toUse = true; //toUse.add(onOff);
+					else if(isMatchedByList(onOff.getLocation(), normallyExcluded))
+						toUse = false; //continue;
+					else if(toBeUsed(onOff))
+						toUse = true; //toUse.add(onOff);
+					else
+						toUse = false;
+					if(!toUse)
 						continue;
-					if(toBeUsed(onOff))
-						toUse.add(onOff);
 				//}
 				
 				List<OnOffSwitchData> result = cache.data;
