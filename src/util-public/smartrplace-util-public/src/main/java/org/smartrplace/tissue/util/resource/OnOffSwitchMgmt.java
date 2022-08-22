@@ -95,8 +95,10 @@ public class OnOffSwitchMgmt {
 					continue;
 				
 				CachedResult cache = cashedResults.get(room.getLocation());
-				if(cache == null)
+				if(cache == null) {
 					cache = new CachedResult();
+					cashedResults.put(room.getLocation(), cache);
+				}
 				//List<OnOffSwitch> onOffs = ResourceUtils.getDevicesFromRoom(appMan.getResourceAccess(), OnOffSwitch.class, room);
 				//if(maintainListIfNumberOfSwitchesUnchanged && cache.dataRawAll != null && cache.dataRawAll.size() == onOffs.size()) {
 				//	return cache.data;	
