@@ -80,7 +80,7 @@ public class TimeProcUtil {
 	}
 	public static boolean initDefaultMeteringReferenceResource(long referenceTime, boolean forceUpdate, ResourceAccess resAcc) {
 		TimeResource ref = getDefaultMeteringReferenceResource(resAcc);
-		if((!ref.isActive()) || forceUpdate) {
+		if((ref == null) || (!ref.isActive()) || forceUpdate) {
 			ValueResourceHelper.setCreate(ref, referenceTime);
 			return true;
 		}

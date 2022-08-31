@@ -70,6 +70,7 @@ public class DirUtils {
 		String result;
 		if(in.length() > sizeLimit) {
 			result = "H"+in.hashCode()+in.substring(0, 1)+in.substring(sizeLimit-1, sizeLimit);
+			result = result.replaceAll("[\\\\/:*?\"<>|]", "_");
 		} else 
 			result = in.replaceAll("[\\\\/:*?\"<>|]", "_");
 		return result;

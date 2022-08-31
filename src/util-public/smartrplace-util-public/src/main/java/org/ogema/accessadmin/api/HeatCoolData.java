@@ -102,6 +102,8 @@ public class HeatCoolData extends SettingsBaseData {
 	public static int STARTEND_WORKINGDAY_IDX = 7;
 	public static int STARTEND_WEEKEND_IDX = 8;
 	public static int STARTEND_TIMES_SIZE = 9;
+	
+	/** Day type -> even-idx: startTime, odd-idx: endTime*/
 	public Map<Integer, List<Long>> startEndTimes = new HashMap<>();
 	
 	public List<Long> getStartEndTimesMonday() {
