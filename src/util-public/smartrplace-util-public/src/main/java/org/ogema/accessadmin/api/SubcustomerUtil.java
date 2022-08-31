@@ -2,9 +2,11 @@ package org.ogema.accessadmin.api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
@@ -182,7 +184,13 @@ public class SubcustomerUtil {
 				accessAdminConfigRes.userPermissions());
 		if(userEntry == null)
 			return null;
-		ResourceListHelper.addReferenceUnique(userEntry.superGroups(), subcustGroup);
+
+		if(ResourceListHelper.addReferenceUnique(userEntry.superGroups(), subcustGroup) == null)
+			return userEntry; //already in subcustomer
+
+		if(data.aggregationType().getValue() > 0)
+			ValueResourceHelper.setCreate(accessAdminConfigRes.subcustomerUserMode(), 1);
+
 		/*boolean alreadyIn = false;
 		for(AccessConfigUser grp: userEntry.superGroups().getAllElements()) {
 			if(grp.equalsLocation(subcustGroup)) {
@@ -192,16 +200,15 @@ public class SubcustomerUtil {
 		}
 		if(!alreadyIn)
 			userEntry.superGroups().add(subcustGroup);*/
-		if(data.aggregationType().getValue() > 0)
-			ValueResourceHelper.setCreate(accessAdminConfigRes.subcustomerUserMode(), 1);
 		
 		//Set rooms not belonging to subcustomer to denied for user
 		List<Room> all = KPIResourceAccess.getRealRooms(appMan.getResourceAccess());
-		BuildingPropertyUnit subcustGroupRooms = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
+		/*BuildingPropertyUnit subcustGroupRooms = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
 				accessAdminConfigRes.roomGroups());
 		if(subcustGroupRooms == null)
 			throw new IllegalStateException("Room Group for Subcustomer "+data.getLocation() + " missing!");
-		List<Room> subcustRooms = subcustGroupRooms.rooms().getAllElements();
+		//List<Room> subcustRooms = subcustGroupRooms.rooms().getAllElements();*/
+		Set<Room> subcustRooms = getUserRoomsBySubcustomers(userName, appMan.appMan());
 		for(Room room: all) {
 			boolean hasAccess;
 			if(ResourceHelper.containsLocation(subcustRooms, room))
@@ -304,6 +311,18 @@ public class SubcustomerUtil {
 		return selected;
 	}
 
+	public static Set<Room> getUserRoomsBySubcustomers(String userName, ApplicationManager appMan) {
+		List<SubCustomerData> subcdlist = getAllDataForUser(userName, appMan);
+		Set<Room> result = new HashSet<>();
+		for(SubCustomerData subc: subcdlist) {
+			List<Room> rooms = subc.roomGroup().rooms().getAllElements();
+			for(Room room: rooms) {
+				result.add(room.getLocationResource());
+			}
+		}
+		return result ;
+	}
+	
 	/** This method always returns the sub customers configured for a user independently of
 	 * {@link AccessAdminConfig#subcustomerUserMode()}
 	 * @param userName
