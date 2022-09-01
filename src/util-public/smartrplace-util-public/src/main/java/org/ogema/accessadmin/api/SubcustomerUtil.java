@@ -14,6 +14,7 @@ import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 import org.smartrplace.external.accessadmin.config.AccessConfigBase;
@@ -28,6 +29,7 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 public class SubcustomerUtil {
 	public static final String DECORATOR_NAME = "subcustomer";
 	public static final String ALL_ROOMS_GROUP_NAME = "All Rooms";
+	private static final long MAX_UPDATE_INTERVAL = 10*TimeProcUtil.MINUTE_MILLIS;
 	
 	/** The ids are stored in resources persistently, so on a certain system the meaning of each integer
 	 * value shall not be changed, although the exact name texts can be adapted.
@@ -171,6 +173,7 @@ public class SubcustomerUtil {
 		return accessAdminConfigRes.subCustomers().getAllElements();
 	}
 	
+	private static Map<String, Long> lastRoomPermissionUpdate = new HashMap<>();
 	public static AccessConfigUser addUserToSubcustomer(String userName, SubCustomerData data,
 			ApplicationManagerPlus appMan) {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
@@ -185,12 +188,18 @@ public class SubcustomerUtil {
 		if(userEntry == null)
 			return null;
 
-		if(ResourceListHelper.addReferenceUnique(userEntry.superGroups(), subcustGroup) == null)
+		long now = appMan.getFrameworkTime();
+		Long lastUpdate = lastRoomPermissionUpdate.get(userName);
+		if(lastUpdate == null)
+			lastUpdate = 0l;
+		if((ResourceListHelper.addReferenceUnique(userEntry.superGroups(), subcustGroup) == null)
+				&& (now - lastUpdate < MAX_UPDATE_INTERVAL))
 			return userEntry; //already in subcustomer
 
 		if(data.aggregationType().getValue() > 0)
 			ValueResourceHelper.setCreate(accessAdminConfigRes.subcustomerUserMode(), 1);
 
+		lastRoomPermissionUpdate.put(userName, now);
 		/*boolean alreadyIn = false;
 		for(AccessConfigUser grp: userEntry.superGroups().getAllElements()) {
 			if(grp.equalsLocation(subcustGroup)) {
@@ -200,7 +209,12 @@ public class SubcustomerUtil {
 		}
 		if(!alreadyIn)
 			userEntry.superGroups().add(subcustGroup);*/
-		
+		setUserRoomPermissions(userName, userEntry, appMan);
+		return userEntry;
+	}
+	
+	public static void setUserRoomPermissions(String userName, AccessConfigUser userEntry,
+			ApplicationManagerPlus appMan) {
 		//Set rooms not belonging to subcustomer to denied for user
 		List<Room> all = KPIResourceAccess.getRealRooms(appMan.getResourceAccess());
 		/*BuildingPropertyUnit subcustGroupRooms = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
@@ -218,8 +232,6 @@ public class SubcustomerUtil {
 			PermissionCellData acc = getAccessConfig(room, UserPermissionService.USER_ROOM_PERM, userName, appMan);
 			acc.setOwnStatus(hasAccess?null:false);
 		}
-				
-		return userEntry;
 	}
 	
 	public static ConfigurablePermission getAccessConfig(Room object, String permissionID,
