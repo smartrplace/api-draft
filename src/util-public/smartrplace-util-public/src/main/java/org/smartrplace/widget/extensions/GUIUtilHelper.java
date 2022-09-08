@@ -80,8 +80,20 @@ public class GUIUtilHelper {
 		return ud;
 	}
 	
-	/** Version using resource data*/
-	public static String getRealName(String userName, ResourceAccess ra) {
+	/** Version using resource data as well as UserAccount property*/
+	public static String getRealName(String userName, ApplicationManager appMan) {
+		return getRealName(userName, appMan, null);
+	}
+	public static String getRealName(String userName, ApplicationManager appMan, UserAccount ud) {
+		String result = getRealNameResourceOnly(userName, appMan.getResourceAccess());
+		if(result != null)
+			return result;
+		if(ud == null)
+			ud = getUserAccount(userName, appMan);
+		return getRealName(ud);
+	}
+	
+	public static String getRealNameResourceOnly(String userName, ResourceAccess ra) {
 		NaturalPerson ud = getUserData(userName, ra);
 		if(ud == null)
 			return null;
