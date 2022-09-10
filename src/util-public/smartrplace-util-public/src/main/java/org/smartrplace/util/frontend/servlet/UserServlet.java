@@ -455,9 +455,10 @@ public class UserServlet extends HttpServlet {
 		
 		if(pageprov == null) {
 			res.message = "In Userservlet page not found: "+getParameter("page", paramMap);
-			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 				System.out.println(res.message);
-			else
+				logger.trace("Servlet provider exception: {}", res.message);
+			} else
 				logger.info("Servlet provider exception: {}", res.message);
 			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
@@ -467,10 +468,11 @@ public class UserServlet extends HttpServlet {
 		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap, false);
 		if(odata.objects == null || odata.objects.contains(null)) {
 			res.message = "In Userservlet object not found:"+odata.objectId+" Pageprov:"+pageprov.getClass().getName();
-			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 				System.out.println(res.message);
-			else
-				logger.info("Servlet provider exception: {}", res.message);
+				logger.trace("Servlet provider exception2: {}", res.message);
+			} else
+				logger.info("Servlet provider exception2: {}", res.message);
 			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
 			return res;
