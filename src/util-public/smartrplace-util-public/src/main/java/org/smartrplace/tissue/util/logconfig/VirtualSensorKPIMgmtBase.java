@@ -161,22 +161,22 @@ public abstract class VirtualSensorKPIMgmtBase<D extends Resource, S extends Sin
 
 	public VirtualSensorKPIDataBase addVirtualDatapointSingle(Datapoint dpSource,
 			//VirtualDatapointSetup setupProvider,
-			String newSubResName, D device,
+			String newSubResName, D destinationResParent,
 			long intervalToStayBehindNow,
 			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
 			List<Datapoint> result) {
-		return addVirtualDatapointSingle(dpSource, newSubResName, device, intervalToStayBehindNow, registerGovernedSchedule,
+		return addVirtualDatapointSingle(dpSource, newSubResName, destinationResParent, intervalToStayBehindNow, registerGovernedSchedule,
 				registerRemoteScheduleViaHeartbeat, result, null);
 		
 	}
 	public VirtualSensorKPIDataBase addVirtualDatapointSingle(Datapoint dpSource,
 			//VirtualDatapointSetup setupProvider,
-			String newSubResName, D device,
+			String newSubResName, D destinationResParent,
 			long intervalToStayBehindNow,
 			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
 			List<Datapoint> result, Integer absoluteTiming) {
 		List<Datapoint> dpSources = Arrays.asList(new Datapoint[] {dpSource});
-		return addVirtualDatapoint(dpSources, newSubResName, device, intervalToStayBehindNow, registerGovernedSchedule,
+		return addVirtualDatapoint(dpSources, newSubResName, destinationResParent, intervalToStayBehindNow, registerGovernedSchedule,
 				registerRemoteScheduleViaHeartbeat, result, absoluteTiming);		
 	}
 	public VirtualSensorKPIDataBase addVirtualDatapoint(List<Datapoint> dpSource,
@@ -201,7 +201,7 @@ public abstract class VirtualSensorKPIMgmtBase<D extends Resource, S extends Sin
 	 */
 	public VirtualSensorKPIDataBase addVirtualDatapoint(List<Datapoint> dpSource,
 			//VirtualDatapointSetup setupProvider,
-			String newSubResName, D device,
+			String newSubResName, D destinationResParent,
 			long intervalToStayBehindNow,
 			boolean registerGovernedSchedule, boolean registerRemoteScheduleViaHeartbeat,
 			List<Datapoint> result,
@@ -225,7 +225,7 @@ public abstract class VirtualSensorKPIMgmtBase<D extends Resource, S extends Sin
 		final VirtualSensorKPIDataBase mapData = new VirtualSensorKPIDataBase();
 		synchronized (mapData) {
 		dpData.put(sourceLocation, mapData);
-		S destRes = getAndConfigureValueResource(dpSource, mapData, newSubResName, device);
+		S destRes = getAndConfigureValueResource(dpSource, mapData, newSubResName, destinationResParent);
 		if(mapData.evalDp == null)
 			return null;
 		if(registerGovernedSchedule) {
