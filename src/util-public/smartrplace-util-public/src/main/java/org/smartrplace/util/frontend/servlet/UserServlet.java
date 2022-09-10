@@ -23,7 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
-import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.BooleanValue;
 import org.ogema.core.channelmanager.measurements.DoubleValue;
 import org.ogema.core.channelmanager.measurements.FloatValue;
@@ -684,6 +683,10 @@ public class UserServlet extends HttpServlet {
 			if(obj != null) {
 				result.objects = new ArrayList<T>();
 				result.objects.add(obj);
+				return result;
+			} else {
+				//return error
+				result.objects = null;
 				return result;
 			}
 		}
