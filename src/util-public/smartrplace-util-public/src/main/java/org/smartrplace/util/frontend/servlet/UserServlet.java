@@ -378,7 +378,8 @@ public class UserServlet extends HttpServlet {
 				logger.debug("Finished GET for:"+fullURL);
 			logger.trace("GET Response:"+out);
 		}
-		resp.setStatus(200);
+		//resp.setStatus(200);
+		resp.setStatus(result.responseCode);
 	}
 	
 	protected Map<String, String[]> getParamMap(HttpServletRequest req) {
@@ -397,6 +398,7 @@ public class UserServlet extends HttpServlet {
 		public JSONObject result = null;
 		public JSONArray resultArr = null;
 		public String message = null;
+		int responseCode = HttpServletResponse.SC_OK;
 	}
 	protected <T> JSONVarrRes getJSONWithPageIdDebugging(String user, String pollStr, String timeString,
 			ServletPageProvider<T> pageprov, String returnStruct, Map<String, String[]> paramMap,
@@ -437,6 +439,7 @@ public class UserServlet extends HttpServlet {
 		JSONVarrRes result = getJSON(user, pollStr, timeString, pageprov, retStruct, paramMap, logger, fullUrl, appManPlus);
 		if(result.message != null) {
 			writeMessage(result, "exception", result.message);
+			result.responseCode = HttpServletResponse.SC_NOT_ACCEPTABLE;
 		}
 		return result;
 	}
@@ -455,6 +458,7 @@ public class UserServlet extends HttpServlet {
 		
 		if(pageprov == null) {
 			res.message = "In Userservlet page not found: "+getParameter("page", paramMap);
+			res.responseCode = HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 				System.out.println(res.message);
 				logger.trace("Servlet provider exception: {}", res.message);
@@ -468,6 +472,7 @@ public class UserServlet extends HttpServlet {
 		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap, false);
 		if(odata.objects == null || odata.objects.contains(null)) {
 			res.message = "In Userservlet object not found:"+odata.objectId+" Pageprov:"+pageprov.getClass().getName();
+			res.responseCode = HttpServletResponse.SC_NO_CONTENT;
 			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 				System.out.println(res.message);
 				logger.trace("Servlet provider exception2: {}", res.message);
@@ -644,6 +649,7 @@ public class UserServlet extends HttpServlet {
 	protected static class GetObjectResult<T> {
 		public Collection<T> objects;
 		public String objectId = null;
+		public int status = HttpServletResponse.SC_OK;
 	}
 	/** 
 	 * 
@@ -858,7 +864,7 @@ public class UserServlet extends HttpServlet {
 					return;
 				}
 			}
-			postJSON(user, result, pageMap, timeStr, paramMap);
+			GetObjectResult<?> odata = postJSON(user, result, pageMap, timeStr, paramMap);
 			//Map<String, ServletValueProvider> userMap = postData.get(user);
 			//for(String key: result.keySet()) {
 			//	ServletValueProvider prov = userMap.get(key);
@@ -866,7 +872,7 @@ public class UserServlet extends HttpServlet {
 			//	prov.setValue(user, key, value);
 			//}
 			response = response + " Success!";
-			status = HttpServletResponse.SC_OK;
+			status = odata.status; //HttpServletResponse.SC_OK;
 		} catch (Exception e) {
 			response = response + "An error occurred: " + e.toString();
 			logException(logger, e, "POST", appManPlus);
@@ -901,7 +907,7 @@ public class UserServlet extends HttpServlet {
 			subJson.put(jsonkey, value);
 	}
 	
-	protected static <T> void postJSON(String user, JSONObject postData,
+	protected static <T> GetObjectResult<T> postJSON(String user, JSONObject postData,
 			ServletPageProvider<T> pageprov,
 			//String response,
 			String timeString,
@@ -909,6 +915,7 @@ public class UserServlet extends HttpServlet {
 		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap, true);
 		//postData.remove("params");
 		postJSON(user, postData, pageprov, timeString, paramMap, odata);
+		return odata;
 	}
 	protected static <T> void postJSON(String user, JSONObject postData,
 			ServletPageProvider<T> pageprov,
