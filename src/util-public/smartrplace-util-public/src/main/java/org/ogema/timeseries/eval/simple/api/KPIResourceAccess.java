@@ -54,7 +54,7 @@ public class KPIResourceAccess {
 	public static List<Room> getRealRooms(ResourceAccess resAcc, boolean realRoomsOnly) {
 		if(Boolean.getBoolean("org.smartrplace.apps.heatcontrol.pattern.bacnet.roomcontrol")) {
 			List<Room> result = new ArrayList<>();
-			ResourceList<PhysicalElement> bacnetDevices = resAcc.getResource("BACnetDevices");
+			/*ResourceList<PhysicalElement> bacnetDevices = resAcc.getResource("BACnetDevices");
 			for(PhysicalElement el: bacnetDevices.getAllElements()) {
 				if(el.getName().startsWith("RoomControls_") && (el instanceof PhysicalElement)) {
 					Room room = el.location().room();
@@ -62,7 +62,17 @@ public class KPIResourceAccess {
 						continue;
 					result.add(room.getLocationResource());
 				}
+			}*/
+			ResourceList<PhysicalElement> knxcontrols = resAcc.getResource("knxcontrols");
+			for(PhysicalElement el: knxcontrols.getAllElements()) {
+				if(el.getName().startsWith("LightingControls_") && (el instanceof PhysicalElement)) {
+					Room room = el.location().room();
+					if(!room.exists())
+						continue;
+					result.add(room.getLocationResource());
+				}
 			}
+
 			if(realRoomsOnly)
 				return result;
 			ResourceList<Room> standardRooms = resAcc.getResource("rooms");

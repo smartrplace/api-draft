@@ -1,7 +1,5 @@
 package org.smartrplace.apps.heatcontrol.extensionapi.heatandcool;
 
-import java.util.List;
-
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.MechanicalFan;
@@ -13,7 +11,7 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 /** This interface can be implemented by single devices and by room control units that control all heating and
  * cooling units within a room
  */
-public interface TemperatureControlBase {
+public interface TemperatureControlBase extends RoomDeviceProvider {
 
     /** Get temperature control setpoint resource ("setpoint set")
      * 
@@ -163,5 +161,4 @@ public interface TemperatureControlBase {
 		/** Override this if Controller shall use this*/
 		public void setState(int newState) {};
 	}
-	default List<SmartPlugData> additionalDevicesForSwitching(OgemaLocale locale) { return null;}
 }
