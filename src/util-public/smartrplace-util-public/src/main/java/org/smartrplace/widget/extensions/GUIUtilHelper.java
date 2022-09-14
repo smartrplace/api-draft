@@ -110,7 +110,7 @@ public class GUIUtilHelper {
 	
 	/** Version using the admin data*/
 	public static String getRealName(UserAccount userAccount) {
-		String realName =userAccount.getProperties().getOrDefault(UserConstants.FORMATTED_NAME, "--").toString();
+		String realName =userAccount.getProperties().getOrDefault(UserConstants.FORMATTED_NAME, "").toString();
 		return realName;	
 	}
 	

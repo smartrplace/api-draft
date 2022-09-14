@@ -27,7 +27,7 @@ public interface AppstoreLocalVersionManagementService {
 	 * 
 	 * @return true if version was deleted successfully
 	 */
-	boolean deleteLocalVersion();
+	boolean deleteLocalVersion(long versionTimestamp);
 	
 	/** Get number of versions that can be created without deleting a version based
 	 * on the disk space reserved for appstore versions 

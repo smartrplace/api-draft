@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.smartrplace.appstore.api.AppstoreBundle;
 import org.smartrplace.appstore.api.GatewayUpdateService;
 import org.smartrplace.appstore.api.GitCommit;
@@ -292,4 +294,36 @@ public class AppstoreUtils {
 			return getVersion(update.parentUpdate(), mavenToFind);
 		return null;
 	}
+    
+    public static class SystemUpdateSummary {
+    	public long lastChangeTime = -1;
+    	public int lastBundleChangeNum = 0;
+    	public long lastBuildTime = -1;
+    }
+    private static SystemUpdateSummary susummary = null;
+    public static SystemUpdateSummary getSystemUpdateSummary(BundleContext bc) {
+    	if(susummary == null) {
+    		if(bc == null)
+    			return null;
+    		susummary = new SystemUpdateSummary();
+    		Bundle[] allBundles = bc.getBundles();
+    		for(Bundle bundle: allBundles) {
+    			long modTime = bundle.getLastModified();
+    			if(modTime > susummary.lastChangeTime) {
+    				if(modTime > (susummary.lastChangeTime + TimeProcUtil.MINUTE_MILLIS))
+    					susummary.lastBundleChangeNum = 0;
+    				susummary.lastChangeTime = modTime;
+    			}
+    			if(modTime > (susummary.lastChangeTime - TimeProcUtil.MINUTE_MILLIS))
+    				susummary.lastBundleChangeNum++;
+    			String lastMod = bundle.getHeaders().get("Bnd-LastModified");
+    			if(lastMod != null) try {
+    				long lastBuild = Long.parseLong(lastMod);
+    				if(lastBuild > susummary.lastBuildTime)
+    					susummary.lastBuildTime = lastBuild;
+    			} catch(NumberFormatException e) {}
+    		}
+    	}
+    	return susummary;
+    }
 }
