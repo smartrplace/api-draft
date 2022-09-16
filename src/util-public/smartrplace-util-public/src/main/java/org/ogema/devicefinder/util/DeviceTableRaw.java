@@ -496,7 +496,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return "WeatherStation";
 		if(isTempHumSens(resourceLocation))
 			return "TempHumSens";
-		if(isFAL230(resourceLocation))
+		if(isFALorFALMOT(resourceLocation))
 			return "FAL230";
 		if(isOpenWeatherMapSensorDevice(resourceLocation, subResources))
 			return "OpenWeatherMapSensor";
@@ -520,7 +520,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static boolean isTempHumSens(String resourceLocation) {
 		if(isWeatherStation(resourceLocation))
 			return false;
-		if(isFAL230(resourceLocation))
+		if(isFALorFALMOT(resourceLocation))
 			return false;
 		if(resourceLocation.contains("maintenanceChannelReadings"))
 			return false;
@@ -535,8 +535,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 	
-	public static boolean isFAL230(String resourceLocation) {
-		if(resourceLocation.toLowerCase().startsWith("homematic") && resourceLocation.contains("FAL230_"))
+	public static boolean isFALorFALMOT(String resourceLocation) {
+		if(resourceLocation.toLowerCase().startsWith("homematic") && (
+				resourceLocation.contains("FAL230_") || resourceLocation.contains("FAL24_") ||resourceLocation.contains("FALMOT_")))
 			return true;
 		return false;
 	}
