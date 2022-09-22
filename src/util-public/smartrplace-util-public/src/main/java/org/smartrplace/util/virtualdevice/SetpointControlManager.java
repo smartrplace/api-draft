@@ -381,6 +381,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	}
 	
 	protected void writeDataReporting(RouterInstance ccu, long deltaT) {
+		if(!ccu.device.isActive())
+			return;
 		if(ccu.totalWritePerHour != null) {
 			ValueResourceHelper.setCreate(ccu.totalWritePerHour, (float) (((double)(ccu.totalWriteCount*TimeProcUtil.HOUR_MILLIS))/deltaT));
 		}

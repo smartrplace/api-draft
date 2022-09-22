@@ -166,6 +166,8 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 	
 					@Override
 					public void resourceChanged(FloatResource resource) {
+						if(!cd.device.isActive())
+							return;
 						float val = Boolean.getBoolean("org.smartrplace.util.virtualdevice.dutycycle100")?(cd.dutyCycle.getValue()*0.01f):cd.dutyCycle.getValue();
 						if(val > cd.dutyCycleValueMaxNew)
 							cd.dutyCycleValueMaxNew = val;
@@ -230,7 +232,10 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 	protected void writeDataReporting(RouterInstance ccu, long deltaT) {
 		super.writeDataReporting(ccu, deltaT);
 		
+		
 		CCUInstance ccuMy = (CCUInstance)ccu;
+		if(!ccuMy.device.isActive())
+			return;
 		
 		ccuMy.dutyCycleValueMax = ccuMy.dutyCycleValueMaxNew;		
 		if(ccuMy.dutyCycleMax != null) {

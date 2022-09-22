@@ -131,7 +131,13 @@ if(Boolean.getBoolean("jobdebug")) {
 					vh.registerHeaderEntry("Value");
 					vh.registerHeaderEntry("Last Contact");
 				} else {
-					Label valueLabel = getMainSensorLabel(box, object, vh, id);
+					Label valueLabel;
+					try {
+						valueLabel = getMainSensorLabel(box, object, vh, id);
+					} catch(ClassCastException e) {
+						e.printStackTrace();
+						return;
+					}
 					SingleValueResource sampleSensor = getMainSensorValue(box, object);
 					if((valueLabel == null) && (sampleSensor != null)) {
 						if(sampleSensor instanceof FloatResource)
