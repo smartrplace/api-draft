@@ -1,7 +1,9 @@
 package org.smartrplace.apps.hw.install.prop;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
@@ -34,14 +36,21 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 	protected StaticTable topTable;
 	//protected final PopupSimple gatewayCreatePopup;
 	
+	protected final boolean isOperationStandardPage;
+	
 	protected final String serverGatewayLink;
 
 	public GatewayMainPage(WidgetPage<?> page, ApplicationManager appMan, AppstoreConfig appConfigData,
 			String serverGatewayLink) {
+		this(page, appMan, appConfigData, serverGatewayLink, false);
+	}
+	public GatewayMainPage(WidgetPage<?> page, ApplicationManager appMan, AppstoreConfig appConfigData,
+			String serverGatewayLink, boolean isOperationStandardPage) {
 		super(page, appMan, ResourceHelper.getSampleResource(GatewayData.class));
 		//this.controller = controller;
 		this.appConfigData = appConfigData;
 		this.serverGatewayLink = serverGatewayLink;
+		this.isOperationStandardPage = isOperationStandardPage;
 		triggerPageBuild();
 	}
 
@@ -58,6 +67,10 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			vh.registerHeaderEntry("Software Release Group");
 			vh.registerHeaderEntry("Expected Online");
 			vh.registerHeaderEntry("GUI");
+			if(isOperationStandardPage) {
+				vh.registerHeaderEntry("Op Link");
+				vh.registerHeaderEntry("Operation Status");
+			}
 		} else {
 			Map<GatewayGroupData, String> valuesToSetG = new HashMap<>();
 			for(GatewayGroupData grGrp: ResourceListHelper.getAllElementsLocation(appConfigData.gatewayGroupData())) {
@@ -68,6 +81,11 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			String gwUrl = ServerGatewayUtil.getGatewayBaseUrl(object);
 			if(gwUrl != null) {
 				vh.linkingButton("GUI", id, object, row, "To GW", gwUrl+"/ogema/index.html");
+				if(isOperationStandardPage) {
+					vh.linkingButton("Op Link", id, object, row, "Summer Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
+					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
+					vh.stringEdit("Operation Status", id, dev.installationComment(), row, alert);
+				}
 			}
 			/*if(object.guiLink().isActive()) {
 				RedirectButton guiButton = new RedirectButton(mainTable, id+"guiButton", "GUI",
@@ -77,8 +95,8 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 		}
 		vh.stringEdit("Customer", id, object.customer(), row, alert);
 		if(req == null) {
-			vh.registerHeaderEntry("Status");
 			vh.registerHeaderEntry("Comment");
+			vh.registerHeaderEntry("Status");
 		} else {
 			InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 			if(dev != null) {
@@ -86,8 +104,10 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				vh.stringEdit("Comment", id, dev.installationComment(), row, alert);
 			}
 		}
-		vh.stringEdit("GUI Link", id, object.guiLink(), row, alert);
-		vh.stringEdit("SlotsGwId", id, object.remoteSlotsGatewayId(), row, alert);
+		if(!isOperationStandardPage) {
+			vh.stringEdit("GUI Link", id, object.guiLink(), row, alert);
+			vh.stringEdit("SlotsGwId", id, object.remoteSlotsGatewayId(), row, alert);
+		}
 	}
 
 	@Override
@@ -115,6 +135,15 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 
 	@Override
 	public Collection<GatewayData> getObjectsInTable(OgemaHttpRequest req) {
+		if(isOperationStandardPage) {
+			List<GatewayData> all = appConfigData.gatewayData().getAllElements();
+			List<GatewayData> result = new ArrayList<>();
+			for(GatewayData gw: all) {
+				if(gw.expectedOnHeartbeat().getValue())
+					result.add(gw);
+			}
+			return result;
+		}
 		return appConfigData.gatewayData().getAllElements();
 	}
 
