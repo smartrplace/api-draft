@@ -31,6 +31,7 @@ public class HeatCoolData extends SettingsBaseData {
 	public int specialStructureRooms = 0;
 	
 	public boolean showComfortTemperature = false;
+	public boolean showEcoTemperature = false;
 	
 	public HeatCoolData() {
 		this(SubcustomerUtil.VALUE_IDX_NUM);
@@ -99,6 +100,10 @@ public class HeatCoolData extends SettingsBaseData {
 		return showComfortTemperature;
 	}
 	
+	public boolean getShowEcoTemperature() {
+		return showEcoTemperature;
+	}
+
 	public static int STARTEND_WORKINGDAY_IDX = 7;
 	public static int STARTEND_WEEKEND_IDX = 8;
 	public static int STARTEND_TIMES_SIZE = 9;

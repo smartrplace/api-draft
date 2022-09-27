@@ -483,8 +483,9 @@ public class SubcustomerUtil {
 	public static final int ECOTEMP_V2_IDX = 10;
 	public static final int WINDOWTEMP_V2_IDX = 11;
 	public static final int COMFORT_TEMP_RELEVANT_IDX = 12;
+	public static final int ECO_TEMP_RELEVANT_IDX = 13;
 	
-	public static final int VALUE_IDX_NUM = 13;
+	public static final int VALUE_IDX_NUM = 14;
 
 	public static class ValueVariance {
 		public ValueVariance(int valueIdx) {
