@@ -313,7 +313,7 @@ logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocatio
 				if(accTs instanceof ProcessedReadOnlyTimeSeries2)
 					((ProcessedReadOnlyTimeSeries2)accTs).resetKnownEnd(lastVal, false);
 				List<SampledValue> svs = accTs.getValues(lastVal+1, now+1);
-logger.info("   In EnergyServer energyDaily onValueChanged: Found new vals:"+svs.size()+" Checked from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal));
+/*logger.info("   In EnergyServer energyDaily onValueChanged: Found new vals:"+svs.size()+" Checked from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal));
 if(!svs.isEmpty())
 logger.info("   Last value written at: "+StringFormatHelper.getFullTimeDateInLocalTimeZone(svs.get(svs.size()-1).getTimestamp()));
 				if(!svs.isEmpty() && (destRes != null))
@@ -323,7 +323,7 @@ logger.info("OnValueChanged Summary for "+destRes.getLocation()+":\r\n"+
 						(lastSv!=null?"Found existing last SampledValue in SlotsDB at "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastSv.getTimestamp()):"")+
 						",\r\n Calculated values for DP"+mapData.evalDp.getLocation()+" from "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal+1)+" to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(now+1)+
 						",\r\n Found "+svs.size()+" new values. Wrote into "+mapData.evalDp.getLocation()); //+
-						//".\r\n Set lastVal to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal));
+						//".\r\n Set lastVal to "+StringFormatHelper.getFullTimeDateInLocalTimeZone(lastVal));*/
 			}
 		};
 		sourceRes.addValueListener(mapData.aggListener, true);	

@@ -11,7 +11,7 @@ import de.iwes.widgets.template.LabelledItem;
 public class NamedIntegerType implements LabelledItem {
 	protected final int id;
 	protected final String idPrefix;
-	Map<OgemaLocale, String> name;
+	private final Map<OgemaLocale, String> name;
 	
 	public NamedIntegerType(int id, Map<OgemaLocale, String> name) {
 		this(id, name, null);
@@ -52,8 +52,11 @@ public class NamedIntegerType implements LabelledItem {
 
 	@Override
 	public String label(OgemaLocale locale) {
-		if(locale != null)
-			return name.get(locale);
+		if(locale != null) {
+			String result2 = name.get(locale);
+			if(result2 != null)
+				return result2;
+		}
 		OgemaLocale defaultLocale = UserLocaleUtil.getSystemDefaultLocale();
 		String result = name.get(defaultLocale);
 		if(result != null)
