@@ -51,6 +51,10 @@ public class PropType implements LabelledItem {
 			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
 			Integer.class);
 
+	public static final PropType THERMOSTAT_WINDOWOPEN_MINDROP = new PropType("ThermostatWindowOpenMinimumDropKelvin", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Float.class);
+
 	/** In Celsius*/
 	public static final PropType THERMOSTAT_WINDOWOPEN_TEMPERATURE = new PropType("ThermostatWindowOpenTemperature", Arrays.asList(
 			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
