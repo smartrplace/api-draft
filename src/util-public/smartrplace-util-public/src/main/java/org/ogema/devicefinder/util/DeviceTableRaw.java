@@ -292,7 +292,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	protected AddBatteryVoltageResult addBatteryStatus(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
 			PhysicalElement device2) {
-		BooleanResource batteryStatus = ResourceHelper.getSubResourceOfSibbling(device2,
+		BooleanResource batteryStatus = ResourceHelper.getSubResourceOfSibbling(device2.getLocationResource(),
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "batteryLow", BooleanResource.class);
 		if(batteryStatus != null) {
 			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.booleanLabel("Bat.Low", id, batteryStatus, row, 0), batteryStatus);

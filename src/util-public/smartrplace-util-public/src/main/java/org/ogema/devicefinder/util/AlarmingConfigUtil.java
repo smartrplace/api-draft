@@ -75,7 +75,7 @@ public class AlarmingConfigUtil {
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVELOPMENT, "Development");
 		//ASSIGNEMENT_ROLES.put("2100", "Development Logic");
 		//ASSIGNEMENT_ROLES.put("2200", "Development HW Driver");
-		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVELOPMENT_EXTERNAL, "Dev External");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVELOPMENT_EXTERNAL, "Op Valve Error"); //"Dev External");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_CUSTOMER, "Customer");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_BACKLOG, "Backlog");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEPDENDENT, "Dependent");

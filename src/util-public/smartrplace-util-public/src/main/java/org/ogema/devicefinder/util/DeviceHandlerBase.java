@@ -153,7 +153,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		if(batVolt != null && batVolt.isActive())
 			return batVolt;
 		else {
-			VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(dev,
+			VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(dev.getLocationResource(),
 					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
 			return batteryVoltage;
 		}		
