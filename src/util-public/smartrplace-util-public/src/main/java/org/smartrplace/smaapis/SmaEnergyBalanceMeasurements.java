@@ -4,6 +4,7 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.units.PercentageResource;
 import org.ogema.core.model.units.PowerResource;
+import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
 import org.ogema.model.prototypes.PhysicalElement;
 
 /**
@@ -14,19 +15,21 @@ public interface SmaEnergyBalanceMeasurements extends PhysicalElement {
 	
 	StringResource lastMeasurementTime();
 	
-	PowerResource pvGeneration();
+	ElectricityConnectionBox pvGeneration();
 	
-	PowerResource dieselGeneration();
+	ElectricityConnectionBox dieselGeneration();
 	
-	PowerResource combinedHeatAndPowerGeneration();
+	ElectricityConnectionBox combinedHeatAndPowerGeneration();
 	
-	PowerResource hydroGeneration();
+	ElectricityConnectionBox hydroGeneration();
 
-	PowerResource directConsumption();
+	ElectricityConnectionBox directConsumption();
 	
-	PowerResource selfConsumption();
+	ElectricityConnectionBox selfConsumption();
 	
-	PowerResource totalConsumption();
+	ElectricityConnectionBox gridConsumption();
+	
+	ElectricityConnectionBox totalConsumption();
 	
 	PowerResource batteryCharging();
 	
@@ -39,8 +42,6 @@ public interface SmaEnergyBalanceMeasurements extends PhysicalElement {
 	FloatResource autarkyRate();
 	
 	FloatResource selfConsumptionRate();
-	
-	PowerResource gridConsumption();
 	
 	PowerResource selfSupply();
 	
