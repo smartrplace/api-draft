@@ -24,7 +24,6 @@ import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
-import org.ogema.model.devices.connectiondevices.ThermalValve;
 import org.ogema.model.devices.generators.PVPlant;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.devices.sensoractordevices.SingleSwitchBox;
@@ -510,6 +509,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return "HeatMeter";
 		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
 			return "HeatCostAllocator";
+		if(isSmokeDetectorDevice(resourceLocation, subResources))
+			return "SmokeDetector";
 		if(isWiredMBusMasterDevice(resourceLocation, subResources))
 			return "WiredMBusMaster";
 		if(isWaterMeterDevice(resourceLocation, subResources))
@@ -572,6 +573,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return false;
 		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
 			return false;
+		if(DeviceTableRaw.isSmokeDetectorDevice(resourceLocation, subResources))
+			return false;
 		if(isWiredMBusMasterDevice(resourceLocation, subResources))
 			return false;
 		int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
@@ -587,7 +590,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return foundVolume;
 	}
 	public static boolean isWaterMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
-		if(resourceLocation.startsWith("MBusReadings/WATER_METER_"))
+		if(resourceLocation.startsWith("MBusReadings/WATER_METER_") ||
+				resourceLocation.startsWith("MBusReadings/WARM_WATER_METER_"))
 			return true;
 		if(subResources == null)
 			return false;
@@ -627,6 +631,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return true;
 		return false;
 	}
+	public static boolean isSmokeDetectorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		if(resourceLocation.startsWith("MBusReadings/SMOKE_DETECTOR_"))
+			return true;
+		return false;
+	}
 	public static boolean isWiredMBusMasterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		if(resourceLocation.startsWith("MBusReadings/BUS_SYSTEM_COMPONENT_"))
 			return true;
@@ -648,6 +657,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(isHeatMeterDevice(resourceLocation, subResources))
 			return false;
 		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
+			return false;
+		if(DeviceTableRaw.isSmokeDetectorDevice(resourceLocation, subResources))
 			return false;
 		if(isWiredMBusMasterDevice(resourceLocation, subResources))
 			return false;
