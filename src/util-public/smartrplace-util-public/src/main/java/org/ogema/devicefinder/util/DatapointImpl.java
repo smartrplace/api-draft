@@ -579,6 +579,10 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			throw new IllegalArgumentException("Trying to set resource "+resource.getLocation()+" for Datapoint "+location);
 		this.resource = resource;
 	}
+	/** Be very careful to use this !! May have unintended side effects or may not be fully supported yet! */
+	public void setResourceExperimental(Resource resource) {
+		this.resource = resource;
+	}
 	
 	@Override
 	public String toString() {

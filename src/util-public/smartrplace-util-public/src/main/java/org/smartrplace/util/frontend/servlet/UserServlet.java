@@ -808,12 +808,12 @@ public class UserServlet extends HttpServlet {
 		Map<String, String[]> paramMap = getParamMap(req);
 		addParametersFromUrl(req, paramMap);
 
-		String pageId = req.getParameter("page");
+		String pageId = UserServlet.getParameter("page", paramMap); //req.getParameter("page");
 		if(pageId == null) pageId = stdPageId ;
 		//String object = req.getParameter("object");
 		final ServletPageProvider<?> pageMap = pages.get(pageId);
 		if(pageMap == null) return;
-		String timeStr = req.getParameter("time");
+		String timeStr =  UserServlet.getParameter("time", paramMap); //req.getParameter("time");
 		
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = req.getReader();

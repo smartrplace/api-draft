@@ -4,7 +4,6 @@ import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.IntegerResource;
-import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.core.resourcemanager.ResourceValueListener;
@@ -48,7 +47,10 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	 */
 	@Existence(required = CreateMode.OPTIONAL) 
 	public final IntegerResource windowRecognitionMode = model.getSubResource("HmParametersMaster", ResourceList.class)
-																.getSubResource("TEMPERATUREFALL_MODUS", IntegerResource.class);
+			.getSubResource("TEMPERATUREFALL_MODUS", IntegerResource.class);
+	@Existence(required = CreateMode.OPTIONAL) 
+	public final IntegerResource windowRecognitionModeFb = model.getSubResource("HmParametersMaster", ResourceList.class)
+			.getSubResource("TEMPERATUREFALL_MODUS_FEEDBACK", IntegerResource.class);
 	
 	/**
 	 * If the thermostat is a Homematic device, an association will be created at Homematic level
@@ -94,13 +96,16 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 		return (parent != null && parent.getResourceType().getSimpleName().equals("HmLogicInterface"));
 	}
 	
-	public boolean deactivateHomematicWindowOpenRecognition(ResourceAccess ra) {
+	public boolean setHomematicWindowOpenRecognition(boolean newState, ResourceAccess ra) {
 		if (!isHomematic())
 			return false;
 		int mode;
 		if (windowRecognitionMode.isActive()) {
 			mode = windowRecognitionMode.getValue();
-			if (mode == 0 || mode == 1)
+			if(newState) {
+				if (mode == 4)
+					return false;
+			} else if (mode == 0 || mode == 1)
 				return false;
 		}
 		ResourceTransaction trans = ra.createResourceTransaction();
@@ -108,9 +113,9 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 		trans.activate(windowRecognitionMode);
 		trans.activate(windowRecognitionMode.getParent());
 		// remains active in auto mode
-		trans.setInteger(windowRecognitionMode, 1);
+		trans.setInteger(windowRecognitionMode, newState?4:1);
 		trans.commit();
-		windowRecognitionMode.<ResourceList<?>> getParent().setElementType(SingleValueResource.class);
+		//windowRecognitionMode.<ResourceList<?>> getParent().setElementType(SingleValueResource.class);
 		return true;
 	}
 	

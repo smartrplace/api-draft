@@ -104,7 +104,7 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * the method may not be called for all datapoints. In the initial implementation this is the case if the property
 	 * org.smartrplace.apps.hw.install.autologging is set to true, but in the future the user shall be
 	 * able to configure this on a per-device base.*/
-	default boolean relevantForDefaultLogging(Datapoint dp) {
+	default boolean relevantForDefaultLogging(Datapoint dp, InstallAppDevice iad) {
 		return true;
 	};
 	
