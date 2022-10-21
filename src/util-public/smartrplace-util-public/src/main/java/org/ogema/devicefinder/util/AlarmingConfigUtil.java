@@ -157,13 +157,14 @@ public class AlarmingConfigUtil {
 	public static InstallAppDevice getTemplate(String devTypeId,
 			ApplicationManagerPlus appManPlus) {
 		for(InstallAppDevice dev: appManPlus.getResourceAccess().getResources(InstallAppDevice.class)) {
-			DatapointGroup devTypeGrp = DpGroupUtil.getDeviceTypeGroup(dev, appManPlus);
-			//GenericFilterFixedSingle<String> selected = (GenericFilterFixedSingle<String>) deviceDrop.getSelectedItem(req);
-			if(devTypeGrp == null || (!devTypeGrp.id().equals(devTypeId)))
-				continue;
-			if(DeviceTableRaw.isTemplate(dev, null)) {
+			//DatapointGroup devTypeGrp = DpGroupUtil.getDeviceTypeGroup(dev, appManPlus);
+			//if(devTypeGrp == null || (!devTypeGrp.id().equals(devTypeId)))
+			//	continue;
+			//if(DeviceTableRaw.isTemplate(dev, null)) {
+			//	return dev;
+			//}
+			if(dev.isTemplate().isActive() && dev.isTemplate().getValue().equals(devTypeId))
 				return dev;
-			}
 		}
 		return null;
 	}
