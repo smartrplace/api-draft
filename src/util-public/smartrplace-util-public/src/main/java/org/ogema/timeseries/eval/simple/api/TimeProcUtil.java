@@ -2,6 +2,7 @@ package org.ogema.timeseries.eval.simple.api;
 
 import java.util.List;
 
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
@@ -9,6 +10,7 @@ import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.util.DPRoomImpl;
+import org.ogema.tools.resourcemanipulator.timer.CountDownDelayedExecutionTimer;
 import org.smartrplace.tissue.util.resource.ResourceHelperSP;
 
 import de.iwes.util.resource.ValueResourceHelper;
@@ -78,9 +80,21 @@ public class TimeProcUtil {
 		}
 		return refRes;
 	}
-	public static boolean initDefaultMeteringReferenceResource(long referenceTime, boolean forceUpdate, ResourceAccess resAcc) {
-		TimeResource ref = getDefaultMeteringReferenceResource(resAcc);
-		if((ref == null) || (!ref.isActive()) || forceUpdate) {
+	public static boolean initDefaultMeteringReferenceResource(long referenceTime, boolean forceUpdate, ApplicationManager appMan) {
+		TimeResource ref = getDefaultMeteringReferenceResource(appMan.getResourceAccess());
+		if(ref == null) {
+			new CountDownDelayedExecutionTimer(appMan, TimeProcUtil.HOUR_MILLIS) {
+				
+				@Override
+				public void delayedExecution() {
+					TimeResource ref = getDefaultMeteringReferenceResource(appMan.getResourceAccess());
+					if((ref != null) && ((!ref.isActive()) || forceUpdate))
+						ValueResourceHelper.setCreate(ref, referenceTime);
+				}
+			};
+			return false;
+		}
+		if((!ref.isActive()) || forceUpdate) {
 			ValueResourceHelper.setCreate(ref, referenceTime);
 			return true;
 		}

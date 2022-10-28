@@ -29,6 +29,7 @@ public interface TimedJobProvider extends LabelledItem {
 	
 	/** 0: No evaluation job
 	 *  1: standard evaluation job
+	 *  2: mass automation job (automation job type for which may be registered a lot of instances, mostly processed like an evaluation job)
 	 */
 	int evalJobType();
 	
@@ -41,7 +42,7 @@ public interface TimedJobProvider extends LabelledItem {
 	
 	/** Change the result of this to trigger another call to {@link #initConfigResource(TimedJobConfig)}
 	 * If "XXX" is returned then initConfigResource is called on every startup and no initversion control is used
-	 * @return
+	 * @return may be null or empty if only initial call is requested
 	 */
 	public String getInitVersion();
 

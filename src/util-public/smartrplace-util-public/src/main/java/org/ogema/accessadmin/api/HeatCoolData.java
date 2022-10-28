@@ -19,7 +19,7 @@ public class HeatCoolData extends SettingsBaseData {
 	public float minSetpointAuto;
 	public float maxSetpointAuto;
 	
-	public boolean ecoEqualsOff;
+	public Boolean ecoEqualsOff;
 	public Integer dayTypeSettingMode;
 	
 	public ValueVariance[] valueEval;
