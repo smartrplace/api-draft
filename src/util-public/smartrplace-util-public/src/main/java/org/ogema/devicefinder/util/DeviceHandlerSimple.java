@@ -8,6 +8,7 @@ import java.util.Map;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.schedule.AbsoluteSchedule;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
@@ -24,6 +25,7 @@ import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.tissue.util.resource.GatewaySyncUtil;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
@@ -100,6 +102,7 @@ if(Boolean.getBoolean("jobdebug")) {
 	 * @return
 	 */
 	protected abstract Collection<Datapoint> getDatapoints(T device, InstallAppDevice deviceConfiguration);
+	protected boolean addDeviceOrResourceListToSync() {return true;}
 	
 	/** The value and last contact labels are polled. You can adapt the poll rate here*/
 	protected long getLabelPollRate() {
@@ -217,6 +220,19 @@ if(Boolean.getBoolean("jobdebug")) {
 		if(knownDps == null) {
 			knownDps = getDatapoints(device, installDeviceRes);
 			knownDpsMap.put(installDeviceRes.getLocation(), knownDps);
+			
+			if(Boolean.getBoolean("org.smartrplace.apps.subgateway") && addDeviceOrResourceListToSync()) {
+				if(device.getLocation().startsWith("EvalCollection"))
+					return knownDps;
+				if(DeviceTableBase.isHomematic(device.getLocation()))
+					return knownDps;
+				Resource parentraw = device.getParent();
+				if(parentraw != null && ((parentraw instanceof ResourceList) ||
+						parentraw.getResourceType().equals(Resource.class)))
+					GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(parentraw, appMan.appMan());
+				else
+					GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(device, appMan.appMan());
+			}
 		}
 		return knownDps;			
 	}
