@@ -196,8 +196,8 @@ public class SubcustomerUtil {
 				&& (now - lastUpdate < MAX_UPDATE_INTERVAL))
 			return userEntry; //already in subcustomer
 
-		if(data.aggregationType().getValue() > 0)
-			ValueResourceHelper.setCreate(accessAdminConfigRes.subcustomerUserMode(), 1);
+		//if(data.aggregationType().getValue() > 0)
+		ValueResourceHelper.setCreate(accessAdminConfigRes.subcustomerUserMode(), 1);
 
 		lastRoomPermissionUpdate.put(userName, now);
 		/*boolean alreadyIn = false;

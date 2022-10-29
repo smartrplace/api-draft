@@ -39,8 +39,16 @@ public class GatewaySyncUtil {
 		if(gatewayIdBase == null)
 			gatewayIdBase = ViaHeartbeatUtil.getBaseGwId(GatewayUtil.getGatewayId(appMan.getResourceAccess()));
 		String resName = "replication_"+gatewayIdBase;
-		if(Boolean.getBoolean("org.smartrplace.apps.subgateway"))
-			return ResourceHelper.getOrCreateTopLevelResource(resName, GatewaySyncData.class, appMan);
+		if(Boolean.getBoolean("org.smartrplace.apps.subgateway")) {
+			GatewaySyncData gwSync = ResourceHelper.getOrCreateTopLevelResource(resName, GatewaySyncData.class, appMan);
+			String existing = getSyncEntry(gwSync, "rooms"); //,hardwareInstallConfig");
+			if(existing == null) {
+				gwSync.toplevelResourcesToBeSynchronized().create();
+				String sentry = "rooms:"+gatewayIdBase+":rooms:/"; //,hardwareInstallConfig:/";
+				ValueResourceUtils.appendValue(gwSync.toplevelResourcesToBeSynchronized(), sentry);
+			}
+			return gwSync;
+		}
 		GatewaySyncData result = ResourceHelper.getTopLevelResource(resName, GatewaySyncData.class, appMan.getResourceAccess());
 		if(result != null)
 			return result;
@@ -53,10 +61,12 @@ public class GatewaySyncUtil {
 	}
 	
 	public static String getSyncEntry(GatewaySyncData gws, Resource device) {
-		String loc = device.getLocation();
+		return getSyncEntry(gws, device.getLocation());
+	}
+	public static String getSyncEntry(GatewaySyncData gws, String resourceLocation) {
 		for(String s: gws.toplevelResourcesToBeSynchronized().getValues()) {
 			SyncEntry entry = new SyncEntry(s);
-			if(Arrays.asList(entry.resourcepaths).contains(loc))
+			if(Arrays.asList(entry.resourcepaths).contains(resourceLocation))
 				return s;
 		}
 		return null;
