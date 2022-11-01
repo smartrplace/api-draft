@@ -51,8 +51,8 @@ public interface DatapointDescAccess extends DatapointDesc {
 	boolean setSubRoomLocation(OgemaLocale locale, Object context, String value);
 	/** If the sub room location already exists and it does not contain the new String yet then
 	 * the new String is added with a hyphen
-	 * @param locale
-	 * @param context
+	 * @param locale may be null, not used in standard implementation
+	 * @param context may be null, not used in standard implementation
 	 * @param value
 	 * @param if true then the element will be added to the beginning of the String followed by a hyphen, otherwise appended
 	 * @return
