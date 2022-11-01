@@ -297,6 +297,8 @@ public class SubcustomerUtil {
 				accessAdminConfigRes.userPermissions());
 		if(userEntry == null)
 			return null;
+		if(userEntry.superGroups().size() == 0)
+			return getEntireBuildingSubcustomer(appMan);
 		
 		for(SubCustomerData subc: subcs) {
 			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
