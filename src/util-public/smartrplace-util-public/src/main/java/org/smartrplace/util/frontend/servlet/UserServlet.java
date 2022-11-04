@@ -472,6 +472,8 @@ public class UserServlet extends HttpServlet {
 		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap, false);
 		if(odata.objects == null || odata.objects.contains(null)) {
 			res.message = "In Userservlet object not found:"+odata.objectId+" Pageprov:"+pageprov.getClass().getName();
+			if(odata.objects != null)
+				res.message += " (Found objects #"+odata.objects.size()+")";
 			res.responseCode = HttpServletResponse.SC_NO_CONTENT;
 			if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 				System.out.println(res.message);
