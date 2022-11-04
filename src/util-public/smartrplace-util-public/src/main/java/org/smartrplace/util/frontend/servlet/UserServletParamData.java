@@ -14,8 +14,9 @@ public class UserServletParamData {
 	public UserServletParamData(Map<String, String[]> paramMap) {
 		this.paramMap = paramMap;
 		suppressNan = UserServletUtil.suppressNan(paramMap);
-		String structureStr = UserServlet.getParameter("structure", paramMap);
-		if(structureStr != null && structureStr.equals("list"))
+		//String structureStr = UserServlet.getParameter("structure", paramMap);
+		//if(structureStr != null && structureStr.equals("list"))
+		if(isStructureList(paramMap))
 			structureList = true;
 		provideExtended = UserServlet.getBoolean("extendedData", paramMap);
 		timeString = UserServlet.getParameter("time", paramMap);
@@ -52,4 +53,11 @@ public class UserServletParamData {
 	public String tsLocationOrBaseId = null;
 	
 	public Boolean hasWritePermission = null;
+	
+	public static boolean isStructureList(Map<String, String[]> paramMap) {
+		String structureStr = UserServlet.getParameter("structure", paramMap);
+		if(structureStr != null && structureStr.equals("list"))
+			return true;
+		return false;
+	}
 }
