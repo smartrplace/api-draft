@@ -292,82 +292,95 @@ public class UserServlet extends HttpServlet {
 		Map<String, String[]> paramMap = getParamMap(req);
 		addParametersFromUrl(req, paramMap);
 		doGet(req, resp, user, paramMap, isMobile);
+		
 	}
 	
 	/** Processed for any READING request if coming via GET or POST*/
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, Map<String, String[]> paramMap, boolean isMobile)
 			throws ServletException, IOException {
 		//String object = req.getParameter("object");
-		String fullURL = null;
-		if(logger.isDebugEnabled() || (user.equals("master_rest") ||
-				Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")))
-			fullURL = req.getRequestURL().toString();
-		if(user.equals("master_rest") ||
-				Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")) {
-			long now = appManPlus.getFrameworkTime();
-
-			LastAccessData lastAcc = UserServletUtil.getLastAccessDataForEvent(fullURL, now);
-
-			long start = -2;
-			long end = -1;
-			try {
-				start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
-				end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
-			} catch(NumberFormatException | NullPointerException e) {
-				start = -1;
-			}
-			lastAcc.lastStartTimeRequested = start;
-			lastAcc.lastEndTimeRequested = end;
-			lastAcc.user = user;
-		}
-		
-		String timeStr = UserServlet.getParameter("time", paramMap);
-		String returnStruct = UserServlet.getParameter("structure", paramMap);
-		//if(user == null) return;
-		String pageId1 = UserServlet.getParameter("page", paramMap);
-		List<String> pageList = null;
-		if(pageId1 == null) {
-			String pageIds = UserServlet.getParameter("pages", paramMap);
-			if(pageIds != null)
-				pageList = StringFormatHelper.getListFromString(pageIds);
-			else
-				pageId1 = stdPageId;
-		}
-		if(pageList == null) {
-			pageList = new ArrayList<>();
-			pageList.add(pageId1);
-		}
-		String pollStr = UserServlet.getParameter("poll", paramMap);
-		
-		JSONVarrRes result;
-		if(pageList.isEmpty())
-			throw new IllegalStateException("No page found!!");
-		else if(pageList.size() == 1) {
-			ServletPageProvider<?> pageMap = pages.get(pageList.get(0));
-			result = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageList.get(0), fullURL);			
-
-			incrementAccessCounter(pageList.get(0), isMobile);			
-		} else {
-			result = new JSONVarrRes();
-			result.result = new JSONObject();
-			for(String pageId: pageList) {
-				ServletPageProvider<?> pageMap = pages.get(pageId);
-				JSONVarrRes resultSub = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageId, fullURL);
-				if(resultSub.result != null)
-					result.result.put(pageId, resultSub.result);
-				else
-					result.result.put(pageId, resultSub.resultArr);
-
-				incrementAccessCounter(pageId, isMobile);				
-			}
-		}
-		resp.addHeader("content-type", "application/json;charset=utf-8");
 		String out;
-		if(result.result != null) {
-			out = result.result.toString();
-		} else {
-			out = result.resultArr.toString();
+		JSONVarrRes result = null;
+		String fullURL = null;
+		try {
+			if(logger.isDebugEnabled() || (user.equals("master_rest") ||
+					Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")))
+				fullURL = req.getRequestURL().toString();
+			if(user.equals("master_rest") ||
+					Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")) {
+				long now = appManPlus.getFrameworkTime();
+	
+				LastAccessData lastAcc = UserServletUtil.getLastAccessDataForEvent(fullURL, now);
+	
+				long start = -2;
+				long end = -1;
+				try {
+					start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
+					end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
+				} catch(NumberFormatException | NullPointerException e) {
+					start = -1;
+				}
+				lastAcc.lastStartTimeRequested = start;
+				lastAcc.lastEndTimeRequested = end;
+				lastAcc.user = user;
+			}
+			
+			String timeStr = UserServlet.getParameter("time", paramMap);
+			String returnStruct = UserServlet.getParameter("structure", paramMap);
+			//if(user == null) return;
+			String pageId1 = UserServlet.getParameter("page", paramMap);
+			List<String> pageList = null;
+			if(pageId1 == null) {
+				String pageIds = UserServlet.getParameter("pages", paramMap);
+				if(pageIds != null)
+					pageList = StringFormatHelper.getListFromString(pageIds);
+				else
+					pageId1 = stdPageId;
+			}
+			if(pageList == null) {
+				pageList = new ArrayList<>();
+				pageList.add(pageId1);
+			}
+			String pollStr = UserServlet.getParameter("poll", paramMap);
+			
+			if(pageList.isEmpty())
+				throw new IllegalStateException("No page found!!");
+			else if(pageList.size() == 1) {
+				ServletPageProvider<?> pageMap = pages.get(pageList.get(0));
+				result = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageList.get(0), fullURL);			
+	
+				incrementAccessCounter(pageList.get(0), isMobile);			
+			} else {
+				result = new JSONVarrRes();
+				result.result = new JSONObject();
+				for(String pageId: pageList) {
+					ServletPageProvider<?> pageMap = pages.get(pageId);
+					JSONVarrRes resultSub = getJSONWithPageIdDebugging(user, pollStr, timeStr, pageMap, returnStruct, paramMap, pageId, fullURL);
+					if(resultSub.result != null)
+						result.result.put(pageId, resultSub.result);
+					else
+						result.result.put(pageId, resultSub.resultArr);
+	
+					incrementAccessCounter(pageId, isMobile);				
+				}
+			}
+			resp.addHeader("content-type", "application/json;charset=utf-8");
+			if(result.result != null) {
+				out = result.result.toString();
+			} else {
+				out = result.resultArr.toString();
+			}
+			
+		} catch (Exception e) {
+			out = "An error occurred: " + e.toString();
+			logException(logger, e, "POST", 3, appManPlus);
+			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
+			//	e.printStackTrace();
+			if(result == null)
+				result = new JSONVarrRes();
+			result.responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
+
 		resp.getWriter().write(out);
 		if(logger.isDebugEnabled()) {
 			//String fullURL = req.getRequestURL().toString();
@@ -466,6 +479,7 @@ public class UserServlet extends HttpServlet {
 				logger.info("Servlet provider exception: {}", res.message);
 			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
+			logException(logger, null, res.message, 5, appManPlus);
 			return res;
 		}
 
@@ -482,6 +496,7 @@ public class UserServlet extends HttpServlet {
 				logger.info("Servlet provider exception2: {}", res.message);
 			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
+			logException(logger, null, res.message, 6, appManPlus);
 			return res;
 		}
 		
@@ -510,7 +525,7 @@ public class UserServlet extends HttpServlet {
 					continue;
 				objStr = pageprov.getObjectId(obj);
 			} catch(Exception e) {
-				logException(logger, e, fullUrl, appManPlus);
+				logException(logger, e, fullUrl, 4, appManPlus);
 				/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 					e.printStackTrace();
 					if(fullUrl != null)
@@ -613,7 +628,7 @@ public class UserServlet extends HttpServlet {
 				}
 				} catch(Exception e) {
 					subJson.put(jsonkey, e.toString());
-					logException(logger, e, fullUrl, appManPlus);
+					logException(logger, e, fullUrl, 3, appManPlus);
 					/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 						e.printStackTrace();
 					else
@@ -877,7 +892,7 @@ public class UserServlet extends HttpServlet {
 			status = odata.status; //HttpServletResponse.SC_OK;
 		} catch (Exception e) {
 			response = response + "An error occurred: " + e.toString();
-			logException(logger, e, "POST", appManPlus);
+			logException(logger, e, "POST", 2, appManPlus);
 			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 			//	e.printStackTrace();
 			status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -1117,8 +1132,28 @@ System.out.println("SUFIBSD");
 		}
 	}
 	
-	private static void logException(Logger logger, Exception e, String fullUrl, ApplicationManagerPlus appManPlus) {
-		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
+	//private static void logException(Logger logger, Exception e, String fullUrl, ApplicationManagerPlus appManPlus) {
+	//	logException(logger, e, fullUrl, 49, appManPlus);
+	//}
+	/** Log exception and write notification for alarming. Note that not another exception should be thrown when
+	 * this is called or logFileCheckNotification is written to avoid that the exception is caught in the UserServlet handling
+	 * later and a less specific error code overwrites the new one. If the duration is below 1msec inbetween the more specific
+	 * value may be lost even in the chart.
+	 * 
+	 * @param logger
+	 * @param e
+	 * @param fullUrl
+	 * @param exceptionCode
+	 * @param appManPlus
+	 */
+	private static void logException(Logger logger, Exception e, String fullUrl, int exceptionCode,
+			ApplicationManagerPlus appManPlus) {
+		if(e == null) {
+			if(fullUrl != null)
+				logger.info("Servlet provider incident for: "+fullUrl);
+			else
+				logger.info("Servlet provider incident with code: "+exceptionCode);
+		} else if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			e.printStackTrace();
 			if(fullUrl != null)
 				logger.trace("Servlet provider exception for: "+fullUrl, e);
@@ -1133,6 +1168,6 @@ System.out.println("SUFIBSD");
 		
 		if(appManPlus != null)
 			ValueResourceHelper.setCreate(
-					ResourceHelper.getLocalDevice(appManPlus.appMan()).logFileCheckNotification(), 2);
+					ResourceHelper.getLocalDevice(appManPlus.appMan()).logFileCheckNotification(), exceptionCode);
 	}
 }
