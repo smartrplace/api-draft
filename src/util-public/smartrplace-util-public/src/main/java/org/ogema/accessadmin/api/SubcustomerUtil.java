@@ -427,8 +427,15 @@ public class SubcustomerUtil {
 	
 	/** Data for a single room (pro forma base, real data in roomcontrol)*/
 	public static class SingleRoomSettingEvalBase {
+		/** Non-usage temperature, usage temperature; 
+		 * Note: We do not support special times for non-working days anymore. These are always overwritten. */
 		public float[] workingSpecialTemperature;
+		
+		/** Start time of usage and end time of usage, maybe just one element -1 if more complex <br>
+		 * Note: We do not support special times for non-working days anymore. These are always overwritten. */
 		public long[] workingSpecialTime;
+		
+		/** If this is true the nonworking setting may not be overwritten at all in the master mode*/
 		public boolean isNonWorkingSpecial;
 	}
 
