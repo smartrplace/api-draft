@@ -10,23 +10,6 @@ import de.iwes.widgets.template.LabelledItem;
 public interface TimedJobProvider extends LabelledItem {
 	void execute(long now, TimedJobMemoryData data);
 	
-	/** If this is true then the job cannot be started again*/
-	//Moved into TimedJobMemoryData
-	//boolean isExecuting();
-	
-	/** If true the job implementation or the application registring the job can
-	 * trigger the job directrly
-	 */
-	//default boolean canJobTriggerItself() {
-	//	return false;
-	//}
-	
-	/** Only relevant if {@link #canJobTriggerItself()} is true
-	 */
-	//default long lastTimeJobWasStarted() {
-	//	return -1;
-	//}
-	
 	/** 0: No evaluation job
 	 *  1: standard evaluation job
 	 *  2: mass automation job (automation job type for which may be registered a lot of instances, mostly processed like an evaluation job)
