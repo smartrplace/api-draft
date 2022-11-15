@@ -2,6 +2,8 @@ package org.ogema.timeseries.eval.simple.api;
 
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.simple.TimeResource;
@@ -203,5 +205,20 @@ public class TimeProcUtil {
 			idx++;
 		}
 		return true;
+	}
+	
+	public static String resultLoction(List<Datapoint> input, String className) {
+		JSONObject json = new JSONObject();
+		JSONArray args = new JSONArray();
+		for(Datapoint inp:input) {
+			args.put(inp.getLocation());
+		}
+		json.put(className, args);
+		String location = json.toString();
+		return location;
+	}
+
+	public static String getResultDpLocation(List<Datapoint> input, String className) {
+		return resultLoction(input, className)+"_SgInp";		
 	}
 }

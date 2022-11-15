@@ -452,12 +452,12 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			routers.add(nullRouterInstance);
 		}
 		long now = appMan.getFrameworkTime();
-		log.info("In timer of "+this.getClass().getSimpleName()+" found "+routers.size()+" routers to update.");
+		log.debug("In timer of "+this.getClass().getSimpleName()+" found "+routers.size()+" routers to update.");
 		Long deltaT;
 		if(now > nextEvalInterval) {
 			deltaT = now - intervalStart;
 			
-			log.info("In "+this.getClass().getSimpleName()+" write report resources for "+deltaT+" msec");
+			log.debug("In "+this.getClass().getSimpleName()+" write report resources for "+deltaT+" msec");
 			
 
 			intervalStart = nextEvalInterval;

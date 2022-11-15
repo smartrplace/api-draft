@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.ogema.core.channelmanager.measurements.FloatValue;
 import org.ogema.core.channelmanager.measurements.Quality;
 import org.ogema.core.channelmanager.measurements.SampledValue;
@@ -19,6 +17,7 @@ import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcSingleToSingle.ProcTsProvider;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 
@@ -34,6 +33,7 @@ import de.iwes.util.timer.AbsoluteTimeHelper;
  * be directly obtained from a single input datapoint with postfix as for {@link TimeseriesSetProcSingleToSingle}.
  * If you are using a Multi2Single predefined evaluation you still have to set the label afterwards. You should
  * set at least label(null) or label(ENGLISH).*/
+@Deprecated
 public abstract class TimeseriesSetProcMultiToSingle implements TimeseriesSetProcessor {
 
 	public static PerformanceLog tsSingleLog;
@@ -208,19 +208,9 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("Ret updateValues  "+dpLa
 	//protected abstract AggregationMode getMode(String tsLabel);
 	protected String resultLabel() {return label;}
 	public String resultLoction(List<Datapoint> input) {
-		return resultLoction(input, this.getClass().getName());
+		return TimeProcUtil.resultLoction(input, this.getClass().getName());
 	}
 
-	public static String resultLoction(List<Datapoint> input, String className) {
-		JSONObject json = new JSONObject();
-		JSONArray args = new JSONArray();
-		for(Datapoint inp:input) {
-			args.put(inp.getLocation());
-		}
-		json.put(className, args);
-		String location = json.toString();
-		return location;
-	}
 	
 	protected final String label;
 	//protected final int intervalType2;
@@ -334,7 +324,4 @@ if(tsSingleLog != null) tsSingleLog.logEvent((endOfCalc-startOfCalc), "Calculati
 		return result;
 	}
 
-	public static String getResultDpLocation(List<Datapoint> input, String className) {
-		return resultLoction(input, className)+"_SgInp";		
-	}
 }

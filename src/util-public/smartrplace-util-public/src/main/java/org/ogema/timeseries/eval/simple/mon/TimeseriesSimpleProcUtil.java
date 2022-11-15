@@ -27,6 +27,7 @@ import de.iwes.timeseries.eval.api.TimeSeriesData;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 
+@Deprecated
 public class TimeseriesSimpleProcUtil implements TimeseriesSimpleProcUtilBase { 
 	public static final int DEFAULT_UPDATE_MODE = 4;
 	

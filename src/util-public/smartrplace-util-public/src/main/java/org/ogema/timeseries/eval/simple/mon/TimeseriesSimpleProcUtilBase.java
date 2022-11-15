@@ -8,7 +8,6 @@ import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.util.AggregationModeProvider;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries;
-import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.smartrplace.gateway.device.MemoryTimeseriesPST;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog.GwSubResProvider;
@@ -17,6 +16,8 @@ import de.iwes.timeseries.eval.api.TimeSeriesData;
 
 public interface TimeseriesSimpleProcUtilBase {
 
+	@SuppressWarnings("deprecation")
+	/** Also used for TimeseriesSetProcMultiToSingle3.tsSingleLog, but no direct access possible at this position*/
 	public static void initStaticLogs(ApplicationManager appMan) {
 		TimeseriesSetProcMultiToSingle.tsSingleLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle.class.getName()+"_TSI",
 				new GwSubResProvider() {
@@ -31,6 +32,7 @@ public interface TimeseriesSimpleProcUtilBase {
 						return device.pstMultiToSingleCounter();
 					}
 				});
+		/** Also used for TimeseriesSetProcMultiToSingle3.aggregateLog, but no direct access possible at this position*/
 		TimeseriesSetProcMultiToSingle.aggregateLog = PerformanceLog.getInstance(true, appMan, TimeseriesSetProcMultiToSingle.class.getName()+"_AGG",
 				new GwSubResProvider() {
 					
@@ -70,7 +72,7 @@ public interface TimeseriesSimpleProcUtilBase {
 						return device.pstSubTsBuildCounter();
 					}
 				});
-		ProcessedReadOnlyTimeSeries2.uv2Log = PerformanceLog.getInstance(true, appMan, ProcessedReadOnlyTimeSeries2.class.getName()+"_UV2",
+		/*ProcessedReadOnlyTimeSeries2.uv2Log = PerformanceLog.getInstance(true, appMan, ProcessedReadOnlyTimeSeries2.class.getName()+"_UV2",
 				new GwSubResProvider() {
 					
 					@Override
@@ -82,8 +84,8 @@ public interface TimeseriesSimpleProcUtilBase {
 					public FloatResource getCounterResource(MemoryTimeseriesPST device) {
 						return device.pstUpdateValuesPS2Counter();
 					}
-				});
-		TimeSeriesServlet.tsServletLog = PerformanceLog.getInstance(true, appMan, TimeSeriesServlet.class.getName()+"_TSS",
+				});*/
+		/*TimeSeriesServlet.tsServletLog = PerformanceLog.getInstance(true, appMan, TimeSeriesServlet.class.getName()+"_TSS",
 				new GwSubResProvider() {
 					
 					@Override
@@ -95,7 +97,7 @@ public interface TimeseriesSimpleProcUtilBase {
 					public FloatResource getCounterResource(MemoryTimeseriesPST device) {
 						return device.pstTSServletCounter();
 					}
-				});
+				});*/
 	}
 	public List<Datapoint> process(String tsProcessRequest, List<Datapoint> input);
 	

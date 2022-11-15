@@ -11,10 +11,12 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
 
+@Deprecated
 public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetProcessor {
 	protected final Integer absoluteTiming;
 	/** Perform calculation on a certain input series.
@@ -53,7 +55,7 @@ public abstract class TimeseriesSetProcSingleToSingle implements TimeseriesSetPr
 	public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 		List<Datapoint> result = new ArrayList<>();
 		for(Datapoint tsdi: input) {
-			String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
+			String location = ProcessedReadOnlyTimeSeries3.getDpLocation(tsdi, labelPostfix);
 			ProcTsProvider provider = new ProcTsProvider() {
 				
 				@Override

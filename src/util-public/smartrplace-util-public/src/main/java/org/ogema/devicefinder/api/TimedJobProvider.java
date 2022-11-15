@@ -1,5 +1,6 @@
 package org.ogema.devicefinder.api;
 
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 import org.smartrplace.apps.eval.timedjob.TimedEvalJobConfig;
 import org.smartrplace.apps.eval.timedjob.TimedJobConfig;
 
@@ -36,4 +37,15 @@ public interface TimedJobProvider extends LabelledItem {
 	
 	default void timerStartedNotification(TimedJobMemoryData data) {}
 	default void timerStoppedNotification(TimedJobMemoryData data) {}
+	
+	/** Overwrite this for evaluation jobs that may register several providers for various datapoints*/
+	default String getType() {
+		if(evalJobType() == 0)
+			return "BASE_DEFAULT";
+		else if(evalJobType() == 1)
+			return "EVAL_DEFAULT";
+		return "TIMED_"+evalJobType()+"_DEFAULT";
+	}
+	
+	default ProcessedReadOnlyTimeSeries3 getEvaluationContext() {return null;}
 }

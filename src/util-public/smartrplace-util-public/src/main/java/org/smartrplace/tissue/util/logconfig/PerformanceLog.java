@@ -5,12 +5,14 @@ import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.simple.FloatResource;
-import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.gateway.device.MemoryTimeseriesPST;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
+/** A PerformanceLog organizes writing event messages to text log files and also notifications
+ * to data log resources. The latter functionality requires definition of a counter resource
+ * where events are counted and a singleEvent resource where an entry is written for each event.*/
 public abstract class PerformanceLog {
 	public static final int ZERO_COUNTER_REPORT_INTERVAL = 1000; //should be 10000
 	public static final long MINIUM_DURATION_TO_CONSOLE = 10;

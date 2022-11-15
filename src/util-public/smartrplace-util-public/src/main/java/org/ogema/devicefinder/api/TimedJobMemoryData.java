@@ -6,7 +6,7 @@ import org.smartrplace.apps.eval.timedjob.TimedJobConfig;
 /** Data for a TimedJob that is not stored persistently*/
 public interface TimedJobMemoryData {
 	public static final float MINIMUM_MINUTES_FOR_TIMER_START = 2.5f;
-	public static final long LOAD_REPORT_INTERVAL = 5*TimeProcUtil.MINUTE_MILLIS;
+	public static final long LOAD_REPORT_INTERVAL = 1*TimeProcUtil.MINUTE_MILLIS;
 	public static final long MIN_FREE_MEMORY_MB = Long.getLong("org.ogema.devicefinder.util.minfreemb", 200);
 	
 	public long lastRunStart();

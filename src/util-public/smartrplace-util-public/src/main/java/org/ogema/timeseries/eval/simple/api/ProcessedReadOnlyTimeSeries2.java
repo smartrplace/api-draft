@@ -23,7 +23,9 @@ import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
 import de.iwes.util.format.StringFormatHelper;
 
-/** Implementation of {@link ProcessedReadOnlyTimeSeries} that has an input time series and assumes that the 
+/** Do NOT use this class anymore, use only {@link ProcessedReadOnlyTimeSeries3} !
+ * 
+ * Implementation of {@link ProcessedReadOnlyTimeSeries} that has an input time series and assumes that the 
  * {@link ProcessedReadOnlyTimeSeries} as result shall have exactly one resulting SampledValue for each input
  * time stamp. The result values are requested via {@link #getResultValues(ReadOnlyTimeSeries, long, long, AggregationMode).
  * Further input series may be taken into account by the implementation, but the timestamps must be provided by
@@ -39,6 +41,7 @@ import de.iwes.util.format.StringFormatHelper;
  * @author dnestle
  *
  */
+@Deprecated
 public abstract class ProcessedReadOnlyTimeSeries2 extends ProcessedReadOnlyTimeSeries {
 	
 	public static PerformanceLog uv2Log;
@@ -253,7 +256,7 @@ if(uv2Log != null) uv2Log.logEvent(endCalc-startCalc, "Calculation of UV2 "+getS
 		} else {
 			String tsLocationOrBaseId;
 			if(getInputDp() != null) {
-				tsLocationOrBaseId = getDpLocation(getInputDp(), getLabelPostfix()); //getDp().getLocation()+getLocationPostifx();
+				tsLocationOrBaseId = ProcessedReadOnlyTimeSeries3.getDpLocation(getInputDp(), getLabelPostfix()); //getDp().getLocation()+getLocationPostifx();
 			} else {
 				tsLocationOrBaseId = tsdi.id()+getLocationPostifx();
 			}
@@ -292,15 +295,7 @@ if(uv2Log != null) uv2Log.logEvent(endCalc-startCalc, "Calculation of UV2 "+getS
 	public TimeSeriesDataImpl getTSDI() {
 		return tsdi;
 	}
-	
-	public static String getDpLocation(Datapoint dpSource, String locationPostfix) {
-if(dpSource == null || dpSource.getLocation() == null || locationPostfix == null)
-System.out.println(dpSource.getLocation());	
-		return getDpLocation(dpSource.getLocation(), locationPostfix);
-	}
-	public static String getDpLocation(String dpSource, String locationPostfix) {
-		return dpSource+locationPostfix;
-	}
+
 	/** See constructor documentation*/
 	public boolean isUpdateLastTimestampInSourceOnEveryCall() {
 		return updateLastTimestampInSourceOnEveryCall;

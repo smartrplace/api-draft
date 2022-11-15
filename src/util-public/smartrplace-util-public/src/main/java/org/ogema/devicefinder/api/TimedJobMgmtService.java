@@ -15,5 +15,9 @@ public interface TimedJobMgmtService {
 	
 	Collection<TimedJobMemoryData> getAllProviders();
 	
+	Collection<TimedJobMemoryData> getAllProviders(String type);
+	
+	Collection<String> getAllTypes();
+	
 	TimedJobMemoryData getProvider(String id);
 }

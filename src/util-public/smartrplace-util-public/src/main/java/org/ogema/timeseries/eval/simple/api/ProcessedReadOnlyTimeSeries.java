@@ -15,7 +15,6 @@ import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpGap;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.DatapointImpl;
-import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.tissue.util.logconfig.PerformanceLog;
@@ -66,7 +65,7 @@ import de.iwes.util.timer.AbsoluteTiming;
  * with existing data and any existing data in the range is deleted if this is the case. This avoids that the internal
  * list of SampledValues ({@link #values}) gets unordered etc. In some cases this may not be necessary and very
  * resource-costly, but in most typical cases this is the intended behavior.<br>
- * TODO 2: The caching management is especially critical for {@link TimeseriesSetProcMultiToSingle}
+ * TODO 2: The caching management is especially critical for TimeseriesSetProcMultiToSingle
  * that take several time series as input, oftentimes ProcessedReadOnlyTimeSeries themselves. Currently
  * we operate all such time series in updateMode=4, which means that any reported change in the input
  * data will lead to a complete recalculation. In typical online operation this is usually no problem and a

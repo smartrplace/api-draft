@@ -21,7 +21,6 @@ import org.ogema.devicefinder.api.TimedJobMemoryData;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
-import org.ogema.timeseries.eval.simple.mon.TimeseriesSetProcMultiToSingle;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
@@ -79,7 +78,7 @@ public abstract class ProcessedReadOnlyTimeSeries3 extends ProcessedReadOnlyTime
 	protected String getResultLocation() {return null;}
 	
 	/** Override usually **/
-	protected String getLabelPostfix() {return "";}
+	public String getLabelPostfix() {return "";}
 
 	/** May override*/
 	/** change startTime and endTime of parameter if necessary*/
@@ -221,13 +220,13 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	protected String getDpLocation() {
 		Datapoint dpIn = getInputDp();
 		if(dpIn != null)
-			return ProcessedReadOnlyTimeSeries2.getDpLocation(dpIn, getLabelPostfix());
+			return getDpLocation(dpIn, getLabelPostfix());
 		List<Datapoint> allInp = getInputDps();
 		if(allInp == null || allInp.isEmpty())
-			return ProcessedReadOnlyTimeSeries2.getDpLocation(getResultLocation(), getLabelPostfix());
-		String baseLoc = TimeseriesSetProcMultiToSingle.getResultDpLocation(
+			return getDpLocation(getResultLocation(), getLabelPostfix());
+		String baseLoc = TimeProcUtil.getResultDpLocation(
 				allInp, this.getClass().getName());
-		return ProcessedReadOnlyTimeSeries2.getDpLocation(baseLoc, getLabelPostfix());
+		return getDpLocation(baseLoc, getLabelPostfix());
 	}
 	
 	protected long lastIntervalCalculated = -1;
@@ -374,9 +373,17 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	 */
 	protected Map<String, Datapoint> dependentTimeseries;
 	public Datapoint getDependentTimeseries(String id) {
+		if(dependentTimeseries == null)
+			return null;
 		return dependentTimeseries.get(id);
 	};
+	/**
+	 * 
+	 * @return null if dependent timeseries is not set for the evaluation
+	 */
 	public Collection<Datapoint> getAllDependentTimeseries() {
+		if(dependentTimeseries == null)
+			return null;
 		return dependentTimeseries.values();
 	}
 
@@ -438,4 +445,12 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 		} return result;
 	}
 
+	public static String getDpLocation(Datapoint dpSource, String locationPostfix) {
+if(dpSource == null || dpSource.getLocation() == null || locationPostfix == null)
+System.out.println(dpSource.getLocation());	
+		return getDpLocation(dpSource.getLocation(), locationPostfix);
+	}
+	public static String getDpLocation(String dpSource, String locationPostfix) {
+		return dpSource+locationPostfix;
+	}
 }

@@ -163,8 +163,12 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		//} else {
 		//	this.alert = alert;
 			//isAlertNew = false;
-		}		
-		knownWidgets = new KnownWidgetHolder<T>(page, WidgetHelper.getValidWidgetId("knownWidgets"+pid()));
+		}
+		try  {
+			knownWidgets = new KnownWidgetHolder<T>(page, WidgetHelper.getValidWidgetId("knownWidgets"+pid()));
+		} catch(IllegalArgumentException e) {
+			throw e;
+		}
 		page.append(knownWidgets);
 		popMore1 = new ClosingPopup<T>(page, WidgetHelper.getValidWidgetId("popMore1"+pid()),
 				"More Information", true, ClosingMode.CLOSE) {

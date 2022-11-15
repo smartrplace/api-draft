@@ -10,7 +10,9 @@ import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
+import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries3;
 
+@Deprecated
 public abstract class TimeseriesSetProcSingleToSingleArg<T> extends TimeseriesSetProcSingleToSingle implements TimeseriesSetProcessorArg<T> {
 	protected abstract List<SampledValue> calculateValues(ReadOnlyTimeSeries timeSeries, long start,
 			long end, AggregationMode mode, ProcessedReadOnlyTimeSeries2 newTs2, T param);
@@ -33,7 +35,7 @@ public abstract class TimeseriesSetProcSingleToSingleArg<T> extends TimeseriesSe
 	public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService, T params) {
 		List<Datapoint> result = new ArrayList<>();
 		for(Datapoint tsdi: input) {
-			String location = ProcessedReadOnlyTimeSeries2.getDpLocation(tsdi, labelPostfix);
+			String location = ProcessedReadOnlyTimeSeries3.getDpLocation(tsdi, labelPostfix);
 			ProcTsProvider provider = new ProcTsProvider() {
 				
 				@Override

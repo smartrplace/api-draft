@@ -12,9 +12,7 @@ import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 import org.smartrplace.external.accessadmin.config.AccessConfigBase;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
 
-import de.iwes.util.resource.OGEMAResourceCopyHelper;
 import de.iwes.util.resource.ValueResourceHelper;
-import de.iwes.util.resource.OGEMAResourceCopyHelper.CopyParams;
 
 public class UserPermissionUtil {
 	public static final String SYSTEM_RESOURCE_ID = "system";
@@ -220,6 +218,26 @@ public class UserPermissionUtil {
 			PermissionCellData acc = UserPermissionUtil.getAccessConfig(object, userTypePermissionLabel);
 			acc.setOwnStatus(value);
 		}
+	}
+	public static float getConfigAccess(String userTypeName, String userTypePermissionLabel,
+			AccessAdminConfig appConfigData) {
+		List<AccessConfigUser> all = SubcustomerUtil.getUserGroups(false, true, appConfigData);
+		int countActive = 0;
+		int countBase = 0;
+		for(AccessConfigUser object: all) {
+			if(!object.name().getValue().equals(userTypeName))
+				continue;
+			PermissionCellData acc = UserPermissionUtil.getAccessConfig(object, userTypePermissionLabel);
+			Boolean val = acc.getOwnstatus();
+			if(val == null)
+				continue;
+			countBase++;
+			if(val)
+				countActive++;
+		}
+		if(countBase == 0)
+			return 0f;
+		return ((float)countActive)/countBase;
 	}
 	
 	public static ConfigurablePermission getUserAppAccessConfig(AccessAdminConfig appConfigData, String permissionID, UserStatus object,

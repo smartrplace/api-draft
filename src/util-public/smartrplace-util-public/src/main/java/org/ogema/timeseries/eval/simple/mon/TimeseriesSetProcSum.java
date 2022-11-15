@@ -3,6 +3,7 @@ package org.ogema.timeseries.eval.simple.mon;
 import org.ogema.devicefinder.api.DatapointInfo.AggregationMode;
 import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 
+@Deprecated
 public class TimeseriesSetProcSum extends TimeseriesSetProcMultiToSingle {
 	
 	/*public TimeseriesSetProcSum(String label) {
