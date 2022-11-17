@@ -530,6 +530,16 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 	
+	public static boolean isRelativeSetpointThermostat(Thermostat thermostat) {
+		//TODO: Differentiate whether these setpoints are available and whether they are used or
+		// absolute setpoints are used by roomcontrol
+		if(!Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints"))
+			return false;
+		if(thermostat.getLocation().contains("/RoomControls_") && thermostat.getName().equals("thermostat"))
+			return true;
+		return false;
+	}
+	
 	public static boolean isWeatherStation(String resourceLocation) {
 		if(resourceLocation.toLowerCase().startsWith("homematic") && resourceLocation.contains("HM_HM_WDS100_"))
 			return true;

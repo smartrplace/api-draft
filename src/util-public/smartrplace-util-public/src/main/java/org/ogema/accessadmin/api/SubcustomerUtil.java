@@ -642,7 +642,9 @@ public class SubcustomerUtil {
 				case "User Standard":
 				case "Secretary":
 				case "Facility Manager":
+				case "Manager":
 				case "Master Administrator":
+				case "Organisation Administrator":
 					AccessConfigBase configRes = userPerm.roompermissionData();
 					UserPermissionUtil.addPermission(allRoomsGroup.getLocation(), UserPermissionService.USER_ROOM_PERM, configRes);
 				}

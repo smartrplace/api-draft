@@ -36,8 +36,8 @@ public enum UserStatus {
 	public static final String DISPLAY_NAME = "Display User";
 	public static final String USER_STD_NAME = "User Standard";
 	public static final String SECRETARY_NAME = "Secretary";
-	public static final String FACILITY_MAN_NAME = "Facility Manager";
-	public static final String SUPERADMIN_NAME = "Master Administrator";
+	public static final String FACILITY_MAN_NAME = "Manager";
+	public static final String SUPERADMIN_NAME = "Organisation Administrator";
 	
 	public static String getLabel(UserStatus obj, OgemaLocale locale) {
 		switch(obj) {

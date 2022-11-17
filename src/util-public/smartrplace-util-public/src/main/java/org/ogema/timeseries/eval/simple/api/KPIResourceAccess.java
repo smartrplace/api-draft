@@ -99,6 +99,16 @@ public class KPIResourceAccess {
 		}
 		return null;
 	}
+	public static Room getRealRoomAlsoByLocation(String shortNameOrLocation, ResourceAccess resAcc) {
+		List<Room> result = resAcc.getResources(Room.class);
+		for(Room room: result) {
+			if(ResourceUtils.getHumanReadableShortName(room).equals(shortNameOrLocation))
+				return room;
+			if(room.getLocation().equals(shortNameOrLocation))
+				return room;
+		}
+		return null;
+	}
 	
 	public static FloatResource getDefaultPriceResource(UtilityType type, ApplicationManager appMan) {
 		switch(type) {
