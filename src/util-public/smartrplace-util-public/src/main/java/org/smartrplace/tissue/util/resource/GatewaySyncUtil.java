@@ -1,17 +1,30 @@
 package org.smartrplace.tissue.util.resource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.array.StringArrayResource;
+import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.devicefinder.api.DeviceHandlerProviderDP;
+import org.ogema.model.locations.Location;
+import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.PhysicalElement;
+import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
+import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
+import org.smartrplace.gateway.device.CascadingData;
 import org.smartrplace.model.sync.mqtt.GatewaySyncData;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
+import de.iwes.util.resource.ValueResourceHelper;
 
 public class GatewaySyncUtil {
 	public static String registerToplevelDeviceForSyncAsClient(Resource device, ApplicationManager appMan) {
@@ -118,5 +131,146 @@ public class GatewaySyncUtil {
 			}
 		}
 		return stdListName;
+	}
+	
+	/**
+	 * 
+	 * @param gatewayBaseId
+	 * @param resAcc
+	 * @return usually of type {@link CascadingData}
+	 */
+	public static Resource getGatewayResource(String gatewayBaseId, ResourceAccess resAcc) {
+		return resAcc.getResource("gw"+gatewayBaseId);
+	}
+	/**
+	 * 
+	 * @param gatewayBaseId
+	 * @param resAcc
+	 * @return usually of type {@link CascadingData}
+	 */
+	public static Resource getOrCreateGatewayResource(String gatewayBaseId, ApplicationManager appMan) {
+		Resource result = getGatewayResource(gatewayBaseId, appMan.getResourceAccess());
+		if(result != null)
+			return result;
+		return ResourceHelper.getOrCreateTopLevelResource("gw"+gatewayBaseId, CascadingData.class, appMan);
+	}
+	
+	public static String getGatewayBaseId(GatewaySyncData syncData) {
+		String[] els = syncData.getName().split("_");
+		String last = els[els.length-1];
+		if(last.length() > 3 && last.length() <= GatewayUtil.GATWAYID_MAX_LENGTH)
+			return last;
+		return null;
+	}
+
+	/** Update all device room locations based on {@link GatewaySyncData#deviceNames()}*/
+	public static int setDeviceRoomLocations(GatewaySyncData syncData, ApplicationManager appMan) {
+		String gatewayBaseId = getGatewayBaseId(syncData);
+		if(gatewayBaseId == null)
+			return 0;
+		Resource gatewayResource = getGatewayResource(gatewayBaseId, appMan.getResourceAccess());
+		if(!syncData.deviceNames().isActive())
+			return 0;
+		String[] entries = syncData.deviceNames().getValues();
+		int count = 0;
+		for(String deviceNamesEntry: entries) {
+			if(setDeviceRoom(deviceNamesEntry, gatewayResource, appMan) != null)
+				count++;
+		}
+		return count;
+	}
+	
+	public static Room setDeviceRoom(String deviceNamesEntry, Resource gatewayResource, ApplicationManager appMan) {
+		String[] els = deviceNamesEntry.split(",");
+		if(els.length != 2)
+			return null;
+		String deviceRoomLocation = els[0];
+		String roomNameOrLocation = els[1];
+		return setDeviceRoom(deviceRoomLocation, roomNameOrLocation, gatewayResource, appMan);
+	}
+	
+	/**
+	 * 
+	 * @param deviceRoomLocation
+	 * @param roomNameOrLocation
+	 * @param gatewayResource usually of type {@link CascadingData}
+	 * @param appMan
+	 * @return
+	 */
+	public static Room setDeviceRoom(String deviceRoomLocation, String roomNameOrLocation, 
+			Resource gatewayResource, ApplicationManager appMan) {
+		Room roomRes = ResourceHelper.getSubResource(gatewayResource, deviceRoomLocation, Room.class);
+		if(roomRes == null)
+			return null;
+		Room destRoom = KPIResourceAccess.getRealRoomAlsoByLocation(roomNameOrLocation, appMan.getResourceAccess());
+		if(destRoom == null)
+			return null;
+		if(roomRes.equalsLocation(destRoom))
+			return null;
+		roomRes.setAsReference(destRoom);
+		return roomRes;
+	}
+
+	public static void writeDeviceNamesEntriesOnSuperior(GatewaySyncData gwSyncData, Resource gatewayRes) {
+		StringArrayResource deviceNames = gwSyncData.deviceNames();
+		List<Location> allLocations = gatewayRes.getSubResources(Location.class, true);
+		for(Location loc: allLocations) {
+			if(!loc.room().isReference(false))
+				continue;
+			writeDeviceNamesEntry(loc.room(), deviceNames, true);
+		}
+	}
+
+	public static void writeDeviceNamesEntriesOnSubGw(GatewaySyncData gwSyncData, DatapointService dpService) {
+		StringArrayResource deviceNames = gwSyncData.deviceNames();
+		
+		List<DeviceHandlerProviderDP<?>> provs = dpService.getDeviceHandlerProviders();
+		for(DeviceHandlerProviderDP<?> prov: provs) {
+			if(!prov.addDeviceOrResourceListToSync())
+				continue;
+			Collection<InstallAppDevice> allOfProv = dpService.managedDeviceResoures(prov.id(), false, true);
+			for(InstallAppDevice iad: allOfProv) {
+				if(iad.device().getLocation().startsWith("EvalCollection"))
+					continue;
+				Location loc = ((PhysicalElement)iad.device().getLocationResource()).location();
+				if(!loc.room().isReference(false))
+					continue;
+				writeDeviceNamesEntry(loc.room(), deviceNames, false);
+			}
+		}
+	}
+
+	public static String writeDeviceNamesEntry(Room deviceLocationRoom, StringArrayResource deviceNames, boolean isSuperiorSystem) {
+		String deviceRoomLocation;
+		if(isSuperiorSystem) {
+			String fullLoc = deviceLocationRoom.getPath();
+			int firstDel = fullLoc.indexOf('/');
+			if(firstDel < 1 || firstDel == (fullLoc.length()-1))
+				return null;
+			deviceRoomLocation = fullLoc.substring(firstDel+1);
+		} else
+			deviceRoomLocation = deviceLocationRoom.getPath();
+		String roomName = ResourceUtils.getHumanReadableShortName(deviceLocationRoom);
+		if(roomName.contains(","))
+			roomName = deviceLocationRoom.getLocation();
+		String result = deviceRoomLocation+","+roomName;
+
+		//Remove existing
+		String[] existingVals = deviceNames.getValues();
+		List<String> newVals = new ArrayList<>();
+		for(String deviceNamesEntry: existingVals) {
+			String[] els = deviceNamesEntry.split(",");
+			if(els.length != 2) {
+				//Clean up corrupt entries
+				continue;
+			}
+			if(els[0].equals(deviceRoomLocation))
+				continue;
+			newVals.add(deviceNamesEntry);
+		}
+		newVals.add(result);
+		ValueResourceHelper.setCreate(deviceNames, newVals.toArray(new String[0]));
+		
+		return result;
 	}
 }

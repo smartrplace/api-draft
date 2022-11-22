@@ -25,6 +25,7 @@ import java.util.Map;
 import org.ogema.core.model.Resource;
 import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.devicefinder.util.DeviceTableBase;
 import org.smartrplace.util.format.StringListFormatUtils;
 
 import de.iwes.timeseries.eval.api.TimeSeriesData;
@@ -118,12 +119,14 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 	}
 	
 	public static String getDeviceShortIdPlus(String location) {
+		location = DeviceTableBase.makeDeviceToplevel(location);
 		if(location.toLowerCase().startsWith("homematic")) {
 			return ":HM"+getDeviceShortId(location);
 		}
 		return getDeviceShortId(location);
 	}
 	public static String getDeviceShortId(String location) {
+		location = DeviceTableBase.makeDeviceToplevel(location);
 		String[] parts = location.split("/");
 		//if(parts.length < 3) return "?S?";
 		if(!(parts[0].toLowerCase().startsWith("homematic"))) {

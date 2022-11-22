@@ -7,6 +7,8 @@ import org.ogema.model.gateway.LocalGatewayInformation;
 import de.iwes.util.resource.ResourceHelper;
 
 public class GatewayUtil {
+	public static final int GATWAYID_MAX_LENGTH = 12;
+
 	public static String getGatewayId(ResourceAccess resAcc, String defaultValue) {
 		String result = getGatewayId(resAcc);
 		if(result != null)

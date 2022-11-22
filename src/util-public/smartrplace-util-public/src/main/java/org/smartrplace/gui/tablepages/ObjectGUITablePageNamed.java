@@ -35,6 +35,25 @@ public abstract class ObjectGUITablePageNamed <T, R extends Resource> extends Ob
 		else
 			vh.stringLabel(getTypeName(null), "name"+id, getLabel(object, req), row);
 	};
+	/** In this version you get back the name value
+	 * 
+	 * @param object
+	 * @param vh
+	 * @param id
+	 * @param row
+	 * @param req
+	 * @return name value
+	 */
+	protected String addNameLabelPlus(T object, ObjectResourceGUIHelper<T, R> vh, String id, Row row,
+			OgemaHttpRequest req) {
+		String name;
+		if(req == null)
+			name = "init";
+		else
+			name = getLabel(object, req);
+		vh.stringLabel(getTypeName(null), "name"+id, name, row);
+		return name;
+	};
 
 	@Override
 	public void addWidgetsAboveTable() {

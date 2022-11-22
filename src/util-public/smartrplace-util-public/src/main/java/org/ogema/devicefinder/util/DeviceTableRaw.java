@@ -435,6 +435,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	 * @return
 	 */
 	public static String getDatapointSubname(String dpLocation) {
+		dpLocation = DeviceTableBase.makeDeviceToplevel(dpLocation);
 		if(dpLocation.toLowerCase().contains("vekin") && dpLocation.contains("/CH")) {
 			String[] els = dpLocation.split("/CH", 2);
 			if(els.length == 2) {
@@ -519,6 +520,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static boolean isTempHumSens(String resourceLocation) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(isWeatherStation(resourceLocation))
 			return false;
 		if(isFALorFALMOT(resourceLocation))
@@ -541,12 +543,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static boolean isWeatherStation(String resourceLocation) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.toLowerCase().startsWith("homematic") && resourceLocation.contains("HM_HM_WDS100_"))
 			return true;
 		return false;
 	}
 	
 	public static boolean isFALorFALMOT(String resourceLocation) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.toLowerCase().startsWith("homematic") && (
 				resourceLocation.contains("FAL230_") || resourceLocation.contains("FAL24_") ||resourceLocation.contains("FALMOT_")))
 			return true;
@@ -554,11 +558,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 
 	public static boolean isDimmerSensorDevice(String resourceLocation) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.toLowerCase().startsWith("vekin"))
 			return true;
 		return false;
 	}
 	public static boolean isSmartProtectDevice(String resourceLocation) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.toLowerCase().startsWith("livy"))
 			return true;
 		return false;
@@ -575,6 +581,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return count;
 	}
 	public static boolean isGasEnergyCamDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(subResources == null)
 			return false;
 		if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.toLowerCase().startsWith("JMBUS_BASE")
@@ -601,6 +608,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return foundVolume;
 	}
 	public static boolean isWaterMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.startsWith("MBusReadings/WATER_METER_") ||
 				resourceLocation.startsWith("MBusReadings/WARM_WATER_METER_"))
 			return true;
@@ -625,6 +633,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return foundVolume;
 	}
 	public static boolean isHeatMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(subResources == null)
 			return false;
 		if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.toLowerCase().startsWith("JMBUS_BASE")
@@ -640,16 +649,19 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return foundEnergy;
 	}
 	public static boolean isHeatCostAllocatorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.startsWith("MBusReadings/HEAT_COST_ALLOCATOR_"))
 			return true;
 		return false;
 	}
 	public static boolean isSmokeDetectorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.startsWith("MBusReadings/SMOKE_DETECTOR_"))
 			return true;
 		return false;
 	}
 	public static boolean isWiredMBusMasterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.startsWith("MBusReadings/BUS_SYSTEM_COMPONENT_"))
 			return true;
 		return false;
@@ -662,6 +674,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	//TODO: Add device handler for this type
 	public static boolean isCO2wMBUSDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(subResources == null)
 			return false;
 		//do not accept if subResource size fits GasEnergyCam
@@ -690,6 +703,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static boolean isOpenWeatherMapSensorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		return resourceLocation.startsWith("BigBlueRoom") || resourceLocation.startsWith("WeatherData");
 	}
 	
@@ -699,6 +713,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 
 	/** For {@link ElectricityConnectionBox} devices*/
 	public static boolean isEnergyServerDevice(String resourceLocation) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.startsWith("EnergyServerReadings_ESE/ESE_"))
 			return true;
 		return false;

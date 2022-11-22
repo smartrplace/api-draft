@@ -5,13 +5,13 @@ import java.util.List;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
-import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.tissue.util.resource.GatewayUtil;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -130,6 +130,7 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	}
 	
 	public static String getHomematicCCUId(String location) {
+		location = makeDeviceToplevel(location);
 		String[] parts = location.split("/");
 		String tail;
 		if(parts[0].toLowerCase().startsWith("homematicip")) {
@@ -156,6 +157,7 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	 * 3: via CCU homematicIP
 	 */
 	public static int getHomematicType(String location) {
+		location = makeDeviceToplevel(location);
 		String loclow = location.toLowerCase();
 		if(loclow.startsWith("homematichg"))
 			return 1;
@@ -165,6 +167,22 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 			return 3;
 		}
 		return 0;
+	}
+	
+	public static String makeDeviceToplevel(String deviceLocation) {
+		if(!Boolean.getBoolean("org.ogema.devicefinder.util.supportcascadedccu"))
+			return deviceLocation;
+		if(!deviceLocation.startsWith("gw"))
+			return deviceLocation;
+		int firstDel = deviceLocation.indexOf('/');
+		// substring(2, firstDel) must return at least 4 characters for a valid gatewayID
+		if(firstDel < 6 || firstDel == (deviceLocation.length()-1))
+			return deviceLocation;
+		String gatewayId = deviceLocation.substring(2, firstDel);
+		if(gatewayId.length() > GatewayUtil.GATWAYID_MAX_LENGTH)
+			return deviceLocation;
+		String result = deviceLocation.substring(firstDel+1);
+		return result;
 	}
 	
 	public DynamicTable<InstallAppDevice> getMainTable() {

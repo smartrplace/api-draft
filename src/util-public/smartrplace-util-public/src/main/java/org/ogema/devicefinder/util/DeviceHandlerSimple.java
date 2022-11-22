@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.util;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +103,6 @@ if(Boolean.getBoolean("jobdebug")) {
 	 * @return
 	 */
 	protected abstract Collection<Datapoint> getDatapoints(T device, InstallAppDevice deviceConfiguration);
-	protected boolean addDeviceOrResourceListToSync() {return true;}
 	
 	/** The value and last contact labels are polled. You can adapt the poll rate here*/
 	protected long getLabelPollRate() {
@@ -218,9 +218,13 @@ if(Boolean.getBoolean("jobdebug")) {
 		}
 		Collection<Datapoint> knownDps = knownDpsMap.get(installDeviceRes.getLocation());
 		if(knownDps == null) {
-			knownDps = getDatapoints(device, installDeviceRes);
-			knownDpsMap.put(installDeviceRes.getLocation(), knownDps);
-			
+			try {
+				knownDps = getDatapoints(device, installDeviceRes);
+				knownDpsMap.put(installDeviceRes.getLocation(), knownDps);
+			} catch(ClassCastException e) {
+				(new IllegalStateException("Wrong device type: "+installDeviceRes.getName(), e)).printStackTrace();
+				return Collections.emptyList();
+			}
 			if(Boolean.getBoolean("org.smartrplace.apps.subgateway") && addDeviceOrResourceListToSync()) {
 				if(device.getLocation().startsWith("EvalCollection"))
 					return knownDps;

@@ -150,5 +150,5 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default void initAlarmingForDevice(InstallAppDevice appDevice,
 			HardwareInstallConfig appConfigData) {}
 
-
+	default boolean addDeviceOrResourceListToSync() {return true;}
 }
