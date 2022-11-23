@@ -82,7 +82,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			if(gwUrl != null) {
 				vh.linkingButton("GUI", id, object, row, "To GW", gwUrl+"/ogema/index.html");
 				if(isOperationStandardPage) {
-					vh.linkingButton("Op Link", id, object, row, "Summer Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
+					vh.linkingButton("Op Link", id, object, row, "Apps for Admin", gwUrl+"/org/smartrplace/external/accessadmin/userstatus.html");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 					vh.stringEdit("Operation Status", id, dev.installationComment(), row, alert);
 				}
