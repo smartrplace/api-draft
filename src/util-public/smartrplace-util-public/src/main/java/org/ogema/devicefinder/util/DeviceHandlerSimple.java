@@ -128,7 +128,7 @@ if(Boolean.getBoolean("jobdebug")) {
 					String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 
 				@SuppressWarnings("unchecked")
-				final T box = (T)addNameWidget(object, vh, id, req, row, appMan, config.showOnlyBaseCols());
+				final T box = (T)addNameWidget(object, vh, id, req, row, appMan, config.showOnlyBaseCols()).getLocationResource();
 
 				if(req == null) {
 					vh.registerHeaderEntry("Value");

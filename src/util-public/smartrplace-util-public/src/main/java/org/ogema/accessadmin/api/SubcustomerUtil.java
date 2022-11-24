@@ -1,6 +1,7 @@
 package org.ogema.accessadmin.api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -337,13 +338,20 @@ public class SubcustomerUtil {
 		return result ;
 	}
 	
+	public static List<SubCustomerData> getAllDataForUserSafe(String userName, ApplicationManager appMan) {
+		return getAllDataForUser(userName, appMan, false);
+	}
+	public static List<SubCustomerData> getAllDataForUser(String userName, ApplicationManager appMan) {
+		return getAllDataForUser(userName, appMan, true);
+	}
 	/** This method always returns the sub customers configured for a user independently of
 	 * {@link AccessAdminConfig#subcustomerUserMode()}
 	 * @param userName
 	 * @param appMan
-	 * @return
+	 * @return null of user has no permission entry (yet)
 	 */
-	public static List<SubCustomerData> getAllDataForUser(String userName, ApplicationManager appMan) {
+	public static List<SubCustomerData> getAllDataForUser(String userName, ApplicationManager appMan,
+			boolean returnNullIfNoUserEntry) {
 		List<SubCustomerData> result = new ArrayList<>();
 		
 		List<SubCustomerData> subcs = getSubcustomers(appMan);
@@ -351,8 +359,12 @@ public class SubcustomerUtil {
 		
 		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
 				accessAdminConfigRes.userPermissions());
-		if(userEntry == null)
-			return null;
+		if(userEntry == null) {
+			if(returnNullIfNoUserEntry)
+				return null;
+			else
+				return Collections.emptyList();
+		}
 		
 		for(SubCustomerData subc: subcs) {
 			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),

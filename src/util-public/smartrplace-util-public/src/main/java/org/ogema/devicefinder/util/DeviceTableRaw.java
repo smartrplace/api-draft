@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.accessadmin.api.SubcustomerUtil;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
@@ -36,6 +37,7 @@ import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.virtual.device.config.VirtualThermostatConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.external.accessadmin.config.SubCustomerData;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
@@ -186,6 +188,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static Map<Room, String> roomsToSet = new HashMap<>();
+	public static Map<SubCustomerData, String> tenantsToSet = new HashMap<>();
 	private static long lastUpdate = -1;
 	protected void addRoomWidget(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
@@ -213,6 +216,33 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		vh.referenceDropdownFixedChoice(columnName, id, deviceRoom, row, roomsToSet, 3);
 	}
 	
+	public static void addTenantWidgetStatic(ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan,
+			PhysicalElement device) {
+		SubCustomerData subc = device.location().getSubResource("tenant", SubCustomerData.class);
+		addTenantWidgetStatic(vh, id, req, row, appMan, subc, "Tenant");
+	}
+	public static void addTenantWidgetStatic(ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan,
+			SubCustomerData deviceTenant) {
+		addTenantWidgetStatic(vh, id, req, row, appMan, deviceTenant, "Tenant");
+	}
+	public static void addTenantWidgetStatic(ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, ApplicationManager appMan,
+			SubCustomerData deviceTenant, String columnName) {
+		long now = appMan.getFrameworkTime();
+		if(now - lastUpdate > 10000) {
+			List<SubCustomerData> allTenants = SubcustomerUtil.getSubcustomers(appMan);
+			Map<SubCustomerData, String> tenantsToSetLoc = new HashMap<>();
+			for(SubCustomerData tenant: allTenants) {
+				tenantsToSetLoc.put(tenant, ResourceUtils.getHumanReadableShortName(tenant));
+			}
+			tenantsToSet = tenantsToSetLoc;
+			lastUpdate = now;
+		}
+		vh.referenceDropdownFixedChoice(columnName, id, deviceTenant, row, tenantsToSet, 3);
+	}
+
 	protected void addSubLocation(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row) {
 		addSubLocationStatic(object, vh, id, req, row, alert);
