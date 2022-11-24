@@ -1,6 +1,7 @@
 package org.ogema.accessadmin.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -223,7 +224,7 @@ public class SubcustomerUtil {
 		if(subcustGroupRooms == null)
 			throw new IllegalStateException("Room Group for Subcustomer "+data.getLocation() + " missing!");
 		//List<Room> subcustRooms = subcustGroupRooms.rooms().getAllElements();*/
-		Set<Room> subcustRooms = getUserRoomsBySubcustomers(userName, appMan.appMan());
+		Collection<Room> subcustRooms = getUserRoomsBySubcustomers(userName, appMan.appMan());
 		for(Room room: all) {
 			boolean hasAccess;
 			if(ResourceHelper.containsLocation(subcustRooms, room))
@@ -265,7 +266,7 @@ public class SubcustomerUtil {
 	}
 	
 	public static AccessConfigUser removeUserFromSubcustomer(String userName, SubCustomerData data,
-			ApplicationManager appMan) {
+			ApplicationManagerPlus appMan) {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
 		AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
 				accessAdminConfigRes.userPermissions());
@@ -278,6 +279,8 @@ public class SubcustomerUtil {
 			return null;
 		
 		ResourceListHelper.removeReferenceOrObject(userEntry.superGroups(), subcustGroup);	
+
+		setUserRoomPermissions(userName, userEntry, appMan);
 
 		return userEntry;
 	}
@@ -326,7 +329,12 @@ public class SubcustomerUtil {
 		return selected;
 	}
 
-	public static Set<Room> getUserRoomsBySubcustomers(String userName, ApplicationManager appMan) {
+	public static Collection<Room> getUserRoomsBySubcustomers(String userName, ApplicationManager appMan) {
+		
+		SubCustomerData activeSubcust = SubcustomerUtil.getDataForUser(userName, appMan, true, true);
+		if((activeSubcust != null) && (activeSubcust.aggregationType().getValue() > 0)) {
+			return KPIResourceAccess.getRealRooms(appMan.getResourceAccess());
+		}
 		List<SubCustomerData> subcdlist = getAllDataForUser(userName, appMan);
 		Set<Room> result = new HashSet<>();
 		for(SubCustomerData subc: subcdlist) {
