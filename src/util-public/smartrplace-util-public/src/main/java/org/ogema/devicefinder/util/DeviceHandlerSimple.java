@@ -104,6 +104,20 @@ if(Boolean.getBoolean("jobdebug")) {
 	 */
 	protected abstract Collection<Datapoint> getDatapoints(T device, InstallAppDevice deviceConfiguration);
 	
+	/** Overwrite this method to set own column titles. If you define new titles you should add respective row-widgets via
+	 * {@link #addMoreValueWidgets(InstallAppDevice, PhysicalElement, ObjectResourceGUIHelper, String, OgemaHttpRequest, Row, ApplicationManager, Alert)}
+	 * @return if true the device handler has set own titles, otherwise the default titles will be used. Note that additional titles can just be
+	 * 		provided via addMoreValueWidgets, this method is only required if standard columns shall be omitted or new entries shall be put before the
+	 * 		standard columns
+	 */
+	protected boolean setColumnTitlesToUse(ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh) {
+		return false;
+	}
+	/** Overwrite this to provide a special value title e.g. including unit information */
+	protected String getValueTitle() {
+		return "Value";
+	}
+	
 	/** The value and last contact labels are polled. You can adapt the poll rate here*/
 	protected long getLabelPollRate() {
 		return DEFAULT_POLL_RATE;
@@ -127,11 +141,18 @@ if(Boolean.getBoolean("jobdebug")) {
 			public void addWidgets(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh,
 					String id, OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 
+				if(req == null) {
+					if(setColumnTitlesToUse(vh)) {
+						appSelector.addWidgetsExpert(DeviceHandlerSimple.this, object, vh, id, req, row, appMan);
+						return;
+					}
+				}
+				
 				@SuppressWarnings("unchecked")
 				final T box = (T)addNameWidget(object, vh, id, req, row, appMan, config.showOnlyBaseCols()).getLocationResource();
 
 				if(req == null) {
-					vh.registerHeaderEntry("Value");
+					vh.registerHeaderEntry(getValueTitle());
 					vh.registerHeaderEntry("Last Contact");
 				} else {
 					Label valueLabel;
@@ -144,20 +165,20 @@ if(Boolean.getBoolean("jobdebug")) {
 					SingleValueResource sampleSensor = getMainSensorValue(box, object);
 					if((valueLabel == null) && (sampleSensor != null)) {
 						if(sampleSensor instanceof FloatResource)
-							valueLabel = vh.floatLabel("Value", id, (FloatResource)sampleSensor, row, "%.1f");
+							valueLabel = vh.floatLabel(getValueTitle(), id, (FloatResource)sampleSensor, row, "%.1f");
 						else if(sampleSensor instanceof IntegerResource)
-							valueLabel = vh.intLabel("Value", id, (IntegerResource)sampleSensor, row, 0);
+							valueLabel = vh.intLabel(getValueTitle(), id, (IntegerResource)sampleSensor, row, 0);
 						else if(sampleSensor instanceof TimeResource) {
 							if(sampleSensor.getName().contains("cnt") || sampleSensor.getName().contains("count"))
-								valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 7);
+								valueLabel = vh.timeLabel(getValueTitle(), id, (TimeResource)sampleSensor, row, 7);
 							else
-								valueLabel = vh.timeLabel("Value", id, (TimeResource)sampleSensor, row, 0);
+								valueLabel = vh.timeLabel(getValueTitle(), id, (TimeResource)sampleSensor, row, 0);
 						} else if(sampleSensor instanceof BooleanResource)
-							valueLabel = vh.booleanLabel("Value", id, (BooleanResource)sampleSensor, row, 0);
+							valueLabel = vh.booleanLabel(getValueTitle(), id, (BooleanResource)sampleSensor, row, 0);
 						else
 							throw new IllegalStateException("Unsupported sensor type: "+sampleSensor.getResourceType().getName());
 					} else {
-						row.addCell("Value", valueLabel);
+						row.addCell(getValueTitle(), valueLabel);
 					}
 					if(sampleSensor != null) {
 						Label lastContact = addLastContact(vh, id, req, row, sampleSensor);
