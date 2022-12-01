@@ -1156,9 +1156,9 @@ System.out.println("SUFIBSD");
 		} else if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			e.printStackTrace();
 			if(fullUrl != null)
-				logger.trace("Servlet provider exception for: "+fullUrl, e);
+				logger.info("Servlet provider exception for: "+fullUrl, e);
 			else
-				logger.trace("Servlet provider exception: ", e);
+				logger.info("Servlet provider exception: ", e);
 		} else {
 			if(fullUrl != null)
 				logger.info("Servlet provider exception for: "+fullUrl, e);
