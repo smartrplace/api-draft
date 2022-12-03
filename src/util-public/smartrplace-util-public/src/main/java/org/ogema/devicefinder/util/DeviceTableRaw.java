@@ -59,6 +59,7 @@ import de.iwes.widgets.html.form.label.LabelData;
 
 public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITablePage<T,R>  {
 	public static final long DEFAULT_POLL_RATE = 5000;
+	public static final String BATTERY_VOLTAGE_HEADER = "Battery Voltage (V)";
 	
 	/** Unique ID for the table e.g. name of providing class*/
 	protected abstract String id();
@@ -263,7 +264,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	protected Label addBattery(InstallAppDevice object, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
 			FloatResource batteryReading) {
-		return vh.floatLabel("Battery", id, batteryReading, row, "%.1f#min:0.1");
+		return vh.floatLabel(BATTERY_VOLTAGE_HEADER, id, batteryReading, row, "%.1f#min:0.1");
 	}
 	
 	protected Label addLastContact(ObjectResourceGUIHelper<?,?> vh, String id,
@@ -308,13 +309,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		VoltageResource batteryVoltage = DeviceHandlerBase.getBatteryVoltage(device2); //ResourceHelper.getSubResourceOfSibbling(device2,
 		//		"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
 		if(batteryVoltage != null) {
-			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel("Battery", id, batteryVoltage, row, "%.1f#min:0.1"),
+			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(BATTERY_VOLTAGE_HEADER, id, batteryVoltage, row, "%.1f#min:0.1"),
 					batteryVoltage);
 			float val = batteryVoltage.getValue();
 			BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req);
 			return result;
 		} else if(req == null)
-			vh.registerHeaderEntry("Battery");
+			vh.registerHeaderEntry(BATTERY_VOLTAGE_HEADER);
 		return null;
 	}
 		

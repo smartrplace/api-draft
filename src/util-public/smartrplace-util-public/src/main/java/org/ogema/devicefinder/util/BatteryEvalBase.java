@@ -13,6 +13,7 @@ import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.message.MessageImpl;
 
+import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.messaging.MessagePriority;
 import de.iwes.widgets.api.widgets.WidgetStyle;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -20,9 +21,9 @@ import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.html.form.label.LabelData;
 
 public class BatteryEvalBase {
-	public static final float DEFAULT_BATTERY_CHANGE_VOLTAGE = 2.7f;
-	public static final float DEFAULT_BATTERY_WARN_VOLTAGE = 2.5f;
-	public static final float DEFAULT_BATTERY_URGENT_VOLTAGE = 2.3f;
+	public static final float DEFAULT_BATTERY_CHANGE_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.changevolt", 2.7f);
+	public static final float DEFAULT_BATTERY_WARN_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.warnvolt", 2.5f);
+	public static final float DEFAULT_BATTERY_URGENT_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.urgentvolt", 2.3f);
 	public static final long TIME_TO_ASSUME_EMPTY = 1*TimeProcUtil.DAY_MILLIS;
 	
 	public static String getRightAlignedString(String in, int len) {
