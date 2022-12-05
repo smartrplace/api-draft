@@ -252,6 +252,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				String valStr;
 				if(minValue != null && val < minValue)
 					valStr = "n/a";
+				else if(Boolean.getBoolean("org.smartrplace.driverhandler.devices.residentialmetering1") && Float.isNaN(val))
+					valStr = "n.v.";
 				else if(format != null) {
 					valStr = String.format(format, val);
 				} else {

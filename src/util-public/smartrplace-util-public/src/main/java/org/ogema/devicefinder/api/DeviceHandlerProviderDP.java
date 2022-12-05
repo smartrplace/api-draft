@@ -150,5 +150,11 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default void initAlarmingForDevice(InstallAppDevice appDevice,
 			HardwareInstallConfig appConfigData) {}
 
+	/** If true then the devices attached to this DeviceHandler will be synched from a subgateway to 
+	 * superior if applicable
+	 */
 	default boolean addDeviceOrResourceListToSync() {return true;}
+	
+	/** If false the sub table for the DeviceHandler shall be hidden for the non-expert view*/
+	default boolean relevantForUsers() {return true;}
 }
