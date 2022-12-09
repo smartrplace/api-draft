@@ -21,6 +21,8 @@ import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.DeviceHandlerProviderDP;
 import org.ogema.devicefinder.api.DocumentationLinkProvider;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice;
+import org.ogema.drivers.homematic.xmlrpc.hl.types.HmInterfaceInfo;
+import org.ogema.drivers.homematic.xmlrpc.hl.types.HmLogicInterface;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
@@ -835,7 +837,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		Resource device = object.device().getLocationResource();
 		if(DeviceTableBase.isHomematic(device.getLocation())) {
 			Resource parent = device.getParent();
-			if(parent != null && (parent instanceof HmDevice))
+			if(parent != null && ((parent instanceof HmDevice) ||
+					((device instanceof HmInterfaceInfo) && (parent instanceof HmLogicInterface))))
 				parent.delete();
 			else
 				device.delete();
