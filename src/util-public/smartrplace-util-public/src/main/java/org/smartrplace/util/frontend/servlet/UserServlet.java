@@ -52,6 +52,9 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
+
+	final static Logger logger = LoggerFactory.getLogger(UserServlet.class);
+
 	public final String servletSubUrl;
 	/** Entries may be generated on first call if the pageId is part of the property
 	 * org.smartrplace.util.frontend.servlet.debugpageids . You may also generate entries
@@ -122,7 +125,6 @@ public class UserServlet extends HttpServlet {
  	
 	public static final String TimeSeriesServletImplClassName = "org.smartrplace.app.monbase.servlet.TimeseriesBaseServlet";
 	
-	final Logger logger = LoggerFactory.getLogger(UserServlet.class);
 	public enum ReturnStructure {
 		/**In this case a list is returned with each element having an element named "key". Additional
 		standard elements may be defined in the future when elements are generated from
@@ -373,7 +375,7 @@ public class UserServlet extends HttpServlet {
 			
 		} catch (Exception e) {
 			out = "An error occurred: " + e.toString();
-			logException(logger, e, "POST", 3, appManPlus);
+			logException(e, "POST", 3, appManPlus);
 			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 			//	e.printStackTrace();
 			if(result == null)
@@ -479,7 +481,7 @@ public class UserServlet extends HttpServlet {
 				logger.info("Servlet provider exception: {}", res.message);
 			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
-			logException(logger, null, res.message, 5, appManPlus);
+			logException(null, res.message, 5, appManPlus);
 			return res;
 		}
 
@@ -496,7 +498,7 @@ public class UserServlet extends HttpServlet {
 				logger.info("Servlet provider exception2: {}", res.message);
 			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
-			logException(logger, null, res.message, 6, appManPlus);
+			logException(null, res.message, 6, appManPlus);
 			return res;
 		}
 		
@@ -525,7 +527,7 @@ public class UserServlet extends HttpServlet {
 					continue;
 				objStr = pageprov.getObjectId(obj);
 			} catch(Exception e) {
-				logException(logger, e, fullUrl, 4, appManPlus);
+				logException(e, fullUrl, 4, appManPlus);
 				/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 					e.printStackTrace();
 					if(fullUrl != null)
@@ -628,7 +630,7 @@ public class UserServlet extends HttpServlet {
 				}
 				} catch(Exception e) {
 					subJson.put(jsonkey, e.toString());
-					logException(logger, e, fullUrl, 3, appManPlus);
+					logException(e, fullUrl, 3, appManPlus);
 					/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 						e.printStackTrace();
 					else
@@ -892,7 +894,7 @@ public class UserServlet extends HttpServlet {
 			status = odata.status; //HttpServletResponse.SC_OK;
 		} catch (Exception e) {
 			response = response + "An error occurred: " + e.toString();
-			logException(logger, e, "POST", 2, appManPlus);
+			logException(e, "POST", 2, appManPlus);
 			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 			//	e.printStackTrace();
 			status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -1146,24 +1148,28 @@ System.out.println("SUFIBSD");
 	 * @param exceptionCode
 	 * @param appManPlus
 	 */
-	private static void logException(Logger logger, Exception e, String fullUrl, int exceptionCode,
+	/*private static void logException(Logger logger, Exception e, String fullUrl, int exceptionCode,
+			ApplicationManagerPlus appManPlus) {
+		logException(e, fullUrl, exceptionCode, appManPlus);
+	}*/
+	private static void logException(Exception e, String fullUrl, int exceptionCode,
 			ApplicationManagerPlus appManPlus) {
 		if(e == null) {
 			if(fullUrl != null)
-				logger.info("Servlet provider incident for: "+fullUrl);
+				UserServlet.logger.info("Servlet provider incident for: "+fullUrl);
 			else
-				logger.info("Servlet provider incident with code: "+exceptionCode);
+				UserServlet.logger.info("Servlet provider incident with code: "+exceptionCode);
 		} else if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			e.printStackTrace();
 			if(fullUrl != null)
-				logger.info("Servlet provider exception for: "+fullUrl, e);
+				UserServlet.logger.info("Servlet provider exception for: "+fullUrl, e);
 			else
-				logger.info("Servlet provider exception: ", e);
+				UserServlet.logger.info("Servlet provider exception: ", e);
 		} else {
 			if(fullUrl != null)
-				logger.info("Servlet provider exception for: "+fullUrl, e);
+				UserServlet.logger.info("Servlet provider exception for: "+fullUrl, e);
 			else
-				logger.info("Servlet provider exception: ", e);
+				UserServlet.logger.info("Servlet provider exception: ", e);
 		}		
 		
 		if(appManPlus != null)
