@@ -111,8 +111,8 @@ public class UserServlet extends HttpServlet {
 	}
 	
 	/** Management of numerical IDs*/
-	protected static final Map<Integer, String> num2stringObjects = new HashMap<>();
-	protected static void num2StringPut(String value, boolean objectIdPostiveOnly) {
+	private static final Map<Integer, String> num2stringObjects = new HashMap<>();
+	private static void num2StringPut(String value, boolean objectIdPostiveOnly) {
 		try {
 			int num = Integer.parseInt(value);
 			num2stringObjects.put(num, value);
@@ -121,6 +121,9 @@ public class UserServlet extends HttpServlet {
 			num2stringObjects.put(num, value);
 		}
 		
+	}
+	public static String num2StringGet(Integer key) {
+		return num2stringObjects.get(key);
 	}
  	
 	public static final String TimeSeriesServletImplClassName = "org.smartrplace.app.monbase.servlet.TimeseriesBaseServlet";
@@ -172,6 +175,9 @@ public class UserServlet extends HttpServlet {
 		 */
 		default String getObjectName() { return null;}
 		default boolean objectIdPostiveOnly() {
+			return false;
+		}
+		default boolean useOriginalObjectId() {
 			return false;
 		}
 		
@@ -704,7 +710,7 @@ public class UserServlet extends HttpServlet {
 			}
 		}
 		if(result.objectId != null) {
-			T obj = pageprov.getObject(result.objectId, user);
+			T obj = pageprov.getObject(pageprov.useOriginalObjectId()?objectId:result.objectId, user);
 			if(obj == null && allowToCreate)
 				obj = pageprov.createObject(result.objectId);
 			if(obj != null) {
@@ -727,7 +733,7 @@ public class UserServlet extends HttpServlet {
 			//we try to find the object once more with the new information
 			result.objectId = num2stringObjects.get(numId);
 			if(result.objectId != null) {
-				T obj = pageprov.getObject(result.objectId, user);
+				T obj = pageprov.getObject(pageprov.useOriginalObjectId()?objectId:result.objectId, user);
 				result.objects = new ArrayList<T>();
 				result.objects.add(obj);
 				return result;				
