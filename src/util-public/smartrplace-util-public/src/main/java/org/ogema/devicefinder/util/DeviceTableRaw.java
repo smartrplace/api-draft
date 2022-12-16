@@ -193,6 +193,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static Map<Room, String> roomsToSet = new HashMap<>();
 	public static Map<SubCustomerData, String> tenantsToSet = new HashMap<>();
 	private static long lastUpdate = -1;
+	private static long lastUpdateTenant = -1;
 	protected void addRoomWidget(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
@@ -234,14 +235,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			SubCustomerData deviceTenant, String columnName) {
 		long now = appMan.getFrameworkTime();
-		if(now - lastUpdate > 10000) {
+		if(now - lastUpdateTenant > 10000) {
 			List<SubCustomerData> allTenants = SubcustomerUtil.getSubcustomers(appMan);
 			Map<SubCustomerData, String> tenantsToSetLoc = new HashMap<>();
 			for(SubCustomerData tenant: allTenants) {
 				tenantsToSetLoc.put(tenant, ResourceUtils.getHumanReadableShortName(tenant));
 			}
 			tenantsToSet = tenantsToSetLoc;
-			lastUpdate = now;
+			lastUpdateTenant = now;
 		}
 		vh.referenceDropdownFixedChoice(columnName, id, deviceTenant, row, tenantsToSet, 3);
 	}
