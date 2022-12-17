@@ -2,7 +2,6 @@ package org.smartrplace.util.virtualdevice;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
@@ -278,15 +277,42 @@ public class ChartsUtil {
 			DeviceHandlerProviderDP<?> devHand,
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
 			ResourceList<DataLogTransferInfo> datalogs) {
+		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv, datalogs, null);
+	}
+	/**
+	 * 
+	 * @param id
+	 * @param object
+	 * @param dpService
+	 * @param appMan
+	 * @param addDataPointInfoLabel
+	 * @param vh
+	 * @param row
+	 * @param req
+	 * @param devHand
+	 * @param schedViewProv
+	 * @param datalogs
+	 * @param datapointsToUse if null the datapoints are determined baed on devHand and object. Otherwise the datapoints specified here
+	 * 		are used. Note that this is not relevant if addDataPointInfoLabel is true.
+	 * @return
+	 */
+	public static GetPlotButtonResult getPlotButton(String id, final InstallAppDevice object,
+			final DatapointService dpService, final ApplicationManager appMan,//final HardwareInstallController controller2,
+			boolean addDataPointInfoLabel,
+			ObjectResourceGUIHelper<?, ?> vh, Row row, OgemaHttpRequest req,
+			DeviceHandlerProviderDP<?> devHand,
+			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
+			ResourceList<DataLogTransferInfo> datalogs,
+			Collection<Datapoint> datapointsToUse) {
 		final GetPlotButtonResult resultMain = new GetPlotButtonResult();
 		
 		resultMain.devHand = devHand;
-		if(resultMain.devHand != null) {
+		if(resultMain.devHand != null || datapointsToUse != null) {
 			if(!addDataPointInfoLabel)
 				resultMain.datapoints2 = null;
 			else  {
-				if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.omitdatapoints"))
-					resultMain.datapoints2 = Collections.emptyList();
+				if(datapointsToUse != null)
+					resultMain.datapoints2 = datapointsToUse;
 				else
 					resultMain.datapoints2 = resultMain.devHand.getDatapoints(object, dpService);
 				int logged = 0;
@@ -307,13 +333,13 @@ public class ChartsUtil {
 					}
 				}
 				String text = ""+resultMain.datapoints2.size()+"/"+logged+"/"+transferred;
-				final boolean isTemplate = DeviceTableRaw.isTemplate(object, resultMain.devHand);
+				final boolean isTemplate = resultMain.devHand != null && DeviceTableRaw.isTemplate(object, resultMain.devHand);
 				if(isTemplate) {
 					text += "/T";
 				}
 				if(addDataPointInfoLabel)
 					resultMain.dataPointInfoLabel = vh.stringLabel(DATAPOINT_INFO_HEADER, id, text, row);
-				}
+			}
 			
 			SchedOpenDataProvider provider = new SchedOpenDataProvider() {
 				
@@ -326,8 +352,12 @@ public class ChartsUtil {
 				public List<TimeSeriesData> getData(OgemaHttpRequest req) {
 					List<TimeSeriesData> result = new ArrayList<>();
 					OgemaLocale locale = req!=null?req.getLocale():null;
-					if(resultMain.datapoints2 == null)
-						resultMain.datapoints2 = resultMain.devHand.getDatapoints(object, dpService);
+					if(resultMain.datapoints2 == null) {
+						if(datapointsToUse != null)
+							resultMain.datapoints2 = datapointsToUse;
+						else
+							resultMain.datapoints2 = resultMain.devHand.getDatapoints(object, dpService);
+					}
 					for(Datapoint dp: resultMain.datapoints2) {
 						TimeSeriesDataImpl tsd = dp.getTimeSeriesDataImpl(locale);
 						if(tsd == null)
