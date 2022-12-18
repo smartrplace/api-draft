@@ -3,6 +3,8 @@ package org.smartrplace.autoconfig.api;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.StringResource;
+import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
@@ -62,4 +64,26 @@ public class InitialConfig {
 		}
 	}
 
+	public static InstallAppDevice getDeviceByNumericalIdString(String preDevId, String typeIdIn,
+			HardwareInstallConfig cfg, int offset) {
+		try {
+			int devIdInt = Integer.parseInt(preDevId);
+	        preDevId = String.format("%04d", devIdInt+offset); // String.format("%s-%04d", typeId, devIdInt + offset);
+		} catch(NumberFormatException e) {}
+		//Set<String> usedSuffixes = new HashSet<>();
+        String typeId = typeIdIn+"-";
+		for(InstallAppDevice d : cfg.knownDevices().getAllElements()) {
+        	if(!d.deviceId().getValue().startsWith(typeId))
+            	continue;
+            if(d.deviceId().getValue().length() <= typeId.length())
+            	continue;
+            String numPart = d.deviceId().getValue().substring(typeId.length());
+            if(preDevId.equals(numPart))
+            	return d;
+            else if(numPart.startsWith(preDevId)) {
+            	return d; //If _A entries exist the numerical search may not have unique result
+            }
+        }
+		return null;
+	}
 }
