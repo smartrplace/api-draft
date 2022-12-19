@@ -829,7 +829,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			hourOfDay = 23;
 		long inHourTime = inDayTime - hourOfDay*TimeProcUtil.HOUR_MILLIS;
 		if(inHourTime == 0)
-			result += " "+hourOfDay+":00";
+			result += " "+String.format("%02d", hourOfDay)+":00";
 		else if(inHourTime <= 30*TimeProcUtil.MINUTE_MILLIS)
 			result += " "+hourOfDay+":30";
 		else if(hourOfDay == 23) {
