@@ -13,6 +13,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.devicefinder.api.DatapointGroup;
@@ -36,6 +37,7 @@ import org.ogema.model.sensors.DoorWindowSensor;
 import org.ogema.model.sensors.EnergyAccumulatedSensor;
 import org.ogema.model.sensors.VolumeAccumulatedSensor;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.virtual.device.config.VirtualThermostatConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -45,8 +47,11 @@ import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
 
+import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
+import de.iwes.util.timer.AbsoluteTimeHelper;
+import de.iwes.util.timer.AbsoluteTiming;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -793,6 +798,84 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 
+	public static String setDecalcTimeForwardMax(Thermostat device, long now) {
+		long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
+		long startOfDay = AbsoluteTimeHelper.getIntervalStart(destTime, AbsoluteTiming.DAY);
+		destTime = startOfDay + 2*TimeProcUtil.HOUR_MILLIS;
+		return setDecalcTime(device, destTime);												
+	}
+	
+	public static String setDecalcTime(Thermostat device, long destTime) {
+		StringResource res = device.valve().getSubResource("DECALCIFICATION", StringResource.class);
+		String val = getDecalcString(destTime);
+		if(val != null)
+			ValueResourceHelper.setCreate(res, val);
+		return val;
+	}
+	
+	public static String[] dayOfWeekStr = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
+	public static String getDecalcString(long destTime) {
+		long curWeekStart = AbsoluteTimeHelper.getIntervalStart(destTime, AbsoluteTiming.WEEK);
+		long timeInWeek = destTime - curWeekStart;
+		long dayOfWeekIdx = timeInWeek / TimeProcUtil.DAY_MILLIS;
+		if(dayOfWeekIdx > 6)
+			dayOfWeekIdx = 6;
+		String result = dayOfWeekStr[(int) dayOfWeekIdx];
+		
+		long inDayTime = timeInWeek % TimeProcUtil.DAY_MILLIS;
+		StringFormatHelper.getTimeOfDayInLocalTimeZone(destTime);
+		long hourOfDay = inDayTime / TimeProcUtil.HOUR_MILLIS;
+		if(hourOfDay > 23)
+			hourOfDay = 23;
+		long inHourTime = inDayTime - hourOfDay*TimeProcUtil.HOUR_MILLIS;
+		if(inHourTime == 0)
+			result += " "+hourOfDay+":00";
+		else if(inHourTime <= 30*TimeProcUtil.MINUTE_MILLIS)
+			result += " "+hourOfDay+":30";
+		else if(hourOfDay == 23) {
+			dayOfWeekIdx++;
+			if(dayOfWeekIdx > 6)
+				dayOfWeekIdx = 0;
+			result = dayOfWeekStr[(int) dayOfWeekIdx]+" "+hourOfDay+":30";
+		} else {
+			result += " "+(hourOfDay+1)+":00";
+		} return result;
+	}
+	
+	public static long getNextDecalcTime(String deCalcString, long now) {
+		String[] daySplit = deCalcString.split("\\s+");
+		if(daySplit.length != 2)
+			return 0;
+		int dayOfWeekIdx = 0;
+		boolean found = false;
+		for(String dayStr: dayOfWeekStr) {
+			if(dayStr.equals(daySplit[0])) {
+				found = true;
+				break;
+			}
+			dayOfWeekIdx++;
+		}
+		if(!found)
+			return 0;
+		String[] hourSplit = daySplit[1].split(":");
+		if(hourSplit.length != 2)
+			return 0;
+		try {
+			int hours = Integer.parseInt(hourSplit[0]);
+			int minutes = Integer.parseInt(hourSplit[1]);
+			long timeInWeek = dayOfWeekIdx*TimeProcUtil.DAY_MILLIS + hours*TimeProcUtil.HOUR_MILLIS + minutes*TimeProcUtil.MINUTE_MILLIS;
+			
+			long nowStartOfWeek = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.WEEK);
+			long result = nowStartOfWeek + timeInWeek;
+			if(result <= now)
+				return result + 7*TimeProcUtil.DAY_MILLIS;
+			else
+				return result;
+		} catch(NumberFormatException e) {
+			return 0;
+		}
+		
+	}
 	/** 
 	 * 
 	 * @param object

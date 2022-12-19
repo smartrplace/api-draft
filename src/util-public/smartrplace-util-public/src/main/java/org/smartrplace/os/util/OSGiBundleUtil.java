@@ -12,14 +12,15 @@ public class OSGiBundleUtil {
 		HomematicDriver,
 		MdnsService,
 		WMBusDriver,
-		ModbusDriver
+		ModbusDriver,
+		MQTTReplicator
 	}
 	public static Map<BundleType, String> typeSymbolicNames = new HashMap<>();
 	static {
 		typeSymbolicNames.put(BundleType.HomematicDriver, "org.ogema.drivers.homematic-xmlrpc-hl");
 		typeSymbolicNames.put(BundleType.MdnsService, "org.smartrplace.drivers.jmdns-service");
 		typeSymbolicNames.put(BundleType.WMBusDriver, "org.smartrplace.drivers.jmbus-connector");
-		typeSymbolicNames.put(BundleType.ModbusDriver, "org.ogema.drivers.modbus-tcp-resource");
+		typeSymbolicNames.put(BundleType.MQTTReplicator, "org.smartrplace.drivers.mqtt-resource-replicator");
 	}
 	
 	
