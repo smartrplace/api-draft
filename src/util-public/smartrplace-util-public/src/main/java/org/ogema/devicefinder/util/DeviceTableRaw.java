@@ -798,6 +798,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 
+	/** Thermostat location -> next check time*/
+	public static Map<String, Long> nextDecalcShiftCheck = new HashMap<>();
 	public static String setDecalcTimeForwardMax(Thermostat device, long now) {
 		//long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
 		long startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);

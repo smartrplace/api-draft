@@ -1361,7 +1361,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	 * @param gateway
 	 * @param mode 0: absolute time, 1: time in day, 2: absolute time relative to now (ago),
 	 * 		3: absolute time relative to now (future),
-	 * 		4: duration
+	 * 		4: duration, 5: absolute time as DateTime
 	 * @return
 	 */
 	private Label timeLabel(String widgetId, final Long value, final int mode) {
