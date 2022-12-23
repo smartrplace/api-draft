@@ -57,9 +57,15 @@ public class GatewaySyncUtil {
 			String existing = getSyncEntry(gwSync, "rooms"); //,hardwareInstallConfig");
 			if(existing == null) {
 				gwSync.toplevelResourcesToBeSynchronized().create();
-				String sentry = "rooms:"+gatewayIdBase+":rooms:/"; //,hardwareInstallConfig:/";
-				ValueResourceUtils.appendValue(gwSync.toplevelResourcesToBeSynchronized(), sentry);
+				//TODO: Rooms are currently duplicated on CMS level
+				//String sentry = "rooms:"+gatewayIdBase+":rooms:/"; //,hardwareInstallConfig:/";
+				//ValueResourceUtils.appendValue(gwSync.toplevelResourcesToBeSynchronized(), sentry);
 			}
+			//TODO: Removal may not be final solution
+			String sentry = "rooms:"+gatewayIdBase+":rooms:/";
+			int idx = ValueResourceUtils.getIndexIngoringActiveStatus(gwSync.toplevelResourcesToBeSynchronized(), sentry);
+			if(idx >= 0)
+				ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
 			return gwSync;
 		}
 		GatewaySyncData result = ResourceHelper.getTopLevelResource(resName, GatewaySyncData.class, appMan.getResourceAccess());
