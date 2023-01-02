@@ -99,7 +99,7 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 	}
 
 	@Override
-	public void setValue(String user, String key, String value) {
+	public synchronized void setValue(String user, String key, String value) {
 		if(postMode == POSTMODE.REWRITE_COMPLETE_LIST) try  {
 			JSONObject jsonobj = new JSONObject(value);
 			JSONArray json = jsonobj.getJSONArray(id);
