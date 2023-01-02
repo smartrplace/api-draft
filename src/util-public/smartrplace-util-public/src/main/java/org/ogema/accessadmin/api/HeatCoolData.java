@@ -14,6 +14,7 @@ public class HeatCoolData extends SettingsBaseData {
 	public float windowOpenTemperatureV2;
 
 	//public float ecoTemperatureV1;
+	@Deprecated //should not be used anymore, writing to old-style interval-based window temperature
 	public float setSingleSetpoint_Window_open;
 	/**Both minSetpoint and minSetpointAuto*/
 	public float minSetpointAuto;
