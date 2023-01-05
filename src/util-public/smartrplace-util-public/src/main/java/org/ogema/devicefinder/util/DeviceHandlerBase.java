@@ -233,6 +233,18 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "configPending", BooleanResource.class);
 		return isAutoModeAllowed(dev, configPending, hwConfig.autoThermostatMode());
 	}
+	
+	public static boolean performWeeklyPostpone(Thermostat dev,HardwareInstallConfig hwConfig) {
+		if(hwConfig == null)
+			return Boolean.getBoolean("org.smartrplace.homematic.devicetable.autostart.shiftdecalc");		
+		int val = hwConfig.weeklyPostponeMode().getValue();
+		if(val == 1)
+			return false;
+		if(val == 2)
+			return true;
+		return Boolean.getBoolean("org.smartrplace.homematic.devicetable.autostart.shiftdecalc");		
+	}
+	
 	public static boolean isAutoModeAllowed(Thermostat dev,
 			BooleanResource configPending, IntegerResource autoThermostatMode) {
 		IntegerResource autoThermostatModeSingle = getAutoThermostatModeSingle(dev);
