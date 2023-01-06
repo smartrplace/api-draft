@@ -441,7 +441,11 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			Class<? extends ResourcePattern> patternClass = devHandBase.getPatternClass();
 			Constructor<?> constructor;
 			try {
-				constructor = patternClass.getConstructor(devHand.getResourceType());
+				try {
+					constructor = patternClass.getConstructor(devHand.getResourceType());
+				} catch (NoSuchMethodException e) {
+					constructor = patternClass.getConstructor(Resource.class);
+				}
 				Object patternInstance = constructor.newInstance(dev);
 				if(isSatisfiedInternal((ResourcePattern)patternInstance, patternClass, appMan.appMan())) {
 					DeviceByEndcodeResult<? extends PhysicalElement> result = new DeviceByEndcodeResult((PhysicalElement) dev, devHand);
