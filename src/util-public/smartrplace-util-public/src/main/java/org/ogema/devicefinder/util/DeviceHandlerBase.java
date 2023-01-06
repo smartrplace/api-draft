@@ -454,6 +454,34 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		return null;
 	}
 	
+	@SuppressWarnings({"unchecked", "rawtypes" })
+	public static DeviceByEndcodeResult<? extends PhysicalElement> getDeviceHandler(PhysicalElement dev, ApplicationManagerPlus appMan) {
+		for(DeviceHandlerProviderDP<?> devHand: appMan.dpService().getDeviceHandlerProviders()) {
+			if(!(devHand instanceof DeviceHandlerBase))
+				continue;
+			DeviceHandlerBase<?> devHandBase = (DeviceHandlerBase<?>) devHand;
+			if(dev == null || (!devHand.getResourceType().isAssignableFrom(dev.getResourceType())))
+				return null;
+			Class<? extends ResourcePattern> patternClass = devHandBase.getPatternClass();
+			Constructor<?> constructor;
+			try {
+				try {
+					constructor = patternClass.getConstructor(devHand.getResourceType());
+				} catch (NoSuchMethodException e) {
+					constructor = patternClass.getConstructor(Resource.class);
+				}
+				Object patternInstance = constructor.newInstance(dev);
+				if(isSatisfiedInternal((ResourcePattern)patternInstance, patternClass, appMan.appMan())) {
+					DeviceByEndcodeResult<? extends PhysicalElement> result = new DeviceByEndcodeResult((PhysicalElement) dev, devHand);
+					return result;
+				}
+			} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
 	@SuppressWarnings("rawtypes")
 	private static <T extends ResourcePattern> boolean isSatisfiedInternal(ResourcePattern patternInstanceIn,
 			Class<T> patternClass, //Class<? extends ResourcePattern> patternClassIn,
