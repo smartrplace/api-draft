@@ -460,12 +460,14 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	
 	@SuppressWarnings({"unchecked", "rawtypes" })
 	public static DeviceByEndcodeResult<? extends PhysicalElement> getDeviceHandler(PhysicalElement dev, ApplicationManagerPlus appMan) {
+		if(dev == null)
+			return null;
 		for(DeviceHandlerProviderDP<?> devHand: appMan.dpService().getDeviceHandlerProviders()) {
 			if(!(devHand instanceof DeviceHandlerBase))
 				continue;
 			DeviceHandlerBase<?> devHandBase = (DeviceHandlerBase<?>) devHand;
-			if(dev == null || (!devHand.getResourceType().isAssignableFrom(dev.getResourceType())))
-				return null;
+			if(!devHand.getResourceType().isAssignableFrom(dev.getResourceType()))
+				continue;
 			Class<? extends ResourcePattern> patternClass = devHandBase.getPatternClass();
 			Constructor<?> constructor;
 			try {
