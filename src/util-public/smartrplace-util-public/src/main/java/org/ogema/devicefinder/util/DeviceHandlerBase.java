@@ -383,6 +383,8 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 					hinfo = (HmInterfaceInfo) iad.device();
 			} else
 				hinfo = (HmInterfaceInfo)device;
+			if(hinfo == null)
+				return null;
 			String addr = hinfo.address().getValue();
 			if(addr == null || addr.isEmpty())
 				return null;
