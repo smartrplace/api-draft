@@ -1,8 +1,14 @@
 package org.smartrplace.autoconfig.api;
 
+import java.util.List;
+
+import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.simple.StringResource;
+import org.ogema.devicefinder.util.DeviceHandlerBase;
+import org.ogema.devicefinder.util.DeviceTableBase;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 

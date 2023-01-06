@@ -1,9 +1,13 @@
 package org.ogema.devicefinder.util;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
@@ -19,10 +23,14 @@ import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
+import org.ogema.devicefinder.api.DeviceHandlerProviderDP;
 import org.ogema.devicefinder.api.DriverPropertySuccessHandler;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.devicefinder.api.PatternListenerExtended;
+import org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice;
+import org.ogema.drivers.homematic.xmlrpc.hl.types.HmInterfaceInfo;
+import org.ogema.drivers.homematic.xmlrpc.hl.types.HmLogicInterface;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.buildingtechnology.ThermostatProgram;
 import org.ogema.model.devices.storage.ElectricityStorage;
@@ -43,7 +51,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	 * of the patterns make sure that each device of the type is assigned to exactly one DeviceHandlerProvider.
 	 */
 	protected abstract Class<? extends ResourcePattern<T>> getPatternClass();
-	
+
 	protected PatternListenerExtended<ResourcePattern<T>, T> listener = null;
 	public List<ResourcePattern<T>> getAllPatterns() {
 		if(listener == null)
@@ -341,6 +349,119 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		if(room != null)
 			dp.setRoom(room);
 		
+	}
+	
+	/** From InstallationServiceHM */
+	public static InstallAppDevice getOtherCCU(HmLogicInterface ccu, boolean isThisCCUCC, DatapointService dpService) {
+		if(ccu == null)
+			return null;
+		String otherName = ccu.getName().substring(0, ccu.getName().length()-2)+(isThisCCUCC?"ip":"cc");
+		Collection<InstallAppDevice> all = dpService.managedDeviceResoures("HomematicCCUHandler", true);
+		for(InstallAppDevice iad: all) {
+			Resource parent = iad.device().getLocationResource().getParent();
+			if(parent != null && parent.getName().equals(otherName)) {
+				return iad;
+			}
+		}
+		return null;
+	}
+	
+	/** This is the device name which is used to check a preKnown endCode to. If the DeviceName
+	 * ends with the preKnown Code then the endCode is considered fitting. Usually the last 4 or 5
+	 * digits of the deviceName are considered sufficient for a unique identification.
+	 * @param device
+	 * @return
+	 */
+	public static String getDeviceSerialNr(Resource device, DatapointService dpService) {
+		String hmName;
+		if(device instanceof HmInterfaceInfo) {
+			HmInterfaceInfo hinfo = null;
+			boolean isCC = DeviceTableBase.getHomematicType(device.getLocation()) == 2;
+			if(isCC && dpService != null) {
+				InstallAppDevice iad = getOtherCCU((HmLogicInterface) device.getLocationResource().getParent(), true, dpService);
+				if(iad != null)
+					hinfo = (HmInterfaceInfo) iad.device();
+			} else
+				hinfo = (HmInterfaceInfo)device;
+			String addr = hinfo.address().getValue();
+			if(addr == null || addr.isEmpty())
+				return null;
+			hmName = addr;
+		} else {
+			HmDevice hmDevice = (HmDevice) ResourceHelper.getFirstParentOfType(device, "HmDevice");
+			if(hmDevice == null)
+				return device.getName();
+			hmName = hmDevice.getName();
+		}
+		return hmName;
+	}
+	public static String getDeviceEndCode(Resource device, DatapointService dpService) {
+		String deviceName = getDeviceSerialNr(device, dpService);
+		if(deviceName == null)
+			return "NONE::"+device.getLocation();
+		if(deviceName.length() > 5)
+			return deviceName.substring(deviceName.length()-5);
+		return deviceName;
+	}
+	
+	public static <T extends Resource> T getDeviceByEndcode(String endCode, Class<T> deviceType, ApplicationManagerPlus appMan) {
+		List<T> devices = appMan.getResourceAccess().getResources(deviceType);
+		for(T dev: devices) {
+			if(getDeviceSerialNr(dev, appMan.dpService()).endsWith(endCode))
+				return dev;
+		}
+		return null;
+	}
+	
+	private static Resource getDeviceByEndcodeInternal(String endCode, Class<? extends Resource> deviceType, ApplicationManagerPlus appMan) {
+		return getDeviceByEndcode(endCode, deviceType, appMan);
+	}
+
+	public static class DeviceByEndcodeResult<T extends PhysicalElement> {
+		public T device;
+		public DeviceHandlerProviderDP<T> devHand;
+		
+		@SuppressWarnings("unchecked")
+		public DeviceByEndcodeResult(PhysicalElement device, DeviceHandlerProviderDP<T> devHand) {
+			this.device = (T) device;
+			this.devHand = devHand;
+		}
+	}
+	@SuppressWarnings({"unchecked", "rawtypes" })
+	public static DeviceByEndcodeResult<? extends PhysicalElement> getDeviceByEndcode(String endCode, String devHandShortId, ApplicationManagerPlus appMan) {
+		for(DeviceHandlerProviderDP<?> devHand: appMan.dpService().getDeviceHandlerProviders()) {
+			if(!(devHand instanceof DeviceHandlerBase))
+				continue;
+			DeviceHandlerBase<?> devHandBase = (DeviceHandlerBase<?>) devHand;
+			if(!devHand.getDeviceTypeShortId(appMan.dpService()).equals(devHandShortId))
+				continue;
+			Resource dev = getDeviceByEndcodeInternal(endCode, devHand.getResourceType(), appMan);
+			if(dev == null || (!devHand.getResourceType().isAssignableFrom(dev.getResourceType())))
+				return null;
+			Class<? extends ResourcePattern> patternClass = devHandBase.getPatternClass();
+			Constructor<?> constructor;
+			try {
+				constructor = patternClass.getConstructor(devHand.getResourceType());
+				Object patternInstance = constructor.newInstance(dev);
+				if(isSatisfiedInternal((ResourcePattern)patternInstance, patternClass, appMan.appMan())) {
+					DeviceByEndcodeResult<? extends PhysicalElement> result = new DeviceByEndcodeResult((PhysicalElement) dev, devHand);
+					return result;
+				}
+			} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private static <T extends ResourcePattern> boolean isSatisfiedInternal(ResourcePattern patternInstanceIn,
+			Class<T> patternClass, //Class<? extends ResourcePattern> patternClassIn,
+			ApplicationManager appMan) {
+		@SuppressWarnings("unchecked")
+		T patternInstance = (T) patternInstanceIn;
+		//Class<T> patternClass = (Class<T>) patternClassIn;
+		return appMan.getResourcePatternAccess().isSatisfied(patternInstance, patternClass);
 	}
 }
 
