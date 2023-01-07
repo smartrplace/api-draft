@@ -421,10 +421,10 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 
 	public static class DeviceByEndcodeResult<T extends PhysicalElement> {
 		public T device;
-		public DeviceHandlerProviderDP<T> devHand;
+		public DeviceHandlerBase<T> devHand;
 		
 		@SuppressWarnings("unchecked")
-		public DeviceByEndcodeResult(PhysicalElement device, DeviceHandlerProviderDP<T> devHand) {
+		public DeviceByEndcodeResult(PhysicalElement device, DeviceHandlerBase<T> devHand) {
 			this.device = (T) device;
 			this.devHand = devHand;
 		}
@@ -450,7 +450,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 				}
 				Object patternInstance = constructor.newInstance(dev);
 				if(isSatisfiedInternal((ResourcePattern)patternInstance, patternClass, appMan.appMan())) {
-					DeviceByEndcodeResult<? extends PhysicalElement> result = new DeviceByEndcodeResult((PhysicalElement) dev, devHand);
+					DeviceByEndcodeResult<? extends PhysicalElement> result = new DeviceByEndcodeResult((PhysicalElement) dev, devHandBase);
 					return result;
 				}
 			} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -480,7 +480,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 				}
 				Object patternInstance = constructor.newInstance(dev);
 				if(isSatisfiedInternal((ResourcePattern)patternInstance, patternClass, appMan.appMan())) {
-					DeviceByEndcodeResult<? extends PhysicalElement> result = new DeviceByEndcodeResult((PhysicalElement) dev, devHand);
+					DeviceByEndcodeResult<? extends PhysicalElement> result = new DeviceByEndcodeResult((PhysicalElement) dev, devHandBase);
 					return result;
 				}
 			} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
