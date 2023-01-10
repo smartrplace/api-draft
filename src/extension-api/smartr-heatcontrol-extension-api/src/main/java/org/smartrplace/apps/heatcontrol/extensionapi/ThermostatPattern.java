@@ -99,13 +99,15 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	public boolean setHomematicWindowOpenRecognition(boolean newState, ResourceAccess ra) {
 		if (!isHomematic())
 			return false;
-		int mode;
+		int curMode;
 		if (windowRecognitionMode.isActive()) {
-			mode = windowRecognitionMode.getValue();
-			if(newState) {
-				if (mode == 4)
+			curMode = windowRecognitionModeFb.getValue();
+			if(curMode != windowRecognitionMode.getValue()) {
+				//do nothing
+			} else if(newState) {
+				if (curMode == 4)
 					return false;
-			} else if (mode == 0 || mode == 1)
+			} else if (curMode == 0) // || mode == 1)
 				return false;
 		}
 		ResourceTransaction trans = ra.createResourceTransaction();
@@ -113,7 +115,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 		trans.activate(windowRecognitionMode);
 		trans.activate(windowRecognitionMode.getParent());
 		// remains active in auto mode
-		trans.setInteger(windowRecognitionMode, newState?4:1);
+		trans.setInteger(windowRecognitionMode, newState?4:0);
 		trans.commit();
 		//windowRecognitionMode.<ResourceList<?>> getParent().setElementType(SingleValueResource.class);
 		return true;
