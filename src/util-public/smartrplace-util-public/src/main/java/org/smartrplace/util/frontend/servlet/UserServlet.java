@@ -724,10 +724,24 @@ public class UserServlet extends HttpServlet {
 			}
 		}
 		Collection<T> allObj = pageprov.getAllObjects(user);
-		for(T obj: allObj) {
-			String id = pageprov.getObjectId(obj);
-			//int numIdNew = id.hashCode();
-			num2StringPut(id, pageprov.objectIdPostiveOnly());			
+		//TODO: Fix this when more analysis available
+		try {
+			for(T obj: allObj) {
+				String id = pageprov.getObjectId(obj);
+				//int numIdNew = id.hashCode();
+				num2StringPut(id, pageprov.objectIdPostiveOnly());			
+			}
+		} catch(ConcurrentModificationException e) {
+			logger.error("First trial failed for "+allObj.size()+" elements...", e);
+			logger.error("Caught first ConcurrentModificationException", e);
+			e.printStackTrace();
+			allObj = pageprov.getAllObjects(user);			
+			logger.error("Second try for "+allObj.size()+" elements...", e);
+			for(T obj: allObj) {
+				String id = pageprov.getObjectId(obj);
+				//int numIdNew = id.hashCode();
+				num2StringPut(id, pageprov.objectIdPostiveOnly());			
+			}
 		}
 		if(numId != 0) {
 			//we try to find the object once more with the new information

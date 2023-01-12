@@ -409,7 +409,8 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	public static <T extends Resource> T getDeviceByEndcode(String endCode, Class<T> deviceType, ApplicationManagerPlus appMan) {
 		List<T> devices = appMan.getResourceAccess().getResources(deviceType);
 		for(T dev: devices) {
-			if(getDeviceSerialNr(dev, appMan.dpService()).endsWith(endCode))
+			String serialNr = getDeviceSerialNr(dev, appMan.dpService());
+			if((serialNr != null) && serialNr.endsWith(endCode))
 				return dev;
 		}
 		return null;
