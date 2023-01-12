@@ -923,6 +923,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static void deleteDevice(InstallAppDevice object) {
 		Resource device = object.device().getLocationResource();
+		deleteDeviceBase(device);
+		object.delete();	
+	}
+	
+	public static void deleteDeviceBase(Resource device) {
 		if(DeviceTableBase.isHomematic(device.getLocation())) {
 			Resource parent = device.getParent();
 			if(parent != null && ((parent instanceof HmDevice) ||
@@ -931,7 +936,6 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			else
 				device.delete();
 		} else
-			device.delete();
-		object.delete();	
+			device.delete();		
 	}
 }
