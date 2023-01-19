@@ -28,14 +28,34 @@ import de.iwes.util.resource.ValueResourceHelper;
 
 public class GatewaySyncUtil {
 	public static String registerToplevelDeviceForSyncAsClient(Resource device, ApplicationManager appMan) {
+		return registerToplevelDeviceForSyncAsClient(device, appMan, false);
+	}
+	/**
+	 * 
+	 * @param device
+	 * @param appMan
+	 * @param isDataTransferOnly if true the data is only synchronized for a one-time data transfer and shall be deleted 
+	 * 		afterwards. For this reason it is stored below "temp".
+	 * @return
+	 */
+	public static String registerToplevelDeviceForSyncAsClient(Resource device, ApplicationManager appMan,
+			boolean isDataTransferOnly) {
 		String gatewayIdBase = ViaHeartbeatUtil.getBaseGwId(GatewayUtil.getGatewayId(appMan.getResourceAccess()));
 		GatewaySyncData gwSync = getGatewaySyncData(appMan, gatewayIdBase);
 		if(gwSync == null)
 			return null;
+		return registerToplevelDeviceForSyncAsClient(device, appMan, isDataTransferOnly, gwSync, gatewayIdBase);
+	}
+	public static String registerToplevelDeviceForSyncAsClient(Resource device, ApplicationManager appMan,
+				boolean isDataTransferOnly, GatewaySyncData gwSync, String gatewayIdBase) {
 		String existing = getSyncEntry(gwSync, device);
 		if(existing != null)
 			return existing;
-		SyncEntry entry = new SyncEntry(device, gatewayIdBase, gwSync.toplevelResourcesToBeSynchronized());
+		SyncEntry entry;
+		if(isDataTransferOnly)
+			entry = new SyncEntry(device, gatewayIdBase, gwSync.toplevelResourcesToBeSynchronized(), "temp");
+		else
+			entry = new SyncEntry(device, gatewayIdBase, gwSync.toplevelResourcesToBeSynchronized());
 		String sentry = entry.getEntry();
 		gwSync.toplevelResourcesToBeSynchronized().create();
 		ValueResourceUtils.appendValue(gwSync.toplevelResourcesToBeSynchronized(), sentry);
@@ -54,18 +74,30 @@ public class GatewaySyncUtil {
 		String resName = "replication_"+gatewayIdBase;
 		if(Boolean.getBoolean("org.smartrplace.apps.subgateway")) {
 			GatewaySyncData gwSync = ResourceHelper.getOrCreateTopLevelResource(resName, GatewaySyncData.class, appMan);
-			String existing = getSyncEntry(gwSync, "rooms"); //,hardwareInstallConfig");
-			if(existing == null) {
-				gwSync.toplevelResourcesToBeSynchronized().create();
+			gwSync.toplevelResourcesToBeSynchronized().create();
+			//String existing = getSyncEntry(gwSync, "rooms"); //,hardwareInstallConfig");
+			//if(existing == null) {
 				//TODO: Rooms are currently duplicated on CMS level
 				//String sentry = "rooms:"+gatewayIdBase+":rooms:/"; //,hardwareInstallConfig:/";
 				//ValueResourceUtils.appendValue(gwSync.toplevelResourcesToBeSynchronized(), sentry);
-			}
+			//}
 			//TODO: Removal may not be final solution
 			String sentry = "rooms:"+gatewayIdBase+":rooms:/";
 			int idx = ValueResourceUtils.getIndexIngoringActiveStatus(gwSync.toplevelResourcesToBeSynchronized(), sentry);
 			if(idx >= 0)
 				ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
+			
+			if(Boolean.getBoolean("org.smartrplace.apps.sync.roomcontroldata")) {
+				Resource srcConfig = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig");
+				registerToplevelDeviceForSyncAsClient(srcConfig, appMan, true, gwSync, gatewayIdBase);	
+			} else {
+				//remove
+				String sentrySRC = "src:"+gatewayIdBase+":smartrplaceHeatcontrolConfig:"; //,hardwareInstallConfig:/";
+				idx = ValueResourceUtils.getContainingIndexIngoringActiveStatus(gwSync.toplevelResourcesToBeSynchronized(), sentrySRC);
+				if(idx >= 0)
+					ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
+			}
+			
 			return gwSync;
 		}
 		GatewaySyncData result = ResourceHelper.getTopLevelResource(resName, GatewaySyncData.class, appMan.getResourceAccess());
@@ -95,6 +127,10 @@ public class GatewaySyncUtil {
 		public SyncEntry(Resource device, String gwId, StringArrayResource existing) {
 			this(getUniqueListname(device.getName(), existing), gwId, device.getLocation(), "gw"+gwId, false);
 		}
+		public SyncEntry(Resource device, String gwId, StringArrayResource existing, String targetAdditionalPath) {
+			this(getUniqueListname(device.getName(), existing), gwId, device.getLocation(), "gw"+gwId+"/"+targetAdditionalPath, false);
+		}
+
 		public SyncEntry(String listname, String gwId, String resourcepath, String targetpath, boolean isTargetPathRawGwId) {
 			this(listname, gwId, new String[]{resourcepath}, targetpath, isTargetPathRawGwId);
 		}
