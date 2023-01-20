@@ -13,6 +13,7 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProviderDP;
 import org.ogema.model.locations.Location;
 import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.Data;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -66,6 +67,7 @@ public class GatewaySyncUtil {
 	public static GatewaySyncData getGatewaySyncDataAsClient(ApplicationManager appMan) {
 		return getGatewaySyncData(appMan, null);
 	}
+	public static volatile boolean initSRC = false;
 	public static GatewaySyncData getGatewaySyncData(ApplicationManager appMan, String gatewayIdBase) {
 		if((!Boolean.getBoolean("org.smartrplace.apps.subgateway")) && gatewayIdBase == null)
 			throw new IllegalStateException("Only subgateway can call getGatewaySyncData without gatewayId!");
@@ -88,8 +90,11 @@ public class GatewaySyncUtil {
 				ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
 			
 			if(Boolean.getBoolean("org.smartrplace.apps.sync.roomcontroldata")) {
-				Resource srcConfig = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig");
-				registerToplevelDeviceForSyncAsClient(srcConfig, appMan, true, gwSync, gatewayIdBase);	
+				if(!initSRC) {
+					Resource srcConfig = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig");
+					registerToplevelDeviceForSyncAsClient(srcConfig, appMan, true, gwSync, gatewayIdBase);
+					initSRC = true;
+				}
 			} else {
 				//remove
 				String sentrySRC = "src:"+gatewayIdBase+":smartrplaceHeatcontrolConfig:"; //,hardwareInstallConfig:/";
@@ -192,9 +197,17 @@ public class GatewaySyncUtil {
 	 */
 	public static Resource getOrCreateGatewayResource(String gatewayBaseId, ApplicationManager appMan) {
 		Resource result = getGatewayResource(gatewayBaseId, appMan.getResourceAccess());
-		if(result != null)
-			return result;
-		return ResourceHelper.getOrCreateTopLevelResource("gw"+gatewayBaseId, CascadingData.class, appMan);
+		if(result == null)
+			result = ResourceHelper.getOrCreateTopLevelResource("gw"+gatewayBaseId, CascadingData.class, appMan);
+		if(result != null) try {
+			Resource tempRes = result.getSubResource("temp", Data.class);
+			if(tempRes == null || (!tempRes.isActive())) {
+				tempRes.create().activate(false);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	public static String getGatewayBaseId(GatewaySyncData syncData) {

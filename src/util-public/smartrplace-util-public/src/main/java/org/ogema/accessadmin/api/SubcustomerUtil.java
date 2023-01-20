@@ -12,7 +12,6 @@ import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
-import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
@@ -636,12 +635,13 @@ public class SubcustomerUtil {
 	 * @param room
 	 * @param resAcc
 	 */
-	public static void initRoom(Room room, ResourceAccess resAcc) {
-		AccessAdminConfig appConfigData = resAcc.getResource("accessAdminConfig");
+	public static void initRoom(Room room, ApplicationManager appMan) {
+		AccessAdminConfig appConfigData = appMan.getResourceAccess().getResource("accessAdminConfig");
 		ResourceList<BuildingPropertyUnit> roomGroups = appConfigData.roomGroups();
-		initRoom(room, roomGroups, appConfigData);
+		initRoom(room, roomGroups, appConfigData, appMan);
 	}
-	public static void initRoom(Room object, ResourceList<BuildingPropertyUnit> roomGroups, AccessAdminConfig appConfigData) {
+	public static void initRoom(Room object, ResourceList<BuildingPropertyUnit> roomGroups, AccessAdminConfig appConfigData,
+			ApplicationManager appMan) {
 		BuildingPropertyUnit allRoomsGroup = null;
 		for(BuildingPropertyUnit g: roomGroups.getAllElements()) {
 			if(ResourceUtils.getHumanReadableShortName(g).equals(ALL_ROOMS_GROUP_NAME)) {
@@ -671,6 +671,17 @@ public class SubcustomerUtil {
 			}
 		}
 		ResourceListHelper.addReferenceUnique(allRoomsGroup.rooms(), object);
+		
+		SubCustomerData entireBuilding = getEntireBuildingSubcustomer(appMan);
+		if(entireBuilding == null) {
+			entireBuilding = SubcustomerUtil.getSubcustomer("Gesamtgebäude(C)", appMan);
+			if(entireBuilding != null)
+				ValueResourceHelper.setCreate(entireBuilding.aggregationType(), 1);
+		}
+		if(entireBuilding != null) {
+			SubcustomerUtil.addRoomToSubcustomer(object, entireBuilding, appMan);
+		}
+		
 		//setGroups(object, Arrays.asList(new BuildingPropertyUnit[] {allRoomsGroup}), roomGroups.getAllElements());
 	}
 }
