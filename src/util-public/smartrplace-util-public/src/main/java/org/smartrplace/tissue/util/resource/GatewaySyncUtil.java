@@ -93,11 +93,19 @@ public class GatewaySyncUtil {
 				if(!initSRC) {
 					Resource srcConfig = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig");
 					registerToplevelDeviceForSyncAsClient(srcConfig, appMan, true, gwSync, gatewayIdBase);
+
+					Resource accessAdConfig = appMan.getResourceAccess().getResource("accessAdminConfig");
+					registerToplevelDeviceForSyncAsClient(accessAdConfig, appMan, true, gwSync, gatewayIdBase);
 					initSRC = true;
 				}
 			} else {
 				//remove
 				String sentrySRC = "src:"+gatewayIdBase+":smartrplaceHeatcontrolConfig:"; //,hardwareInstallConfig:/";
+				idx = ValueResourceUtils.getContainingIndexIngoringActiveStatus(gwSync.toplevelResourcesToBeSynchronized(), sentrySRC);
+				if(idx >= 0)
+					ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
+
+				sentrySRC = "src:"+gatewayIdBase+":accessAdminConfig:"; //,hardwareInstallConfig:/";
 				idx = ValueResourceUtils.getContainingIndexIngoringActiveStatus(gwSync.toplevelResourcesToBeSynchronized(), sentrySRC);
 				if(idx >= 0)
 					ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
