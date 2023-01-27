@@ -187,7 +187,7 @@ public class AlarmingConfigUtil {
 		for(AlarmConfiguration alarmSource: template.alarms().getAllElements()) {
 			//TODO: Make this more general
 			SingleValueResource destSens = null;
-			if((template.device() instanceof SingleSwitchBox) && (template.device().getLocation().startsWith("virtSwitchBoxes"))) {
+			if((template.device() instanceof SingleSwitchBox) && (DeviceTableBase.makeDeviceToplevel(template.device().getLocation()).startsWith("virtSwitchBoxes"))) {
 				String sourceLoc = alarmSource.sensorVal().getLocation();
 				if(sourceLoc.endsWith("stateControl"))
 					destSens = ((SingleSwitchBox)device.device()).onOffSwitch().stateControl();
@@ -217,32 +217,6 @@ public class AlarmingConfigUtil {
 		for(CopyAlarmsSettings copy: data.values()) {
 			copySettings(copy.templateConfig, copy.deviceConfig, setSendAlarms);
 		}
-		
-		/*for(AlarmConfiguration alarmSource: source.alarms().getAllElements()) {
-			//TODO: Make this more general
-			SingleValueResource destSens = null;
-			if((source.device() instanceof SingleSwitchBox) && (source.device().getLocation().startsWith("virtSwitchBoxes"))) {
-				String sourceLoc = alarmSource.sensorVal().getLocation();
-				if(sourceLoc.endsWith("stateControl"))
-					destSens = ((SingleSwitchBox)destination.device()).onOffSwitch().stateControl();
-				else if(sourceLoc.endsWith("stateFeedback"))
-					destSens = ((SingleSwitchBox)destination.device()).onOffSwitch().stateFeedback();
-			}
-			if(destSens == null)
-				destSens = ResourceHelper.getRelativeResource(source.device(),alarmSource.sensorVal(), destination.device());
-			if(destSens == null || (!destSens.exists())) {
-				//appMan.getLogger().warn("Alarming "+alarmSource.sensorVal().getLocation()+" not found as relative path for: "+destination.device().getLocation());
-				//throw new IllegalStateException("Alarming "+alarmSource.sensorVal().getLocation()+" not found as relative path for: "+destination.device().getLocation());
-				continue;
-			}
-			String destPath = destSens.getLocation();
-			for(AlarmConfiguration alarmDest: destination.alarms().getAllElements()) {
-				if(alarmDest.sensorVal().getLocation().equals(destPath)) {
-					copySettings(alarmSource, alarmDest, setSendAlarms);
-					break;
-				}
-			}
-		}*/
 	}
 	
 	public static void copySettings(AlarmConfiguration source, AlarmConfiguration destination,
