@@ -26,8 +26,6 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.util.directresourcegui.KnownWidgetHolder;
 import org.smartrplace.util.format.WidgetHelper;
 
-import com.fasterxml.jackson.core.PrettyPrinter;
-
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
@@ -103,6 +101,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 	protected final T headerObject;
 	protected long retardationOnGET = 0;
 	protected boolean preBuildDone = false;
+	protected final boolean hideIfEmpty;
 	
 	public ObjectGUITablePage(final WidgetPage<?> page, final ApplicationManager appMan,
 			T initSampleObject) {
@@ -131,11 +130,19 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 			T initSampleObject, Class<T> resourceType, boolean autoBuildPage, boolean registerDependentWidgets) {
 		this(page, appMan, appManMin, initSampleObject, resourceType, autoBuildPage, registerDependentWidgets, null);
 	}
-	@SuppressWarnings("unchecked")
+	
 	public ObjectGUITablePage(final WidgetPage<?> page,
 			final ApplicationManager appMan, final ApplicationManagerMinimal appManMin,
 			T initSampleObject, Class<T> resourceType, boolean autoBuildPage, boolean registerDependentWidgets,
 			Alert alert) {
+		this(page, appMan, appManMin, initSampleObject, resourceType, autoBuildPage, registerDependentWidgets, alert, false);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ObjectGUITablePage(final WidgetPage<?> page,
+			final ApplicationManager appMan, final ApplicationManagerMinimal appManMin,
+			T initSampleObject, Class<T> resourceType, boolean autoBuildPage, boolean registerDependentWidgets,
+			Alert alert, boolean hideIfEmpty) {
 
 		if(resourceType != null) {
 			if(!(Resource.class.isAssignableFrom(resourceType)))
@@ -150,6 +157,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		this.registerDependentWidgets = registerDependentWidgets;
 		headerObject = getHeaderObject();
 		this.alert = alert;
+		this.hideIfEmpty = hideIfEmpty;
 		isAlertNew = (alert == null);
 		
 		if(autoBuildPage) triggerPageBuild();
@@ -249,6 +257,12 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 					e.printStackTrace();
 				}
 			}
+			
+			//@Override
+			public boolean inZombieMode(OgemaHttpRequest req) {
+				return ObjectGUITablePage.this.hideIfEmpty && ObjectGUITablePage.this.isEmpty(req);
+			}
+			
 		};
 		mainTable.setRowTemplate(mainTableRowTemplate);
 		
@@ -268,5 +282,12 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 		if(registerDependentWidgets) governor.registerDependentWidget(target);
 		else governor.triggerAction(target, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST);
 	}
+	
+	// override to hide table
+	protected boolean isEmpty(OgemaHttpRequest req) {
+		return false;
+	}
+	
+	
 }
 

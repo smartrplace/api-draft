@@ -90,7 +90,12 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public DeviceTableRaw(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
 			T initSampleObject) {
-		super(page, appMan!=null?appMan.appMan():null, null, initSampleObject, null, false, true, alert);
+		this(page, appMan, alert, initSampleObject, false);
+	}
+	
+	public DeviceTableRaw(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
+			T initSampleObject, boolean hideIfEmpty) {
+		super(page, appMan!=null?appMan.appMan():null, null, initSampleObject, null, false, true, alert, hideIfEmpty);
 		this.appManPlus = appMan;
 	}
 

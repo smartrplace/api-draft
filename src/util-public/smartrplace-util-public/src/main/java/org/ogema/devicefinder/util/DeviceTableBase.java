@@ -30,11 +30,12 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	protected final InstalledAppsSelector appSelector;
 	protected final DeviceHandlerProvider<?> devHand;
 	protected final TimeResource deviceIdManipulationUntil;
+	protected volatile boolean isEmpty = true;
 	
 	public DeviceTableBase(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
 			InstalledAppsSelector appSelector,
 			DeviceHandlerProvider<?> devHand) {
-		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class));
+		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class), true);
 		this.devHand = devHand;
 		this.deviceIdManipulationUntil = appMan.getResourceAccess().getResource("hardwareInstallConfig/deviceIdManipulationUntil");
 		if(appSelector != null)
@@ -191,6 +192,15 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	
 	public Header getHeaderWidget() {
 		return headerWinSens;
+	}
+	
+	public void setEmpty(boolean empty) {
+		this.isEmpty = empty;
+	}
+	
+	@Override
+	protected boolean isEmpty(OgemaHttpRequest req) {
+		return this.isEmpty;
 	}
 	
 	@Override

@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
@@ -12,7 +13,7 @@ public class PatternListenerExtendedImpl<P extends ResourcePattern<R>, R extends
 
 	private final InstalledAppsSelector app;
 	private final DeviceHandlerBase<R> devHandler;
-	public final List<P> availablePatterns = new ArrayList<>();
+	public final List<P> availablePatterns = Collections.synchronizedList(new ArrayList<P>());
 	
  	public PatternListenerExtendedImpl(InstalledAppsSelector app, DeviceHandlerBase<R> devHandler) {
 if(app == null) {
@@ -46,7 +47,9 @@ if(app == null) {
 
 	@Override
 	public List<P> getAllPatterns() {
-		return availablePatterns;
+		synchronized (availablePatterns) {
+			return new ArrayList<>(availablePatterns);
+		}
 	}
 
 }
