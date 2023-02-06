@@ -92,10 +92,12 @@ public class GatewaySyncUtil {
 			if(Boolean.getBoolean("org.smartrplace.apps.sync.roomcontroldata")) {
 				if(!initSRC) {
 					Resource srcConfig = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig");
-					registerToplevelDeviceForSyncAsClient(srcConfig, appMan, true, gwSync, gatewayIdBase);
+					if(srcConfig != null)
+						registerToplevelDeviceForSyncAsClient(srcConfig, appMan, true, gwSync, gatewayIdBase);
 
 					Resource accessAdConfig = appMan.getResourceAccess().getResource("accessAdminConfig");
-					registerToplevelDeviceForSyncAsClient(accessAdConfig, appMan, true, gwSync, gatewayIdBase);
+					if(accessAdConfig != null)
+						registerToplevelDeviceForSyncAsClient(accessAdConfig, appMan, true, gwSync, gatewayIdBase);
 					initSRC = true;
 				}
 			} else {

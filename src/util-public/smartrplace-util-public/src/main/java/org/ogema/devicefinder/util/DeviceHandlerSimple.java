@@ -30,6 +30,7 @@ import org.smartrplace.tissue.util.resource.GatewaySyncUtil;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -251,12 +252,15 @@ if(Boolean.getBoolean("jobdebug")) {
 					return knownDps;
 				if(DeviceTableBase.isHomematic(device.getLocation()))
 					return knownDps;
-				Resource parentraw = device.getParent();
+				Resource topLevel = ResourceHelper.getToplevelResource(device);
+				GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(topLevel, appMan.appMan());
+
+				/*Resource parentraw = device.getParent();
 				if(parentraw != null && ((parentraw instanceof ResourceList) ||
 						parentraw.getResourceType().equals(Resource.class)))
 					GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(parentraw, appMan.appMan());
 				else
-					GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(device, appMan.appMan());
+					GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(device, appMan.appMan());*/
 			}
 		}
 		return knownDps;			
