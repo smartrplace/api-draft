@@ -21,8 +21,6 @@ package org.ogema.messaging.api;
  */
 public interface MailSessionServiceI {
 
-	public void initMailCap();
-
 	public MessageBuilderI newMessage();
 
 }
