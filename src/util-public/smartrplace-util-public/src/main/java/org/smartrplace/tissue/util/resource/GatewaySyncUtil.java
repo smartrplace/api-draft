@@ -13,6 +13,7 @@ import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProviderDP;
 import org.ogema.model.locations.Location;
 import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.Data;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -28,14 +29,34 @@ import de.iwes.util.resource.ValueResourceHelper;
 
 public class GatewaySyncUtil {
 	public static String registerToplevelDeviceForSyncAsClient(Resource device, ApplicationManager appMan) {
+		return registerToplevelDeviceForSyncAsClient(device, appMan, false);
+	}
+	/**
+	 * 
+	 * @param device
+	 * @param appMan
+	 * @param isDataTransferOnly if true the data is only synchronized for a one-time data transfer and shall be deleted 
+	 * 		afterwards. For this reason it is stored below "temp".
+	 * @return
+	 */
+	public static String registerToplevelDeviceForSyncAsClient(Resource device, ApplicationManager appMan,
+			boolean isDataTransferOnly) {
 		String gatewayIdBase = ViaHeartbeatUtil.getBaseGwId(GatewayUtil.getGatewayId(appMan.getResourceAccess()));
 		GatewaySyncData gwSync = getGatewaySyncData(appMan, gatewayIdBase);
 		if(gwSync == null)
 			return null;
+		return registerToplevelDeviceForSyncAsClient(device, appMan, isDataTransferOnly, gwSync, gatewayIdBase);
+	}
+	public static String registerToplevelDeviceForSyncAsClient(Resource device, ApplicationManager appMan,
+				boolean isDataTransferOnly, GatewaySyncData gwSync, String gatewayIdBase) {
 		String existing = getSyncEntry(gwSync, device);
 		if(existing != null)
 			return existing;
-		SyncEntry entry = new SyncEntry(device, gatewayIdBase, gwSync.toplevelResourcesToBeSynchronized());
+		SyncEntry entry;
+		if(isDataTransferOnly)
+			entry = new SyncEntry(device, gatewayIdBase, gwSync.toplevelResourcesToBeSynchronized(), "temp");
+		else
+			entry = new SyncEntry(device, gatewayIdBase, gwSync.toplevelResourcesToBeSynchronized());
 		String sentry = entry.getEntry();
 		gwSync.toplevelResourcesToBeSynchronized().create();
 		ValueResourceUtils.appendValue(gwSync.toplevelResourcesToBeSynchronized(), sentry);
@@ -46,6 +67,7 @@ public class GatewaySyncUtil {
 	public static GatewaySyncData getGatewaySyncDataAsClient(ApplicationManager appMan) {
 		return getGatewaySyncData(appMan, null);
 	}
+	public static volatile boolean initSRC = false;
 	public static GatewaySyncData getGatewaySyncData(ApplicationManager appMan, String gatewayIdBase) {
 		if((!Boolean.getBoolean("org.smartrplace.apps.subgateway")) && gatewayIdBase == null)
 			throw new IllegalStateException("Only subgateway can call getGatewaySyncData without gatewayId!");
@@ -54,18 +76,43 @@ public class GatewaySyncUtil {
 		String resName = "replication_"+gatewayIdBase;
 		if(Boolean.getBoolean("org.smartrplace.apps.subgateway")) {
 			GatewaySyncData gwSync = ResourceHelper.getOrCreateTopLevelResource(resName, GatewaySyncData.class, appMan);
-			String existing = getSyncEntry(gwSync, "rooms"); //,hardwareInstallConfig");
-			if(existing == null) {
-				gwSync.toplevelResourcesToBeSynchronized().create();
+			gwSync.toplevelResourcesToBeSynchronized().create();
+			//String existing = getSyncEntry(gwSync, "rooms"); //,hardwareInstallConfig");
+			//if(existing == null) {
 				//TODO: Rooms are currently duplicated on CMS level
 				//String sentry = "rooms:"+gatewayIdBase+":rooms:/"; //,hardwareInstallConfig:/";
 				//ValueResourceUtils.appendValue(gwSync.toplevelResourcesToBeSynchronized(), sentry);
-			}
+			//}
 			//TODO: Removal may not be final solution
 			String sentry = "rooms:"+gatewayIdBase+":rooms:/";
 			int idx = ValueResourceUtils.getIndexIngoringActiveStatus(gwSync.toplevelResourcesToBeSynchronized(), sentry);
 			if(idx >= 0)
 				ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
+			
+			if(Boolean.getBoolean("org.smartrplace.apps.sync.roomcontroldata")) {
+				if(!initSRC) {
+					Resource srcConfig = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig");
+					if(srcConfig != null)
+						registerToplevelDeviceForSyncAsClient(srcConfig, appMan, true, gwSync, gatewayIdBase);
+
+					Resource accessAdConfig = appMan.getResourceAccess().getResource("accessAdminConfig");
+					if(accessAdConfig != null)
+						registerToplevelDeviceForSyncAsClient(accessAdConfig, appMan, true, gwSync, gatewayIdBase);
+					initSRC = true;
+				}
+			} else {
+				//remove
+				String sentrySRC = "src:"+gatewayIdBase+":smartrplaceHeatcontrolConfig:"; //,hardwareInstallConfig:/";
+				idx = ValueResourceUtils.getContainingIndexIngoringActiveStatus(gwSync.toplevelResourcesToBeSynchronized(), sentrySRC);
+				if(idx >= 0)
+					ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
+
+				sentrySRC = "src:"+gatewayIdBase+":accessAdminConfig:"; //,hardwareInstallConfig:/";
+				idx = ValueResourceUtils.getContainingIndexIngoringActiveStatus(gwSync.toplevelResourcesToBeSynchronized(), sentrySRC);
+				if(idx >= 0)
+					ValueResourceUtils.removeElement(gwSync.toplevelResourcesToBeSynchronized(), idx);
+			}
+			
 			return gwSync;
 		}
 		GatewaySyncData result = ResourceHelper.getTopLevelResource(resName, GatewaySyncData.class, appMan.getResourceAccess());
@@ -95,6 +142,10 @@ public class GatewaySyncUtil {
 		public SyncEntry(Resource device, String gwId, StringArrayResource existing) {
 			this(getUniqueListname(device.getName(), existing), gwId, device.getLocation(), "gw"+gwId, false);
 		}
+		public SyncEntry(Resource device, String gwId, StringArrayResource existing, String targetAdditionalPath) {
+			this(getUniqueListname(device.getName(), existing), gwId, device.getLocation(), "gw"+gwId+"/"+targetAdditionalPath, false);
+		}
+
 		public SyncEntry(String listname, String gwId, String resourcepath, String targetpath, boolean isTargetPathRawGwId) {
 			this(listname, gwId, new String[]{resourcepath}, targetpath, isTargetPathRawGwId);
 		}
@@ -156,9 +207,17 @@ public class GatewaySyncUtil {
 	 */
 	public static Resource getOrCreateGatewayResource(String gatewayBaseId, ApplicationManager appMan) {
 		Resource result = getGatewayResource(gatewayBaseId, appMan.getResourceAccess());
-		if(result != null)
-			return result;
-		return ResourceHelper.getOrCreateTopLevelResource("gw"+gatewayBaseId, CascadingData.class, appMan);
+		if(result == null)
+			result = ResourceHelper.getOrCreateTopLevelResource("gw"+gatewayBaseId, CascadingData.class, appMan);
+		if(result != null) try {
+			Resource tempRes = result.getSubResource("temp", Data.class);
+			if(tempRes == null || (!tempRes.isActive())) {
+				tempRes.create().activate(false);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	public static String getGatewayBaseId(GatewaySyncData syncData) {
