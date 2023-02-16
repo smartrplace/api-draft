@@ -814,6 +814,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return setDecalcTime(device, destTime);												
 	}
 	
+	public static String setDecalcTimeForNextDay(Thermostat device, long now) {
+		//long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
+		long startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
+		long destTime = startOfDay + 26*TimeProcUtil.HOUR_MILLIS;
+		return setDecalcTime(device, destTime);												
+	}
+	
 	public static String setDecalcTime(Thermostat device, long destTime) {
 		StringResource res = device.valve().getSubResource("DECALCIFICATION", StringResource.class);
 		String val = getDecalcString(destTime);
