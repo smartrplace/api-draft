@@ -63,6 +63,7 @@ import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.html.form.label.LabelData;
+import de.iwes.widgets.resource.widget.dropdown.ResourceDropdown;
 
 public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITablePage<T,R>  {
 	public static final long DEFAULT_POLL_RATE = 5000;
@@ -227,7 +228,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			roomsToSet = roomsToSetLoc;
 			lastUpdate = now;
 		}
-		vh.referenceDropdownFixedChoice(columnName, id, deviceRoom, row, roomsToSet, 3);
+		final ResourceDropdown<Room> roomSelector = vh.referenceDropdownFixedChoice(columnName, id, deviceRoom, row, roomsToSet, 3);
+		if (roomSelector != null)
+			roomSelector.setDefaultMinWidth("7em");
 	}
 	
 	public static void addTenantWidgetStatic(ObjectResourceGUIHelper<?,?> vh, String id,
