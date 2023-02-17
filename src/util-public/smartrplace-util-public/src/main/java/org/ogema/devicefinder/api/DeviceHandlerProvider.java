@@ -79,6 +79,9 @@ public interface DeviceHandlerProvider<T extends PhysicalElement> extends Device
 	
 	public static interface DeviceTableConfig {
 		boolean showOnlyBaseCols();
+		default boolean emptyStateControlledExternally() {
+			return false;
+		}
 	}
 	
 	/** Provide table to be included into the hardware-installation app. It is recommended to use the

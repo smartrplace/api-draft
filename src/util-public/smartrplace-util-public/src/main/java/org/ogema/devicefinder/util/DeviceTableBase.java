@@ -35,7 +35,13 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	public DeviceTableBase(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
 			InstalledAppsSelector appSelector,
 			DeviceHandlerProvider<?> devHand) {
-		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class), true);
+		this(page, appMan, alert, appSelector, devHand, false);
+	}
+	
+	public DeviceTableBase(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
+			InstalledAppsSelector appSelector,
+			DeviceHandlerProvider<?> devHand, boolean emptyStateControlledExternally) {
+		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class), emptyStateControlledExternally);
 		this.devHand = devHand;
 		this.deviceIdManipulationUntil = appMan.getResourceAccess().getResource("hardwareInstallConfig/deviceIdManipulationUntil");
 		if(appSelector != null)
@@ -198,6 +204,9 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 		this.isEmpty = empty;
 	}
 	
+	/**
+	 * Only relevant if constructor parameter emptyControlledExternally is set to true
+	 */
 	@Override
 	protected boolean isEmpty(OgemaHttpRequest req) {
 		return this.isEmpty;

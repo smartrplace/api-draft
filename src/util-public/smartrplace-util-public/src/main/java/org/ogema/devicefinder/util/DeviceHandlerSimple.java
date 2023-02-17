@@ -132,7 +132,8 @@ if(Boolean.getBoolean("jobdebug")) {
 	@Override
 	public DeviceTableBase getDeviceTable(WidgetPage<?> page, Alert alert,
 			InstalledAppsSelector appSelector, DeviceTableConfig config) {
-		return new DeviceTableBase(page, appMan, alert, appSelector, this) {
+		final boolean emptyExternal = config.emptyStateControlledExternally();
+		return new DeviceTableBase(page, appMan, alert, appSelector, this, emptyExternal) {
 			@Override
 			protected String pid() {
 				return WidgetHelper.getValidWidgetId(DeviceHandlerSimple.this.getClass().getName());
