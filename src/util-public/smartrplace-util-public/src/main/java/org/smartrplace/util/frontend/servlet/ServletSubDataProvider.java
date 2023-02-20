@@ -29,6 +29,12 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 
 	protected final ReturnStructure returnStruct;
 	
+	/** It is not really clear why we call (JSONObject)in.get(key) when selection by key is done again in UserServlet.postJSON,
+	 * which should lead to an error as the key is not available anymore in UserServlet.postJSON. At least in some cases
+	 * this has to be avoided.
+	 */
+	private final boolean avoidProcessingKeyOnPOSTInThisClass;
+	
 	/** 
 	 * @param provider
 	 * @param object may be null. In this case all elements provided by getAllObjects of provider are used
@@ -38,9 +44,15 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 	public ServletSubDataProvider(ServletPageProvider<T> provider, T object,
 			boolean useNumericalId,
 			Map<String, String[]> parameters) {
-		this(provider, object, useNumericalId, ReturnStructure.DICTIONARY, parameters);
+		this(provider, object, useNumericalId, ReturnStructure.DICTIONARY, parameters, false);
 	}
-	/** 
+
+	public ServletSubDataProvider(ServletPageProvider<T> provider, T object,
+			boolean useNumericalId, ReturnStructure returnStruct,
+			Map<String, String[]> parameters) {
+		this(provider, object, useNumericalId, returnStruct, parameters, false);
+	}
+/** 
 	 * 
 	 * @param provider
 	 * @param object may be null. In this case all elements provided by getAllObjects of provider are used
@@ -50,13 +62,15 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 	 */
 	public ServletSubDataProvider(ServletPageProvider<T> provider, T object,
 			boolean useNumericalId, ReturnStructure returnStruct,
-			Map<String, String[]> parameters) {
+			Map<String, String[]> parameters,
+			boolean avoidProcessingKeyOnPOSTInThisClass) {
 		this.provider = provider;
 		this.object = object;
 		this.useNumericalId = useNumericalId;
 		this.paramD = new UserServletParamData(parameters);
 		this.returnStruct = returnStruct;
 		this.parameters = parameters;
+		this.avoidProcessingKeyOnPOSTInThisClass = avoidProcessingKeyOnPOSTInThisClass;
 	}
 	
 	@Override
@@ -108,7 +122,10 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 		    if (in.get(key) instanceof JSONObject) {
 				String timeString = UserServlet.getParameter("time", parameters);
 				GetObjectResult<T> odata = UserServlet.getObjects(user, provider, key, true);
-				UserServlet.postJSON(user, (JSONObject)in.get(key), provider, timeString, parameters, odata);
+				if(avoidProcessingKeyOnPOSTInThisClass)
+					UserServlet.postJSON(user, in, provider, timeString, parameters, odata);
+				else
+					UserServlet.postJSON(user, (JSONObject)in.get(key), provider, timeString, parameters, odata);
 		    }
 		}
 		
