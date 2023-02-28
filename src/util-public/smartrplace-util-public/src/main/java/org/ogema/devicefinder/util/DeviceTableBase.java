@@ -106,7 +106,7 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 		if(req == null)
 			device = ResourceHelper.getSampleResource(getResourceType());
 		else
-			device = object.device();
+			device = object.device().getLocationResource();
 		return device;
 	}
 

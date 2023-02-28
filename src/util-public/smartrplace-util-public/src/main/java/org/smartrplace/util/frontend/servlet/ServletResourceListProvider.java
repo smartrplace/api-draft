@@ -104,7 +104,7 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 			JSONObject jsonobj = new JSONObject(value);
 			JSONArray json = jsonobj.getJSONArray(id);
 			json = checkArrayToWrite(json);
-			int len = json.length();
+			final int len = json.length();
 			if(len < res.size()) {
 				int minSize = minimumSizeOfListAfterUpdate(json);
 				if(len < minSize)
