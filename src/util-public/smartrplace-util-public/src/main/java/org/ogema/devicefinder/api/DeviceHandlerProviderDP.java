@@ -58,7 +58,7 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 
 	default SingleValueResource getMainSensorValue(InstallAppDevice deviceConfiguration) {
 		@SuppressWarnings("unchecked")
-		T device = (T) deviceConfiguration.device();
+		T device = (T) deviceConfiguration.device().getLocationResource();
 		return getMainSensorValue(device, deviceConfiguration);
 		
 	}

@@ -579,14 +579,54 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 	
-	public static boolean isRelativeSetpointThermostat(Thermostat thermostat) {
+	/** In a relativeSetpointSystem thermostats exists that take setpoit values relative to
+	 * a predefined setpoint, e.g. -3 to +3. Still it may be possible to also control the
+	 * absolute setpoint, which currently is determined by the property org.smartrplace.apps.heatcontrol.relativesetpoints .
+	 * The main thermostat is the one that is active based on the property. For non-relativeSetpointSystems the function
+	 * always return false
+	 * @param thermostat
+	 * @return
+	 */
+	public static boolean isMainThermostatInRelativeSetpointSystem(PhysicalElement thermostat) {
 		//TODO: Differentiate whether these setpoints are available and whether they are used or
 		// absolute setpoints are used by roomcontrol
-		if(!Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints"))
+		if(!isRelativeSetpointSystem())
 			return false;
-		if(thermostat.getLocation().contains("/RoomControls_") && thermostat.getName().equals("thermostat"))
+		if(Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints") &&
+				thermostat.getLocation().contains("/RoomControls_") && thermostat.getName().equals("thermostat"))
+			return true;
+		if(Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints") &&
+				thermostat.getLocation().contains("/ISPRoomControls_"))
+			return true;
+		if((!Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints")) &&
+				(!(thermostat.getLocation().contains("/RoomControls_") && thermostat.getName().equals("thermostat"))))
 			return true;
 		return false;
+	}
+	public static boolean isRelativeSetpointSystem() {
+		return Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpointsystem");
+	}
+	
+	/** Check if resource is inside a relative setpoint thermostat
+	 * 
+	 * @param thermostat path of resource to check, may be sub resource of thermostat
+	 * @return
+	 */
+	public static boolean hasThermostatRelativeSetpoint(Resource thermostat) {
+		//Simple variant
+		//return Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints");
+		
+		if(!Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints"))
+			return false;
+		if(thermostat.getSubResource("hasAbsoluteSetpoint") != null) {
+			BooleanResource isRel = thermostat.getSubResource("hasAbsoluteSetpoint", BooleanResource.class);
+			if(isRel.isActive())
+				return isRel.getValue();
+			return false;
+		}
+		if(thermostat.getLocation().contains("/ISPRoomControls_"))
+			return false;
+		return true;
 	}
 	
 	public static boolean isWeatherStation(String resourceLocation) {

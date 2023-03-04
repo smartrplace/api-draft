@@ -72,7 +72,18 @@ public class KPIResourceAccess {
 					result.add(room.getLocationResource());
 				}
 			}
-
+			ResourceList<PhysicalElement> bacnetDevices = resAcc.getResource("BACnetDevices");
+			for(PhysicalElement el: bacnetDevices.getAllElements()) {
+				if(el.getName().startsWith("ISPRoomControls_") && (el instanceof PhysicalElement)) {
+					Room room = el.location().room();
+					if(!room.exists())
+						continue;
+					if(result.contains(room))
+						continue;
+					result.add(room.getLocationResource());
+				}
+			}
+			
 			if(realRoomsOnly)
 				return result;
 			ResourceList<Room> standardRooms = resAcc.getResource("rooms");
