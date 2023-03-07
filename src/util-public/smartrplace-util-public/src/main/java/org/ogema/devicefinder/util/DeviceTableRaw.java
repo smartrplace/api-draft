@@ -619,11 +619,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(!Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints"))
 			return false;
 		if(thermostat.getSubResource("hasAbsoluteSetpoint") != null) {
-			BooleanResource isRel = thermostat.getSubResource("hasAbsoluteSetpoint", BooleanResource.class);
-			if(isRel.isActive())
-				return isRel.getValue();
-			return false;
+			BooleanResource isAbs = thermostat.getSubResource("hasAbsoluteSetpoint", BooleanResource.class);
+			if(isAbs.isActive())
+				return !isAbs.getValue();
+			return true;
 		}
+		if(thermostat.getLocation().contains("Leitwarte"))
+			return true;
 		if(thermostat.getLocation().contains("/ISPRoomControls_"))
 			return false;
 		return true;
