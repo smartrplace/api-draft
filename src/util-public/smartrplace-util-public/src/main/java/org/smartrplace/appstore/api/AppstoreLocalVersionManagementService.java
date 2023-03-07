@@ -53,4 +53,10 @@ public interface AppstoreLocalVersionManagementService {
 	 * @return true if trigger was performed successfully
 	 */
 	boolean triggerUpdate();
+	
+	/** Trigger a restart of the OGEMA / OSGi framework.
+	 * @return true if the restart command has been called successfully.
+	 */
+	boolean restartFramework();
+	
 }
