@@ -118,9 +118,25 @@ public abstract class ServletResourceListProvider<T extends Resource> implements
 					res.add();
 				}
 			}
-			for(int i=0; i<len; i++) {
+			try { for(int i=0; i<len; i++) {
 				List<T> allRes = res.getAllElements();
 				setElementData(allRes.get(i), (JSONObject) json.get(i), i);
+			}} catch(IndexOutOfBoundsException e) {
+				//try once again
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+				if(len > res.size()) {
+					for(int i=res.size(); i<len; i++) {
+						res.add();
+					}
+				}
+				for(int i=0; i<len; i++) {
+					List<T> allRes = res.getAllElements();
+					setElementData(allRes.get(i), (JSONObject) json.get(i), i);
+				}
 			}
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException(e);
