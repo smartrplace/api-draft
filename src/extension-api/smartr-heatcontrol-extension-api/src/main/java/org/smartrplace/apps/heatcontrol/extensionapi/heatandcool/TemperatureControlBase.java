@@ -1,5 +1,9 @@
 package org.smartrplace.apps.heatcontrol.extensionapi.heatandcool;
 
+import java.util.Collection;
+
+import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.schedule.AbsoluteSchedule;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.MechanicalFan;
@@ -146,6 +150,17 @@ public interface TemperatureControlBase extends RoomDeviceProvider {
 		else
 			mode = isCoolingSupported();
 		return mode != HeatCoolFanMode.UNSUPPORTED;
+	}
+	
+	default void setBackupSetpointSchedule(Collection<SampledValue> vals) {
+		TemperatureResource setp = getTemperatureSetpoint();
+		AbsoluteSchedule program = setp.program();
+		if(!program.exists()) {
+			program.create();
+			program.replaceValues(0, Long.MAX_VALUE, vals);
+			program.activate(false);
+		} else
+			program.replaceValues(0, Long.MAX_VALUE, vals);
 	}
 	
 	/** Provide Virtual Switches by devices*/
