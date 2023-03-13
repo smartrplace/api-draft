@@ -592,12 +592,18 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		// absolute setpoints are used by roomcontrol
 		if(!isRelativeSetpointSystem())
 			return false;
+		if(thermostat.getLocation().contains("_Leitwarte_")) {
+			if(thermostat.getLocation().contains("knx_devices/"))
+				return true;
+			return false;
+		}
 		if(Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints") &&
 				thermostat.getLocation().contains("/RoomControls_") && thermostat.getName().equals("thermostat"))
 			return true;
 		if(Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints") &&
-				thermostat.getLocation().contains("/ISPRoomControls_"))
+				thermostat.getLocation().contains("/ISPRoomControls_")) {
 			return true;
+		}
 		if((!Boolean.getBoolean("org.smartrplace.apps.heatcontrol.relativesetpoints")) &&
 				(!(thermostat.getLocation().contains("/RoomControls_") && thermostat.getName().equals("thermostat"))))
 			return true;
@@ -624,8 +630,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				return !isAbs.getValue();
 			return true;
 		}
-		if(thermostat.getLocation().contains("Leitwarte"))
-			return true;
+		//if(thermostat.getLocation().contains("Leitwarte"))
+		//	return false; //true;
 		if(thermostat.getLocation().contains("/ISPRoomControls_"))
 			return false;
 		return true;
