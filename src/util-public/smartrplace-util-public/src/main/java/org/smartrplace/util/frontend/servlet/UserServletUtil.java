@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -16,8 +17,12 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.model.locations.Room;
+import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
+import org.smartrplace.util.frontend.servlet.UserServlet.GetObjectResult;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletPageProvider;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
@@ -133,6 +138,28 @@ public class UserServletUtil {
 		return tsd;
 	}
 	
+	/** Get location/name/other String objectId based on numerical or String object identifiert
+	 * 
+	 * @param objectId
+	 * @param objectIdPostiveOnly value of {@link ServletPageProvider#objectIdPostiveOnly()} of relevant provider
+	 * @return
+	 */
+	public static String getStringObjectId(String objectId, boolean objectIdPostiveOnly) {
+		int numId = 0;
+		final String result;
+		if(objectId != null) {
+			try {
+				numId = Integer.parseInt(objectId);
+				result = UserServlet.num2stringObjects.get(numId);
+				return result;
+			} catch(NumberFormatException e) {
+				UserServlet.num2StringPut(objectId, objectIdPostiveOnly);
+				return objectId;
+			}
+		} else
+			return null;
+	}
+	
 	public static <T extends Resource> T getObject(String objectId, Collection<T> allObjects) {
 		for(T resource: allObjects) {
 			if(resource.getName().equals(objectId)) return resource;
@@ -142,6 +169,12 @@ public class UserServletUtil {
 		return null;
 	}
 
+	public static Room getRoomById(String objectId, ResourceAccess resAcc) {
+		List<Room> rooms = KPIResourceAccess.getRealRooms(resAcc);
+		String objectIdLoc = getStringObjectId(objectId, true);
+		return getObject(objectIdLoc, rooms);
+	}
+	
 	public static boolean isDepthTimeSeries(Map<String, String[]> paramMap) {
 		String depth = UserServlet.getParameter("depth", paramMap);
 		if(depth == null)

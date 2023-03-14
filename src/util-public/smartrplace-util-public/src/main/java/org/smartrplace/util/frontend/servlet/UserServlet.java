@@ -111,8 +111,8 @@ public class UserServlet extends HttpServlet {
 	}
 	
 	/** Management of numerical IDs*/
-	private static final Map<Integer, String> num2stringObjects = new HashMap<>();
-	private static void num2StringPut(String value, boolean objectIdPostiveOnly) {
+	static final Map<Integer, String> num2stringObjects = new HashMap<>();
+	static void num2StringPut(String value, boolean objectIdPostiveOnly) {
 		try {
 			int num = Integer.parseInt(value);
 			num2stringObjects.put(num, value);
