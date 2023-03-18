@@ -49,16 +49,6 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 	@Override
 	public boolean setSubRoomLocation(OgemaLocale locale, Object context, String value) {
 		return addToSubRoomLocationAtomic(locale, context, value, true);
-		/*if(subRoomLocation == null) {
-			subRoomLocation = value;
-			return true;
-		}
-			
-		synchronized(subRoomLocation) {
-
-			subRoomLocation = value;
-		}
-		return true;*/
 	}
 	
 	@Override
