@@ -281,8 +281,23 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		if(result.devTypeShort == null)
 			result.devTypeShort = DeviceTableRaw.getDeviceStdName(devRes);
 		
-		//String subLoc = null;
-		if((appDev != null) && appDev.installationLocation().isActive()) {
+		String subName;
+		if(appDev != null) {
+			String devName = appDev.deviceId().getValue();
+			int devnr = ScheduleViewerOpenButtonEval.getNumberById(devName);
+			subName = ""+devnr;
+			if(appDev.installationLocation().isActive())
+				subName += "-"+appDev.installationLocation().getValue();
+		} else
+			subName = ScheduleViewerOpenButtonEval.getDeviceShortIdPlus(devRes.getLocation()); //DeviceTableRaw.getSubNameForDevice(devRes, dpService);
+		if(result.devTypeShort != null) {
+			if(subName != null && (!subName.isEmpty()))
+				result.subLoc = result.devTypeShort + subName;
+			else
+				result.subLoc = result.devTypeShort;
+		} else
+			result.subLoc = subName;
+		/*if((appDev != null) && appDev.installationLocation().isActive()) {
 			if(result.devTypeShort != null)
 				result.subLoc = result.devTypeShort+"-"+appDev.installationLocation().getValue();
 			else
@@ -302,7 +317,7 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 					result.subLoc = result.devTypeShort;
 			} else
 				result.subLoc = subName;
-		}
+		}*/
 		result.deviceLabel = DatapointImpl.getDeviceLabel(null,
 				result.room!=null?result.room.label(null):Datapoint.UNKNOWN_ROOM_NAME, result.subLoc, null);
 		/*PhysicalElement devRes = appDev.device();
