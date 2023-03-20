@@ -229,6 +229,7 @@ public class GatewaySyncUtil {
 	}
 
 	/** Update all device room locations based on {@link GatewaySyncData#deviceNames()}*/
+	@Deprecated //Not really used and tested
 	public static int setDeviceRoomLocations(GatewaySyncData syncData, ApplicationManager appMan) {
 		String gatewayBaseId = getGatewayBaseId(syncData);
 		if(gatewayBaseId == null)
@@ -245,6 +246,7 @@ public class GatewaySyncUtil {
 		return count;
 	}
 	
+	@Deprecated //Not really used and tested
 	public static Room setDeviceRoom(String deviceNamesEntry, Resource gatewayResource, ApplicationManager appMan) {
 		String[] els = deviceNamesEntry.split(",");
 		if(els.length != 2)
@@ -262,6 +264,7 @@ public class GatewaySyncUtil {
 	 * @param appMan
 	 * @return
 	 */
+	@Deprecated //Not really used and tested
 	public static Room setDeviceRoom(String deviceRoomLocation, String roomNameOrLocation, 
 			Resource gatewayResource, ApplicationManager appMan) {
 		Room roomRes = ResourceHelper.getSubResource(gatewayResource, deviceRoomLocation, Room.class);
@@ -276,6 +279,7 @@ public class GatewaySyncUtil {
 		return roomRes;
 	}
 
+	@Deprecated //Not really used and tested
 	public static void writeDeviceNamesEntriesOnSuperior(GatewaySyncData gwSyncData, Resource gatewayRes) {
 		StringArrayResource deviceNames = gwSyncData.deviceNames();
 		List<Location> allLocations = gatewayRes.getSubResources(Location.class, true);
@@ -286,6 +290,7 @@ public class GatewaySyncUtil {
 		}
 	}
 
+	@Deprecated //Not really used and tested
 	public static void writeDeviceNamesEntriesOnSubGw(GatewaySyncData gwSyncData, DatapointService dpService) {
 		StringArrayResource deviceNames = gwSyncData.deviceNames();
 		
@@ -305,6 +310,7 @@ public class GatewaySyncUtil {
 		}
 	}
 
+	@Deprecated //Not really used and tested
 	public static String writeDeviceNamesEntry(Room deviceLocationRoom, StringArrayResource deviceNames, boolean isSuperiorSystem) {
 		String deviceRoomLocation;
 		if(isSuperiorSystem) {
