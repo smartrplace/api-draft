@@ -31,7 +31,6 @@ import org.ogema.timeseries.eval.simple.api.TimeProcUtil.MeterReference;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartrplace.tissue.util.logconfig.PerformanceLog;
 import org.smartrplace.util.frontend.servlet.ServletNumProvider;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletPageProvider;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletValueProvider;
@@ -803,6 +802,12 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 		//List<SampledValue> req = setpReq.getValues(start, end+1);
 		//List<SampledValue> fb = setpFb.getValues(start, end+1);
 		List<SampledValue> result = new ArrayList<>();
+		if(setpFb == null) {
+			log.error("Stopping setpReact due to null setpFb timeseries!");
+			if(setpReq != null)
+				log.error("       SetpReq: "+TimeProcPrint.getTimeseriesName(setpReq, true));
+			return result;				
+		}
 		//SampledValue lastVal = null;
 		//if(input.isEmpty() && ((end-start) > maxGapSize)) {
 		//	result.add(new SampledValue(new FloatValue((float)((double)(end-start)/TimeProcUtil.MINUTE_MILLIS)), end, Quality.GOOD));
@@ -819,6 +824,10 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 			if(conNow - startTime > 5*TimeProcUtil.MINUTE_MILLIS) {
 				log.error("Stopping setpReact from "+TimeProcPrint.getTimeseriesName(setpFb, true)+" due to time after samples:"+idx);
 				return result;
+			}
+			if(sv == null) {
+				log.error("Stopping setpReact from "+TimeProcPrint.getTimeseriesName(setpFb, true)+" due to null setpReq value:"+idx);
+				return result;				
 			}
 			SampledValue fbVal = setpFb.getNextValue(sv.getTimestamp());
 			if(nextDiffResult == null || nextDiffResult.getTimestamp() <= sv.getTimestamp())

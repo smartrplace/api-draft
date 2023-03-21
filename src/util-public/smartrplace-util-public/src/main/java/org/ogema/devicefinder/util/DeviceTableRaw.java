@@ -909,6 +909,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		} return result;
 	}
 	
+	public static long getNextDecalcTime(Thermostat device, long now) {
+		StringResource res = device.valve().getSubResource("DECALCIFICATION_FEEDBACK", StringResource.class);
+		if(!res.isActive())
+			return 0;
+		return getNextDecalcTime(res.getValue(), now);
+	}
+	
 	public static long getNextDecalcTime(String deCalcString, long now) {
 		String[] daySplit = deCalcString.split("\\s+");
 		if(daySplit.length != 2)
