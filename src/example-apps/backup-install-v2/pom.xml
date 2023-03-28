@@ -19,7 +19,7 @@
     	<repository>
 		    <id>ogema-release</id>
 		    <name>ogema-release</name>
-		    <url>https://www.ogema-source.net/artifactory/libs-release</url>
+		    <url>https://repository.smartrplace.de/artifactory/libs-release</url>
    		</repository>
     </repositories>
     
