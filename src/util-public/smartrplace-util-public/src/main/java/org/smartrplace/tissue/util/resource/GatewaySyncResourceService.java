@@ -7,6 +7,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
+import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
 import org.smartrplace.model.sync.mqtt.GatewaySyncData;
 import org.smartrplace.os.util.OSGiBundleUtil.BundleType;
 
@@ -19,7 +20,10 @@ import org.smartrplace.os.util.OSGiBundleUtil.BundleType;
  * we always assume the system acting as gateway. 
  * If neither condition applies then the destination has to be determined by the position in
  * the cascading tree. The Cascading trees are defined in {@link GatewaySyncData#toplevelResourcesToBeSynchronized()}
- * for each cascading connection.
+ * for each cascading connection. Whether a GatewaySyncData entry is relevant for you as client or as
+ * server can be determined based on the own gatewayId. This can be determined by
+ * {@link GatewayUtil#getGatewayId(org.ogema.core.resourcemanager.ResourceAccess)},
+ * to make sure got get only 5-digit-id process the result by {@link ViaHeartbeatUtil#getBaseGwId(String)}.
  */
 public interface GatewaySyncResourceService {
 	
@@ -120,10 +124,11 @@ public interface GatewaySyncResourceService {
 	 */
 	<R extends Resource> CompletionStage<RemoteResourceStatus<R>> addToResourceList(ResourceList<R> list);
 	
-	
+    /** Room must be identified by name*/
 	CompletionStage<RemoteStatus> setRoomAsReference(PhysicalElement device, Room Room);
 	CompletionStage<RemoteStatus> setDeviceAsReference(PhysicalElement newReference, PhysicalElement deviceToBeReferenced);
 	
-	CompletionStage<RemoteStatus> restartBundle(BundleType type);
-	CompletionStage<RemoteStatus> restartBundle(String bundleSymbolicName);
+	CompletionStage<RemoteStatus> restartBundle(BundleType type, String gatewayId);
+	CompletionStage<RemoteStatus> restartBundle(String bundleSymbolicName, String gatewayId);
+
 }

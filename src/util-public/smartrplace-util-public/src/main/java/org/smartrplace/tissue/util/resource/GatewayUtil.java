@@ -3,6 +3,7 @@ package org.smartrplace.tissue.util.resource;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.gateway.LocalGatewayInformation;
+import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
 
 import de.iwes.util.resource.ResourceHelper;
 
@@ -25,6 +26,13 @@ public class GatewayUtil {
 			return idProp;
 		String idEnv = System.getenv("GATEWAY_ID");
 		return idEnv;
+	}
+
+	public static String getGatewayBaseId(ResourceAccess resAcc) {
+		String pre = getGatewayId(resAcc);
+		if(pre == null)
+			return null;
+		return ViaHeartbeatUtil.getBaseGwId(pre);
 	}
 
 	public static String getGatewayNameFromURL(ApplicationManager appMan) {

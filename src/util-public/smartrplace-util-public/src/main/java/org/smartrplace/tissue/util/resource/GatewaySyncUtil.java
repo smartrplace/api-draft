@@ -228,6 +228,12 @@ public class GatewaySyncUtil {
 		return null;
 	}
 
+	public static String getGatewayBaseIdStartingGw(Resource gwData) {
+		if(gwData.getName().length() < 3)
+			return null;
+		return gwData.getName().substring(2);
+	}
+	
 	/** Update all device room locations based on {@link GatewaySyncData#deviceNames()}*/
 	@Deprecated //Not really used and tested
 	public static int setDeviceRoomLocations(GatewaySyncData syncData, ApplicationManager appMan) {
