@@ -229,9 +229,10 @@ public class GatewaySyncUtil {
 	}
 
 	public static String getGatewayBaseIdStartingGw(Resource gwData) {
-		if(gwData.getName().length() < 3)
+		Resource top = ResourceHelper.getToplevelResource(gwData);
+		if(top.getName().length() < 3)
 			return null;
-		return gwData.getName().substring(2);
+		return top.getName().substring(2);
 	}
 	
 	/** Update all device room locations based on {@link GatewaySyncData#deviceNames()}*/
