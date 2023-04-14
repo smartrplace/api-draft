@@ -943,12 +943,17 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		updateInterval.myField.setDefaultInputmode("decimal");
 		return updateInterval.myField;
 	}
-	
+
 	public TextField stringEdit(String widgetId, String lineId, final StringResource source, Row row,
 			final Alert alert) {
+		return this.stringEdit(widgetId, lineId, source, row, alert, null);
+	}
+	
+	public TextField stringEdit(String widgetId, String lineId, final StringResource source, Row row,
+			final Alert alert, final StringResource tooltip) {
 		if(checkLineId(widgetId)) return null;
 		widgetId = WidgetHelper.getValidWidgetId(widgetId);
-		TextField result = stringEdit(widgetId + lineId, source, null, alert);
+		TextField result = stringEdit(widgetId + lineId, source, null, alert, tooltip);
 		finishRowSnippet(row, widgetId, result);	
 		return result;
 	}
@@ -960,7 +965,12 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		counter++;
 		return stringEdit("stringEdit"+counter, null, subResourceName, alert);
 	}
+	
 	private TextField stringEdit(String widgetId, final StringResource optSource, String altId, final Alert alert) {
+		return stringEdit(widgetId, optSource,altId, alert, null);
+	}
+	
+	private TextField stringEdit(String widgetId, final StringResource optSource, String altId, final Alert alert, final StringResource tooltip) {
 		final SingleValueResourceAccess<StringResource> sva = new SingleValueResourceAccess<StringResource>(optSource, altId);
 		TextFieldFlex updateInterval = new TextFieldFlex(widgetId, this) {
 			@Override
@@ -974,6 +984,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 						throw new IllegalStateException("Could not find "+sva.altIdUsed);
 				}
 				myField.setValue(source.getValue()+"",req);
+				if (tooltip != null)
+					myField.setToolTip(tooltip.getValue(), req);
 			}
 			
 			@Override

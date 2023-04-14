@@ -36,20 +36,24 @@ public class GenericControllerProvider<C> {
 
 	/** Call this method as soon as controller as been set up by the providing application*/
 	public void setController(C controller) {
-		this.controller = controller;
-		for(GenericExtensionProvider<C> p: extProvidersOpen.values()) {
-			p.setController(controller);
+		synchronized (extProvidersOpen) {
+			this.controller = controller;
+			for(GenericExtensionProvider<C> p: extProvidersOpen.values()) {
+				p.setController(controller);
+			}
+			extProvidersOpen.clear();
 		}
-		extProvidersOpen.clear();
 	}
 	
 	public void addExtProvider(GenericExtensionProvider<C> provider) {
 		if(!acceptedClassNames.contains(provider.getClass().getName()))
     		return;
-    	if(controller != null) {
-    		provider.setController(controller);
-    	} else
-        	extProvidersOpen.put(provider.getClass().getName(), provider);
+		synchronized (extProvidersOpen) {
+	    	if(controller != null) {
+	    		provider.setController(controller);
+	    	} else
+	        	extProvidersOpen.put(provider.getClass().getName(), provider);
+		}
     }
     public void removeExtProvider(GenericExtensionProvider<C> provider) {
     	extProvidersOpen.remove(provider.getClass().getName());
