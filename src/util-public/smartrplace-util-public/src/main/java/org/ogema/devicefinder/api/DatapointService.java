@@ -146,6 +146,13 @@ public interface DatapointService {
 	 * @return
 	 */
 	Collection<Class<? extends Resource>> getManagedDeviceResourceTypes(boolean basedOnDeviceHandlers);
+	
+	/** Get InstallAppDevice resources managing devices of a resourceType
+	 * 
+	 * @param resourceType if null then all InstallAppDevice resources are returned including trash. If you
+	 * 		do not want trash devices use managedDeviceResoures(null, false, false)
+	 * @return
+	 */
 	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
 	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId);
 	
