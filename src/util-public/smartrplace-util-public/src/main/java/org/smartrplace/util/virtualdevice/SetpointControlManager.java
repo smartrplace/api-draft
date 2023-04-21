@@ -37,7 +37,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	public static final float CONDITIONAL_PRIO_DEFAULT = 0.3f;
 	public static final float PRIORITY_PRIO_DEFAULT = 1.0f;
 	public static final int FORCE_PRIO = 1000;
-	public static final long KEEPKNOWNTEMPERATURES_DURATION_DEFAULT = 30000;
+	public static final long KEEPKNOWNTEMPERATURES_DURATION_DEFAULT = 8*TimeProcUtil.MINUTE_MILLIS; //30000;
 	public static final long PENDING_TimeForMissingFeedback_DEFAULT = Long.getLong("org.smartrplace.util.virtualdevice.maxfeedbacktime", 8*TimeProcUtil.MINUTE_MILLIS);
 
 	public static final String totalWritePerHour = "totalWritePerHour";
