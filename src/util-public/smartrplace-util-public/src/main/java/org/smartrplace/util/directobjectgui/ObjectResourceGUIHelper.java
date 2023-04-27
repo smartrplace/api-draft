@@ -1125,10 +1125,14 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	
 	public <S extends SingleValueResource> ValueResourceDropdown<S> dropdown(String widgetId, String lineId, final S source, Row row,
 			Map<String, String> valuesToSet) {
+		return dropdown(widgetId, lineId, source, row, valuesToSet, 0);
+	}
+	public <S extends SingleValueResource> ValueResourceDropdown<S> dropdown(String widgetId, String lineId, final S source, Row row,
+			Map<String, String> valuesToSet, int columnSize) {
 		if(checkLineId(widgetId)) return null;
 		widgetId = WidgetHelper.getValidWidgetId(widgetId);
 		ValueResourceDropdown<S> result = dropdown(widgetId + lineId, source, null, valuesToSet, null);
-		finishRowSnippet(row, widgetId, result);	
+		finishRowSnippet(row, widgetId, result, columnSize);	
 		return result;
 	}
 	public <S extends SingleValueResource> ValueResourceDropdown<S> dropdown(final S source,
