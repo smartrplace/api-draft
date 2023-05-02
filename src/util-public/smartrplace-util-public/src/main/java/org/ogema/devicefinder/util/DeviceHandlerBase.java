@@ -28,6 +28,7 @@ import org.ogema.devicefinder.api.DriverPropertySuccessHandler;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService;
 import org.ogema.devicefinder.api.PatternListenerExtended;
+import org.ogema.devicefinder.api.PropType;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmInterfaceInfo;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmLogicInterface;
@@ -229,6 +230,18 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "dutyCycle", GenericBinarySensor.class);
 		if(dutyCycle != null && dutyCycle.reading().exists())
 			addDatapoint(dutyCycle.reading(), result, dpService);
+		IntegerResource cyclicMsgChanged = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_CHANGED, false);
+		if(cyclicMsgChanged != null && cyclicMsgChanged.exists())
+			addDatapoint(cyclicMsgChanged, result, "cyclicMsgChangedCt", dpService);
+		IntegerResource cyclicMsgChangedFb = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_CHANGED, true);
+		if(cyclicMsgChanged != null && cyclicMsgChanged.exists())
+			addDatapoint(cyclicMsgChangedFb, result, "cyclicMsgChangedFb", dpService);
+		IntegerResource cyclicMsgUnchanged = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_UNCHANGED, false);
+		if(cyclicMsgChanged != null && cyclicMsgChanged.exists())
+			addDatapoint(cyclicMsgUnchanged, result, "cyclicMsgUnchangedCt", dpService);
+		IntegerResource cyclicMsgUnchangedFb = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_UNCHANGED, true);
+		if(cyclicMsgChanged != null && cyclicMsgChanged.exists())
+			addDatapoint(cyclicMsgUnchangedFb, result, "cyclicMsgUnchangedFb", dpService);
 		return result;
 	}
 	
