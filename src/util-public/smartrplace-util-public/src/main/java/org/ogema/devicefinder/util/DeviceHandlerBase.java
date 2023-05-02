@@ -255,6 +255,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		return isAutoModeAllowed(dev, configPending, hwConfig.autoThermostatMode());
 	}
 	
+	public static long blockShiftingUntil = -1;
 	public static boolean performWeeklyPostpone(Thermostat dev,HardwareInstallConfig hwConfig) {
 		if(hwConfig == null)
 			return Boolean.getBoolean("org.smartrplace.homematic.devicetable.autostart.shiftdecalc");		
