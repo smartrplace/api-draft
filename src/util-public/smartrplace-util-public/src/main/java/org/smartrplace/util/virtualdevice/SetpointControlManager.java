@@ -480,7 +480,10 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					long timePendingFb = now - resenddata.valuePendingSince;
 					//long sentAgoFb = now - resenddata.lastSent;
 					if((timePendingFb > pendingTimeForMissingFeedback)) { // && (sentAgoFb > lastSentAgoForRetry)) {
-						log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
+						if(resenddata.valueFeedbackPending != null)
+							log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending, value:"+(float)resenddata.valueFeedbackPending+".");
+						else
+							log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
 						cd.resendMissingFbCount++;
 						boolean success;
 						if(resenddata.valueFeedbackPendingObject != null) {
