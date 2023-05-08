@@ -252,6 +252,9 @@ public class PropType implements LabelledItem {
 			else
 				return getSubInt(mainTenanceMaster, "CYCLIC_INFO_MSG_DIS_UNCHANGED", feedback);
 		}
+		if(type == PropType.BUTTON_LOCK)
+			return ResourceHelper.getSubResourceOfSibbling(hmDevice,
+					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "globalButtonLock", BooleanResource.class);
 		
 		ResourceList<SingleValueResource> master = getHmParamMaster(hmDevice);
 		if(type == PropType.THERMOSTAT_WINDOWOPEN_MINUTES)
@@ -262,9 +265,6 @@ public class PropType implements LabelledItem {
 			return getSubFloat(master, "TEMPERATURE_WINDOW_OPEN", feedback);
 		else if(type == PropType.THERMOSTAT_VALVE_MAXPOSITION)
 			return getSubFloat(master, "VALVE_MAXIMUM_POSITION", feedback);
-		else if(type == PropType.BUTTON_LOCK)
-			return ResourceHelper.getSubResourceOfSibbling(hmDevice,
-					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "globalButtonLock", BooleanResource.class);
 		else
 			throw new IllegalStateException("PropType not supported as resource:"+type.id);
 	}
