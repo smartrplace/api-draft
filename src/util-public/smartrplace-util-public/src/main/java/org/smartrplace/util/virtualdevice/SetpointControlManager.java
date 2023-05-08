@@ -224,6 +224,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		return requestSetpointWrite(setp, Float.NaN, setpointData, prioLevel, resendEvenIfConditional,
 				writeEvenIfNochChangeForFeedbackAndSetpoint, false);
 	}
+	/** Call this if the setpoint should be set by the device itself or via transaction, just request a feedback and resend if feedback is not received*/
 	public boolean requestSetpointFeedback(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
 		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, false, true);
 	}

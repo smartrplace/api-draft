@@ -96,7 +96,7 @@ public class BatteryEvalBase {
 	public static WidgetStyle<Label> addBatteryStyle(Label label, float val, boolean changeInfoRelevant,
 			String deviceLocation, OgemaHttpRequest req) {
 		WidgetStyle<Label> result = null;
-		boolean singleBattery = deviceLocation == null || deviceLocation.contains("HMIP_SWDO");
+		boolean singleBattery = deviceLocation == null || deviceLocation.toUpperCase().contains("HMIP_SWDO");
 		BatteryStatus stat = getBatteryStatus(val, changeInfoRelevant, singleBattery?1:2);
 		if(stat == BatteryStatus.URGENT || stat == BatteryStatus.EMPTY)
 			result = LabelData.BOOTSTRAP_RED;
