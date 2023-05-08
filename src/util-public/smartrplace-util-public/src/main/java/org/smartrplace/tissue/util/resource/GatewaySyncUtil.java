@@ -114,14 +114,20 @@ public class GatewaySyncUtil {
 			}
 			
 			return gwSync;
-		}
+		} //if(Boolean.getBoolean("org.smartrplace.apps.subgateway"))
 		GatewaySyncData result = ResourceHelper.getTopLevelResource(resName, GatewaySyncData.class, appMan.getResourceAccess());
-		if(result != null)
+		if(result != null) {
 			return result;
+		}
 		List<GatewaySyncData> allSync = appMan.getResourceAccess().getResources(GatewaySyncData.class);
 		for(GatewaySyncData gws: allSync) {
 			if(gws.getName().equals(resName))
 				return gws;
+		}
+		result = ResourceHelper.getOrCreateTopLevelResource(resName, GatewaySyncData.class, appMan);
+		if(result != null) {
+			result.toplevelResourcesToBeSynchronized().create();
+			return result;
 		}
 		return null;
 	}
