@@ -90,6 +90,8 @@ public class GUIUtilHelper {
 			return result;
 		if(ud == null)
 			ud = getUserAccount(userName, appMan);
+		if(ud == null)
+			return userName;
 		return getRealName(ud);
 	}
 	
