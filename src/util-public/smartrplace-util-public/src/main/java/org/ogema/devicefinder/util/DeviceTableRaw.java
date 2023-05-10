@@ -848,6 +848,12 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return true;
 		return false;
 	}
+	public static boolean isCLThermostat(String resourceLocation) {
+		if(resourceLocation.contains("HmIP_eTRV_CL_"))
+			return true;
+		return false;
+	}
+
 	public static boolean isCO2SensorHm(String resourceLocation) {
 		if(resourceLocation.contains("HM_HmIP_SCTH230"))
 			return true;
