@@ -284,15 +284,23 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					if(!ValueResourceHelper.isAlmostEqual(curFb, setpoint))
 						done = false;					
 				}
-				if(done)
+				if(done) {
+					sens.valuePending = null;
+					sens.valueFeedbackPending = null;
+					if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
+						log.debug("In DONE1 For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 					return true;
+				}
 			}
 		}
 		if(minRewriteTime != null) {
 			long now = appMan.getFrameworkTime();
 			long sentAgo = now - sens.lastSent;
-			if(sentAgo < minRewriteTime)
+			if(sentAgo < minRewriteTime) {
+				if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
+					log.debug("In MIN_REWRITE_TIME For "+sens.setpoint().getLocation()+" minRewriteTime:"+minRewriteTime+" valueFeedback:"+sens.valueFeedbackPending);
 				return true;
+			}
 		}
 		boolean isOverload = isSensorInOverload(sens, maxDC);
 		if((!isOverload) || requestConfirmationOnly) {
@@ -311,11 +319,16 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					sens.writeSetpoint(setpoint);
 					sens.reportSetpoint(setpoint);
 				}
-				if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.noresend"))
-					return true;
+				//if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.noresend"))
+				//	return true;
 			}
-			if(!resendIfNoFeedback())
+			if(!resendIfNoFeedback()) {
+				sens.valuePending = null;
+				sens.valueFeedbackPending = null;
+				if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
+					log.debug("In RESEND_IF_NO_FB For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 				return true;
+			}
 
 			if((!writeEvenIfNochChangeForFeedbackAndSetpoint) && (setpointData == null)) {
 				//we do not support this for array resources etc. yet
@@ -325,8 +338,13 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					if(!ValueResourceHelper.isAlmostEqual(curFb, setpoint))
 						done = false;					
 				}
-				if(done)
+				if(done) {
+					sens.valuePending = null;
+					sens.valueFeedbackPending = null;
+					if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
+						log.debug("In DONE2 For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 					return true;
+				}
 			}
 						
 			if(sens.valueFeedbackPending == null || (sens.valueFeedbackPending != setpoint))
@@ -334,6 +352,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			if(setpointData != null)
 				sens.valueFeedbackPendingObject = setpointData;
 			sens.valueFeedbackPending = setpoint;
+			if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
+				log.debug("For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 			sens.valuePending = null;
 			return true;
 		}
