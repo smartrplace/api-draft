@@ -1,5 +1,7 @@
 package org.smartrplace.os.util;
 
+import java.awt.image.ReplicateScaleFilter;
+
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.TimedJobMemoryData;
 import org.ogema.devicefinder.api.TimedJobProvider;
@@ -28,6 +30,7 @@ public class BundleRestartButton extends Button {
 	
 	public static TimedJobMemoryData mdnsRestart = null;
 	public static TimedJobMemoryData hmRestart = null;
+	public static TimedJobMemoryData gwSyncRestart = null;
 	
 	public BundleRestartButton(WidgetPage<?> page, String id, BundleType type, BundleContext bc, Alert alert,
 			DatapointService dpService, Integer standardInterval) {
@@ -95,6 +98,8 @@ public class BundleRestartButton extends Button {
 				mdnsRestart = data;
 			else if(type.toString().toLowerCase().contains("homematic"))
 				hmRestart = data;
+			else if(type.toString().toLowerCase().contains("mqttreplicator"))
+				gwSyncRestart = data;
 		}
 	}
 
