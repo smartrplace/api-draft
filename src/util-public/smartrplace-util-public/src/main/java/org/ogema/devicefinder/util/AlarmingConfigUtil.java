@@ -40,6 +40,7 @@ import org.smartrplace.apps.hw.install.config.InstallAppDeviceBase;
 import de.iwes.util.resource.OGEMAResourceCopyHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
+import de.iwes.widgets.api.messaging.MessagePriority;
 
 public class AlarmingConfigUtil {
 	public static final double QUALITY_TIME_SHARE_LIMIT = 0.95f;
@@ -606,5 +607,18 @@ public class AlarmingConfigUtil {
 		String[] dhidfull = longId.split("\\.");
 		String dhid = dhidfull[dhidfull.length-1];
 		return dhid;
+	}
+	
+	public static MessagePriority getMessagePrio(int resourceValue) {
+		switch(resourceValue) {
+		case 1:
+			return MessagePriority.LOW;
+		case 2:
+			return MessagePriority.MEDIUM;
+		case 3:
+			return MessagePriority.HIGH;
+		default:
+			return null;
+		}
 	}
 }

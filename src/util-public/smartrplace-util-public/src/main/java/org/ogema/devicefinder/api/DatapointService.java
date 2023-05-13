@@ -10,6 +10,8 @@ import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.messaging.api.MessageTransport;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.app.useradmin.api.UserDataAccess;
+import org.smartrplace.alarming.escalation.util.EscalationManagerI;
+import org.smartrplace.alarming.escalation.util.EscalationProvider;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.autoconfig.api.OSGiConfigAccessService;
 
@@ -18,6 +20,7 @@ import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.TypeChecker;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
+import de.iwes.widgets.template.LabelledItem;
 
 /** Service for interchanging extended Datapoint information between applications
  * TODO: Shall be moved to ogema-widgets repository when more stable
@@ -211,4 +214,14 @@ public interface DatapointService {
 	default InstallationProgressService installationService(String comSystemId) {
 		return null;
 	}
+	
+	default EscalationManagerI alarmingEscalationService() {
+		return null;
+	}
+	
+	boolean addService(Object service);
+	
+	/** Use this method to pre-register even if EscalationManager is not yet available*/
+	void registerEscalationProvider(EscalationProvider prov);
+	EscalationProvider unregisterEscalationProvider(EscalationProvider prov);
 }
