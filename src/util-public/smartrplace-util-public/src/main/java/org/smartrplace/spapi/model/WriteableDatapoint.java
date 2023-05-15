@@ -19,4 +19,8 @@ public interface WriteableDatapoint extends PhysicalElement {
 	/** Human readable name to be provided as label*/
 	@Override
 	StringResource name();
+	
+	/** Room, device or gateway device the writeable datapoint is assigned to*/
+	PhysicalElement deviceAssigned();
+	//StringResource alarmType();
 }

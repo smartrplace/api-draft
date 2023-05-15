@@ -20,9 +20,11 @@ import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
-import org.smartrplace.util.frontend.servlet.UserServlet.GetObjectResult;
+import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.frontend.servlet.UserServlet.ServletPageProvider;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
@@ -160,6 +162,20 @@ public class UserServletUtil {
 			return null;
 	}
 	
+	public static boolean initDeviceIdsDone = false;
+	public static String getStringObjectId(String objectId, boolean objectIdPostiveOnly, DatapointService dpService) {
+		String result = getStringObjectId(objectId, objectIdPostiveOnly);
+		if(result != null || initDeviceIdsDone)
+			return result;
+		initDeviceIdsDone = true;
+		for(InstallAppDevice iad: dpService.managedDeviceResoures(null)) {
+			UserServlet.num2StringPut(iad.device().getLocation(), true);
+			UserServlet.num2StringPut(iad.device().getLocation(), false);
+		}
+		return getStringObjectId(objectId, objectIdPostiveOnly);
+	}
+
+	
 	public static <T extends Resource> T getObject(String objectId, Collection<T> allObjects) {
 		for(T resource: allObjects) {
 			if(resource.getName().equals(objectId)) return resource;
@@ -174,7 +190,17 @@ public class UserServletUtil {
 		String objectIdLoc = getStringObjectId(objectId, true);
 		return getObject(objectIdLoc, rooms);
 	}
+	public static Room getRoomById(String objectId, ResourceAccess resAcc, DatapointService dpService) {
+		List<Room> rooms = KPIResourceAccess.getRealRooms(resAcc);
+		String objectIdLoc = getStringObjectId(objectId, true, dpService);
+		return getObject(objectIdLoc, rooms);
+	}
 	
+	public static PhysicalElement getDeviceById(String objectId, ResourceAccess resAcc, DatapointService dpService) {
+		String devLoc = UserServletUtil.getStringObjectId(objectId, false, dpService);
+		return resAcc.getResource(devLoc);
+	}
+
 	public static boolean isDepthTimeSeries(Map<String, String[]> paramMap) {
 		String depth = UserServlet.getParameter("depth", paramMap);
 		if(depth == null)
