@@ -9,6 +9,7 @@ import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
@@ -75,9 +76,17 @@ public class DpGroupUtil {
 	
 	public static class CashedIAD {
 		public long lastAppDevCashed;
+		public boolean isFinal = false;
 		public InstallAppDevice iad;
 	}
 	public static Map<String, CashedIAD> cashedIAD = new HashMap<>();
+	public static CashedIAD setFinalDeviceForDatapoint(Datapoint dp, InstallAppDevice iad) {
+		CashedIAD result = new CashedIAD();
+		result.isFinal = true;
+		result.iad = iad;
+		cashedIAD.put(dp.getLocation(), result);
+		return result;
+	}
 	public static InstallAppDevice getInstallAppDeviceForSubCashed(Resource res, ApplicationManager appMan) {
 		String loc = res.getLocation();
 		CashedIAD result = cashedIAD.get(loc);
@@ -85,7 +94,7 @@ public class DpGroupUtil {
 		if(result == null) {
 			result = new CashedIAD();
 			cashedIAD.put(loc, result);
-		} else if(now - result.lastAppDevCashed < IAD_CASH_TIME) {
+		} else if(result.isFinal || (now - result.lastAppDevCashed < IAD_CASH_TIME)) {
 			return result.iad;		
 		}
 		result.lastAppDevCashed = now;

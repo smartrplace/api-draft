@@ -9,7 +9,6 @@ import java.util.Map;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
-import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.schedule.AbsoluteSchedule;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
@@ -237,6 +236,9 @@ if(Boolean.getBoolean("jobdebug")) {
 		T device = (T)installDeviceRes.device().getLocationResource();
 		if(Boolean.getBoolean("org.ogema.devicefinder.util.updateDatapoints")) {
 			Collection<Datapoint> result = getDatapoints(device, installDeviceRes);
+			for(Datapoint dp: result) {
+				DpGroupUtil.setFinalDeviceForDatapoint(dp, installDeviceRes);
+			}
 			return result;
 		}
 		Collection<Datapoint> knownDps = knownDpsMap.get(installDeviceRes.getLocation());
@@ -244,6 +246,10 @@ if(Boolean.getBoolean("jobdebug")) {
 			try {
 				knownDps = getDatapoints(device, installDeviceRes);
 				knownDpsMap.put(installDeviceRes.getLocation(), knownDps);
+				
+				for(Datapoint dp: knownDps) {
+					DpGroupUtil.setFinalDeviceForDatapoint(dp, installDeviceRes);
+				}
 			} catch(ClassCastException e) {
 				(new IllegalStateException("Wrong device type: "+installDeviceRes.getName(), e)).printStackTrace();
 				return Collections.emptyList();
@@ -255,13 +261,6 @@ if(Boolean.getBoolean("jobdebug")) {
 					return knownDps;
 				Resource topLevel = ResourceHelper.getToplevelResource(device);
 				GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(topLevel, appMan.appMan());
-
-				/*Resource parentraw = device.getParent();
-				if(parentraw != null && ((parentraw instanceof ResourceList) ||
-						parentraw.getResourceType().equals(Resource.class)))
-					GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(parentraw, appMan.appMan());
-				else
-					GatewaySyncUtil.registerToplevelDeviceForSyncAsClient(device, appMan.appMan());*/
 			}
 		}
 		return knownDps;			
