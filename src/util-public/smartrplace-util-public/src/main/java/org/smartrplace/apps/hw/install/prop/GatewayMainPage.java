@@ -69,6 +69,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			vh.registerHeaderEntry("GUI");
 			if(isOperationStandardPage) {
 				vh.registerHeaderEntry("Op Link");
+				vh.registerHeaderEntry("Controller");
 				vh.registerHeaderEntry("Operation Status");
 			}
 		} else {
@@ -83,6 +84,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				vh.linkingButton("GUI", id, object, row, "To GW", gwUrl+"/ogema/index.html");
 				if(isOperationStandardPage) {
 					vh.linkingButton("Op Link", id, object, row, "Apps for Admin", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/ccutDetails.hmtl.html");
+					vh.linkingButton("Controller", id, object, row, "Controller", gwUrl+"/org/sp/app/drivermonapp/index.html");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 					vh.stringEdit("Operation Status", id, dev.installationComment(), row, alert);
 				}
