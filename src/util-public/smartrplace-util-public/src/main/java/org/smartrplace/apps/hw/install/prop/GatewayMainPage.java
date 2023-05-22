@@ -70,6 +70,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			if(isOperationStandardPage) {
 				vh.registerHeaderEntry("Op Link");
 				vh.registerHeaderEntry("Controller");
+				vh.registerHeaderEntry("Mode");
 				vh.registerHeaderEntry("Operation Status");
 			}
 		} else {
@@ -85,8 +86,9 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				if(isOperationStandardPage) {
 					vh.linkingButton("Op Link", id, object, row, "Apps for Admin", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/ccutDetails.hmtl.html");
 					vh.linkingButton("Controller", id, object, row, "Controller", gwUrl+"/org/sp/app/drivermonapp/index.html");
+					vh.linkingButton("Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
-					vh.stringEdit("Operation Status", id, dev.installationComment(), row, alert);
+					vh.stringEdit("Operation Status", id, dev.operationStatus(), row, alert);
 				}
 			}
 			/*if(object.guiLink().isActive()) {
