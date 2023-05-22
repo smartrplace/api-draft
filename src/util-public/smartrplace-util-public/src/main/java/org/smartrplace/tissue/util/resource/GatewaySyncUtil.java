@@ -241,6 +241,21 @@ public class GatewaySyncUtil {
 		return top.getName().substring(2);
 	}
 	
+	public static String getGatewayBaseIdIfRemoteDevice(Resource gwData) {
+		Resource top = ResourceHelper.getToplevelResource(gwData);
+		if(top.getName().length() < 3)
+			return null;
+		if(!top.getName().startsWith("gw"))
+			return null;
+		String result = top.getName().substring(2);
+		try {
+			Integer.parseInt(result);
+			return result;
+		} catch(NumberFormatException e) {
+			return null;
+		}
+	}
+
 	/** Update all device room locations based on {@link GatewaySyncData#deviceNames()}*/
 	@Deprecated //Not really used and tested
 	public static int setDeviceRoomLocations(GatewaySyncData syncData, ApplicationManager appMan) {

@@ -42,6 +42,8 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.virtual.device.config.VirtualThermostatConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.external.accessadmin.config.SubCustomerData;
+import org.smartrplace.os.util.BundleRestartButton;
+import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
@@ -862,27 +864,30 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 
 	/** Thermostat location -> next check time*/
 	public static Map<String, Long> nextDecalcShiftCheck = new HashMap<>();
-	public static String setDecalcTimeForwardMax(Thermostat device, long now) {
+	public static String setDecalcTimeForwardMax(Thermostat device, long now, GatewaySyncResourceService gwSync) {
 		//long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
 		long startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
 		long destTime = startOfDay + 2*TimeProcUtil.HOUR_MILLIS;
 		if(destTime > now)
 			destTime += 6*TimeProcUtil.DAY_MILLIS;
-		return setDecalcTime(device, destTime);												
+		return setDecalcTime(device, destTime, gwSync);												
 	}
 	
-	public static String setDecalcTimeForNextDay(Thermostat device, long now) {
+	public static String setDecalcTimeForNextDay(Thermostat device, long now, GatewaySyncResourceService gwSync) {
 		//long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
 		long startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
 		long destTime = startOfDay + 26*TimeProcUtil.HOUR_MILLIS;
-		return setDecalcTime(device, destTime);												
+		return setDecalcTime(device, destTime, gwSync);												
 	}
 	
-	public static String setDecalcTime(Thermostat device, long destTime) {
+	public static String setDecalcTime(Thermostat device, long destTime, GatewaySyncResourceService gwSync) {
 		StringResource res = device.valve().getSubResource("DECALCIFICATION", StringResource.class);
 		String val = getDecalcString(destTime);
-		if(val != null)
+		if(val != null) {
+			if(gwSync != null)
+				setCreate(res, val, gwSync);
 			ValueResourceHelper.setCreate(res, val);
+		}
 		return val;
 	}
 	
@@ -997,21 +1002,64 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return valve.getName().substring(idx+1);		
 	}
 	
-	public static void deleteDevice(InstallAppDevice object) {
+	public static void deleteDevice(InstallAppDevice object, GatewaySyncResourceService gwSync) {
 		Resource device = object.device().getLocationResource();
-		deleteDeviceBase(device);
+		deleteDeviceBase(device, gwSync);
 		object.delete();	
 	}
 	
-	public static void deleteDeviceBase(Resource device) {
+	public static void deleteDeviceBase(Resource device, GatewaySyncResourceService gwSync) {
 		if(DeviceTableBase.isHomematic(device.getLocation())) {
 			Resource parent = device.getParent();
 			if(parent != null && ((parent instanceof HmDevice) ||
 					((device instanceof HmInterfaceInfo) && (parent instanceof HmLogicInterface))))
-				parent.delete();
+				deleteResource(parent, gwSync);
 			else
-				device.delete();
+				deleteResource(device, gwSync);
 		} else
+			deleteResource(device, gwSync);
+	}
+	
+	public static void deleteResource(Resource device, GatewaySyncResourceService gwSync) {
+		if(gwSync != null) {
+			gwSync.delete(device.getLocationResource());
+			System.out.println("Delete VIA SYNC: "+device.getLocation());
+		} else {
 			device.delete();		
+		}
+	}
+	
+	public static boolean setCreate(BooleanResource fres, boolean value, GatewaySyncResourceService gwSync) {
+		if(!fres.exists()) {
+			gwSync.create(fres);
+			gwSync.activateResource(fres, false);
+			BundleRestartButton.gwSyncRestart.executeBlockingOnceOnYourOwnRisk();
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			fres.setValue(value);
+			return true;
+		}
+		fres.setValue(value);
+		return false;
+	}
+	
+	public static boolean setCreate(StringResource fres, String value, GatewaySyncResourceService gwSync) {
+		if(!fres.exists()) {
+			gwSync.create(fres);
+			gwSync.activateResource(fres, false);
+			BundleRestartButton.gwSyncRestart.executeBlockingOnceOnYourOwnRisk();
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			fres.setValue(value);
+			return true;
+		}
+		fres.setValue(value);
+		return false;
 	}
 }

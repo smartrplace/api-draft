@@ -5,6 +5,7 @@ import java.util.concurrent.CompletionStage;
 
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
+import org.ogema.drivers.homematic.xmlrpc.hl.types.HmLogicInterface;
 import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
@@ -94,7 +95,7 @@ public interface GatewaySyncResourceService {
 	 */
 	<R extends Resource> CompletionStage<RemoteResourceStatus<R>> deactivateResource(R res, boolean recursive);
 	/** 
-	 * Deactivate resource locally and the respective resource on the other side of cascading if the
+	 * Delete resource locally and the respective resource on the other side of cascading if the
 	 * resource is inside a cascading tree.
 	 * @param res
 	 * @param recursive
@@ -131,4 +132,8 @@ public interface GatewaySyncResourceService {
 	CompletionStage<RemoteStatus> restartBundle(BundleType type, String gatewayId);
 	CompletionStage<RemoteStatus> restartBundle(String bundleSymbolicName, String gatewayId);
 
+	/** Reboot CCU device */
+	default CompletionStage<RemoteStatus> rebootCCU(HmLogicInterface ccu, String gatewayId) {
+		return null;
+	}
 }

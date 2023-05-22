@@ -162,12 +162,14 @@ public class UserServletUtil {
 			return null;
 	}
 	
-	public static boolean initDeviceIdsDone = false;
+	public static long initDoneUntil = -1;
 	public static String getStringObjectId(String objectId, boolean objectIdPostiveOnly, DatapointService dpService) {
 		String result = getStringObjectId(objectId, objectIdPostiveOnly);
-		if(result != null || initDeviceIdsDone)
+		if(result != null)
 			return result;
-		initDeviceIdsDone = true;
+		if(initDoneUntil > dpService.getFrameworkTime())
+			return null;
+		initDoneUntil = dpService.getFrameworkTime() + 10000;
 		for(InstallAppDevice iad: dpService.managedDeviceResoures(null)) {
 			UserServlet.num2StringPut(iad.device().getLocation(), true);
 			UserServlet.num2StringPut(iad.device().getLocation(), false);

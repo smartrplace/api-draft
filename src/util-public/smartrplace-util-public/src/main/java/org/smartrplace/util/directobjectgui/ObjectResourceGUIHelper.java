@@ -1230,8 +1230,13 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				else source.setAsReference(selection);
 			}
 		};
-		widget.myDrop.setDefaultItems(valuesToSet.keySet());
-		widget.myDrop.setDefaultAddEmptyOption(true, "(not set)");
+		if(req == null) {
+			widget.myDrop.setDefaultAddEmptyOption(true, "(not set)");
+			widget.myDrop.setDefaultItems(valuesToSet.keySet());		
+		} else {
+			widget.myDrop.setAddEmptyOption(true, "(not set)", req);
+			widget.myDrop.update(valuesToSet.keySet(), req);
+		}
 		return widget.myDrop;
 	}
 	
