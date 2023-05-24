@@ -84,7 +84,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			if(gwUrl != null) {
 				vh.linkingButton("GUI", id, object, row, "To GW", gwUrl+"/ogema/index.html");
 				if(isOperationStandardPage) {
-					vh.linkingButton("Op Link", id, object, row, "Apps for Admin", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/ccutDetails.hmtl.html");
+					vh.linkingButton("Op Link", id, object, row, "CCU-Page", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/ccutDetails.hmtl.html");
 					vh.linkingButton("Controller", id, object, row, "Controller", gwUrl+"/org/sp/app/drivermonapp/index.html");
 					vh.linkingButton("Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
