@@ -111,6 +111,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 		if(!isOperationStandardPage) {
 			vh.stringEdit("GUI Link", id, object.guiLink(), row, alert);
 			vh.stringEdit("SlotsGwId", id, object.remoteSlotsGatewayId(), row, alert);
+			vh.stringLabel("Loc", id, object.getName(), row);
 		}
 	}
 
