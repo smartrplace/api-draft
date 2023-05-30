@@ -42,7 +42,6 @@ import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.virtual.device.config.VirtualThermostatConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.external.accessadmin.config.SubCustomerData;
-import org.smartrplace.os.util.BundleRestartButton;
 import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -1031,15 +1030,16 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static boolean setCreate(BooleanResource fres, boolean value, GatewaySyncResourceService gwSync) {
 		if(!fres.exists()) {
+			ValueResourceHelper.setCreate(fres,  value);
 			gwSync.create(fres);
-			gwSync.activateResource(fres, false);
+			/*gwSync.activateResource(fres, false);
 			BundleRestartButton.gwSyncRestart.executeBlockingOnceOnYourOwnRisk();
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			fres.setValue(value);
+			fres.setValue(value);*/
 			return true;
 		}
 		fres.setValue(value);
@@ -1048,15 +1048,16 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static boolean setCreate(StringResource fres, String value, GatewaySyncResourceService gwSync) {
 		if(!fres.exists()) {
+			ValueResourceHelper.setCreate(fres,  value);
 			gwSync.create(fres);
-			gwSync.activateResource(fres, false);
+			/*gwSync.activateResource(fres, false);
 			BundleRestartButton.gwSyncRestart.executeBlockingOnceOnYourOwnRisk();
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			fres.setValue(value);
+			fres.setValue(value);*/
 			return true;
 		}
 		fres.setValue(value);
