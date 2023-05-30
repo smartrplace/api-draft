@@ -974,9 +974,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return isTemplate;
 	}
 	
-	public static void setTemplateStatus(InstallAppDevice object, DeviceHandlerProviderDP<?> devHand, boolean newStatus) {
+	public static void setTemplateStatus(InstallAppDevice object, boolean newStatus) {
 		if(newStatus) {
-			ValueResourceHelper.setCreate(object.isTemplate(), devHand.id());
+			ValueResourceHelper.setCreate(object.isTemplate(), object.devHandlerInfo().getValue());
 			if(!object.isTemplate().isActive())
 				object.isTemplate().activate(false);
 		} else if(object.isTemplate().exists()) {
