@@ -105,6 +105,9 @@ public interface GatewaySyncResourceService {
 	/**
 	 * Create a resource locally, and the corresponding resource on the other side of cascading 
 	 * if the resource is inside a cascading tree; For non-toplevel resources, a virtual resource can be passed.
+	 * If the resource exists then its value and active status are transferred, as well. Hence, this method can
+	 * also be used for out-of-band updates of the remote resource.
+	 * 
 	 * @param <R>
 	 * @param resource
 	 * @return 
