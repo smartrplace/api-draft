@@ -12,6 +12,7 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService.AccessAvailability;
+import org.ogema.devicefinder.util.DeviceHandlerBase;
 import org.ogema.internationalization.util.LocaleHelper;
 import org.ogema.model.prototypes.PhysicalElement;
 
@@ -253,8 +254,8 @@ public class PropType implements LabelledItem {
 				return getSubInt(mainTenanceMaster, "CYCLIC_INFO_MSG_DIS_UNCHANGED", feedback);
 		}
 		if(type == PropType.BUTTON_LOCK)
-			return ResourceHelper.getSubResourceOfSibbling(hmDevice,
-					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "globalButtonLock", BooleanResource.class);
+			return DeviceHandlerBase.getSubResourceOfSibblingOrDirectChildMaintenance(hmDevice,
+					"globalButtonLock", BooleanResource.class);
 		
 		ResourceList<SingleValueResource> master = getHmParamMaster(hmDevice);
 		if(type == PropType.THERMOSTAT_WINDOWOPEN_MINUTES)

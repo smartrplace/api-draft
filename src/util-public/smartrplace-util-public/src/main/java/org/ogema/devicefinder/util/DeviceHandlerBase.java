@@ -32,6 +32,7 @@ import org.ogema.devicefinder.api.PropType;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmInterfaceInfo;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmLogicInterface;
+import org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.buildingtechnology.ThermostatProgram;
 import org.ogema.model.devices.storage.ElectricityStorage;
@@ -162,22 +163,22 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		if(batVolt != null && batVolt.isActive())
 			return batVolt;
 		else {
-			VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(dev.getLocationResource(),
-					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
+			VoltageResource batteryVoltage = getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
+					"battery/internalVoltage/reading", VoltageResource.class);
 			return batteryVoltage;
 		}		
 	}
 	
 	public static IntegerResource getRSSIResource(PhysicalElement dev) {
-		IntegerResource rssiDevice = ResourceHelper.getSubResourceOfSibbling(dev.getLocationResource(),
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
+		IntegerResource rssiDevice = getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
+				"rssiDevice", IntegerResource.class);
 		if(rssiDevice != null && rssiDevice.exists())
 			return rssiDevice;
 		return null;
 	}
 	public static IntegerResource getRSSIPeerResource(PhysicalElement dev) {
-		IntegerResource rssiPeer = ResourceHelper.getSubResourceOfSibbling(dev.getLocationResource(),
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiPeer", IntegerResource.class);
+		IntegerResource rssiPeer = getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
+				"rssiPeer", IntegerResource.class);
 		if(rssiPeer != null && rssiPeer.exists())
 			return rssiPeer;
 		return null;
@@ -190,44 +191,35 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			VoltageResource batteryVoltage = getBatteryVoltage(dev);
 			if(batteryVoltage != null)
 				addDatapoint(batteryVoltage, result, dpService);
-			/*VoltageResource batVolt = dev.getSubResource("battery", ElectricityStorage.class).internalVoltage().reading();
-			if(batVolt.isActive())
-				result.add(dpService.getDataPointStandard(batVolt));
-			else {
-				VoltageResource batteryVoltage = ResourceHelper.getSubResourceOfSibbling(dev,
-						"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "battery/internalVoltage/reading", VoltageResource.class);
-				if(batteryVoltage != null)
-					addDatapoint(batteryVoltage, result, dpService);
-			}*/
-			BooleanResource batteryStatus = ResourceHelper.getSubResourceOfSibbling(dev,
-					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "batteryLow", BooleanResource.class);
+			BooleanResource batteryStatus = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
+					"batteryLow", BooleanResource.class);
 			if(batteryStatus != null && batteryStatus.exists())
 				addDatapoint(batteryStatus, result, dpService);
 		}
-		BooleanResource comDisturbed = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "communicationStatus/communicationDisturbed", BooleanResource.class);
+		BooleanResource comDisturbed = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
+				"communicationStatus/communicationDisturbed", BooleanResource.class);
 		if(comDisturbed != null && comDisturbed.exists())
 			addDatapoint(comDisturbed, result, dpService);
-		IntegerResource errorCode = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "errorCode", IntegerResource.class);
+		IntegerResource errorCode = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
+				"errorCode", IntegerResource.class);
 		if(errorCode != null && errorCode.exists()) {
 			addDatapoint(errorCode, result, dpService);			
 		}
-		BooleanResource configPending = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "configPending", BooleanResource.class);
+		BooleanResource configPending = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
+				"configPending", BooleanResource.class);
 		if(configPending != null && configPending.exists()) {
 			addDatapoint(configPending, result, dpService);			
 		}
-		IntegerResource rssiDevice = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiDevice", IntegerResource.class);
+		IntegerResource rssiDevice = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
+				"rssiDevice", IntegerResource.class);
 		if(rssiDevice != null && rssiDevice.exists())
 			addDatapoint(rssiDevice, result, dpService);
-		IntegerResource rssiPeer = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "rssiPeer", IntegerResource.class);
+		IntegerResource rssiPeer = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
+				"rssiPeer", IntegerResource.class);
 		if(rssiPeer != null && rssiPeer.exists())
 			addDatapoint(rssiPeer, result, dpService);
-		GenericBinarySensor dutyCycle = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "dutyCycle", GenericBinarySensor.class);
+		GenericBinarySensor dutyCycle = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
+				"dutyCycle", GenericBinarySensor.class);
 		if(dutyCycle != null && dutyCycle.reading().exists())
 			addDatapoint(dutyCycle.reading(), result, dpService);
 		IntegerResource cyclicMsgChanged = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_CHANGED, false);
@@ -245,13 +237,27 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		return result;
 	}
 	
+	public static <T extends Resource> T getSubResourceOfSibblingOrDirectChildMaintenance(Resource r, String subPath, Class<T> type) {
+		T result = ResourceHelper.getSubResourceOfSibbling(r, "org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance",
+				subPath, type);
+		if(result != null && result.exists())
+			return result;
+		HmMaintenance subMaint = r.getSubResource("maintenance", HmMaintenance.class);
+		if(!subMaint.exists())
+			return null;
+		result = ResourceHelper.getSubResource(subMaint, subPath, type);
+		if(result != null && result.exists())
+			return result;
+		return null;
+	}
+	
 	/** Check if Auto-mode is allowed based on configPending
 	 * 
 	 * @return true if AutoMode is allowed for the thermostat, which will only be used if no ecoMode is active etc.
 	 */
 	public static boolean isAutoModeAllowed(Thermostat dev, HardwareInstallConfig hwConfig) {
-		BooleanResource configPending = ResourceHelper.getSubResourceOfSibbling(dev,
-				"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "configPending", BooleanResource.class);
+		BooleanResource configPending = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
+				"configPending", BooleanResource.class);
 		return isAutoModeAllowed(dev, configPending, hwConfig.autoThermostatMode());
 	}
 	
