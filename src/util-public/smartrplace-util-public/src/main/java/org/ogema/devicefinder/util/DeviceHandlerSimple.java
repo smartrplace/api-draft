@@ -25,6 +25,7 @@ import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.spapi.model.WriteableDatapoint;
 import org.smartrplace.tissue.util.resource.GatewaySyncUtil;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
@@ -236,6 +237,14 @@ if(Boolean.getBoolean("jobdebug")) {
 		T device = (T)installDeviceRes.device().getLocationResource();
 		if(Boolean.getBoolean("org.ogema.devicefinder.util.updateDatapoints")) {
 			Collection<Datapoint> result = getDatapoints(device, installDeviceRes);
+			
+			if(result instanceof List) {
+				List<WriteableDatapoint> writeDps = device.getSubResources(WriteableDatapoint.class, false);
+				for(WriteableDatapoint wdp: writeDps) {
+					addDatapoint(wdp.resource(), (List<Datapoint>)result, wdp.getName(), dpService);
+				}
+			}
+			
 			for(Datapoint dp: result) {
 				DpGroupUtil.setFinalDeviceForDatapoint(dp, installDeviceRes);
 			}
@@ -245,6 +254,13 @@ if(Boolean.getBoolean("jobdebug")) {
 		if(knownDps == null) {
 			try {
 				knownDps = getDatapoints(device, installDeviceRes);
+				if(knownDps instanceof List) {
+					List<WriteableDatapoint> writeDps = device.getSubResources(WriteableDatapoint.class, false);
+					for(WriteableDatapoint wdp: writeDps) {
+						addDatapoint(wdp.resource(), (List<Datapoint>)knownDps, wdp.getName(), dpService);
+					}
+				}
+				
 				knownDpsMap.put(installDeviceRes.getLocation(), knownDps);
 				
 				for(Datapoint dp: knownDps) {
