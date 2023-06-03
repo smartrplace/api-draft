@@ -17,6 +17,7 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.core.resourcemanager.NoSuchResourceException;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.core.timeseries.InterpolationMode;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
@@ -200,7 +201,13 @@ public class UserServletUtil {
 	
 	public static PhysicalElement getDeviceById(String objectId, ResourceAccess resAcc, DatapointService dpService) {
 		String devLoc = UserServletUtil.getStringObjectId(objectId, false, dpService);
-		return resAcc.getResource(devLoc);
+		if(devLoc != null && (!devLoc.contains("-"))) try {
+			return resAcc.getResource(devLoc);
+		} catch(NoSuchResourceException e) {}
+		InstallAppDevice iad = dpService.getMangedDeviceResource(objectId);
+		if(iad != null)
+			return iad.device().getLocationResource();
+		return null;
 	}
 
 	public static boolean isDepthTimeSeries(Map<String, String[]> paramMap) {
