@@ -327,6 +327,9 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	public static IntegerResource getAutoThermostatModeSingle(Thermostat th) {
 		return th.getSubResource("autoThermostatModeSingle", IntegerResource.class);
 	}
+	public static IntegerResource getSendIntervalModeSingle(Thermostat th) {
+		return th.getSubResource("sendIntervalModeSingle", IntegerResource.class);
+	}
 	public static ThermostatProgram getHmThermProgram(Thermostat th) {
 		ThermostatProgram hmThermProgram = th.getSubResource("program", ThermostatProgram.class);
 		if ((hmThermProgram == null) || (!hmThermProgram.isActive()))
@@ -534,6 +537,88 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		T patternInstance = (T) patternInstanceIn;
 		//Class<T> patternClass = (Class<T>) patternClassIn;
 		return appMan.getResourcePatternAccess().isSatisfied(patternInstance, patternClass);
+	}
+	
+	public static int setOpenIntervalConfigs(IntegerResource sendIntervalMode,
+			Collection<InstallAppDevice> all, DatapointService dpService, boolean resend) {
+		if(all == null)
+			all = dpService.managedDeviceResoures(Thermostat.class);
+		int count = 0;
+		for(InstallAppDevice dev: all) {
+			if(dev.isTrash().getValue())
+				continue;
+			if(dev.device() instanceof Thermostat) {
+				count += DeviceHandlerBase.setSendIntervalByMode((Thermostat) dev.device().getLocationResource(), sendIntervalMode, resend);
+			}
+		}
+		return count;
+	}
+
+	public static int setSendIntervalByMode(Thermostat dev,
+			IntegerResource sendIntervalMode, boolean resend) {
+		IntegerResource sendIntervalModeSingle = getSendIntervalModeSingle(dev);
+		int singleState = sendIntervalModeSingle.getValue();
+		int overallState = sendIntervalMode.getValue();
+		int realState;
+		if(overallState == 1 || overallState == 3 || overallState == 5 || singleState == 0)
+			realState = overallState/2;
+		else
+			realState = singleState-1;
+		if(singleState == 4)
+			return 0;
+		int count = 0;
+		switch(realState) {
+		case 0:
+			if(setSendIntervalConfig(0, 1, dev, resend))
+				count++;
+			if(setSendIntervalConfig(1, 1, dev, resend))
+				count++;
+			if(setSendIntervalConfig(2, 20, dev, resend))
+				count++;
+			break;			
+		case 1:
+			if(setSendIntervalConfig(0, 0, dev, resend))
+				count++;
+			//if(setSendIntervalConfig(1, 1, dev, resend))
+			//	count++;
+			//if(setSendIntervalConfig(2, 20, dev, resend))
+			//	count++;
+			break;			
+		case 2:
+			if(setSendIntervalConfig(0, 1, dev, resend))
+				count++;
+			if(setSendIntervalConfig(1, 255, dev, resend))
+				count++;
+			if(setSendIntervalConfig(2, 255, dev, resend))
+				count++;
+			break;			
+		default:
+			//Should never occur
+			break;
+		}
+		return count;
+	}
+
+	public static boolean setSendIntervalConfig(int type, int value, Thermostat device, boolean resend) {
+		final IntegerResource setp;
+		final IntegerResource fb;
+		if(type == 0) {
+			setp = (IntegerResource) PropType.getHmParam(device, PropType.CYCLIC_MSG_ONOFF, false);
+			fb = (IntegerResource) PropType.getHmParam(device, PropType.CYCLIC_MSG_ONOFF, true);
+		} else if(type == 1) {
+			setp = (IntegerResource) PropType.getHmParam(device, PropType.CYCLIC_MSG_CHANGED, false);
+			fb = (IntegerResource) PropType.getHmParam(device, PropType.CYCLIC_MSG_CHANGED, true);
+		} else if(type == 2) {
+			setp = (IntegerResource) PropType.getHmParam(device, PropType.CYCLIC_MSG_UNCHANGED, false);
+			fb = (IntegerResource) PropType.getHmParam(device, PropType.CYCLIC_MSG_UNCHANGED, true);
+		} else
+			throw new IllegalStateException(" Unknown TYPE:"+type);
+		if(!resend) {
+			if(fb.getValue() == value && setp.getValue() == value)
+				return false;
+		}
+		setp.setValue(value);
+		return true;
 	}
 }
 
