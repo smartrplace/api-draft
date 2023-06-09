@@ -123,6 +123,10 @@ public class PropType implements LabelledItem {
 	public static final PropType CYCLIC_MSG_UNCHANGED = new PropType("CycleMsgUnchanged", Arrays.asList(
 			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
 			Integer.class);
+	/** 0: off, 1: on*/
+	public static final PropType CYCLIC_MSG_ONOFF = new PropType("CycleMsgOnOff", Arrays.asList(
+			new PropUsage[] {PropUsage.HOMEMATIC}), AccessAvailability.WRITE,
+			Integer.class);
 
 	public static final List<PropType> STD_PROPS = Arrays.asList(new PropType[] {ENCRYPTION_ENABLED, THERMOSTAT_OPERATION_MODE,
 			CURRENT_SENSOR_VALUE, DEVICE_ERROR, TRANSMIT_TRY_MAX, TRANSMIT_DEV_TRY_MAX, EXPECT_AES,
@@ -242,13 +246,15 @@ public class PropType implements LabelledItem {
 	}
 	
 	public static SingleValueResource getHmParam(PhysicalElement hmDevice, PropType type, boolean feedback) {
-		if(type == PropType.CYCLIC_MSG_CHANGED || type == PropType.CYCLIC_MSG_UNCHANGED) {
+		if(type == PropType.CYCLIC_MSG_CHANGED || type == PropType.CYCLIC_MSG_UNCHANGED || type == PropType.CYCLIC_MSG_ONOFF) {
 			@SuppressWarnings("unchecked")
 			ResourceList<SingleValueResource> mainTenanceMaster = ResourceHelper.getSubResourceOfSibbling(hmDevice,
 					"org.ogema.drivers.homematic.xmlrpc.hl.types.HmMaintenance", "HmParametersMaster", ResourceList.class);
 			if(mainTenanceMaster == null)
 				return null;
-			if(type == CYCLIC_MSG_CHANGED)
+			if(type == CYCLIC_MSG_ONOFF)
+				return getSubInt(mainTenanceMaster, "CYCLIC_INFO_MSG", feedback);
+			else if(type == CYCLIC_MSG_CHANGED)
 				return getSubInt(mainTenanceMaster, "CYCLIC_INFO_MSG_DIS", feedback);
 			else
 				return getSubInt(mainTenanceMaster, "CYCLIC_INFO_MSG_DIS_UNCHANGED", feedback);

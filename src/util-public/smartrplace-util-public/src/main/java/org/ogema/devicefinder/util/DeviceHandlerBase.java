@@ -222,17 +222,23 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 				"dutyCycle", GenericBinarySensor.class);
 		if(dutyCycle != null && dutyCycle.reading().exists())
 			addDatapoint(dutyCycle.reading(), result, dpService);
+		IntegerResource cyclicMsgOnOff = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_ONOFF, false);
+		if(cyclicMsgOnOff != null && cyclicMsgOnOff.exists())
+			addDatapoint(cyclicMsgOnOff, result, "cyclicMsgOnOffCt", dpService);
+		IntegerResource cyclicMsgOnOffFb = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_ONOFF, true);
+		if(cyclicMsgOnOffFb != null && cyclicMsgOnOffFb.exists())
+			addDatapoint(cyclicMsgOnOffFb, result, "cyclicMsgOnOffFb", dpService);
 		IntegerResource cyclicMsgChanged = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_CHANGED, false);
 		if(cyclicMsgChanged != null && cyclicMsgChanged.exists())
 			addDatapoint(cyclicMsgChanged, result, "cyclicMsgChangedCt", dpService);
 		IntegerResource cyclicMsgChangedFb = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_CHANGED, true);
-		if(cyclicMsgChanged != null && cyclicMsgChanged.exists())
+		if(cyclicMsgChangedFb != null && cyclicMsgChangedFb.exists())
 			addDatapoint(cyclicMsgChangedFb, result, "cyclicMsgChangedFb", dpService);
 		IntegerResource cyclicMsgUnchanged = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_UNCHANGED, false);
 		if(cyclicMsgChanged != null && cyclicMsgChanged.exists())
 			addDatapoint(cyclicMsgUnchanged, result, "cyclicMsgUnchangedCt", dpService);
 		IntegerResource cyclicMsgUnchangedFb = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_UNCHANGED, true);
-		if(cyclicMsgChanged != null && cyclicMsgChanged.exists())
+		if(cyclicMsgChangedFb != null && cyclicMsgChangedFb.exists())
 			addDatapoint(cyclicMsgUnchangedFb, result, "cyclicMsgUnchangedFb", dpService);
 		return result;
 	}
