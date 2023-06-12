@@ -27,6 +27,13 @@ import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.button.RedirectButton;
 
 public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, GatewayData> {
+	public static enum GwPageType {
+		BASE_VERSION,
+		OPERATION_STANDARD,
+		ROOMCONTROL_LINKS
+	}
+	private final GwPageType pageType;
+	
 	public static Map<String, String> valuesToSetInstallGw = new HashMap<>(DeviceTableRaw.valuesToSetInstall);
 	static  {
 		valuesToSetInstallGw.put("1", "SerialNumberRecorded: Device production has fixed deviceID");
@@ -36,21 +43,22 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 	protected StaticTable topTable;
 	//protected final PopupSimple gatewayCreatePopup;
 	
-	protected final boolean isOperationStandardPage;
+	//protected final boolean isOperationStandardPage;
 	
 	protected final String serverGatewayLink;
 
 	public GatewayMainPage(WidgetPage<?> page, ApplicationManager appMan, AppstoreConfig appConfigData,
 			String serverGatewayLink) {
-		this(page, appMan, appConfigData, serverGatewayLink, false);
+		this(page, appMan, appConfigData, serverGatewayLink, GwPageType.BASE_VERSION);
 	}
 	public GatewayMainPage(WidgetPage<?> page, ApplicationManager appMan, AppstoreConfig appConfigData,
-			String serverGatewayLink, boolean isOperationStandardPage) {
+			String serverGatewayLink, GwPageType pageType) {
 		super(page, appMan, ResourceHelper.getSampleResource(GatewayData.class));
 		//this.controller = controller;
 		this.appConfigData = appConfigData;
 		this.serverGatewayLink = serverGatewayLink;
-		this.isOperationStandardPage = isOperationStandardPage;
+		this.pageType = pageType;
+		//this.isOperationStandardPage = isOperationStandardPage;
 		triggerPageBuild();
 	}
 
@@ -64,13 +72,17 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			OgemaHttpRequest req, Row row, ApplicationManager appMan) {
 		addNameLabel(object, vh, id, row, req);
 		if(req == null) {
-			vh.registerHeaderEntry("Software Release Group");
+			if(pageType == GwPageType.BASE_VERSION) {
+				vh.registerHeaderEntry("Software Release Group");
+			}
 			vh.registerHeaderEntry("Expected Online");
 			vh.registerHeaderEntry("GUI");
-			if(isOperationStandardPage) {
+			if(pageType != GwPageType.BASE_VERSION) {
 				vh.registerHeaderEntry("Op Link");
 				vh.registerHeaderEntry("Controller");
-				vh.registerHeaderEntry("Mode");
+				vh.registerHeaderEntry("Season Mode");
+				vh.registerHeaderEntry("Roomcontrol Main");
+				vh.registerHeaderEntry("Update Rate");
 				vh.registerHeaderEntry("Operation Status");
 			}
 		} else {
@@ -78,15 +90,19 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			for(GatewayGroupData grGrp: ResourceListHelper.getAllElementsLocation(appConfigData.gatewayGroupData())) {
 				valuesToSetG.put(grGrp, ResourceUtils.getHumanReadableShortName(grGrp));
 			}
-			vh.referenceDropdownFixedChoice("Software Release Group", id, object.installationLevelGroup(), row, valuesToSetG);
+			if(pageType == GwPageType.BASE_VERSION) {
+				vh.referenceDropdownFixedChoice("Software Release Group", id, object.installationLevelGroup(), row, valuesToSetG);
+			}
 			vh.booleanEdit("Expected Online", id, object.expectedOnHeartbeat(), row);
 			String gwUrl = ServerGatewayUtil.getGatewayBaseUrl(object);
 			if(gwUrl != null) {
 				vh.linkingButton("GUI", id, object, row, "To GW", gwUrl+"/ogema/index.html");
-				if(isOperationStandardPage) {
+				if(pageType != GwPageType.BASE_VERSION) {
 					vh.linkingButton("Op Link", id, object, row, "CCU-Page", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/ccutDetails.hmtl.html");
 					vh.linkingButton("Controller", id, object, row, "Controller", gwUrl+"/org/sp/app/drivermonapp/index.html");
-					vh.linkingButton("Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
+					vh.linkingButton("Roomcontrol Main", id, object, row, "Room Control", gwUrl+"/org/smartrplace/apps/smartrplaceheatcontrolv2/index.html");
+					vh.linkingButton("Update Rate", id, object, row, "Upd.Rate", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/thermostatUpdateRate.hmtl.html");
+					vh.linkingButton("Season Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 					vh.stringEdit("Operation Status", id, dev.operationStatus(), row, alert);
 				}
@@ -100,15 +116,19 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 		vh.stringEdit("Customer", id, object.customer(), row, alert);
 		if(req == null) {
 			vh.registerHeaderEntry("Comment");
-			vh.registerHeaderEntry("Status");
+			if(pageType == GwPageType.BASE_VERSION) {
+				vh.registerHeaderEntry("Status");
+			}
 		} else {
 			InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 			if(dev != null) {
-				vh.dropdown("Status", id, dev.installationStatus(), row, valuesToSetInstallGw);
+				if(pageType == GwPageType.BASE_VERSION) {
+					vh.dropdown("Status", id, dev.installationStatus(), row, valuesToSetInstallGw);
+				}
 				vh.stringEdit("Comment", id, dev.installationComment(), row, alert);
 			}
 		}
-		if(!isOperationStandardPage) {
+		if(pageType == GwPageType.BASE_VERSION) {
 			vh.stringEdit("GUI Link", id, object.guiLink(), row, alert);
 			vh.stringEdit("SlotsGwId", id, object.remoteSlotsGatewayId(), row, alert);
 			vh.stringLabel("Loc", id, object.getName(), row);
@@ -140,7 +160,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 
 	@Override
 	public Collection<GatewayData> getObjectsInTable(OgemaHttpRequest req) {
-		if(isOperationStandardPage) {
+		if(pageType != GwPageType.BASE_VERSION) {
 			List<GatewayData> all = appConfigData.gatewayData().getAllElements();
 			List<GatewayData> result = new ArrayList<>();
 			for(GatewayData gw: all) {
