@@ -108,7 +108,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 					vh.linkingButton("Charts", id, object, row, "Charts", gwUrl+"/org/sp/app/srcmonexpert/roomcontrolcharts.html");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 					vh.stringEdit("Operation Status", id, dev.operationStatus(), row, alert);
-					vh.stringEdit("Status Done", id, dev.operationStatus(), row, alert);
+					vh.stringEdit("Status Done", id, dev.operationStatusDone(), row, alert);
 				}
 			}
 			/*if(object.guiLink().isActive()) {
