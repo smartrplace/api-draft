@@ -83,7 +83,9 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				vh.registerHeaderEntry("Season Mode");
 				vh.registerHeaderEntry("Roomcontrol Main");
 				vh.registerHeaderEntry("Update Rate");
+				vh.registerHeaderEntry("Charts");
 				vh.registerHeaderEntry("Operation Status");
+				vh.registerHeaderEntry("Status Done");
 			}
 		} else {
 			Map<GatewayGroupData, String> valuesToSetG = new HashMap<>();
@@ -103,8 +105,10 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 					vh.linkingButton("Roomcontrol Main", id, object, row, "Room Control", gwUrl+"/org/smartrplace/apps/smartrplaceheatcontrolv2/index.html");
 					vh.linkingButton("Update Rate", id, object, row, "Upd.Rate", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/thermostatUpdateRate.hmtl.html");
 					vh.linkingButton("Season Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
+					vh.linkingButton("Charts", id, object, row, "Charts", gwUrl+"/org/sp/app/srcmonexpert/roomcontrolcharts.html");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 					vh.stringEdit("Operation Status", id, dev.operationStatus(), row, alert);
+					vh.stringEdit("Status Done", id, dev.operationStatus(), row, alert);
 				}
 			}
 			/*if(object.guiLink().isActive()) {
