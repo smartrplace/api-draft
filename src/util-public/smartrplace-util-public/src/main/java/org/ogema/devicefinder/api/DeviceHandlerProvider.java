@@ -12,7 +12,6 @@ import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
 import org.ogema.simulation.shared.api.SingleRoomSimulationBase;
-import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.autoconfig.api.DeviceTypeProvider;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -159,13 +158,6 @@ public interface DeviceHandlerProvider<T extends PhysicalElement> extends Device
 
 	/** Required for hardware installation. Provided by DeviceHandlerBase*/
 	List<ResourcePattern<T>> getAllPatterns();
-	
-	/** Provide version of alarming initializiation. If a new version is provided then
-	 * {@link #initAlarmingForDevice(InstallAppDevice, HardwareInstallConfig)}
-	 * is called once more. Implementation should take care then that existing special configurations
-	 * for the devices are not overwritten.
-	 */
-	default String getInitVersion() {return "";}
 	
 	/** Optionally als DeviceTypeProviders can be declared*/
 	default Collection<DeviceTypeProvider<?>> getDeviceTypeProviders() {
