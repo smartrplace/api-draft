@@ -89,7 +89,9 @@ public abstract class SingleFiltering<A, T> extends TemplateDropdown<GenericFilt
 	};*/
 	protected List<A> getAttributes(T object) {
 		List<A> result = new ArrayList<>();
-		result.add(getAttribute(object));
+		A attr = getAttribute(object);
+		if(attr != null)
+			result.add(attr);
 		return result ;
 	};
 	
