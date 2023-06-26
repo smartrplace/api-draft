@@ -1,7 +1,6 @@
 package org.ogema.devicefinder.api;
 
 import org.ogema.core.timeseries.InterpolationMode;
-import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
