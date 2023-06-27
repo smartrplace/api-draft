@@ -79,10 +79,12 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			vh.registerHeaderEntry("GUI");
 			if(pageType != GwPageType.BASE_VERSION) {
 				vh.registerHeaderEntry("Op Link");
-				vh.registerHeaderEntry("Controller");
+				//vh.registerHeaderEntry("Controller");
 				vh.registerHeaderEntry("Season Mode");
 				vh.registerHeaderEntry("Roomcontrol Main");
 				vh.registerHeaderEntry("Update Rate");
+				vh.registerHeaderEntry("Configuration Page");
+				vh.registerHeaderEntry("User App Mapping");
 				vh.registerHeaderEntry("Charts");
 				vh.registerHeaderEntry("Operation Status");
 				vh.registerHeaderEntry("Status Done");
@@ -101,10 +103,12 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				vh.linkingButton("GUI", id, object, row, "To GW", gwUrl+"/ogema/index.html");
 				if(pageType != GwPageType.BASE_VERSION) {
 					vh.linkingButton("Op Link", id, object, row, "CCU-Page", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/ccutDetails.hmtl.html");
-					vh.linkingButton("Controller", id, object, row, "Controller", gwUrl+"/org/sp/app/drivermonapp/index.html");
+					//vh.linkingButton("Controller", id, object, row, "Controller", gwUrl+"/org/sp/app/drivermonapp/index.html");
+					vh.linkingButton("Season Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
 					vh.linkingButton("Roomcontrol Main", id, object, row, "Room Control", gwUrl+"/org/smartrplace/apps/smartrplaceheatcontrolv2/index.html");
 					vh.linkingButton("Update Rate", id, object, row, "Upd.Rate", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/thermostatUpdateRate.hmtl.html");
-					vh.linkingButton("Season Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
+					vh.linkingButton("Configuration Page", id, object, row, "Charts", gwUrl+"/org/smartrplace/hardwareinstall/expert/configPage.hmtl.html");
+					vh.linkingButton("User App Mapping", id, object, row, "Charts", gwUrl+"/org/smartrplace/external/accessadmin/userstatus.htmll");
 					vh.linkingButton("Charts", id, object, row, "Charts", gwUrl+"/org/sp/app/srcmonexpert/roomcontrolcharts.html");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 					vh.stringEdit("Operation Status", id, dev.operationStatus(), row, alert);
