@@ -107,8 +107,8 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 					vh.linkingButton("Season Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
 					vh.linkingButton("Roomcontrol Main", id, object, row, "Room Control", gwUrl+"/org/smartrplace/apps/smartrplaceheatcontrolv2/index.html");
 					vh.linkingButton("Update Rate", id, object, row, "Upd.Rate", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/thermostatUpdateRate.hmtl.html");
-					vh.linkingButton("Configuration Page", id, object, row, "Charts", gwUrl+"/org/smartrplace/hardwareinstall/expert/configPage.hmtl.html");
-					vh.linkingButton("User App Mapping", id, object, row, "Charts", gwUrl+"/org/smartrplace/external/accessadmin/userstatus.htmll");
+					vh.linkingButton("Configuration Page", id, object, row, "Config", gwUrl+"/org/smartrplace/hardwareinstall/expert/configPage.hmtl.html");
+					vh.linkingButton("User App Mapping", id, object, row, "App Perms", gwUrl+"/org/smartrplace/external/accessadmin/userstatus.html");
 					vh.linkingButton("Charts", id, object, row, "Charts", gwUrl+"/org/sp/app/srcmonexpert/roomcontrolcharts.html");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 					vh.stringEdit("Operation Status", id, dev.operationStatus(), row, alert);
