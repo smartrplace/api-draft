@@ -613,8 +613,10 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			fb = (IntegerResource) PropType.getHmParam(device, PropType.CYCLIC_MSG_UNCHANGED, true);
 		} else
 			throw new IllegalStateException(" Unknown TYPE:"+type);
+		if(setp == null)
+			return false;
 		if(!resend) {
-			if(fb.getValue() == value && setp.getValue() == value)
+			if(fb != null && (fb.getValue() == value && setp.getValue() == value))
 				return false;
 		}
 		setp.setValue(value);
