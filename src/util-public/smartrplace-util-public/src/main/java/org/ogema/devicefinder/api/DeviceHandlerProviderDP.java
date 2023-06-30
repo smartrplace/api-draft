@@ -162,7 +162,7 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * {@link InstallAppDevice#minimumIntervalBetweenNewValues()}
 	 * @param iad
 	 * @param defaultSettingValue value set in database configuration based on datapoint and device setting. Long.MAX_VALUE if
-	 * 		NoValue is disabled for the datapoint
+	 * 		NoValue is disabled for the datapoint. Provided in minutes.
 	 * @return if not null this value is used instead of the default {@link InstallAppDevice#minimumIntervalBetweenNewValues()}. Note that
 	 * 		the value is only requested and set on startup of alarming. Interval in minutes. Note that it is
 	 * 		not possible currently to request a shorter interval then specified in the database for the datapoint.
