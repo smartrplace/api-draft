@@ -589,7 +589,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 				count++;
 			if(setSendIntervalConfig(1, 255, dev, resend))
 				count++;
-			if(setSendIntervalConfig(2, 255, dev, resend))
+			if(setSendIntervalConfig(2, 0, dev, resend))
 				count++;
 			break;			
 		default:

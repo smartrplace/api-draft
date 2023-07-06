@@ -7,6 +7,7 @@ import java.util.List;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.util.DatapointImpl;
+import org.ogema.model.extended.alarming.AlarmConfiguration;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
@@ -166,8 +167,9 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * @return if not null this value is used instead of the default {@link InstallAppDevice#minimumIntervalBetweenNewValues()}. Note that
 	 * 		the value is only requested and set on startup of alarming. Interval in minutes. Note that it is
 	 * 		not possible currently to request a shorter interval then specified in the database for the datapoint.
+	 * 		If a negative value is returned, then no-value alarming is disabled for the datapoint.
 	 */
-	default Float getMinimumNoValueTime(InstallAppDevice iad, float defaultSettingValue) {
+	default Float getMinimumNoValueTime(AlarmConfiguration ac, InstallAppDevice iad, float defaultSettingValue) {
 		return null;
 	}
 	
