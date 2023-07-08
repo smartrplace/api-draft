@@ -175,9 +175,9 @@ public class ChartsUtil {
 	
 	public static Label getDutyCycleLabel(HmInterfaceInfo device, InstallAppDevice deviceConfiguration,
 			ObjectResourceGUIHelper<InstallAppDevice, InstallAppDevice> vh, String id_vh) {
-		return getDutyCycleLabel(device, "dutyCycleLb", deviceConfiguration, vh.getParent(), vh.getReq(), id_vh, device.dutyCycle().reading());
+		return getDutyCycleLabel("dutyCycleLb", deviceConfiguration, vh.getParent(), vh.getReq(), id_vh, device.dutyCycle().reading());
 	}
-	public static Label getDutyCycleLabel(HmInterfaceInfo device, String preId, InstallAppDevice deviceConfiguration,
+	public static Label getDutyCycleLabel(String preId, InstallAppDevice deviceConfiguration,
 			OgemaWidget parent, OgemaHttpRequest req, String id_vh,
 			FloatResource dutyCycleRes) {
 		PercentageResource res = deviceConfiguration.getSubResource(HmSetpCtrlManagerTHSetp.dutyCycleYellowMin, PercentageResource.class);
@@ -215,6 +215,34 @@ public class ChartsUtil {
 		return dutyCycleLb;		
 	}
 	
+	public static Label getCarrierSensLabel(String preId, InstallAppDevice deviceConfiguration,
+			OgemaWidget parent, OgemaHttpRequest req, String id_vh,
+			FloatResource dutyCycleRes) {
+		float minYellow = 0.18f;
+		float minRed = 0.3f;
+		Label carrierSensLb = new Label(parent, preId+id_vh, req) {
+			private static final long serialVersionUID = 6380831122071345220L;
+
+			@Override
+			public void onGET(OgemaHttpRequest req) {
+				float val = dutyCycleRes.getValue();
+				if(val > minRed) {
+					removeStyle(LabelData.BOOTSTRAP_ORANGE, req);
+					addStyle(LabelData.BOOTSTRAP_RED, req);
+				} else if(val > minYellow) {
+					removeStyle(LabelData.BOOTSTRAP_RED, req);
+					addStyle(LabelData.BOOTSTRAP_ORANGE, req);
+				} else {
+					removeStyle(LabelData.BOOTSTRAP_ORANGE, req);
+					removeStyle(LabelData.BOOTSTRAP_RED, req);
+					addStyle(LabelData.BOOTSTRAP_GREEN, req);
+				}
+				setText(String.format("%.0f%%", val*100), req);
+			}
+		};
+		return carrierSensLb;		
+	}
+
 	public static void getDutyCycleLabelOnGET(InstallAppDevice deviceConfiguration,
 			FloatResource dutyCycleRes,
 			Label label, OgemaHttpRequest req) {
