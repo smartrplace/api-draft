@@ -21,6 +21,8 @@ import org.smartrplace.external.accessadmin.config.AccessAdminConfig;
 import org.smartrplace.external.accessadmin.config.AccessConfigBase;
 import org.smartrplace.external.accessadmin.config.AccessConfigUser;
 import org.smartrplace.external.accessadmin.config.SubCustomerData;
+import org.smartrplace.external.accessadmin.config.SubCustomerSuperiorData;
+import org.smartrplace.gateway.device.GatewaySuperiorData;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
@@ -172,6 +174,23 @@ public class SubcustomerUtil {
 	public static List<SubCustomerData> getSubcustomers(ApplicationManager appMan) {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
 		return accessAdminConfigRes.subCustomers().getAllElements();
+	}
+	
+	public static SubCustomerSuperiorData getSubcustomerDatabase(String name, ApplicationManager appMan, boolean createIfMissing) {
+		GatewaySuperiorData gwSubRes = appMan.getResourceAccess().getResource("gatewaySuperiorDataRes");
+		if(gwSubRes == null)
+			return null;
+		if(createIfMissing)
+			return ResourceListHelper.getOrCreateNamedElementFlex(
+					name, gwSubRes.tenantData());
+		return ResourceListHelper.getNamedElementFlex(
+				name, gwSubRes.tenantData());
+	}
+	public static List<SubCustomerSuperiorData> getSubcustomersDatabase(ApplicationManager appMan) {
+		GatewaySuperiorData gwSubRes = appMan.getResourceAccess().getResource("gatewaySuperiorDataRes");
+		if(gwSubRes == null)
+			gwSubRes = appMan.getResourceManagement().createResource("gatewaySuperiorDataRes", GatewaySuperiorData.class);
+		return gwSubRes.tenantData().getAllElements();
 	}
 	
 	private static Map<String, Long> lastRoomPermissionUpdate = new HashMap<>();
@@ -629,6 +648,18 @@ public class SubcustomerUtil {
 		}
 		return null;
 	}
+	public static SubCustomerSuperiorData getEntireBuildingSubcustomerDatabase(ApplicationManager appMan) {
+		if(Boolean.getBoolean("org.smartplace.app.srcmon.server.issuperior")) {
+			List<SubCustomerSuperiorData> all = getSubcustomersDatabase(appMan);
+			for(SubCustomerSuperiorData sub: all) {
+				if(sub.aggregationType().getValue() > 0)
+					return sub;
+			}
+			return null;
+		}
+		SubCustomerData subc = getEntireBuildingSubcustomer(appMan);
+		return getDatabaseData(subc, appMan);
+	}
 	
 	/** Initialize room regarding standard room groups
 	 * 
@@ -683,5 +714,25 @@ public class SubcustomerUtil {
 		}
 		
 		//setGroups(object, Arrays.asList(new BuildingPropertyUnit[] {allRoomsGroup}), roomGroups.getAllElements());
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static SubCustomerSuperiorData getDatabaseData(SubCustomerData subc, ApplicationManager appMan) {
+		if(subc.databaseData().isActive())
+			return subc.databaseData().getLocationResource();
+		SubCustomerSuperiorData sdb = getSubcustomerDatabase(ResourceUtils.getHumanReadableShortName(subc), appMan, true);
+		if(sdb != null) {
+			ValueResourceHelper.setCreate(sdb.aggregationType(), subc.aggregationType().getValue());
+			ValueResourceHelper.setCreate(sdb.additionalAdminEmailAddresses(), subc.additionalAdminEmailAddresses().getValue());
+			ValueResourceHelper.setCreate(sdb.personalSalutations(), subc.personalSalutations().getValue());
+			//if(!subc.useOnlyAdditionalAddresses().isActive()))
+			//	ValueResourceHelper.setCreate(sdb.useOnlyAdditionalAddresses(), true);
+			//else
+			//	ValueResourceHelper.setCreate(sdb.useOnlyAdditionalAddresses(), subc.useOnlyAdditionalAddresses().getValue());
+			ValueResourceHelper.setCreate(sdb.emailAddressesIT(), subc.emailAddressesIT().getValue());
+			ValueResourceHelper.setCreate(sdb.personalSalutationsIT(), subc.personalSalutationsIT().getValue());
+			subc.databaseData().setAsReference(sdb);
+		}
+		return sdb;
 	}
 }
