@@ -242,16 +242,27 @@ public class GatewaySyncUtil {
 	}
 	
 	public static String getGatewayBaseIdIfRemoteDevice(Resource gwData) {
+		return getGatewayBaseIdRemote(gwData, false);
+	}
+	public static String getGatewayBaseIdRemote(Resource gwData, boolean returnInfoOnError) {
 		Resource top = ResourceHelper.getToplevelResource(gwData);
-		if(top.getName().length() < 3)
+		if(top.getName().length() < 3) {
+			if(returnInfoOnError)
+				return top.getName();
 			return null;
-		if(!top.getName().startsWith("gw"))
+		} 
+		if(!top.getName().startsWith("gw")) {
+			if(returnInfoOnError)
+				return top.getName();
 			return null;
+		}
 		String result = top.getName().substring(2);
 		try {
 			Integer.parseInt(result);
 			return result;
 		} catch(NumberFormatException e) {
+			if(returnInfoOnError)
+				return top.getName();
 			return null;
 		}
 	}
