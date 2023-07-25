@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
+import org.ogema.model.gateway.LocalGatewayInformation;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
@@ -732,6 +733,13 @@ public class SubcustomerUtil {
 			ValueResourceHelper.setCreate(sdb.emailAddressesIT(), subc.emailAddressesIT().getValue());
 			ValueResourceHelper.setCreate(sdb.personalSalutationsIT(), subc.personalSalutationsIT().getValue());
 			subc.databaseData().setAsReference(sdb);
+		}
+		LocalGatewayInformation localgw = ResourceHelper.getLocalGwInfo(appMan.getResourceAccess());
+		if(localgw != null) {
+			ValueResourceHelper.setCreate(sdb.gatewayBaseUrl(), localgw.gatewayBaseUrl().getValue());
+			ValueResourceHelper.setCreate(sdb.gatewayOperationDatabaseUrl(), localgw.gatewayOperationDatabaseUrl().getValue());
+			ValueResourceHelper.setCreate(sdb.gatewayLinkOverviewUrl(), localgw.gatewayLinkOverviewUrl().getValue());
+			ValueResourceHelper.setCreate(sdb.systemLocale(), localgw.systemLocale().getValue());
 		}
 		return sdb;
 	}
