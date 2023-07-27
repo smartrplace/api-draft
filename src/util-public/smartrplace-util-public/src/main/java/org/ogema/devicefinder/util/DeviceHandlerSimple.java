@@ -266,7 +266,7 @@ if(Boolean.getBoolean("jobdebug")) {
 				for(Datapoint dp: knownDps) {
 					DpGroupUtil.setFinalDeviceForDatapoint(dp, installDeviceRes);
 				}
-			} catch(ClassCastException e) {
+			} catch(ClassCastException| NullPointerException e) {
 				(new IllegalStateException("Wrong device type: "+installDeviceRes.getName(), e)).printStackTrace();
 				return Collections.emptyList();
 			}
