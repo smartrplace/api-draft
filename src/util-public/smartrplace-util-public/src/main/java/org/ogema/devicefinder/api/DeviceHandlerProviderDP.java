@@ -158,6 +158,8 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	
 	/** If false the sub table for the DeviceHandler shall be hidden for the non-expert view*/
 	default boolean relevantForUsers() {return true;}
+	
+	default boolean isInRoom() {return false;}
 
 	/** This is a more flexible option to provide a value for
 	 * {@link InstallAppDevice#minimumIntervalBetweenNewValues()}

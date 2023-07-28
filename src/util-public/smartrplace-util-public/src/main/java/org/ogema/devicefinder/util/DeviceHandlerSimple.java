@@ -335,4 +335,9 @@ if(Boolean.getBoolean("jobdebug")) {
 	public String label(OgemaLocale locale) {
 		return getTableTitle();
 	}
+	
+	@Override
+	public boolean isInRoom() {
+		return isInRoom;
+	}
 }
