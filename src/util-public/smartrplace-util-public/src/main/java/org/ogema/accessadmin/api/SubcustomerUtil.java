@@ -181,6 +181,9 @@ public class SubcustomerUtil {
 		GatewaySuperiorData gwSubRes = appMan.getResourceAccess().getResource("gatewaySuperiorDataRes");
 		if(gwSubRes == null)
 			return null;
+		if(!gwSubRes.isActive()) {
+			gwSubRes.activate(false);
+		}
 		if(createIfMissing)
 			return ResourceListHelper.getOrCreateNamedElementFlex(
 					name, gwSubRes.tenantData());
@@ -189,8 +192,12 @@ public class SubcustomerUtil {
 	}
 	public static List<SubCustomerSuperiorData> getSubcustomersDatabase(ApplicationManager appMan) {
 		GatewaySuperiorData gwSubRes = appMan.getResourceAccess().getResource("gatewaySuperiorDataRes");
-		if(gwSubRes == null)
+		if(gwSubRes == null) {
 			gwSubRes = appMan.getResourceManagement().createResource("gatewaySuperiorDataRes", GatewaySuperiorData.class);
+		}
+		if(!gwSubRes.isActive()) {
+			gwSubRes.activate(false);
+		}
 		return gwSubRes.tenantData().getAllElements();
 	}
 	
