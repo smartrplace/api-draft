@@ -305,7 +305,28 @@ public class ChartsUtil {
 			DeviceHandlerProviderDP<?> devHand,
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
 			ResourceList<DataLogTransferInfo> datalogs) {
-		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv, datalogs, null);
+		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv, datalogs, null,
+				vh.getParent());
+	}
+	
+	public static GetPlotButtonResult getPlotButtonBase(String id, final InstallAppDevice object,
+			final DatapointService dpService, final ApplicationManager appMan,
+			OgemaWidget parent, Row row, OgemaHttpRequest req,
+			DefaultScheduleViewerConfigurationProviderExtended schedViewProv) {
+		DeviceHandlerProviderDP<Resource> devHand = dpService.getDeviceHandlerProvider(object);
+		return getPlotButton(id, object, dpService, appMan, false, null, row, req, devHand, schedViewProv, null, null, parent);
+	}
+
+	public static GetPlotButtonResult getPlotButton(String id, final InstallAppDevice object,
+			final DatapointService dpService, final ApplicationManager appMan,//final HardwareInstallController controller2,
+			boolean addDataPointInfoLabel,
+			ObjectResourceGUIHelper<?, ?> vh, Row row, OgemaHttpRequest req,
+			DeviceHandlerProviderDP<?> devHand,
+			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
+			ResourceList<DataLogTransferInfo> datalogs,
+			Collection<Datapoint> datapointsToUse) {
+		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv, datalogs, datapointsToUse,
+				vh.getParent());
 	}
 	/**
 	 * 
@@ -331,7 +352,7 @@ public class ChartsUtil {
 			DeviceHandlerProviderDP<?> devHand,
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
 			ResourceList<DataLogTransferInfo> datalogs,
-			Collection<Datapoint> datapointsToUse) {
+			Collection<Datapoint> datapointsToUse, OgemaWidget parent) {
 		final GetPlotButtonResult resultMain = new GetPlotButtonResult();
 		
 		resultMain.devHand = devHand;
@@ -397,7 +418,7 @@ public class ChartsUtil {
 					return result;
 				}
 			};
-			resultMain.plotButton = ScheduleViwerOpenUtil.getScheduleViewerOpenButton(vh.getParent(), "plotButton"+id,
+			resultMain.plotButton = ScheduleViwerOpenUtil.getScheduleViewerOpenButton(parent, "plotButton"+id,
 					"Plot", provider, schedViewProv, req);
 		}
 		return resultMain;
