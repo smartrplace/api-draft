@@ -17,8 +17,10 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.resourcemanager.AccessPriority;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
+import org.ogema.core.resourcemanager.transaction.ResourceTransaction;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
@@ -330,6 +332,12 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	public static IntegerResource getSendIntervalModeSingle(Thermostat th) {
 		return th.getSubResource("sendIntervalModeSingle", IntegerResource.class);
 	}
+	public static BooleanResource getMaxSendSingle(Thermostat th) {
+		return th.getSubResource("maxSendMode", BooleanResource.class);
+	}
+	public static BooleanResource getShortBatteryLifetimeIndicator(PhysicalElement device) {
+		return device.getSubResource("shorBattery", BooleanResource.class);
+	}
 	public static ThermostatProgram getHmThermProgram(Thermostat th) {
 		ThermostatProgram hmThermProgram = th.getSubResource("program", ThermostatProgram.class);
 		if ((hmThermProgram == null) || (!hmThermProgram.isActive()))
@@ -539,8 +547,8 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		return appMan.getResourcePatternAccess().isSatisfied(patternInstance, patternClass);
 	}
 	
-	public static int setOpenIntervalConfigs(IntegerResource sendIntervalMode,
-			Collection<InstallAppDevice> all, DatapointService dpService, boolean resend) {
+	public static int setOpenIntervalConfigs(IntegerResource sendIntervalModeGeneral,
+			Collection<InstallAppDevice> all, DatapointService dpService, boolean resend, ResourceAccess resAcc) {
 		if(all == null)
 			all = dpService.managedDeviceResoures(Thermostat.class);
 		int count = 0;
@@ -548,17 +556,17 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			if(dev.isTrash().getValue())
 				continue;
 			if(dev.device() instanceof Thermostat) {
-				count += DeviceHandlerBase.setSendIntervalByMode((Thermostat) dev.device().getLocationResource(), sendIntervalMode, resend);
+				count += DeviceHandlerBase.setSendIntervalByMode((Thermostat) dev.device().getLocationResource(), sendIntervalModeGeneral, resend, resAcc);
 			}
 		}
 		return count;
 	}
 
 	public static int setSendIntervalByMode(Thermostat dev,
-			IntegerResource sendIntervalMode, boolean resend) {
+			IntegerResource sendIntervalModeGeneral, boolean resend, ResourceAccess resAcc) {
 		IntegerResource sendIntervalModeSingle = getSendIntervalModeSingle(dev);
 		int singleState = sendIntervalModeSingle.getValue();
-		int overallState = sendIntervalMode.getValue();
+		int overallState = sendIntervalModeGeneral.getValue();
 		int realState;
 		if(overallState == 1 || overallState == 3 || overallState == 5 || singleState == 0)
 			realState = overallState/2;
@@ -566,18 +574,32 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			realState = singleState-1;
 		if(singleState == 4)
 			return 0;
+		return setSendIntervalByMode(dev, realState, resend, resAcc);
+		
+	}
+	
+	/**
+	 * 
+	 * @param dev
+	 * @param realState 0=standard mode, 1=summer mode(cyclic off), 2=reduced, 3=max
+	 * @param resend
+	 * @return
+	 */
+	public static int setSendIntervalByMode(Thermostat dev,
+			int realState, boolean resend, ResourceAccess resAcc) {
 		int count = 0;
+		ResourceTransaction trans = resAcc.createResourceTransaction();
 		switch(realState) {
 		case 0:
-			if(setSendIntervalConfig(0, 1, dev, resend))
+			if(setSendIntervalConfig(0, 1, dev, resend, trans))
 				count++;
-			if(setSendIntervalConfig(1, 1, dev, resend))
+			if(setSendIntervalConfig(1, 1, dev, resend, trans))
 				count++;
-			if(setSendIntervalConfig(2, 20, dev, resend))
+			if(setSendIntervalConfig(2, 20, dev, resend, trans))
 				count++;
 			break;			
 		case 1:
-			if(setSendIntervalConfig(0, 0, dev, resend))
+			if(setSendIntervalConfig(0, 0, dev, resend, trans))
 				count++;
 			//if(setSendIntervalConfig(1, 1, dev, resend))
 			//	coun1t++;
@@ -585,21 +607,41 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			//	count++;
 			break;			
 		case 2:
-			if(setSendIntervalConfig(0, 20, dev, resend))
+			if(setSendIntervalConfig(0, 1, dev, resend, trans))
 				count++;
-			if(setSendIntervalConfig(1, 10, dev, resend))
+			if(setSendIntervalConfig(1, 9, dev, resend, trans))
 				count++;
-			if(setSendIntervalConfig(2, 0, dev, resend))
+			if(setSendIntervalConfig(2, 10, dev, resend, trans))
+				count++;
+			break;			
+		case 3:
+			if(setSendIntervalConfig(0, 1, dev, resend, trans))
+				count++;
+			if(setSendIntervalConfig(1, 0, dev, resend, trans))
+				count++;
+			if(setSendIntervalConfig(2, 5, dev, resend, trans))
 				count++;
 			break;			
 		default:
 			//Should never occur
 			break;
 		}
+		trans.commit();
 		return count;
 	}
 
+	/**
+	 * 
+	 * @param type 0: ON_OFF (0/1), 1:CHANGED, 2:UNCHANGED
+	 * @param value
+	 * @param device
+	 * @param resend
+	 * @return
+	 */
 	public static boolean setSendIntervalConfig(int type, int value, Thermostat device, boolean resend) {
+		return setSendIntervalConfig(type, value, device, resend, null);
+	}
+	public static boolean setSendIntervalConfig(int type, int value, Thermostat device, boolean resend, ResourceTransaction trans) {
 		final IntegerResource setp;
 		final IntegerResource fb;
 		if(type == 0) {
@@ -619,7 +661,10 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			if(fb != null && (fb.getValue() == value && setp.getValue() == value))
 				return false;
 		}
-		setp.setValue(value);
+		if(trans != null)
+			trans.setInteger(setp, value);
+		else
+			setp.setValue(value);
 		return true;
 	}
 }
