@@ -10,8 +10,10 @@ import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointGroup;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.util.AlarmingConfigUtil;
+import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.gateway.device.KnownIssueDataGw;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public class ViaHeartbeatUtil {
@@ -180,6 +182,9 @@ System.out.println("Use send group:"+sendGroup.id()+" recvGroup"+recvGroup.id())
 
 	public static void updateEvalResources(KnownIssueDataGw kniData, ApplicationManager appMan) {
 		if(kniData != null) {
+			HardwareInstallConfig hwInstall = ResourceHelper.getTopLevelResource(HardwareInstallConfig.class, appMan.getResourceAccess());
+			ValueResourceHelper.setCreateIfChanged(kniData.alarmingActivated(), hwInstall.isAlarmingActive().getValue());
+			
 			int[] alarmNum = AlarmingConfigUtil.getActiveAlarms(appMan.getResourceAccess());
 			ValueResourceHelper.setCreateIfChanged(kniData.datapointsInAlarmState(), alarmNum[0]);
 			ValueResourceHelper.setCreateIfChanged(kniData.activeAlarmSupervision(), alarmNum[1]);
