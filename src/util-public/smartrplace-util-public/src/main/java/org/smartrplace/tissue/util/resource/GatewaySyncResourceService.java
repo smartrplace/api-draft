@@ -114,6 +114,31 @@ public interface GatewaySyncResourceService {
 	 */
 	<R extends Resource> CompletionStage<RemoteResourceStatus<R>> create(R resource);
 	/**
+	 * Relevant for resources that already exist on the calling side. It will copy also all subresources
+	 * to the other side of cascading, including their active status. 
+	 * @param <R>
+	 * @param resource
+	 * @param recursive
+	 * @return
+	 */
+	<R extends Resource> CompletionStage<RemoteResourceStatus<R>> create(R resource, boolean recursive);
+	/**
+	 * Relevant for resources that already exist on the calling side. It will copy also all subresources
+	 * to the other side of cascading, including their active status. 
+	 * @param <R>
+	 * @param resource
+	 * @param recursive
+	 * @param maxDepth
+	 * @param includeSchedules
+	 * @param strict if set to true and the creation of some subresource fails, then the whole transaction 
+	 * on the other side of the cascading is considered as failed and will be rolled back. 
+	 * Otherwise (the default), a partial transfer of the resource is realized. TODO rollback is not implemented,
+	 * instead the operation simply terminates upon the first subresource that cannot be created.
+	 * @return
+	 */
+	<R extends Resource> CompletionStage<RemoteResourceStatus<R>> create(R resource, boolean recursive, 
+			int maxDepth, boolean includeSchedules, boolean strict);
+	/**
 	 * Add an element to a resource list locally, and the corresponding resource on the other side of cascading 
 	 * if the resource is inside a cascading tree
 	 * @param <R>
