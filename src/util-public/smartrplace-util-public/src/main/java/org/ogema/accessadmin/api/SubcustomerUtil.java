@@ -666,7 +666,7 @@ public class SubcustomerUtil {
 			return null;
 		}
 		SubCustomerData subc = getEntireBuildingSubcustomer(appMan);
-		return getDatabaseData(subc, appMan);
+		return subc != null ? getDatabaseData(subc, appMan) : null;
 	}
 	
 	/** Initialize room regarding standard room groups
