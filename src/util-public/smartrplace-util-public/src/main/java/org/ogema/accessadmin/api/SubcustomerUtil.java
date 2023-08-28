@@ -656,6 +656,15 @@ public class SubcustomerUtil {
 		}
 		return null;
 	}
+	public static SubCustomerSuperiorData getEntireBuildingSubcustomerDatabase(GatewaySuperiorData gwData) {
+		List<SubCustomerSuperiorData> all = gwData.tenantData().getAllElements();
+		for(SubCustomerSuperiorData sub: all) {
+			if(sub.aggregationType().getValue() > 0)
+				return sub;
+		}
+		return null;
+	}
+	
 	public static SubCustomerSuperiorData getEntireBuildingSubcustomerDatabase(ApplicationManager appMan) {
 		if(Boolean.getBoolean("org.smartplace.app.srcmon.server.issuperior")) {
 			List<SubCustomerSuperiorData> all = getSubcustomersDatabase(appMan);
