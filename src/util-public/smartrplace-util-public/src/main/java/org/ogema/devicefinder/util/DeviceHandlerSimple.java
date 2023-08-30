@@ -299,6 +299,9 @@ if(Boolean.getBoolean("jobdebug")) {
 	}
 	
 	protected Datapoint addDatapointWithResOrSensorName(SingleValueResource res, List<Datapoint> result) {
+		return addDatapointWithResOrSensorName(res, null, result);
+	}
+	protected Datapoint addDatapointWithResOrSensorName(SingleValueResource res, String subLocationBase, List<Datapoint> result) {
 		String resName = res.getName();
 		final String subLocation;
 		if(!(resName.equals("reading") || resName.equals("stateFeedback") || resName.equals("stateControl")))
@@ -310,6 +313,8 @@ if(Boolean.getBoolean("jobdebug")) {
 			else
 				subLocation = "TOP";
 		}
+		if(subLocationBase != null)
+			return addDatapoint(res, subLocation+"-"+subLocationBase, result);
 		return addDatapoint(res, subLocation, result);
 	}
 	
