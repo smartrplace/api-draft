@@ -25,6 +25,7 @@ import org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmInterfaceInfo;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmLogicInterface;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
+import org.ogema.model.actors.EventPushButtonDevice;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
@@ -841,6 +842,15 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 
 	public static boolean isCO2SensorHm(String resourceLocation) {
 		if(resourceLocation.contains("HM_HmIP_SCTH230"))
+			return true;
+		return false;
+	}
+
+	public static boolean isKnownOnOffWithEventPushButtonDevice(Resource parent) {
+		if(parent != null && (parent.getName().contains("HM_HmIP_BS2_") ||
+				parent.getName().contains("HmIP_PSM_2_") ||
+				parent.getName().contains("HM_HmIP_BSM_") ||
+				parent.getName().contains("HM_HmIP_BSL_")))
 			return true;
 		return false;
 	}
