@@ -153,6 +153,14 @@ public interface GatewaySyncResourceService {
 	 */
 	<R extends Resource> CompletionStage<RemoteResourceStatus<R>> addToResourceList(ResourceList<R> list);
 	
+	/**
+	 * Send a request to the remote side to provide send the current subresource structure of the provided resource. 
+	 * @param <R>
+	 * @param resource
+	 * @return
+	 */
+	<R extends Resource> CompletionStage<RemoteResourceStatus<R>> requestSync(R resource);
+	
     /** Room must be identified by name*/
 	CompletionStage<RemoteStatus> setRoomAsReference(PhysicalElement device, Room Room);
 	CompletionStage<RemoteStatus> setDeviceAsReference(PhysicalElement newReference, PhysicalElement deviceToBeReferenced);
