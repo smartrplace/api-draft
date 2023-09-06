@@ -158,13 +158,15 @@ if(Boolean.getBoolean("jobdebug")) {
 					vh.registerHeaderEntry("Last Contact");
 				} else {
 					Label valueLabel;
+					SingleValueResource sampleSensor;
 					try {
 						valueLabel = getMainSensorLabel(box, object, vh, id);
+						sampleSensor = getMainSensorValue(box, object);
 					} catch(ClassCastException e) {
+						System.out.println("Exception for IAD:"+object.getLocation());
 						e.printStackTrace();
 						return;
 					}
-					SingleValueResource sampleSensor = getMainSensorValue(box, object);
 					if((valueLabel == null) && (sampleSensor != null)) {
 						if(sampleSensor instanceof FloatResource)
 							valueLabel = vh.floatLabel(getValueTitle(), id, (FloatResource)sampleSensor, row, "%.1f");
@@ -268,6 +270,7 @@ if(Boolean.getBoolean("jobdebug")) {
 				}
 			} catch(ClassCastException| NullPointerException e) {
 				(new IllegalStateException("Wrong device type: "+installDeviceRes.getName(), e)).printStackTrace();
+				
 				return Collections.emptyList();
 			}
 			if(Boolean.getBoolean("org.smartrplace.apps.subgateway") && addDeviceOrResourceListToSync()) {
