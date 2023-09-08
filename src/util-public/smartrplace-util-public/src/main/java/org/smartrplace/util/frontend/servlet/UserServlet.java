@@ -504,7 +504,8 @@ public class UserServlet extends HttpServlet {
 				logger.info("Servlet provider exception2: {}", res.message);
 			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
-			logException(null, res.message, 6, appManPlus);
+			if(!Boolean.getBoolean("org.smartrplace.util.frontend.servlet.objectnotfound.ignore"))
+				logException(null, res.message, 6, appManPlus);
 			return res;
 		}
 		

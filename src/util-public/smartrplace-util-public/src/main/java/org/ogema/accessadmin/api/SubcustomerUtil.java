@@ -749,13 +749,14 @@ public class SubcustomerUtil {
 			ValueResourceHelper.setCreate(sdb.emailAddressesIT(), subc.emailAddressesIT().getValue());
 			ValueResourceHelper.setCreate(sdb.personalSalutationsIT(), subc.personalSalutationsIT().getValue());
 			subc.databaseData().setAsReference(sdb);
-		}
-		LocalGatewayInformation localgw = ResourceHelper.getLocalGwInfo(appMan.getResourceAccess());
-		if(localgw != null) {
-			ValueResourceHelper.setCreate(sdb.gatewayBaseUrl(), localgw.gatewayBaseUrl().getValue());
-			ValueResourceHelper.setCreate(sdb.gatewayOperationDatabaseUrl(), localgw.gatewayOperationDatabaseUrl().getValue());
-			ValueResourceHelper.setCreate(sdb.gatewayLinkOverviewUrl(), localgw.gatewayLinkOverviewUrl().getValue());
-			ValueResourceHelper.setCreate(sdb.systemLocale(), localgw.systemLocale().getValue());
+
+			LocalGatewayInformation localgw = ResourceHelper.getLocalGwInfo(appMan.getResourceAccess());
+			if(localgw != null) {
+				ValueResourceHelper.setCreate(sdb.gatewayBaseUrl(), localgw.gatewayBaseUrl().getValue());
+				ValueResourceHelper.setCreate(sdb.gatewayOperationDatabaseUrl(), localgw.gatewayOperationDatabaseUrl().getValue());
+				ValueResourceHelper.setCreate(sdb.gatewayLinkOverviewUrl(), localgw.gatewayLinkOverviewUrl().getValue());
+				ValueResourceHelper.setCreate(sdb.systemLocale(), localgw.systemLocale().getValue());
+			}
 		}
 		return sdb;
 	}
