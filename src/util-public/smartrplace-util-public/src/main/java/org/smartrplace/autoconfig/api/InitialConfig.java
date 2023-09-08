@@ -71,7 +71,7 @@ public class InitialConfig {
 	}
 
 	public static InstallAppDevice getDeviceByNumericalIdString(String preDevId, String typeIdIn,
-			HardwareInstallConfig cfg, int offset) {
+			HardwareInstallConfig cfg, int offset, boolean requireExactNumber) {
 		try {
 			int devIdInt = Integer.parseInt(preDevId);
 	        preDevId = String.format("%04d", devIdInt+offset); // String.format("%s-%04d", typeId, devIdInt + offset);
@@ -86,7 +86,7 @@ public class InitialConfig {
             String numPart = d.deviceId().getValue().substring(typeId.length());
             if(preDevId.equals(numPart))
             	return d;
-            else if(numPart.startsWith(preDevId)) {
+            else if((!requireExactNumber) && numPart.startsWith(preDevId)) {
             	return d; //If _A entries exist the numerical search may not have unique result
             }
         }
