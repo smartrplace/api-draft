@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.tools.resource.util.ValueResourceUtils;
@@ -294,7 +295,11 @@ public class ObjectGUIHelperBase<T> {
 				@Override
 				public String getSelection(S resource, Locale locale, List<String> displayedValues) {
 					if(valuesToSet == null) return super.getSelection(resource, locale, displayedValues);
-					String value = ValueResourceUtils.getValue(resource);
+					String value;
+					if(resource instanceof FloatResource)
+						value = String.format("%.1f", ((FloatResource)resource).getValue());
+					else
+						value = ValueResourceUtils.getValue(resource);
 					String display = valuesToSet.get(value);
 					if(display == null) return displayedValues.get(0);
 					return display;
