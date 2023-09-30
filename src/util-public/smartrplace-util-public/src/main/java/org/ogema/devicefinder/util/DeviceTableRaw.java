@@ -809,10 +809,12 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
     public static final int CTRLMODE_NONE = 0;
     public static final int CTRLMODE_COOLING = 1;
     public static final int CTRLMODE_HEATING = 2;
-    public static final int CTRLMODE_COOLING_FORCED = 3;
-    public static final int CTRLMODE_HEATING_FORCED = 4;
+    public static final int CTRLMODE_COOLING_FORCED = 3; //means FORCED_OROFF
+    public static final int CTRLMODE_HEATING_FORCED = 4; //means FORCED_OROFF
     public static final int CTRLMODE_OFF = 5;
     public static final int CTRLMODE_ECO = 6;
+    public static final int CTRLMODE_COOLING_ORECO = 7; //means FORCED_ORECO
+    public static final int CTRLMODE_HEATING_ORECO = 8; //means FORCED_ORECO
 
     public static boolean isVirtualThermostat(Thermostat model) {
 		return !(model.getSubResources(VirtualThermostatConfig.class, false).isEmpty());
