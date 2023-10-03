@@ -1,6 +1,7 @@
 package org.ogema.accessadmin.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,21 +50,26 @@ public class SubcustomerUtil {
 		//public float defaultEcoTemperatureCooling = 273.15f+30f;
 		
 		public SubCustomerType(int id, Map<OgemaLocale, String> name) {
-			super(id, name);
+			super(id, false, name);
 		}
 
 		public SubCustomerType(int id, String englishName) {
-			super(id, englishName);
+			super(id, false, englishName);
 		}
 		
 		public SubCustomerType(int id, String englishName, String germanName) {
-			super(id, englishName, germanName);
+			super(id, false, englishName, germanName);
 		}
 		
 		public void addRoomType(NamedIntegerType roomType) {
+			addRoomType(Arrays.asList(new NamedIntegerType[] {roomType,
+					new NamedIntegerType(roomType.getType(), true, roomType.getName(), roomType.idPrefix)}));
+		}
+		public void addRoomType(List<NamedIntegerType> roomTypeList) {
 			if(roomTypes.isEmpty())
-				defaultRoomType = roomType;
-			roomTypes.put(roomType.id, roomType);
+				defaultRoomType = roomTypeList.get(0);
+			for(NamedIntegerType roomType: roomTypeList)
+				roomTypes.put(roomType.getTypeUnique(), roomType);
 		}
 	}
 	public static Map<Integer, SubCustomerType> subCustomerTypes = new HashMap<>();
