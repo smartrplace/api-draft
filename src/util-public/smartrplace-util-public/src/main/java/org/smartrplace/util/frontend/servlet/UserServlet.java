@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.BooleanValue;
 import org.ogema.core.channelmanager.measurements.DoubleValue;
 import org.ogema.core.channelmanager.measurements.FloatValue;
@@ -1165,7 +1166,7 @@ System.out.println("SUFIBSD");
 	 * 
 	 * @param logger
 	 * @param e
-	 * @param fullUrl
+	 * @param fullUrl may be null
 	 * @param exceptionCode
 	 * @param appManPlus
 	 */
@@ -1173,7 +1174,7 @@ System.out.println("SUFIBSD");
 			ApplicationManagerPlus appManPlus) {
 		logException(e, fullUrl, exceptionCode, appManPlus);
 	}*/
-	private static void logException(Exception e, String fullUrl, int exceptionCode,
+	public static void logException(Exception e, String fullUrl, int exceptionCode,
 			ApplicationManagerPlus appManPlus) {
 		if(e == null) {
 			if(fullUrl != null)
@@ -1196,5 +1197,19 @@ System.out.println("SUFIBSD");
 		if(appManPlus != null)
 			ValueResourceHelper.setCreate(
 					ResourceHelper.getLocalDevice(appManPlus.appMan()).logFileCheckNotification(), exceptionCode);
+	}
+
+	public static void logGeneralReport(String message, int exceptionCode,
+			ApplicationManager appMan) {
+		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
+			System.out.println(message);
+			UserServlet.logger.info("General report with exception code: "+exceptionCode+" ::"+message);
+		} else {
+			UserServlet.logger.info("General report with exception code: "+exceptionCode+" ::"+message);
+		}		
+		
+		if(appMan != null)
+			ValueResourceHelper.setCreate(
+					ResourceHelper.getLocalDevice(appMan).logFileCheckNotification(), exceptionCode);
 	}
 }

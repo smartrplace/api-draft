@@ -1,14 +1,11 @@
 package org.smartrplace.os.util;
 
-import java.awt.image.ReplicateScaleFilter;
-
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.TimedJobMemoryData;
 import org.ogema.devicefinder.api.TimedJobProvider;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.osgi.framework.BundleContext;
 import org.smartrplace.apps.eval.timedjob.TimedJobConfig;
-import org.smartrplace.os.util.OSGiBundleUtil;
 import org.smartrplace.os.util.OSGiBundleUtil.BundleType;
 
 import de.iwes.util.resource.ValueResourceHelper;

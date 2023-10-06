@@ -181,4 +181,10 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * for the devices are not overwritten.
 	 */
 	default String getInitVersion() {return "";}
+
+	/** Get device representing network parent, e.g. router, controller, CCU etc.
+	 * Note that the gateway as network parent usually is not returned explicitly.*/
+	default InstallAppDevice getNetworkParent(InstallAppDevice knownDevice) {
+		return null;
+	}
 }

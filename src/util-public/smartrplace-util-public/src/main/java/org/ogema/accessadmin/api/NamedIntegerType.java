@@ -10,28 +10,32 @@ import de.iwes.widgets.template.LabelledItem;
 
 public class NamedIntegerType implements LabelledItem {
 	protected final int id;
+	private final boolean roomsWithCalender;
 	protected final String idPrefix;
 	private final Map<OgemaLocale, String> name;
 	
-	public NamedIntegerType(int id, Map<OgemaLocale, String> name) {
-		this(id, name, null);
+	public NamedIntegerType(int id, boolean roomsWithCalender, Map<OgemaLocale, String> name) {
+		this(id, roomsWithCalender, name, null);
 	}
 
-	public NamedIntegerType(int id, Map<OgemaLocale, String> name, String idPrefix) {
+	public NamedIntegerType(int id, boolean roomsWithCalender, Map<OgemaLocale, String> name, String idPrefix) {
 		this.id = id;
+		this.roomsWithCalender = roomsWithCalender;
 		this.name = name;
 		this.idPrefix = idPrefix;
 	}
 
-	public NamedIntegerType(int id, String englishName) {
+	public NamedIntegerType(int id, boolean roomsWithCalender, String englishName) {
 		this.id = id;
+		this.roomsWithCalender = roomsWithCalender;
 		this.name = new HashMap<>();
 		name.put(OgemaLocale.ENGLISH, englishName);
 		this.idPrefix = null;
 	}
 	
-	public NamedIntegerType(int id, String englishName, String germanName) {
+	public NamedIntegerType(int id, boolean roomsWithCalender, String englishName, String germanName) {
 		this.id = id;
+		this.roomsWithCalender = roomsWithCalender;
 		this.name = new HashMap<>();
 		name.put(OgemaLocale.ENGLISH, englishName);
 		name.put(OgemaLocale.GERMAN, germanName);
@@ -46,8 +50,8 @@ public class NamedIntegerType implements LabelledItem {
 			return "All";
 		}
 		if(idPrefix != null)
-			return idPrefix+id;
-		return ""+id;
+			return idPrefix+id+(isRoomsWithCalender()?"Cal":"");
+		return ""+id+(isRoomsWithCalender()?"Cal":"");
 	}
 
 	@Override
@@ -55,15 +59,15 @@ public class NamedIntegerType implements LabelledItem {
 		if(locale != null) {
 			String result2 = name.get(locale);
 			if(result2 != null)
-				return result2;
+				return result2+(isRoomsWithCalender()?"(Cal)":"(Std)");
 		}
 		OgemaLocale defaultLocale = UserLocaleUtil.getSystemDefaultLocale();
 		String result = name.get(defaultLocale);
 		if(result != null)
-			return result;
+			return result+(isRoomsWithCalender()?"(Cal)":"(Std)");
 		if(name.isEmpty())
 			return null;
-		return name.entrySet().iterator().next().getValue();
+		return name.entrySet().iterator().next().getValue()+(isRoomsWithCalender()?"(Cal)":"(Std)");
 	}
 
 	public String labelReq(OgemaHttpRequest req) {
@@ -73,5 +77,20 @@ public class NamedIntegerType implements LabelledItem {
 	
 	public int getType() {
 		return id;
+	}
+	
+	public int getTypeUnique() {
+		if(roomsWithCalender)
+			return -id;
+		else
+			return id;
+	}
+	
+	public Map<OgemaLocale, String> getName() {
+		return name;
+	}
+
+	public boolean isRoomsWithCalender() {
+		return roomsWithCalender;
 	}
 }

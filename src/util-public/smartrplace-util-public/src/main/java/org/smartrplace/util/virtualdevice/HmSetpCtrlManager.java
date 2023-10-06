@@ -137,6 +137,8 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 		}
 		if(prevDC > ccu.relativeLoadMax)
 			ccu.relativeLoadMax = prevDC;
+if(prevDC > maxDC)
+System.out.println("Overload in "+(ccu.device!=null?ccu.device.deviceId().getValue():"??"));	
 		return (prevDC > maxDC);
 	}
 

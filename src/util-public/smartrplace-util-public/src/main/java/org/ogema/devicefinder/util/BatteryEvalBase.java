@@ -96,7 +96,7 @@ public class BatteryEvalBase {
 	public static WidgetStyle<Label> addBatteryStyle(Label label, float val, boolean changeInfoRelevant,
 			String deviceLocation, OgemaHttpRequest req) {
 		WidgetStyle<Label> result = null;
-		boolean singleBattery = deviceLocation == null || deviceLocation.toUpperCase().contains("HMIP_SWDO");
+		boolean singleBattery = isSingleBattery(deviceLocation);
 		BatteryStatus stat = getBatteryStatus(val, changeInfoRelevant, singleBattery?1:2);
 		if(stat == BatteryStatus.URGENT || stat == BatteryStatus.EMPTY)
 			result = LabelData.BOOTSTRAP_RED;
@@ -109,6 +109,14 @@ public class BatteryEvalBase {
 		if(result != null)
 			label.addStyle(result, req);
 		return result;
+	}
+	
+	public static boolean isSingleBattery(String deviceLocation) {
+		if(deviceLocation == null)
+			return true;
+		if(!deviceLocation.toUpperCase().contains("HMIP_SWDO"))
+			return false;
+		return !(deviceLocation.contains("SWDO_PL_2_") || deviceLocation.contains("SWDO_I_"));
 	}
 	
 	public static String getBatteryHTMLColor(BatteryStatus stat) {
@@ -194,7 +202,7 @@ public class BatteryEvalBase {
 			}
 		} else
 			lastTs = batRes.getLastUpdateTime();
-		boolean singleBattery = batRes.getLocation().contains("HMIP_SWDO");
+		boolean singleBattery = isSingleBattery(batRes.getLocation());
 		result.status = getBatteryStatus(result.voltage, changeInfoRelevant, singleBattery?1:2);
 		if(result.status != BatteryStatus.URGENT)
 			return result;
