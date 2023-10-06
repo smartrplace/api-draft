@@ -45,4 +45,15 @@ public class GatewayUtil {
 			gwName = gwName.substring(0, idx);
 		return gwName;
 	}
+
+	public static boolean isCloudGateway(ResourceAccess resAcc) {
+		String gwId = getGatewayBaseId(resAcc);
+		if(gwId.startsWith("9"))
+			return true;
+		//if(Boolean.getBoolean("org.smartrplace.tissue.util.resource.iscloudgw"))
+		//	return true;
+		//if(Boolean.getBoolean("org.ogema.devicefinder.util.supportcascadedccu"))
+		//	return true;
+		return false;
+	}
 }

@@ -132,7 +132,9 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	
 	long nextEvalInterval;
 	long intervalStart;
-		
+
+	public static long lastOvervloadEvent = -1;
+	
 	protected SetpointControlManager(ApplicationManagerPlus appManPlus) {
 		this(appManPlus, PENDING_TimeForMissingFeedback_DEFAULT);
 	}
@@ -304,6 +306,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		}
 		boolean isOverload = isSensorInOverload(sens, maxDC);
 		if((!isOverload) || requestConfirmationOnly) {
+			//We do not actively reset overload, but it just expires
+			//sens.valuePendingDueToOverloadSince = -1;
 			long now = appMan.getFrameworkTime();
 			if(!requestConfirmationOnly) {
 				if(sens.ccu() != null) {
@@ -347,8 +351,11 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				}
 			}
 						
-			if(sens.valueFeedbackPending == null || (sens.valueFeedbackPending != setpoint))
+			if(sens.valueFeedbackPending == null || (sens.valueFeedbackPending != setpoint)) {
 				sens.valuePendingSince = now;
+				if(isOverload)
+					lastOvervloadEvent = now;
+			}
 			if(setpointData != null)
 				sens.valueFeedbackPendingObject = setpointData;
 			sens.valueFeedbackPending = setpoint;
@@ -377,8 +384,12 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			long now = appMan.getFrameworkTime();
 			if(sens.valuePending == null) {
 				sens.valuePendingSince = now;
+				if(isOverload)
+					lastOvervloadEvent = now;
 			} else if(setpoint != sens.valuePending) {
 				sens.valuePendingSince = now;					
+				if(isOverload)
+					lastOvervloadEvent = now;
 			}
 
 			if(setpointData != null)

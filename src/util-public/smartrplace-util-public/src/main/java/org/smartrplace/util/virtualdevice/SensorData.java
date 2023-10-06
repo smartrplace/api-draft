@@ -35,6 +35,7 @@ public abstract class SensorData {
 	Float valuePending;
 	Object valuePendingObject;
 	long valuePendingSince;
+	//long valuePendingDueToOverloadSince = -1;
 	
 	//Check feedback
 	volatile Float valueFeedbackPending = null;
