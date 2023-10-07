@@ -102,7 +102,10 @@ public class BundleRestartButton extends Button {
 
 	@Override
 	public void onPOSTComplete(String data, OgemaHttpRequest req) {
-		OSGiBundleUtil.restartBundle(type, bc);
+		if(type == BundleType.Gateway)
+			OSGiBundleUtil.stopBundleById(0, bc);
+		else
+			OSGiBundleUtil.restartBundle(type, bc);
 		if(alert != null)
 			alert.showAlert("Restarted "+type, true, req);
 	}

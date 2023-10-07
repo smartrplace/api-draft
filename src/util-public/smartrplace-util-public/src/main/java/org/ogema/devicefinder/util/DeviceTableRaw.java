@@ -25,7 +25,6 @@ import org.ogema.drivers.homematic.xmlrpc.hl.types.HmDevice;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmInterfaceInfo;
 import org.ogema.drivers.homematic.xmlrpc.hl.types.HmLogicInterface;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval;
-import org.ogema.model.actors.EventPushButtonDevice;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
@@ -50,7 +49,6 @@ import org.smartrplace.util.format.WidgetHelper;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.util.format.StringFormatHelper;
-import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
@@ -309,15 +307,20 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	protected AddBatteryVoltageResult addBatteryVoltage(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
 			PhysicalElement device2) {
+		return addBatteryVoltage(vh, id, req, row, device2, BATTERY_VOLTAGE_HEADER);
+	}
+	public static AddBatteryVoltageResult addBatteryVoltage(ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row,
+			PhysicalElement device2, String colHeader) {
 		VoltageResource batteryVoltage = DeviceHandlerBase.getBatteryVoltage(device2);
 		if(batteryVoltage != null) {
-			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(BATTERY_VOLTAGE_HEADER, id, batteryVoltage, row, "%.1f#min:0.1"),
+			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(colHeader, id, batteryVoltage, row, "%.1f#min:0.1"),
 					batteryVoltage);
 			float val = batteryVoltage.getValue();
 			BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req);
 			return result;
 		} else if(req == null)
-			vh.registerHeaderEntry(BATTERY_VOLTAGE_HEADER);
+			vh.registerHeaderEntry(colHeader);
 		return null;
 	}
 		

@@ -13,6 +13,7 @@ public class OSGiBundleUtil {
 		MdnsService,
 		WMBusDriver,
 		ModbusDriver,
+		Gateway,
 		MQTTReplicator
 	}
 	public static Map<BundleType, String> typeSymbolicNames = new HashMap<>();
@@ -20,10 +21,25 @@ public class OSGiBundleUtil {
 		typeSymbolicNames.put(BundleType.HomematicDriver, "org.ogema.drivers.homematic-xmlrpc-hl");
 		typeSymbolicNames.put(BundleType.MdnsService, "org.smartrplace.drivers.jmdns-service");
 		typeSymbolicNames.put(BundleType.WMBusDriver, "org.smartrplace.drivers.jmbus-connector");
+		typeSymbolicNames.put(BundleType.Gateway, "System Bundle");
 		typeSymbolicNames.put(BundleType.MQTTReplicator, "org.smartrplace.drivers.mqtt-resource-replicator");
 	}
 	
 	
+	public static void stopBundleById(long id, BundleContext bc) {
+		for(Bundle bd: bc.getBundles()) {
+			if(bd.getBundleId() == id) {
+				try {
+System.out.println("Stopping "+bd.getSymbolicName()+" ...");
+					bd.stop();
+System.out.println("Stopping of "+bd.getSymbolicName()+" done.");
+				} catch (BundleException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	/** Get bundle symbolic name on console with lb -s*/
 	public static void restartBundle(String bundleSymbolicName, BundleContext bc) {
 		for(Bundle bd: bc.getBundles()) {
