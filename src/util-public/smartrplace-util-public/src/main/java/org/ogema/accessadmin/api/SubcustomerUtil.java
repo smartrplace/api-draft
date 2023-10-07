@@ -180,7 +180,7 @@ public class SubcustomerUtil {
 	}
 	public static List<SubCustomerData> getSubcustomers(ApplicationManager appMan) {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
-		return accessAdminConfigRes.subCustomers().getAllElements();
+		return accessAdminConfigRes != null ? accessAdminConfigRes.subCustomers().getAllElements() : Collections.emptyList();
 	}
 	
 	public static SubCustomerSuperiorData getSubcustomerDatabase(String name, ApplicationManager appMan, boolean createIfMissing) {
