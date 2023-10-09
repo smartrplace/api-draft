@@ -59,7 +59,7 @@ public class AlarmingConfigUtil {
 	public static final int ASSIGNMENT_SIGNALSTRENGTH = 2200;
 	public static final int ASSIGNMENT_OPERATRION_EXTERNAL = 2500;
 	public static final int ASSIGNMENT_DEVELOPMENT = 3000;
-	public static final int ASSIGNMENT_DEVELOPMENT_EXTERNAL = 3500;
+	public static final int ASSIGNMENT_VALVE_ERROR = 3500;
 	public static final int ASSIGNMENT_CUSTOMER = 4000;
 	public static final int ASSIGNMENT_BACKLOG = 5000;
 	public static final int ASSIGNMENT_DEPDENDENT = 6000;
@@ -76,7 +76,7 @@ public class AlarmingConfigUtil {
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVELOPMENT, "Development");
 		//ASSIGNEMENT_ROLES.put("2100", "Development Logic");
 		//ASSIGNEMENT_ROLES.put("2200", "Development HW Driver");
-		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEVELOPMENT_EXTERNAL, "Op Valve Error"); //"Dev External");
+		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_VALVE_ERROR, "Op Valve Error"); //"Dev External");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_CUSTOMER, "Customer");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_BACKLOG, "Backlog");
 		ASSIGNEMENT_ROLES.put(""+ASSIGNMENT_DEPDENDENT, "Dependent");
