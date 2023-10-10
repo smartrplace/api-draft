@@ -725,7 +725,7 @@ public class UserServlet extends HttpServlet {
 				return result;
 			}
 		}
-		Collection<T> allObj = pageprov.getAllObjects(user);
+		Collection<T> allObj = Collections.unmodifiableCollection(pageprov.getAllObjects(user));
 		//TODO: Fix this when more analysis available
 		try {
 			for(T obj: allObj) {
