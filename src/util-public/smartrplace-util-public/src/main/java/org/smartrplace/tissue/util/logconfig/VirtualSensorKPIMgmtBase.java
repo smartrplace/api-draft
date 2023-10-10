@@ -575,8 +575,10 @@ logger.info("   In EnergyServer energyDaily onValueChanged:"+resource.getLocatio
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if(count > 200)
-				System.out.println("WARNING: in waitForCollectingGatewayServerInit blocked for more than 20 seconds!");
+			if(count > 400) {
+				System.out.println("WARNING: in waitForCollectingGatewayServerInit blocked for more than 40 seconds!");
+				count = 0;
+			}
 			count++;
 		}		
 	}
