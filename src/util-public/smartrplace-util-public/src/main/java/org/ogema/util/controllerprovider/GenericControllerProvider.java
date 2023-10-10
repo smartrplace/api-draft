@@ -40,6 +40,7 @@ public class GenericControllerProvider<C> {
 			this.controller = controller;
 			for(GenericExtensionProvider<C> p: extProvidersOpen.values()) {
 				p.setController(controller);
+				System.out.println("SetController done for "+p.getClass());
 			}
 			extProvidersOpen.clear();
 		}
