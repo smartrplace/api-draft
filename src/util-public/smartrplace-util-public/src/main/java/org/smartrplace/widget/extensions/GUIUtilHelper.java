@@ -127,6 +127,11 @@ public class GUIUtilHelper {
 		return ud;
 	}
 
+    public static NaturalPerson getUserPropertyResource(String userId, ResourceList<NaturalPerson> userData) {
+        NaturalPerson userDataRes = ResourceListHelper.getNamedElementFlex(userId, userData);
+        return userDataRes;
+    }
+
     public static NaturalPerson getOrCreateUserPropertyResource(String userId, ResourceList<NaturalPerson> userData) {
         //Resource userDataRes = data.userData().addDecorator(userId, NaturalPerson.class);
         NaturalPerson userDataRes = ResourceListHelper.getOrCreateNamedElementFlex(userId, userData);
