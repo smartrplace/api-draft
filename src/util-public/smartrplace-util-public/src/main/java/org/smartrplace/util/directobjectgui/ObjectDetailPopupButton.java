@@ -16,6 +16,7 @@
 package org.smartrplace.util.directobjectgui;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
@@ -40,6 +41,7 @@ public class ObjectDetailPopupButton<T, R extends Resource> extends Button {
 	protected final String tableId;
 	protected final KnownWidgetHolder<T> knownWidgets;
 	protected final ObjectGUITableProvider<T, R> widgetProvider;
+	private final AtomicInteger tableCnt = new AtomicInteger(0);
 	
 	public ObjectDetailPopupButton(DynamicTable<T> mainTable, String id, String text, OgemaHttpRequest req,
 			final ClosingPopup<T> popMore1, final T object, ApplicationManager appMan,
@@ -80,12 +82,11 @@ public class ObjectDetailPopupButton<T, R extends Resource> extends Button {
 	@Override
 	public void onPrePOST(String data, OgemaHttpRequest req) {
 		popMore1.setItem(object, req);
-		
 		popMore1.getPopupSnippet().clear(req);
 		KnownWidgetHolderData<T> clData = (KnownWidgetHolderData<T>)(knownWidgets.getData(req));
 		ObjectGUIHelperBase<T> popvh = getObjectGUIHelperBase(clData, req);
-
-		final DynamicTable<WidgetEntryData> popTableLoc = new DynamicTable<WidgetEntryData>(popMore1.getPopupSnippet(), "popTable_"+tableId, req);
+		final DynamicTable<WidgetEntryData> popTableLoc 
+			= new DynamicTable<WidgetEntryData>(popMore1.getPopupSnippet(), "popTable_"+tableId + tableCnt.getAndIncrement(), req);
 		DynamicTable<WidgetEntryData> popTable = popTableLoc;
 
 		DefaultObjectRowTemplate<WidgetEntryData> popTableTemplate = new DefaultObjectRowTemplate<WidgetEntryData>() {
@@ -104,8 +105,8 @@ public class ObjectDetailPopupButton<T, R extends Resource> extends Button {
 				//clData.existingLabels.put(object.headerName, popHeader);
 				//popTableLoc.registerDependentWidget(popHeader);
 				//}
-				subRow.addCell(popHeader);
-				subRow.addCell(object.widget);
+				subRow.addCell(popHeader, 4);
+				subRow.addCell(object.widget, 12);
 				//popTableLoc.registerDependentWidget(object.widget);
 				return subRow;
 			}

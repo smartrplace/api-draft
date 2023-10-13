@@ -182,7 +182,7 @@ public abstract class ObjectGUITablePage<T, R extends Resource> implements Objec
 				"More Information", true, ClosingMode.CLOSE) {
 			private static final long serialVersionUID = 1L;
 			@Override
-			public void onGET(OgemaHttpRequest req) {
+			public void onGET(OgemaHttpRequest req) {  // FIXME this looks superfluous
 				T item = getItem(req);
 				if(item == null) return;
 			}
