@@ -11,8 +11,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.accessadmin.api.SubcustomerUtil;
 import org.ogema.core.application.AppID;
+import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.simple.StringResource;
 import org.ogema.devicefinder.api.TimedJobMemoryData;
+import org.ogema.devicefinder.util.AlarmingConfigUtil;
 import org.ogema.model.extended.alarming.AlarmGroupData;
 import org.ogema.model.extended.alarming.EscalationData;
 import org.ogema.model.gateway.LocalGatewayInformation;
@@ -25,7 +29,6 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.tissue.util.resource.GatewayUtil;
 import org.smartrplace.util.message.FirebaseUtil;
 import org.smartrplace.util.message.MessageImpl;
-import org.ogema.devicefinder.util.AlarmingConfigUtil;
 
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.messaging.MessagePriority;
@@ -135,7 +138,7 @@ public abstract class EscalationProviderSimple<T extends EscalationKnownIssue> i
 		}
 	}
 	
-	public static String getMessageHeaderLinks(String baseUrl, LocalGatewayInformation gwRes) {
+	public static String getMessageHeaderLinks(String baseUrl, LocalGatewayInformation gwRes, ApplicationManager appMan) {
 		String emailMessage;
 		if(baseUrl == null)
 			emailMessage = null;
@@ -143,18 +146,20 @@ public abstract class EscalationProviderSimple<T extends EscalationKnownIssue> i
 			emailMessage = "Known issues: "+baseUrl+"/org/smartrplace/alarmingexpert/deviceknownfaults.html" +
 					"\r\nDevices: "+baseUrl+"/org/smartrplace/hardwareinstall/expert/index.html";
 		if(gwRes != null) {
-			if(gwRes.gatewayOperationDatabaseUrl().isActive() && gwRes.gatewayOperationDatabaseUrl().getValue().length() > 5) {
+			StringResource dbUrl = SubcustomerUtil.getGatewayOperationDatabaseUrl(appMan);
+			if(dbUrl.isActive() && dbUrl.getValue().length() > 5) {
 				if(emailMessage == null)
-					emailMessage = "Operation data collection: "+gwRes.gatewayOperationDatabaseUrl().getValue();
+					emailMessage = "Operation data collection: "+dbUrl.getValue();
 				else {
-					emailMessage += "\r\nOperation data collection: "+gwRes.gatewayOperationDatabaseUrl().getValue();
+					emailMessage += "\r\nOperation data collection: "+dbUrl.getValue();
 				}
 			}
-			if(gwRes.gatewayLinkOverviewUrl().isActive() && gwRes.gatewayLinkOverviewUrl().getValue().length() > 5) {
+			StringResource overvUrl = SubcustomerUtil.getGatewayLinkOverviewUrl(appMan);
+			if(overvUrl.isActive() && overvUrl.getValue().length() > 5) {
 				if(emailMessage == null)
-					emailMessage = "Gateway Documentation Links/Wiki: "+gwRes.gatewayLinkOverviewUrl().getValue();
+					emailMessage = "Gateway Documentation Links/Wiki: "+overvUrl.getValue();
 				else
-					emailMessage += "\r\nGateway Documentation Links/Wiki: "+gwRes.gatewayLinkOverviewUrl().getValue();
+					emailMessage += "\r\nGateway Documentation Links/Wiki: "+overvUrl.getValue();
 			}
 		}
 		return emailMessage;

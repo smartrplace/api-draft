@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.model.simple.StringResource;
 import org.ogema.model.gateway.LocalGatewayInformation;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
@@ -36,6 +37,11 @@ public class SubcustomerUtil {
 	public static final String ALL_ROOMS_GROUP_NAME = "All Rooms";
 	private static final long MAX_UPDATE_INTERVAL = 10*TimeProcUtil.MINUTE_MILLIS;
 	
+	public static boolean isSuperior() {
+		return Boolean.getBoolean("org.smartrplace.app.srcmon.server.issuperior")
+				|| Boolean.getBoolean("org.smartplace.app.srcmon.server.issuperior");
+	}
+
 	/** The ids are stored in resources persistently, so on a certain system the meaning of each integer
 	 * value shall not be changed, although the exact name texts can be adapted.
 	 */
@@ -765,5 +771,37 @@ public class SubcustomerUtil {
 			}
 		}
 		return sdb;
+	}
+	
+	public static StringResource getGatewayOperationDatabaseUrl(ApplicationManager appMan) {
+		final SubCustomerSuperiorData subc;
+		if(!isSuperior()) {
+			subc = SubcustomerUtil.getEntireBuildingSubcustomerDatabase(appMan);
+		} else
+			subc = null;
+		if(subc != null)
+			return getGatewayOperationDatabaseUrl(subc, null);
+		LocalGatewayInformation gwInfo = ResourceHelper.getLocalGwInfo(appMan);
+		return getGatewayOperationDatabaseUrl(null, gwInfo);
+	}
+	@SuppressWarnings("deprecation")
+	public static StringResource getGatewayOperationDatabaseUrl(SubCustomerSuperiorData subc, LocalGatewayInformation gwInfo) {
+		return subc != null? subc.gatewayOperationDatabaseUrl():gwInfo.gatewayOperationDatabaseUrl();
+	}
+	
+	public static StringResource getGatewayLinkOverviewUrl(ApplicationManager appMan) {
+		final SubCustomerSuperiorData subc;
+		if(!isSuperior()) {
+			subc = SubcustomerUtil.getEntireBuildingSubcustomerDatabase(appMan);
+		} else
+			subc = null;
+		if(subc != null)
+			return getGatewayLinkOverviewUrl(subc, null);
+		LocalGatewayInformation gwInfo = ResourceHelper.getLocalGwInfo(appMan);
+		return getGatewayLinkOverviewUrl(null, gwInfo);
+	}
+	@SuppressWarnings("deprecation")
+	public static StringResource getGatewayLinkOverviewUrl(SubCustomerSuperiorData subc, LocalGatewayInformation gwInfo) {
+		return subc != null? subc.gatewayLinkOverviewUrl():gwInfo.gatewayLinkOverviewUrl();
 	}
 }

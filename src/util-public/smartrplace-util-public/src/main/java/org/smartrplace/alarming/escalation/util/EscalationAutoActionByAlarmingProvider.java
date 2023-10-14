@@ -77,7 +77,7 @@ public abstract class EscalationAutoActionByAlarmingProvider<R extends Resource>
 	 */
 	protected EscalationCheckResult checkEscalation(Collection<EscalationKnownIssue> issues, List<AppID> appIDs, long now) {
 		int maxFault = 0;
-		String emailMessage = EscalationProviderSimple.getMessageHeaderLinks(baseUrl, gwRes);
+		String emailMessage = EscalationProviderSimple.getMessageHeaderLinks(baseUrl, gwRes, appManPlus.appMan());
 		int countDevice = 0;
 		for(EscalationKnownIssue issue: issues) {
 			if(issue.knownIssue.assigned().getValue() > 0)

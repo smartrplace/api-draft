@@ -199,6 +199,17 @@ public class UserServletUtil {
 		return getObject(objectIdLoc, rooms);
 	}
 	
+	public static Room getRoomByCmsId(int cmsId, ResourceAccess resAcc) {
+		List<Room> rooms = KPIResourceAccess.getRealRooms(resAcc);
+		for(Room room: rooms) {
+			IntegerResource cmsIdRes = room.getSubResource("cmsId", IntegerResource.class);
+			if(cmsIdRes != null && cmsIdRes.exists() && cmsIdRes.getValue() == cmsId) {
+				return room;
+			}
+		}
+		return null;
+	}
+
 	public static PhysicalElement getDeviceById(String objectId, ResourceAccess resAcc, DatapointService dpService) {
 		String devLoc = UserServletUtil.getStringObjectId(objectId, false, dpService);
 		if(devLoc != null && (!devLoc.contains("-"))) try {
