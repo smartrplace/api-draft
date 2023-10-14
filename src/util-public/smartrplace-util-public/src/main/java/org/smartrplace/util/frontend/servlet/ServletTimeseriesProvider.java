@@ -45,8 +45,10 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	protected final ApplicationManager appMan;
 	protected final Map<String, String[]> paramMap;
 	protected final UserServletParamData pData;
-	protected final Long startTime;
-	protected final long endTime;
+	//protected final Long startTime;
+	//protected final long endTime;
+	/** If not null then the first value before the interval is added if it is not more than the value before the start*/
+	//protected final Long startValueMaxBeforeStart;
 	
 	//set from outside if necessary
 	public String unit = null;
@@ -120,16 +122,24 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		this.pData = new UserServletParamData(paramMap);
 		this.deleteValue = deleteValue;
 		this.minValue = minValue;
-		Long start;
+		/*Long start;
 		long end = -1;
+		Long startValueMaxBeforeStart;
 		try {
 			start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
 			end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
 		} catch(NumberFormatException | NullPointerException e) {
 			start = null;
 		}
+		try {
+			String startValParam = UserServlet.getParameter("startValueMaxBeforeStart", paramMap);
+			startValueMaxBeforeStart = Long.parseLong(startValParam);
+		} catch(NumberFormatException | NullPointerException e) {
+			startValueMaxBeforeStart = null;
+		}
 		this.startTime = start;
 		this.endTime = end;
+		this.startValueMaxBeforeStart = startValueMaxBeforeStart;*/
 	}
 	
 	protected String name;
@@ -152,10 +162,18 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		Integer valueDist = UserServlet.getInteger("valueDist", paramMap);
 		//json.put("name", name); //res.name().getValue());
 		long[] startEnd;
-		if(startTime != null) {
-			startEnd = new long[]{startTime, endTime};
-		} else
-			startEnd = getDayStartEnd(paramMap, appMan, key); //getDayStartEnd(key);
+		//if(startTime != null) {
+		//	startEnd = new long[]{startTime, endTime};
+		//} else
+		startEnd = getDayStartEnd(paramMap, appMan, key); //getDayStartEnd(key);
+		String startValParam = UserServlet.getParameter("startValueMaxBeforeStart", paramMap);
+		if(startValParam != null) try {
+			long startValueMaxBeforeStart = Long.parseLong(startValParam);
+			startEnd = adaptStartEndforStart(startEnd, startValueMaxBeforeStart);
+		} catch(NumberFormatException e) {
+			//nothing
+		}
+
 		final List<SampledValue> vals;
 		if(evaluationMode != null) {
 			//TODO
@@ -251,16 +269,28 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	public static long[] getDayStartEnd(Map<String, String[]> paramMap, ApplicationManager appMan) {
 		return getDayStartEnd(paramMap, appMan, null);
 	}
+	
 	public static long[] getDayStartEnd(Map<String, String[]> paramMap, ApplicationManager appMan, String key) {
 		String align = UserServlet.getParameter("align", paramMap);
 		long start = -1;
 		try {
 			start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
 			long end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
-			if(align != null && align.equals("day")) {
-				long startDay = AbsoluteTimeHelper.getIntervalStart(start, AbsoluteTiming.DAY);
-				long endDay = AbsoluteTimeHelper.getNextStepTime(end, AbsoluteTiming.DAY)-1;
-				return new long[] {startDay, endDay};
+			if(align != null) {
+				int alignInt;
+				if(align.equals("day"))
+					alignInt = AbsoluteTiming.DAY;
+				else if(align.equals("month"))
+					alignInt = AbsoluteTiming.MONTH;
+				else if(align.equals("year"))
+					alignInt = AbsoluteTiming.YEAR;
+				else
+					alignInt = -1;
+				if(alignInt > 0) {
+					long startDay = AbsoluteTimeHelper.getIntervalStart(start, alignInt);
+					long endDay = AbsoluteTimeHelper.getNextStepTime(end, alignInt)-1;
+					return new long[] {startDay, endDay};
+				}
 			}
 			return new long[] {start, end};
 		} catch(NumberFormatException | NullPointerException e) {
@@ -557,5 +587,14 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			return timeStamp;
 		svMap.put(timeStamp, fval);
 		return timeStamp;		
+	}
+	
+	private long[] adaptStartEndforStart(long[] startEnd, Long startValueMaxBeforeStart) {
+		if(startValueMaxBeforeStart == null)
+			return startEnd;
+		SampledValue valsBef = timeSeries.getPreviousValue(startEnd[0]);
+		if(valsBef == null || valsBef.getTimestamp() < startEnd[0]-startValueMaxBeforeStart)
+			return startEnd;
+		return new long[] {valsBef.getTimestamp(), startEnd[1]};
 	}
 }
