@@ -86,6 +86,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				vh.registerHeaderEntry("Configuration Page");
 				vh.registerHeaderEntry("User App Mapping");
 				vh.registerHeaderEntry("Charts");
+				vh.registerHeaderEntry("Alarm");
 				vh.registerHeaderEntry("Operation Status");
 				vh.registerHeaderEntry("Status Done");
 			}
@@ -110,6 +111,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 					vh.linkingButton("Configuration Page", id, object, row, "Config", gwUrl+"/org/smartrplace/alarmingexpert/masterdatabase.html");
 					vh.linkingButton("User App Mapping", id, object, row, "App Perms", gwUrl+"/org/smartrplace/external/accessadmin/userstatus.html");
 					vh.linkingButton("Charts", id, object, row, "Charts", gwUrl+"/org/sp/app/srcmonexpert/roomcontrolcharts.html");
+					vh.linkingButton("Alarm", id, object, row, "Alarm", gwUrl+"/org/smartrplace/alarmingsuper/index.html");
 					InstallAppDevice dev = DpGroupUtil.getInstallAppDevice(object, appMan.getResourceAccess());
 					vh.stringEdit("Operation Status", id, dev.operationStatus(), row, alert);
 					vh.stringEdit("Status Done", id, dev.operationStatusDone(), row, alert);
