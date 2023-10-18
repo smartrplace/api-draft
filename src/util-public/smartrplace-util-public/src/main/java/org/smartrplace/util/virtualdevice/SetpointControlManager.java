@@ -25,6 +25,7 @@ import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManager.WritePrioLevel;
 
 import de.iwes.util.resource.ResourceHelper;
@@ -117,6 +118,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		}
 	}
 	protected final ApplicationManager appMan;
+	protected final ApplicationManagerPlus appManPlus;
 	protected final DatapointService dpService;
 	
 	protected final RouterInstance nullRouterInstance = new RouterInstance();
@@ -139,6 +141,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		this(appManPlus, PENDING_TimeForMissingFeedback_DEFAULT);
 	}
 	protected SetpointControlManager(ApplicationManagerPlus appManPlus, long pendingTimeForRetry) {
+		this.appManPlus = appManPlus;
 		this.appMan = appManPlus.appMan();
 		this.dpService = appManPlus.dpService();
 		this.pendingTimeForRetry = pendingTimeForRetry;
@@ -521,9 +524,23 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 						if(resenddata.valueFeedbackPendingObject != null) {
 							success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valueFeedbackPendingObject,
 									WritePrioLevel.CONDITIONAL, false, false);							
-						} else
+						} else try {
 							success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valueFeedbackPending,
 								WritePrioLevel.CONDITIONAL, false, false);
+						} catch(NullPointerException e) {
+							String text = "Resend failed";
+							if(resenddata.setpoint() != null)
+								text += "  Setpoint:"+resenddata.setpoint().getLocation();
+							else
+								text += "  Setpoint null!  ";
+							if(resenddata.feedback() != null)
+								text += "  Feedback:"+resenddata.feedback().getLocation();
+							else
+								text += "  Feedback null!  ";
+							text += "  Value:"+resenddata.valueFeedbackPending;
+							UserServlet.logException(e, null, -11, appManPlus);
+							throw new IllegalStateException(text, e);
+						}
 						if(!success) {
 							//we stop the chain due to overload
 							resenddata.valueFeedbackPending = null;
