@@ -44,7 +44,8 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 	//For now we cannot use HAP info as device - HAP relation is not easy to obtain. Also Controller relation is not used yet.
 	public static class CCUInstance extends RouterInstance {
 		public FloatResource dutyCycle = null;
-		/** Maximum for each reporting period (default: approx. 5 minutes)*/
+		/** Maximum for each reporting period (default: approx. 5 minutes)
+		 * Logged in dutyCycleEff*/
 		public FloatResource dutyCycleMax = null;
 		
 		public PercentageResource dutyCycleWarningYello;
@@ -173,6 +174,7 @@ System.out.println("Overload in "+(ccu.device!=null?ccu.device.deviceId().getVal
 						float val = Boolean.getBoolean("org.smartrplace.util.virtualdevice.dutycycle100")?(cd.dutyCycle.getValue()*0.01f):cd.dutyCycle.getValue();
 						if(val > cd.dutyCycleValueMaxNew)
 							cd.dutyCycleValueMaxNew = val;
+log.trace(" CCU val new: "+val+" ValueMax:"+cd.dutyCycleValueMax+" ValueMaxNew:"+cd.dutyCycleValueMaxNew);
 						if(val > cd.dutyCycleValueMax) {
 							cd.dutyCycleValueMax = val;
 							if(cd.dutyCycleMax != null)
@@ -241,6 +243,7 @@ System.out.println("Overload in "+(ccu.device!=null?ccu.device.deviceId().getVal
 		
 		ccuMy.dutyCycleValueMax = ccuMy.dutyCycleValueMaxNew;		
 		if(ccuMy.dutyCycleMax != null) {
+log.trace(" CCU val WRITE direct: Val/ValueMax:"+ccuMy.dutyCycleValueMax+" ValueMaxNew:"+ccuMy.dutyCycleValueMaxNew);
 			ValueResourceHelper.setCreate(ccuMy.dutyCycleMax, ccuMy.dutyCycleValueMax);
 		}
 		ccuMy.dutyCycleValueMaxNew = 0;		

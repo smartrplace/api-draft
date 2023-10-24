@@ -97,7 +97,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		volatile int priorityDropCount = 0;
 		volatile int resendMissingFbCount = 0;
 		/** During an evaluation interval this value should only go up and shall be limited below
-		 * 100%, usually below the level of PRIORITY_PRIO*/
+		 * 100%, usually below the level of PRIORITY_PRIO<br>
+		 * Note: Logged into {@link #relativeLoadEff}*/
 		volatile float relativeLoadMax = 0;
 		
 		InstallAppDevice device;
@@ -107,6 +108,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		public FloatResource priorityDropPerHour;
 		public FloatResource totalWritePerHour;
 		public FloatResource resendMissingFbPerHour;
+		
+		/** Logged in RouterLoadEff via relativeLoadMax*/
 		public FloatResource relativeLoadEff;
 		
 		/** Overwrite for real CCU*/
@@ -135,7 +138,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	long nextEvalInterval;
 	long intervalStart;
 
-	public static long lastOvervloadEvent = -1;
+	public static long lastOvervloadEventRed = -1;
+	public static long lastOvervloadEventYellow = -1;
 	
 	protected SetpointControlManager(ApplicationManagerPlus appManPlus) {
 		this(appManPlus, PENDING_TimeForMissingFeedback_DEFAULT);
@@ -357,7 +361,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			if(sens.valueFeedbackPending == null || (sens.valueFeedbackPending != setpoint)) {
 				sens.valuePendingSince = now;
 				if(isOverload)
-					lastOvervloadEvent = now;
+					setLastOverloadEvent(now, maxDC);
 			}
 			if(setpointData != null)
 				sens.valueFeedbackPendingObject = setpointData;
@@ -366,7 +370,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				log.debug("For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 			sens.valuePending = null;
 			return true;
-		}
+		} //if((!isOverload) || requestConfirmationOnly) {
 		if(sens.ccu() != null) {
 			if(maxDC <= sens.ccu().dutyCycleWarningYellow()) {
 				sens.ccu().conditionalDropCount++;
@@ -388,11 +392,11 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			if(sens.valuePending == null) {
 				sens.valuePendingSince = now;
 				if(isOverload)
-					lastOvervloadEvent = now;
+					setLastOverloadEvent(now, maxDC);
 			} else if(setpoint != sens.valuePending) {
 				sens.valuePendingSince = now;					
 				if(isOverload)
-					lastOvervloadEvent = now;
+					setLastOverloadEvent(now, maxDC);
 			}
 
 			if(setpointData != null)
@@ -403,6 +407,13 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		return false;
 	}
 	
+	private void setLastOverloadEvent(long now, float maxDC) {
+		if(maxDC > 0.5f)
+			lastOvervloadEventRed = now;
+		else
+			lastOvervloadEventYellow = now;
+		
+	}
 	protected void stopInternal() {
 		for(SensorData sens: knownSensorsAll()) {
 			if(sens.setpointListener() != null && sens.setpoint() != null) {
