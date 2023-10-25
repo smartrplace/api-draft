@@ -30,6 +30,8 @@ public abstract class SensorDataInt2Int extends SensorData {
 						valueFeedbackPending = null;
 					}
 					ctrl.reportSetpointRequest(ccu());
+					if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.setpointControlManager.debug"))
+						HmSetpCtrlManager.log().trace(" New setpoint INT on "+resource.getLocation());
 				}
 			}
 		};

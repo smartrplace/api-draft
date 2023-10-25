@@ -79,6 +79,13 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	
 	protected final Timer resendTimer;
 	protected Logger log = LoggerFactory.getLogger(this.getClass());
+	
+	private static Logger log2;
+	static Logger log() {
+		if(log2 != null)
+			return log2;
+		return LoggerFactory.getLogger(SetpointControlManager.class);
+	}
 
 	/** Resend if no first sending was successful, but no fitting feedback is available*/
 	protected final long pendingTimeForMissingFeedback;
@@ -147,6 +154,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	protected SetpointControlManager(ApplicationManagerPlus appManPlus, long pendingTimeForRetry) {
 		this.appManPlus = appManPlus;
 		this.appMan = appManPlus.appMan();
+		this.log2 = log;
 		this.dpService = appManPlus.dpService();
 		this.pendingTimeForRetry = pendingTimeForRetry;
 		this.pendingTimeForMissingFeedback = pendingTimeForRetry;

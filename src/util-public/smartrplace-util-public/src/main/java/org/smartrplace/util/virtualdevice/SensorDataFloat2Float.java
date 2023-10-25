@@ -37,6 +37,8 @@ public class SensorDataFloat2Float extends SensorData {
 						valueFeedbackPending = null;
 					}
 					ctrl.reportSetpointRequest(ccu());
+					if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.setpointControlManager.debug"))
+						HmSetpCtrlManager.log().trace(" New setpoint FLOAT on "+resource.getLocation());
 				}
 			}
 		};

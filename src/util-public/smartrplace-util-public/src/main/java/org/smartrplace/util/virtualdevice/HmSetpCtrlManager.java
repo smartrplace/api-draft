@@ -174,7 +174,7 @@ System.out.println("Overload in "+(ccu.device!=null?ccu.device.deviceId().getVal
 						float val = Boolean.getBoolean("org.smartrplace.util.virtualdevice.dutycycle100")?(cd.dutyCycle.getValue()*0.01f):cd.dutyCycle.getValue();
 						if(val > cd.dutyCycleValueMaxNew)
 							cd.dutyCycleValueMaxNew = val;
-log.trace(" CCU val new: "+val+" ValueMax:"+cd.dutyCycleValueMax+" ValueMaxNew:"+cd.dutyCycleValueMaxNew);
+log.trace(" CCU val new: "+val+" ValueMax:"+cd.dutyCycleValueMax+" ValueMaxNew:"+cd.dutyCycleValueMaxNew+" res:"+resource.getLocation());
 						if(val > cd.dutyCycleValueMax) {
 							cd.dutyCycleValueMax = val;
 							if(cd.dutyCycleMax != null)
@@ -243,7 +243,7 @@ log.trace(" CCU val new: "+val+" ValueMax:"+cd.dutyCycleValueMax+" ValueMaxNew:"
 		
 		ccuMy.dutyCycleValueMax = ccuMy.dutyCycleValueMaxNew;		
 		if(ccuMy.dutyCycleMax != null) {
-log.trace(" CCU val WRITE direct: Val/ValueMax:"+ccuMy.dutyCycleValueMax+" ValueMaxNew:"+ccuMy.dutyCycleValueMaxNew);
+log.trace(" CCU val WRITE direct: Val/ValueMax:"+ccuMy.dutyCycleValueMax+" ValueMaxNew:"+ccuMy.dutyCycleValueMaxNew+" res:"+ccuMy.dutyCycleMax.getLocation());
 			ValueResourceHelper.setCreate(ccuMy.dutyCycleMax, ccuMy.dutyCycleValueMax);
 		}
 		ccuMy.dutyCycleValueMaxNew = 0;		

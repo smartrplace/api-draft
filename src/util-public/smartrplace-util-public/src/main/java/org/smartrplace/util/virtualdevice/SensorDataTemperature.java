@@ -29,6 +29,8 @@ public abstract class SensorDataTemperature extends SensorData {
 						reportSetpoint(newVal);
 					}
 					ctrl.reportSetpointRequest(ccu());
+					if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.setpointControlManager.debug"))
+						HmSetpCtrlManager.log().trace(" New setpoint TEMPERATURE on "+resource.getLocation());
 				}
 			}
 		};
