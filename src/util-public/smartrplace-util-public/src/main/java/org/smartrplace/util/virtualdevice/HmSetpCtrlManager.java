@@ -182,7 +182,7 @@ log.trace(" CCU val new: "+val+" ValueMax:"+cd.dutyCycleValueMax+" ValueMaxNew:"
 						}
 					}
 				};
-				cd.dutyCycle.addValueListener(cd.dutyCycleListener);
+				cd.dutyCycle.addValueListener(cd.dutyCycleListener, true);
 			}
 		}
 	}
