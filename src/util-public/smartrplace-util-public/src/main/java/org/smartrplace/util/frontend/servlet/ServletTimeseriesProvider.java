@@ -478,6 +478,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		
 		long lastBaseTs = -1;
 		int idx = -1;
+		int maxIdx = vals.size()-1;
 		for(SampledValue sv: vals) {
 			idx++;
 			if(sv.getTimestamp() < lastBaseTs) {
@@ -500,7 +501,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					fval = fval+offset;
 				if(valueDist != null) {
 					long tsNow = sv.getTimestamp();
-					processMinMaxDownSampling(data , tsNow, valueDist, fval, svMap);
+					processMinMaxDownSampling(data , tsNow, valueDist, fval, svMap, idx == maxIdx);
 				} else //if valueDist != null
 					svMap.put(sv.getTimestamp(), fval);
 			}
@@ -540,9 +541,9 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 * @param svMap can contain between 0 and 3 pairs of Long, Float (sampled values)
 	 */
 	protected static void processMinMaxDownSampling(DownSamplingData data, long tsNow, int valueDist, float fval,
-			LinkedHashMap<Long, Float> svMap) {
+			LinkedHashMap<Long, Float> svMap, boolean lastVal) {
 		if(data.lastTsCollected == null) {
-			if((tsNow - data.lastTs) < valueDist) {
+			if(((tsNow - data.lastTs) < valueDist) && (!lastVal)) {
 				data.maxVal = fval;
 				data.minVal = fval;
 				data.lastTsCollected = tsNow;
@@ -551,7 +552,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				data.lastTs = putDownSampledTs(tsNow, fval, svMap, data.suppressNaN, data);
 			}
 		} else {
-			if((tsNow - data.lastTs) < valueDist) {
+			if(((tsNow - data.lastTs) < valueDist) && (!lastVal)) {
 				if(fval > data.maxVal)
 					data.maxVal = fval;
 				else if(fval < data.minVal)
@@ -563,7 +564,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					putDownSampledTs(data.lastTsCollected, data.maxVal, svMap, data.suppressNaN, data);
 				data.lastTsCollected = null;
 				//The new input value has not been processed. We process it with condition lastTsCollected=null
-				processMinMaxDownSampling(data, tsNow, valueDist, fval, svMap);
+				processMinMaxDownSampling(data, tsNow, valueDist, fval, svMap, lastVal);
 			}
 		}		
 	}
