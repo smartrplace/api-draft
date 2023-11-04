@@ -96,8 +96,10 @@ public abstract class SensorData {
 				ctrl.appMan.getLogger().debug("Ignored due to receivedFirstFBValue RemoteVal:"+(fbReceived-273.15)+" / "+(tempSetpointFeedbackValue.getValue()-273.15));
 				return true;
 			}
-			if(ValueResourceHelper.isAlmostEqual(temperatureSetpoint.getValue(), fbReceived))
-				return true;
+			// A setpoint requested should be provided by requestSetpointWrite
+			// The setpoint may be rather old if not updated due to auto-curve etc., so we should not check for the setpoint value
+			//if(ValueResourceHelper.isAlmostEqual(temperatureSetpoint.getValue(), fbReceived))
+			//	return true;
 			for(Float val: knownValues.keySet()) {
 				if(ValueResourceHelper.isAlmostEqual(val, fbReceived)) {
 					return true;

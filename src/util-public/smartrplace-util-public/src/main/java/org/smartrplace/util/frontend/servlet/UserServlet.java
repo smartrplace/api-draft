@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,6 +43,7 @@ import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.logconfig.LogHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -725,19 +725,20 @@ public class UserServlet extends HttpServlet {
 				return result;
 			}
 		}
-		Collection<T> allObj = Collections.unmodifiableCollection(pageprov.getAllObjects(user));
 		//TODO: Fix this when more analysis available
+		List<T> allObj;
 		try {
+			allObj = new ArrayList<>(pageprov.getAllObjects(user));
 			for(T obj: allObj) {
 				String id = pageprov.getObjectId(obj);
 				//int numIdNew = id.hashCode();
 				num2StringPut(id, pageprov.objectIdPostiveOnly());			
 			}
 		} catch(ConcurrentModificationException e) {
-			logger.error("First trial failed for "+allObj.size()+" elements...", e);
+			logger.error("First trial failed for allObj"); //+allObj.size()+" elements...", e);
 			logger.error("Caught first ConcurrentModificationException", e);
 			e.printStackTrace();
-			allObj = pageprov.getAllObjects(user);			
+			allObj = new ArrayList<>(pageprov.getAllObjects(user));			
 			logger.error("Second try for "+allObj.size()+" elements...", e);
 			for(T obj: allObj) {
 				String id = pageprov.getObjectId(obj);
@@ -755,7 +756,7 @@ public class UserServlet extends HttpServlet {
 				return result;				
 			}
 		}
-		result.objects = Collections.unmodifiableList(new ArrayList<T>(allObj));
+		result.objects = allObj; //Collections.unmodifiableList(new ArrayList<T>(allObj));
 		return result;
 	}
 	
@@ -905,7 +906,7 @@ public class UserServlet extends HttpServlet {
 					return;
 				}
 			}
-			GetObjectResult<?> odata = postJSON(user, result, pageMap, timeStr, paramMap);
+			GetObjectResult<?> odata = postJSON(user, result, pageMap, timeStr, paramMap, appManPlus);
 			//Map<String, ServletValueProvider> userMap = postData.get(user);
 			//for(String key: result.keySet()) {
 			//	ServletValueProvider prov = userMap.get(key);
@@ -952,10 +953,11 @@ public class UserServlet extends HttpServlet {
 			ServletPageProvider<T> pageprov,
 			//String response,
 			String timeString,
-			Map<String, String[]> paramMap) {
+			Map<String, String[]> paramMap,
+			ApplicationManagerPlus appManPlus) {
 		GetObjectResult<T> odata = getObjects(user, pageprov, paramMap, true);
 		//postData.remove("params");
-		postJSON(user, postData, pageprov, timeString, paramMap, odata);
+		postJSON(user, postData, pageprov, timeString, paramMap, odata, appManPlus);
 		return odata;
 	}
 	protected static <T> void postJSON(String user, JSONObject postData,
@@ -963,7 +965,8 @@ public class UserServlet extends HttpServlet {
 			//String response,
 			String timeString,
 			Map<String, String[]> paramMap,
-			GetObjectResult<T> odata) {
+			GetObjectResult<T> odata,
+			ApplicationManagerPlus appManPlus) {
 		if(odata.objects == null) return;
 		if(odata.objects.size() > 1) {
 			if(odata.objectId != null)
@@ -1003,6 +1006,8 @@ public class UserServlet extends HttpServlet {
 					keyForSetValue = key;
 				prov.setValue(user, keyForSetValue, value);
 			} catch(Exception e) {
+				if(appManPlus != null && (!LogHelper.isStartupComplete(appManPlus.appMan(), true))) // we do not care then
+					return;
 				if(odata.objectId != null)
 					throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object:"+odata.objectId+", "+e.getMessage(), e);
 				else

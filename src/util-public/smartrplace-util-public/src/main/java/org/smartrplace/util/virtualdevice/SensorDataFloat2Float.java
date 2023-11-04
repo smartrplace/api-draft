@@ -5,7 +5,7 @@ import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
-/** Generic setpoint-feedback data e.g. used for thermostat controlMode*/
+/** Generic setpoint-feedback data*/
 public class SensorDataFloat2Float extends SensorData {
 	RouterInstance ccu = null;
 

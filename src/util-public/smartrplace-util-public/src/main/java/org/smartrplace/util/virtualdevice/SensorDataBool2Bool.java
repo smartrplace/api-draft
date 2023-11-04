@@ -5,7 +5,7 @@ import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
-/** Generic setpoint-feedback data e.g. used for thermostat controlMode*/
+/** Generic setpoint-feedback data e.g. used for switch on/off setpoint*/
 public class SensorDataBool2Bool extends SensorData {
 	RouterInstance ccu = null;
 
