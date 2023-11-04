@@ -270,7 +270,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	}
 	
 	public static long blockShiftingUntil = -1;
-	public static boolean performWeeklyPostpone(Thermostat dev,HardwareInstallConfig hwConfig) {
+	public static boolean performWeeklyPostpone(Thermostat dev,HardwareInstallConfig hwConfig, long now) {
 		if(hwConfig == null)
 			return Boolean.getBoolean("org.smartrplace.homematic.devicetable.autostart.shiftdecalc");		
 		int val = hwConfig.weeklyPostponeMode().getValue();
@@ -278,15 +278,29 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			return false;
 		if(val == 2)
 			return true;
+		if(val == 4) {
+			if(now < hwConfig.noPostponeStart().getValue())
+				return true;
+			if(now >= hwConfig.noPostponeEnd().getValue())
+				return true;
+			return false;
+		}
 		return Boolean.getBoolean("org.smartrplace.homematic.devicetable.autostart.shiftdecalc");		
 	}
 	
-	public static boolean performDailyPostpone(Thermostat dev,HardwareInstallConfig hwConfig) {
+	public static boolean performDailyPostpone(Thermostat dev,HardwareInstallConfig hwConfig, long now) {
 		if(hwConfig == null)
 			return false;		
 		int val = hwConfig.weeklyPostponeMode().getValue();
 		if(val == 3)
 			return true;
+		if(val == 4) {
+			if(now < hwConfig.noPostponeStart().getValue())
+				return false;
+			if(now >= hwConfig.noPostponeEnd().getValue())
+				return false;
+			return true;
+		}
 		return false;		
 	}
 

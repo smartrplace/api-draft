@@ -12,6 +12,7 @@ import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.app.useradmin.api.UserDataAccess;
 import org.smartrplace.alarming.escalation.util.EscalationManagerI;
 import org.smartrplace.alarming.escalation.util.EscalationProvider;
+import org.smartrplace.apps.hw.install.config.DeviceTypeData;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.autoconfig.api.OSGiConfigAccessService;
 
@@ -176,6 +177,7 @@ public interface DatapointService {
 	/** This handler also provides access to Driver Properties*/
 	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
 	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(String devHandId);
+	DeviceTypeData getDeviceHandlerProviderResourceData(String devHandId, boolean createIfMissing);
 	
 	List<DeviceHandlerProviderDP<?>> getDeviceHandlerProviders();
 	

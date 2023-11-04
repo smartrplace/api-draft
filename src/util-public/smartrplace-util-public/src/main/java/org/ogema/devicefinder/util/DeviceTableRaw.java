@@ -12,6 +12,7 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.core.model.simple.TimeResource;
@@ -883,9 +884,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		StringResource res = device.valve().getSubResource("DECALCIFICATION", StringResource.class);
 		String val = getDecalcString(destTime);
 		if(val != null) {
-			if(gwSync != null)
-				setCreate(res, val, gwSync);
-			ValueResourceHelper.setCreate(res, val);
+			setCreate(res, val, gwSync);
+			//ValueResourceHelper.setCreate(res, val);
 		}
 		return val;
 	}
@@ -1001,6 +1001,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return valve.getName().substring(idx+1);		
 	}
 	
+	public static void disableHardwareForDevice(InstallAppDevice object, GatewaySyncResourceService gwSync, boolean alsoDeleteFromHw) {
+		int destVal = alsoDeleteFromHw?3:2;
+		Resource device = object.device().getLocationResource();
+		IntegerResource disableStatus = device.getSubResource("disableStatus", IntegerResource.class);
+		setCreate(disableStatus, destVal, gwSync);
+	}
+	
 	public static void deleteDevice(InstallAppDevice object, GatewaySyncResourceService gwSync) {
 		Resource device = object.device().getLocationResource();
 		deleteDeviceBase(device, gwSync);
@@ -1031,33 +1038,30 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static boolean setCreate(BooleanResource fres, boolean value, GatewaySyncResourceService gwSync) {
 		if(!fres.exists()) {
 			ValueResourceHelper.setCreate(fres,  value);
-			gwSync.create(fres);
-			/*gwSync.activateResource(fres, false);
-			BundleRestartButton.gwSyncRestart.executeBlockingOnceOnYourOwnRisk();
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			fres.setValue(value);*/
+			if(gwSync != null)
+				gwSync.create(fres);
 			return true;
 		}
 		fres.setValue(value);
 		return false;
 	}
 	
+	public static boolean setCreate(IntegerResource fres, int value, GatewaySyncResourceService gwSync) {
+		if(!fres.exists()) {
+			ValueResourceHelper.setCreate(fres,  value);
+			if(gwSync != null)
+				gwSync.create(fres);
+			return true;
+		}
+		fres.setValue(value);
+		return false;
+	}
+
 	public static boolean setCreate(StringResource fres, String value, GatewaySyncResourceService gwSync) {
 		if(!fres.exists()) {
 			ValueResourceHelper.setCreate(fres,  value);
-			gwSync.create(fres);
-			/*gwSync.activateResource(fres, false);
-			BundleRestartButton.gwSyncRestart.executeBlockingOnceOnYourOwnRisk();
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			fres.setValue(value);*/
+			if(gwSync != null)
+				gwSync.create(fres);
 			return true;
 		}
 		fres.setValue(value);
