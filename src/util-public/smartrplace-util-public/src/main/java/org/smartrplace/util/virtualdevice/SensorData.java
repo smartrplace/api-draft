@@ -10,6 +10,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
 import de.iwes.util.resource.ValueResourceHelper;
@@ -110,7 +111,10 @@ public abstract class SensorData {
 	}
 	
 	public void cleanKnownValues() {
-		final long t0 = lastSetpointFeedbackConfirmTime-ctrl.knownSetpointValueOmitDuration(this); //ctrl.appMan.getFrameworkTime();
+		long t0 = lastSetpointFeedbackConfirmTime-ctrl.knownSetpointValueOmitDuration(this); //ctrl.appMan.getFrameworkTime();
+		final long agoMax = ctrl.appMan.getFrameworkTime() - TimeProcUtil.HOUR_MILLIS;
+		if(t0 < agoMax)
+			t0 = agoMax;
 		//List<KnownValue2> remove = new ArrayList<>();
 		List<Float> remove = new ArrayList<>();
 		for (Entry<Float, Long> val: knownValues.entrySet()) {
