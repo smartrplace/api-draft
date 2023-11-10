@@ -32,6 +32,7 @@ import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
 import org.ogema.model.devices.generators.PVPlant;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.devices.sensoractordevices.SingleSwitchBox;
+import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.DoorWindowSensor;
@@ -298,12 +299,16 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 
 	public static class AddBatteryVoltageResult {
 		public AddBatteryVoltageResult(Label label, SingleValueResource reading) {
-			super();
+			this(label, reading, false);
+		}
+		public AddBatteryVoltageResult(Label label, SingleValueResource reading, boolean isSOC) {
 			this.label = label;
 			this.reading = reading;
+			this.isSOC = isSOC;
 		}
 		public Label label;
 		public SingleValueResource reading;
+		public boolean isSOC;
 	}
 	protected AddBatteryVoltageResult addBatteryVoltage(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
@@ -318,9 +323,19 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(colHeader, id, batteryVoltage, row, "%.1f#min:0.1"),
 					batteryVoltage);
 			float val = batteryVoltage.getValue();
-			BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req);
+			BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req, false);
 			return result;
-		} else if(req == null)
+		} else {
+			FloatResource batSOC = device2.getSubResource("battery", ElectricityStorage.class).chargeSensor().reading();
+			if(batSOC != null && batSOC.isActive()) {
+				AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(colHeader, id, batSOC, row, "%.0f%%#fac:100"),
+						batSOC, true);
+				float val = batSOC.getValue();
+				BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req, true);
+				return result;
+			}
+		}
+		if(req == null)
 			vh.registerHeaderEntry(colHeader);
 		return null;
 	}

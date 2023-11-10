@@ -223,11 +223,18 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 		final SingleValueResourceAccess<FloatResource> sva = new SingleValueResourceAccess<FloatResource>(optSource, altId);
 		Float minValue;
 		String format;
+		Float factor;
 		if(formatIn.contains("#min:")) {
 			minValue = Float.parseFloat(formatIn.substring(formatIn.indexOf("#min:")+"#min:".length()));
+			factor = null;
 			format = formatIn.substring(0, formatIn.indexOf("#min:"));
+		} else if(formatIn.contains("#fac:")) {
+			factor = Float.parseFloat(formatIn.substring(formatIn.indexOf("#fac:")+"#fac:".length()));
+			minValue = null;
+			format = formatIn.substring(0, formatIn.indexOf("#fac:"));
 		} else {
 			minValue = null;
+			factor = null;
 			format = formatIn;
 		}
 		
@@ -248,6 +255,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				else {
 					val = source.getValue();
 				}
+				if(factor != null)
+					val = factor * val;
 
 				String valStr;
 				if(minValue != null && val < minValue)

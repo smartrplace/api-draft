@@ -7,8 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.AppID;
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.recordeddata.RecordedData;
+import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.message.MessageImpl;
@@ -65,10 +67,24 @@ public class BatteryEvalBase {
 	public static BatteryStatus getBatteryStatus(float val, boolean changeInfoRelevant) {
 		return getBatteryStatus(val, changeInfoRelevant, 2);
 	}
+	/**
+	 * 
+	 * @param val
+	 * @param changeInfoRelevant
+	 * @param batteryNum if(<=0 then a chargeSensor value 0.0...1.0 is expected
+	 * @return
+	 */
 	public static BatteryStatus getBatteryStatus(float val, boolean changeInfoRelevant, int batteryNum) {
 		if(Float.isNaN(val) || val == 0)
 			return BatteryStatus.UNKNOWN;
-		if(batteryNum == 2) {
+		if(batteryNum <= 0) {
+			if(val <= 0.15f)
+				return BatteryStatus.URGENT;
+			else if(val <= 0.25f)
+				return BatteryStatus.WARNING;
+			else if(changeInfoRelevant && (val <= 0.4f))
+				return BatteryStatus.CHANGE_RECOMMENDED;
+		} else if(batteryNum == 2) {
 			if(val <= DEFAULT_BATTERY_URGENT_VOLTAGE)
 				return BatteryStatus.URGENT;
 			else if(val <= DEFAULT_BATTERY_WARN_VOLTAGE)
@@ -88,16 +104,27 @@ public class BatteryEvalBase {
 	
 	public static class BatteryStatusPlus {
 		public BatteryStatus status;
+		
+		/** This value may also contain a SOC value if batSOC is evaluated*/
 		public float voltage = Float.NaN;
 		public VoltageResource batRes;
+		
+		/** Only available if batRes not found and batSOC is found*/
+		public FloatResource batSOC;
 	}
 
 	
 	public static WidgetStyle<Label> addBatteryStyle(Label label, float val, boolean changeInfoRelevant,
-			String deviceLocation, OgemaHttpRequest req) {
+			String deviceLocation, OgemaHttpRequest req,
+			boolean isSOCValue) {
 		WidgetStyle<Label> result = null;
-		boolean singleBattery = isSingleBattery(deviceLocation);
-		BatteryStatus stat = getBatteryStatus(val, changeInfoRelevant, singleBattery?1:2);
+		final BatteryStatus stat;
+		if(isSOCValue) {
+			stat = getBatteryStatus(val, changeInfoRelevant, 0);			
+		} else {
+			boolean singleBattery = isSingleBattery(deviceLocation);
+			stat = getBatteryStatus(val, changeInfoRelevant, singleBattery?1:2);
+		}
 		if(stat == BatteryStatus.URGENT || stat == BatteryStatus.EMPTY)
 			result = LabelData.BOOTSTRAP_RED;
 		else if(stat == BatteryStatus.WARNING)
@@ -211,6 +238,34 @@ public class BatteryEvalBase {
 		return result;
 	}
 	
+	public static BatteryStatusPlus getBatteryStatusSOCPlus(FloatResource batSOC, boolean changeInfoRelevant, Long now) {
+		BatteryStatusPlus result = new BatteryStatusPlus();
+		result.batSOC = batSOC;
+		if(batSOC == null) {
+			result.status = BatteryStatus.NO_BATTERY;
+			return result;
+		}
+		result.voltage = batSOC.getValue();
+		Long lastTs = null;
+		if(Float.isNaN(result.voltage)) {
+			RecordedData ts = batSOC.getHistoricalData();
+			if(ts != null) {
+				SampledValue sv = ts.getPreviousValue(now!=null?now:Long.MAX_VALUE);
+				if(sv != null) {
+					result.voltage = sv.getValue().getFloatValue();
+					lastTs = sv.getTimestamp();
+				}
+			}
+		} else
+			lastTs = batSOC.getLastUpdateTime();
+		result.status = getBatteryStatus(result.voltage, changeInfoRelevant, 0);
+		if(result.status != BatteryStatus.URGENT)
+			return result;
+		if(lastTs != null && now != null && (now - lastTs) > TIME_TO_ASSUME_EMPTY)
+			result.status = BatteryStatus.EMPTY;
+		return result;
+	}
+
 	/**
 	 * 
 	 * @param iad
@@ -231,6 +286,12 @@ public class BatteryEvalBase {
 				result.batRes = sres;
 				return result;
 			}
+		}
+		if(sres == null || (!sres.isActive())) {
+			FloatResource batSOC = iad.device().getLocationResource().getSubResource("battery", ElectricityStorage.class).chargeSensor().reading();
+			if(batSOC != null && batSOC.isActive()) {
+				return getBatteryStatusSOCPlus(batSOC, changeInfoRelevant, now);							
+			}			
 		}
 		return getBatteryStatusPlus(sres, changeInfoRelevant, now);
 	}	
