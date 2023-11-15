@@ -105,7 +105,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		volatile int resendMissingFbCount = 0;
 		/** During an evaluation interval this value should only go up and shall be limited below
 		 * 100%, usually below the level of PRIORITY_PRIO<br>
-		 * Note: Logged into {@link #relativeLoadEff}*/
+		 * Note: Logged into {@link #relativeLoadEff} as RouterLoadEff*/
 		volatile float relativeLoadMax = 0;
 		
 		InstallAppDevice device;

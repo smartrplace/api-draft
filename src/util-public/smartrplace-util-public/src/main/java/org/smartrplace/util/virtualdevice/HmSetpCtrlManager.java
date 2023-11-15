@@ -99,7 +99,7 @@ public abstract class HmSetpCtrlManager<T extends ValueResource> extends Setpoin
 		else
 			maxDC = priority; // 0.97f;*/
 
-		if(maxDC <= 1.0f) {
+		if((maxDC <= 1.0f) && (Boolean.getBoolean("org.smartrplace.util.virtualdevice.checkTotalWriteCount"))) {
 			//For MUST_WRITE we do not test this
 			float maxWritePerInterval;
 			if(maxWritePerCCUperHourParam != null && maxWritePerCCUperHourParam.isActive()) {
