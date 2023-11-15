@@ -317,7 +317,11 @@ public class UserServlet extends HttpServlet {
 				fullURL = req.getRequestURL().toString();
 			if(user.equals("master_rest") ||
 					Boolean.getBoolean("org.smartrplace.util.frontend.servlet.lastaccess.collectall")) {
-				long now = appManPlus.getFrameworkTime();
+				final long now;
+				if(appManPlus != null)
+					now = appManPlus.getFrameworkTime();
+				else
+					now = System.currentTimeMillis();
 	
 				LastAccessData lastAcc = UserServletUtil.getLastAccessDataForEvent(fullURL, now);
 	
