@@ -11,6 +11,7 @@ import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
+import org.smartrplace.util.virtualdevice.HmSetpCtrlManager.WritePrioLevel;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
 import de.iwes.util.resource.ValueResourceHelper;
@@ -37,6 +38,7 @@ public abstract class SensorData {
 	Object valuePendingObject;
 	long valuePendingSince;
 	//long valuePendingDueToOverloadSince = -1;
+	float maxDC;
 	
 	//Check feedback
 	volatile Float valueFeedbackPending = null;

@@ -289,6 +289,13 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		default:
 			throw new IllegalStateException("Unknown prio level:"+prioLevel);
 		}
+		return requestSetpointWrite(setp, setpoint, setpointData, sens, maxDC,
+				resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint, requestConfirmationOnly, minRewriteTime);
+	}
+	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData,
+			SensorData sens, float maxDC,
+			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
+			boolean requestConfirmationOnly, Long minRewriteTime) {
 		if((!writeEvenIfNochChangeForFeedbackAndSetpoint) && (setpointData == null)) {
 			//we do not support this for array resources etc. yet
 			boolean done = true;
@@ -368,6 +375,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 						
 			if(sens.valueFeedbackPending == null || (sens.valueFeedbackPending != setpoint)) {
 				sens.valuePendingSince = now;
+				sens.maxDC = maxDC;
 				if(isOverload)
 					setLastOverloadEvent(now, maxDC);
 			}
@@ -399,10 +407,12 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			long now = appMan.getFrameworkTime();
 			if(sens.valuePending == null) {
 				sens.valuePendingSince = now;
+				sens.maxDC = maxDC;
 				if(isOverload)
 					setLastOverloadEvent(now, maxDC);
 			} else if(setpoint != sens.valuePending) {
 				sens.valuePendingSince = now;					
+				sens.maxDC = maxDC;
 				if(isOverload)
 					setLastOverloadEvent(now, maxDC);
 			}
@@ -522,8 +532,9 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			if(deltaT != null && (cd != nullRouterInstance))
 				writeDataReporting(cd, deltaT);
 			//checkForDataReporting(cd);
-			
-			if((cd != nullRouterInstance) && isRouterInOverload(cd, cd.dutyCycleWarningYellow()))
+
+			float retryAfterOverloadLimit = Math.min(0.9f*cd.dutyCycleWarningRed(), 2.5f*cd.dutyCycleWarningYellow());
+			if((cd != nullRouterInstance) && isRouterInOverload(cd, retryAfterOverloadLimit))
 				continue;
 			Map<String, SensorData> subMap = knownSensors.get(cd);
 			if(subMap == null)
@@ -580,11 +591,11 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					//NOTE: valuePending is set already so we do not have to indicate resend, will take place anyways if no success.
 					boolean success;
 					if(resenddata.valueFeedbackPendingObject != null)
-						success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valuePendingObject,
-								WritePrioLevel.CONDITIONAL, false, false);
+						success = requestSetpointWrite((T) resenddata.setpoint(), Float.NaN, resenddata.valuePendingObject,
+								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, 5000l);
 					else
-						success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valuePending,
-							WritePrioLevel.CONDITIONAL, false, false);
+						success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valuePending, null,
+								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, 5000l);
 					if(success) {
 						resenddata.valuePending = null;
 						resenddata.lastSent = now;

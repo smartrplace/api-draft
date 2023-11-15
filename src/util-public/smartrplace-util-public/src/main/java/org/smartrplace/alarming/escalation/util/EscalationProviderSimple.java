@@ -173,7 +173,6 @@ public abstract class EscalationProviderSimple<T extends EscalationKnownIssue> i
 	 * @param firebaseMessage
 	 * @param countDevice
 	 * @param maxFault
-	 * @param prio
 	 * @param appIDs
 	 * @param persistData
 	 * @param appManPlus
@@ -203,7 +202,6 @@ public abstract class EscalationProviderSimple<T extends EscalationKnownIssue> i
 	 * 		firebase message is sent.
 	 * @param countDevice number of devices unassigned (only relevant for firebase)
 	 * @param maxFault
-	 * @param prio
 	 * @param appIDs
 	 * @param persistData
 	 * @param appManPlus
