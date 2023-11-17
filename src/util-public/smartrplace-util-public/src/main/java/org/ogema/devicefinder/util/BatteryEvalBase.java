@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.AppID;
 import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.recordeddata.RecordedData;
@@ -288,10 +289,13 @@ public class BatteryEvalBase {
 			}
 		}
 		if(sres == null || (!sres.isActive())) {
-			FloatResource batSOC = iad.device().getLocationResource().getSubResource("battery", ElectricityStorage.class).chargeSensor().reading();
-			if(batSOC != null && batSOC.isActive()) {
-				return getBatteryStatusSOCPlus(batSOC, changeInfoRelevant, now);							
-			}			
+			Resource device2 = iad.device().getLocationResource();
+			if(!device2.getLocation().contains("_cc")) {
+				FloatResource batSOC = device2.getSubResource("battery", ElectricityStorage.class).chargeSensor().reading();
+				if(batSOC != null && batSOC.isActive()) {
+					return getBatteryStatusSOCPlus(batSOC, changeInfoRelevant, now);							
+				}
+			}
 		}
 		return getBatteryStatusPlus(sres, changeInfoRelevant, now);
 	}	

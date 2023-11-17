@@ -325,7 +325,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			float val = batteryVoltage.getValue();
 			BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req, false);
 			return result;
-		} else {
+		} else if(!device2.getLocation().contains("_cc")){
 			FloatResource batSOC = device2.getSubResource("battery", ElectricityStorage.class).chargeSensor().reading();
 			if(batSOC != null && batSOC.isActive()) {
 				AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(colHeader, id, batSOC, row, "%.0f%%#fac:100"),
