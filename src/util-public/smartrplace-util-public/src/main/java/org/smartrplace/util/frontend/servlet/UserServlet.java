@@ -299,7 +299,7 @@ public class UserServlet extends HttpServlet {
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, boolean isMobile)
 			throws ServletException, IOException {
 		Map<String, String[]> paramMap = getParamMap(req);
-		addParametersFromUrl(req, paramMap);
+		addParametersFromUrl(req, paramMap, true);
 		doGet(req, resp, user, paramMap, isMobile);
 		
 	}
@@ -765,14 +765,15 @@ public class UserServlet extends HttpServlet {
 	}
 	
 	/** SubUrl must end on '/' */
-	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap, String servletSubUrl) {
+	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap,
+			String servletSubUrl, boolean isGET) {
 		String fullURL = req.getRequestURL().toString();
 		if(logger.isDebugEnabled())  {
 			String paramStr = req.getQueryString();
 			if(paramStr != null)
-				logger.debug("Starting GET for(A):"+fullURL+"?"+paramStr);
+				logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL+"?"+paramStr);
 			else
-				logger.debug("Starting GET for(A):"+fullURL);
+				logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL);
 		}
 		int idx = fullURL.indexOf(servletSubUrl);
 		String[] subURL;
@@ -797,18 +798,19 @@ public class UserServlet extends HttpServlet {
 		}		
 	}
 
-	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap) {
+	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap,
+			boolean isGET) {
 		if(this.servletSubUrl != null) {
-			addParametersFromUrl(req, paramMap, this.servletSubUrl);
+			addParametersFromUrl(req, paramMap, this.servletSubUrl, isGET);
 			return;
 		}
 		String fullURL = req.getRequestURL().toString();
 		if(logger.isDebugEnabled())  {
 			String paramStr = req.getQueryString();
 			if(paramStr != null)
-				logger.debug("Starting GET for:"+fullURL+"?"+paramStr);
+				logger.debug("Starting "+(isGET?"GET":"POST")+" for:"+fullURL+"?"+paramStr);
 			else
-				logger.debug("Starting GET for:"+fullURL);
+				logger.debug("Starting "+(isGET?"GET":"POST")+" for:"+fullURL);
 		}
 		int idx = fullURL.indexOf("/userdata/");
 		String[] subURL;
@@ -852,7 +854,7 @@ public class UserServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		Map<String, String[]> paramMap = getParamMap(req);
-		addParametersFromUrl(req, paramMap);
+		addParametersFromUrl(req, paramMap, false);
 
 		String pageId = UserServlet.getParameter("page", paramMap); //req.getParameter("page");
 		if(pageId == null) pageId = stdPageId ;
@@ -876,7 +878,11 @@ public class UserServlet extends HttpServlet {
 		}
 		String request = sb.toString();
 
-		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.logdetails")) {
+		if(logger.isDebugEnabled())  {
+			String fullURL = req.getRequestURL().toString();
+			logger.info("POST message to "+fullURL);
+			logger.info("POST body: "+request);
+		} else if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.logdetails")) {
 			String fullURL = req.getRequestURL().toString();
 			logger.info("POST message to "+fullURL);
 			logger.info("POST body: "+request);
