@@ -540,18 +540,6 @@ public class UserServlet extends HttpServlet {
 				objStr = pageprov.getObjectId(obj);
 			} catch(Exception e) {
 				logException(e, fullUrl, 4, appManPlus);
-				/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
-					e.printStackTrace();
-					if(fullUrl != null)
-						logger.trace("Servlet provider exception for: "+fullUrl, e);
-					else
-						logger.trace("Servlet provider exception: ", e);
-				} else {
-					if(fullUrl != null)
-						logger.info("Servlet provider exception for: "+fullUrl, e);
-					else
-						logger.info("Servlet provider exception: ", e);
-				}*/
 				res.message = e.toString();
 				return res;
 			}
@@ -880,8 +868,8 @@ public class UserServlet extends HttpServlet {
 
 		if(logger.isDebugEnabled())  {
 			String fullURL = req.getRequestURL().toString();
-			logger.info("POST message to "+fullURL);
-			logger.info("POST body: "+request);
+			logger.debug("POST message to "+fullURL);
+			logger.debug("POST body: "+request);
 		} else if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.logdetails")) {
 			String fullURL = req.getRequestURL().toString();
 			logger.info("POST message to "+fullURL);
@@ -927,7 +915,7 @@ public class UserServlet extends HttpServlet {
 			status = odata.status; //HttpServletResponse.SC_OK;
 		} catch (Exception e) {
 			response = response + "An error occurred: " + e.toString();
-			logException(e, "POST", 2, appManPlus);
+			logException(e, "POST from "+user, 2, appManPlus);
 			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 			//	e.printStackTrace();
 			status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -1199,14 +1187,14 @@ System.out.println("SUFIBSD");
 		} else if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			e.printStackTrace();
 			if(fullUrl != null)
-				UserServlet.logger.info("Servlet provider exception for: "+fullUrl, e);
+				UserServlet.logger.info("Servlet provider exception "+exceptionCode+" for: "+fullUrl, e);
 			else
 				UserServlet.logger.info("Servlet provider exception: ", e);
 		} else {
 			if(fullUrl != null)
-				UserServlet.logger.info("Servlet provider exception for: "+fullUrl, e);
+				UserServlet.logger.info("Servlet provider exception "+exceptionCode+" for: "+fullUrl, e);
 			else
-				UserServlet.logger.info("Servlet provider exception: ", e);
+				UserServlet.logger.info("Servlet provider exception "+exceptionCode+": ", e);
 		}		
 		
 		if(appManPlus != null)
