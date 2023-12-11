@@ -1,5 +1,7 @@
 package org.ogema.devicefinder.api;
 
+import org.ogema.model.prototypes.PhysicalElement;
+
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataTypeI;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -47,6 +49,8 @@ public interface DatapointDescAccess extends DatapointDesc {
 	boolean setLabel(String label, OgemaLocale locale);
 	
 	boolean setRoom(DPRoom room);
+	
+	boolean setDevice(PhysicalElement device);
 	
 	boolean setSubRoomLocation(OgemaLocale locale, Object context, String value);
 	/** If the sub room location already exists and it does not contain the new String yet then

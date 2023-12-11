@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.util;
 
 import org.ogema.devicefinder.api.DatapointInfo;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.smartrplace.util.format.WidgetHelper;
 
 import java.util.Collections;
@@ -27,6 +28,7 @@ public class DatapointDescImpl implements DatapointDesc {
 	protected Set<String> aliases = new HashSet<>();
 	protected Map<OgemaLocale, String> labels = new HashMap<>();
 	protected DPRoom dpRoom = null;
+	protected PhysicalElement dpDevice = null;
 	protected DatapointInfo consumptionInfo = null;
 	protected volatile String subRoomLocation = null;
 	protected Boolean isLocal = null;
@@ -67,6 +69,11 @@ public class DatapointDescImpl implements DatapointDesc {
 	@Override
 	public DPRoom getRoom() {
 		return dpRoom;
+	}
+	
+	@Override
+	public PhysicalElement getDevice() {
+		return dpDevice;
 	}
 
 	@Override

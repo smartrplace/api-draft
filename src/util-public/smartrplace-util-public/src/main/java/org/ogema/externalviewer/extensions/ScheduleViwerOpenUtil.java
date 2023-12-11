@@ -46,7 +46,7 @@ public class ScheduleViwerOpenUtil {
 			}
 
 			@Override
-			protected List<TimeSeriesData> getTimeseries(OgemaHttpRequest req) {
+			protected List<TimeSeriesData> getTimeseries(long start, long end, OgemaHttpRequest req) {
 				return provider.getData(req);
 			}
 
@@ -90,7 +90,7 @@ public class ScheduleViwerOpenUtil {
 			}
 
 			@Override
-			protected List<TimeSeriesData> getTimeseries(OgemaHttpRequest req) {
+			protected List<TimeSeriesData> getTimeseries(long start, long end, OgemaHttpRequest req) {
 				return provider.getData(req);
 			}
 

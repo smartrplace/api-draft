@@ -6,6 +6,7 @@ import java.util.Set;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointInfo;
 import org.ogema.devicefinder.api.DatapointInfoProvider;
+import org.ogema.model.prototypes.PhysicalElement;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -32,7 +33,12 @@ public abstract class DatapointInfoProviderImpl implements DatapointInfoProvider
 	public DPRoom getRoom() {
 		return null;
 	}
-
+	
+	@Override
+	public PhysicalElement getDevice() {
+		return null;
+	}
+	
 	@Override
 	public String getSubRoomLocation(OgemaLocale locale, Object context) {
 		return null;

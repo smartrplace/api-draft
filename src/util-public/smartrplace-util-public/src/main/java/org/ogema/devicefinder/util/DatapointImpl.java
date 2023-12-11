@@ -481,6 +481,8 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 			}
 		}
 		dev.setType("DEVICE");
+		if((devResource instanceof PhysicalElement) && dpDevice == null)
+			setDevice((PhysicalElement) devResource);
 		return true;
 	}
 	

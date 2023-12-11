@@ -7,10 +7,13 @@ import java.util.List;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.model.array.StringArrayResource;
+import org.ogema.core.model.array.TimeArrayResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.units.PercentageResource;
 import org.ogema.core.recordeddata.RecordedData;
+import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.Datapoint;
 import org.ogema.devicefinder.api.DatapointService;
@@ -27,6 +30,8 @@ import org.ogema.model.actors.OnOffSwitch;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
 import org.ogema.model.gateway.remotesupervision.DataLogTransferInfo;
 import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.Configuration;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.CO2Sensor;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.model.sensors.HumiditySensor;
@@ -423,4 +428,49 @@ public class ChartsUtil {
 		}
 		return resultMain;
 	}
+	
+	public static Configuration getRoomTemperatureSetting(Room room, ResourceAccess resAcc) {
+		Resource srcConfig = resAcc.getResource("smartrplaceHeatcontrolConfig");
+		if(srcConfig == null)
+			return null;
+		ResourceList<?> roomData = srcConfig.getSubResource("roomData", ResourceList.class);
+		if(roomData == null || (!roomData.exists()))
+			return null;
+		for(Resource r: roomData.getAllElements()) {
+			if((!(r instanceof Configuration)))
+				continue;
+			if(r.getSubResource("room", Room.class).equalsLocation(room))
+				return (Configuration) r;
+		}
+		return null;
+	}
+
+	public static List<String> getHistoricalRoomName(long start, long end, PhysicalElement device) {
+		StringArrayResource history = device.location().roomHistory();
+		if(!history.isActive())
+			return null;
+		TimeArrayResource historyStart = device.location().roomStart();
+		int len = Math.min(history.size(), historyStart.size());
+		if(len == 0)
+			return null;
+		List<String> result = new ArrayList<>();
+		long[] startTimes = historyStart.getValues();
+		String[] rooms = history.getValues();
+		for(int idx=0; idx<len; idx++) {
+			long roomStart = startTimes[idx];
+			long roomEnd;
+			if(idx < (len-1))
+				roomEnd = startTimes[idx+1];
+			else
+				roomEnd = Long.MAX_VALUE;
+			if(((roomStart < start && roomEnd > end)
+					|| (roomStart >= start && roomStart <= end)
+					|| (roomEnd >= start && roomEnd <= end))
+					&& rooms[idx] != null && (!rooms[idx].isBlank()))
+				result.add(rooms[idx]);
+		}
+		return result;
+	}
+	
+
 }

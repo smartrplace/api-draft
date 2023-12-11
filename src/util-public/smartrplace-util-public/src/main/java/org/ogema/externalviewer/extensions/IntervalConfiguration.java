@@ -16,9 +16,11 @@
 package org.ogema.externalviewer.extensions;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.model.scheduleviewer.config.ScheduleViewerConfig;
 
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
+import de.iwes.widgets.html.schedulemanipulator.ScheduleManipulator;
 
 /** Configuration of evaluation intervals*/
 public class IntervalConfiguration {
@@ -38,7 +40,8 @@ public class IntervalConfiguration {
     public static final String ONE_DAY = "One Day";
     public static final String ONE_WEEK = "One Week";
     public static final String THREE_WEEKS = "Three Weeks";
-    public static final String[] OPTIONS = {ALL_DATA, ONE_DAY, ONE_WEEK, THREE_WEEKS};
+    public static final String LAST_PLOT = "Last Chart Interval";
+    public static final String[] OPTIONS = {ALL_DATA, ONE_DAY, ONE_WEEK, THREE_WEEKS, LAST_PLOT};
 
 	public static IntervalConfiguration getDefaultDuration(String config, ApplicationManager appMan) {
     	switch(config) {
@@ -68,6 +71,18 @@ public class IntervalConfiguration {
 			startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
 			r.start = AbsoluteTimeHelper.addIntervalsFromAlignedTime(startOfDay, -21, AbsoluteTiming.DAY);
 			r.end = now;
+			return r;
+		case LAST_PLOT:
+			r = new IntervalConfiguration();
+			if(ScheduleManipulator.lastPlotStart > 0) {
+				r.start = ScheduleManipulator.lastPlotStart;
+				r.end = ScheduleManipulator.lastPlotEnd;
+			} else {
+				now = appMan.getFrameworkTime();
+				startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
+				r.start = AbsoluteTimeHelper.addIntervalsFromAlignedTime(startOfDay, -1, AbsoluteTiming.DAY);
+				r.end = now;
+			}
 			return r;
     	}
     	return null;

@@ -84,6 +84,8 @@ public class DPUtil {
 		//	dest.setDeviceResource(source.getDeviceResource());
 		if(source.getRoom() != null)
 			dest.setRoom(source.getRoom());
+		if(source.getDevice() != null)
+			dest.setDevice(source.getDevice());
 	}
 	
 	public static void printDatapointsOfType(GaRoDataTypeI type, DatapointService dpService) {

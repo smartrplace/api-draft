@@ -45,7 +45,7 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 	private static final long serialVersionUID = 1L;
 	protected TimeSeriesNameProvider nameProvider = new TimeSeriesNameProvider() {};
 	
-	protected abstract List<TimeSeriesData> getTimeseries(OgemaHttpRequest req);
+	protected abstract List<TimeSeriesData> getTimeseries(long start, long end, OgemaHttpRequest req);
 	/** This method is only required for generating filter name. If not available
 	 * just return an empty String or any name of the time series set
 	 */
@@ -87,19 +87,9 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 	public void onPrePOST(String data, OgemaHttpRequest req) {
 		//final GaRoSingleEvalProvider eval = selectProvider.getSelectedItem(req);
 		
-		List<TimeSeriesData> input = getTimeseries(req);
-		TimeSeriesWithFilters filteringResult = getTimeSeriesWithFilters(input, "Filter for "+getEvaluationProviderId(req), nameProvider);
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		List<TimeSeriesFilter> programsInner = (List)filteringResult.filters;
-		//List<ReadOnlyTimeSeries> result = new ArrayList<>();
-
-		List<Collection<TimeSeriesFilter>> programs = new ArrayList<>();
-		programs.add(programsInner);
-		
-		//String config = selectConfig.getSelectedLabel(req);
-		IntervalConfiguration itv = getITVConfiguration(req);
 		final long startTime;
 		final long endTime;
+		IntervalConfiguration itv = getITVConfiguration(req);
 		if(itv.multiStart == null || itv.multiStart.length > 0) {
 			startTime = itv.start;
 			endTime = itv.end;
@@ -107,6 +97,15 @@ public abstract class ScheduleViewerOpenButtonEval extends ScheduleViewerOpenBut
 			startTime = itv.multiStart[0];
 			endTime = itv.multiEnd[itv.multiStart.length-1];
 		}
+
+		List<TimeSeriesData> input = getTimeseries(startTime, endTime, req);
+		TimeSeriesWithFilters filteringResult = getTimeSeriesWithFilters(input, "Filter for "+getEvaluationProviderId(req), nameProvider);
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		List<TimeSeriesFilter> programsInner = (List)filteringResult.filters;
+		//List<ReadOnlyTimeSeries> result = new ArrayList<>();
+
+		List<Collection<TimeSeriesFilter>> programs = new ArrayList<>();
+		programs.add(programsInner);
 		
 		final ScheduleViewerConfiguration viewerConfiguration = getViewerConfiguration(
 				startTime, endTime, programs);

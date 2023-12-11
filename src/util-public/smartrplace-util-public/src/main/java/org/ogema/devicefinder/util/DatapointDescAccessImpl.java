@@ -1,6 +1,7 @@
 package org.ogema.devicefinder.util;
 
 import org.ogema.devicefinder.api.DatapointInfo;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.DatapointDescAccess;
 
@@ -46,6 +47,12 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 		return true;
 	}
 
+	@Override
+	public boolean setDevice(PhysicalElement device) {
+		dpDevice = device;
+		return true;
+	}
+	
 	@Override
 	public boolean setSubRoomLocation(OgemaLocale locale, Object context, String value) {
 		return addToSubRoomLocationAtomic(locale, context, value, true);

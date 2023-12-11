@@ -18,6 +18,7 @@ import org.ogema.devicefinder.api.DpUpdateAPI.DpUpdated;
 import org.ogema.devicefinder.util.AggregationModeProvider;
 import org.ogema.devicefinder.util.DPUtil;
 import org.ogema.externalviewer.extensions.ScheduleViewerOpenButtonEval.TimeSeriesNameProvider;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.timeseries.eval.simple.api.ProcessedReadOnlyTimeSeries2;
 import org.ogema.timeseries.eval.simple.api.TimeProcPrint;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
@@ -337,9 +338,20 @@ if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printTimeSeriesSet(input, "IN(
 			public List<Datapoint> getResultSeries(List<Datapoint> input, DatapointService dpService) {
 				List<Datapoint> result1 = dayProc.getResultSeries(input, dpService);
 				List<Datapoint> result = new ArrayList<>();
+				PhysicalElement device = null;
+				boolean allInputSameDevice = true;
+
 				// RoomID -> Timeseries in the room
 				Map<String, List<Datapoint>> sortedbyRoom = new HashMap<>();
 				for(Datapoint tsd: result1) {
+					if(allInputSameDevice) {
+						if(device == null)
+							device = tsd.getDevice();
+						else if(tsd.getDevice() != null && tsd.getDevice() != device) {
+							device = null;
+							allInputSameDevice = false;
+						}
+					}
 					Datapoint dp = dpService.getDataPointAsIs(tsd.getLocation());
 					String label;
 					if(dp.getRoom() != null)
@@ -365,6 +377,8 @@ if(Boolean.getBoolean("evaldebug")) TimeProcPrint.printTimeSeriesSet(input, "IN(
 								dpLoc.setRoom(room);
 							else
 								dpLoc.setRoom(TimeProcUtil.unknownRoom);
+							if(device != null)
+								dpLoc.setDevice(device);
 						}
 					}
 					result.addAll(resultLoc);

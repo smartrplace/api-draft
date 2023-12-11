@@ -3,6 +3,8 @@ package org.ogema.devicefinder.api;
 import java.util.Map;
 import java.util.Set;
 
+import org.ogema.model.prototypes.PhysicalElement;
+
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
@@ -42,6 +44,8 @@ public interface DatapointDesc extends LabelledItem {
 	};
 
 	DPRoom getRoom();
+	
+	PhysicalElement getDevice();
 	
 	/** Get a short label indicating the position within the room
 	 * 
