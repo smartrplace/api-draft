@@ -50,6 +50,15 @@ public interface DatapointDescAccess extends DatapointDesc {
 	
 	boolean setRoom(DPRoom room);
 	
+	/** This method sets the room even if it is set final
+	 * 
+	 * @param room
+	 * @param isFinal if true subsequent calls to setRooom(DPRoom) will not take any effect until
+	 * 		the next restart of the system
+	 * @return
+	 */
+	boolean setRoom(DPRoom room, boolean isFinal);
+
 	boolean setDevice(PhysicalElement device);
 	
 	boolean setSubRoomLocation(OgemaLocale locale, Object context, String value);

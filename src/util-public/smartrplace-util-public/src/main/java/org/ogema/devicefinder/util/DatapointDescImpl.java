@@ -28,6 +28,7 @@ public class DatapointDescImpl implements DatapointDesc {
 	protected Set<String> aliases = new HashSet<>();
 	protected Map<OgemaLocale, String> labels = new HashMap<>();
 	protected DPRoom dpRoom = null;
+	protected boolean isRoomFinal = false;
 	protected PhysicalElement dpDevice = null;
 	protected DatapointInfo consumptionInfo = null;
 	protected volatile String subRoomLocation = null;

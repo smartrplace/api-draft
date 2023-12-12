@@ -43,8 +43,17 @@ public class DatapointDescAccessImpl extends DatapointDescImpl implements Datapo
 
 	@Override
 	public boolean setRoom(DPRoom room) {
+		if(isRoomFinal && dpRoom != null)
+			return false;
 		dpRoom = room;
 		return true;
+	}
+
+	@Override
+	public boolean setRoom(DPRoom room, boolean isFinal) {
+		this.isRoomFinal = isFinal; 
+		dpRoom = room;
+		return true;		
 	}
 
 	@Override
