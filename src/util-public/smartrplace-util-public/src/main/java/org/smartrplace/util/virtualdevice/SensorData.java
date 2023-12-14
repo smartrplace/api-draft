@@ -37,6 +37,10 @@ public abstract class SensorData {
 	Float valuePending;
 	Object valuePendingObject;
 	long valuePendingSince;
+	
+	/** Resend if no first sending was successful, but no fitting feedback is available*/
+	long pendingTimeForMissingFeedback;
+	
 	//long valuePendingDueToOverloadSince = -1;
 	float maxDC;
 	
@@ -49,6 +53,7 @@ public abstract class SensorData {
 
 	public SensorData(SetpointControlManager<?> ctrl2) {
 		this.ctrl = ctrl2;
+		this.pendingTimeForMissingFeedback = ctrl2.pendingTimeForMissingFeedbackDefault;
 		ctrl.appMan.getLogger().debug("  CREATING SensorData for: "+ctrl.getClass().getSimpleName());
 	}
 	

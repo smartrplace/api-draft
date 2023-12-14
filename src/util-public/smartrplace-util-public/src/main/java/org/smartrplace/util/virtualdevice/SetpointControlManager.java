@@ -48,6 +48,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	public static final String priorityDropPerHour = "priorityDropPerHour";
 	public static final String resendMissingFbPerHour = "resendMissingFbPerHour";
 	public static final String relativeLoadEff = "relativeLoadEff";
+	private static final double RESEND_INCREASE_FACTOR = 1.1;
 	
 	public static enum SetpointControlType {
 		/** Default types use the gateway as CCU/router*/
@@ -87,8 +88,9 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		return LoggerFactory.getLogger(SetpointControlManager.class);
 	}
 
-	/** Resend if no first sending was successful, but no fitting feedback is available*/
-	protected final long pendingTimeForMissingFeedback;
+	/** Resend if no first sending was successful, but no fitting feedback is available
+	 * Initial resend interval*/
+	protected final long pendingTimeForMissingFeedbackDefault;
 	/** Retry sending after this time if feedback does not fit request */
 	protected final long pendingTimeForRetry;
 	/** If a request has actually been sent then wait this time. After pendingTimeForRetry we check again if router is not in overload 
@@ -157,7 +159,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		this.log2 = log;
 		this.dpService = appManPlus.dpService();
 		this.pendingTimeForRetry = pendingTimeForRetry;
-		this.pendingTimeForMissingFeedback = pendingTimeForRetry;
+		this.pendingTimeForMissingFeedbackDefault = pendingTimeForRetry;
 		this.knownSetpointValBlockTime = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig/knownSetpointValBlockTime");
 		intervalStart = appMan.getFrameworkTime();
 		nextEvalInterval = intervalStart + DEFAULT_EVAL_INTERVAL;
@@ -268,7 +270,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
 			boolean requestConfirmationOnly, Long minRewriteTime) {
 		SensorData sens = registerSensor(setp);
-
+		sens.pendingTimeForMissingFeedback = pendingTimeForMissingFeedbackDefault;
+		
 		float maxDC;
 		switch(prioLevel) {
 		case MUST_WRITE:
@@ -544,7 +547,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				if(resenddata.valueFeedbackPending != null) {
 					long timePendingFb = now - resenddata.valuePendingSince;
 					//long sentAgoFb = now - resenddata.lastSent;
-					if((timePendingFb > pendingTimeForMissingFeedback)) { // && (sentAgoFb > lastSentAgoForRetry)) {
+					if((timePendingFb > resenddata.pendingTimeForMissingFeedback)) { // && (sentAgoFb > lastSentAgoForRetry)) {
 						if(resenddata.valueFeedbackPending != null)
 							log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending, value:"+(float)resenddata.valueFeedbackPending+".");
 						else
@@ -572,8 +575,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 							throw new IllegalStateException(text, e);
 						}
 						if(!success) {
-							//we stop the chain due to overload
-							resenddata.valueFeedbackPending = null;
+							//CHANGED (not anymore): we stop the chain due to overload
+							//resenddata.valueFeedbackPending = null;
 							resenddata.lastSent = now;
 						} else { 
 							resenddata.valuePendingSince = now;
@@ -589,6 +592,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				long sentAgo = now - resenddata.lastSent;
 				if((timePending > pendingTimeForRetry) && (sentAgo > lastSentAgoForRetry)) {
 					//NOTE: valuePending is set already so we do not have to indicate resend, will take place anyways if no success.
+					resenddata.pendingTimeForMissingFeedback = (long) (RESEND_INCREASE_FACTOR * (double)resenddata.pendingTimeForMissingFeedback);
 					boolean success;
 					if(resenddata.valueFeedbackPendingObject != null)
 						success = requestSetpointWrite((T) resenddata.setpoint(), Float.NaN, resenddata.valuePendingObject,
