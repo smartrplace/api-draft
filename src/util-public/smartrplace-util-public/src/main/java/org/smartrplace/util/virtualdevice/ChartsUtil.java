@@ -445,7 +445,7 @@ public class ChartsUtil {
 		return null;
 	}
 
-	public static List<String> getHistoricalRoomName(long start, long end, PhysicalElement device) {
+	public static List<String> getHistoricalRoomLocation(long start, long end, PhysicalElement device) {
 		StringArrayResource history = device.location().roomHistory();
 		if(!history.isActive())
 			return null;
