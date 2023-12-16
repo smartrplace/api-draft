@@ -28,6 +28,12 @@ public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResour
 			}
 			return ccu;
 		}
+		
+		public boolean isFeedbackFullySet(float value) {
+			if(feedback.getValue() != value)
+				return false;
+			return true;
+		}
 	}
 	
 	private HmSetpCtrlManagerTHSetp(ApplicationManagerPlus appManPlus) {
@@ -80,8 +86,12 @@ public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResour
 		return isRouterInOverload(ccu, maxDC);
 	}
 	
-	/*@Override
-	protected SensorData getSensorDataInstance(Resource sensor) {
-		return new SensorDataHmTemperature((TemperatureSensor) sensor, this);
-	}*/
+	@Override
+	public boolean isFeedbackFullySet(float value, TemperatureResource setp) {
+		SensorDataHmTemperature sd = (SensorDataHmTemperature)getSensorData(setp);
+		if(sd == null)
+			return false;
+		return sd.isFeedbackFullySet(value);
+	}
+
 }

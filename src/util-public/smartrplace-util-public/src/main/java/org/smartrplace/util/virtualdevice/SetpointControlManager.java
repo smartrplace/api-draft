@@ -15,6 +15,7 @@ import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
@@ -638,5 +639,10 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			return SetpointControlType.AirconditionerDefault;
 		//TODO: Maybe we should just return null, but this is for fail-fast
 		throw new IllegalStateException("Unknown heat control type : "+setpoint.getLocation());
+	}
+	
+	/** Overwrite if implementation is used*/
+	public boolean isFeedbackFullySet(float t, T setPoint) {
+		return false;
 	}
 }
