@@ -9,6 +9,7 @@ import org.ogema.model.sensors.Sensor;
 import org.ogema.model.sensors.TemperatureSensor;
 
 import de.iwes.util.resource.ResourceHelper;
+import de.iwes.util.resource.ValueResourceHelper;
 
 public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResource> {
 	public static class SensorDataHmTemperature extends SensorDataTemperature {
@@ -30,9 +31,9 @@ public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResour
 		}
 		
 		public boolean isFeedbackFullySet(float value) {
-			if(feedback.getValue() != value)
-				return false;
-			return true;
+			return ValueResourceHelper.isAlmostEqual(feedback.getValue(), value);
+			//	return false;
+			//return true;
 		}
 	}
 	
