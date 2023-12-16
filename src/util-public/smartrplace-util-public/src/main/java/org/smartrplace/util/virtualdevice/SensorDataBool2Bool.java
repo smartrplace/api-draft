@@ -53,6 +53,9 @@ if(Boolean.getBoolean("org.smartrplace.util.virtualdevice.setpointControlManager
 						valueFeedbackPending = null;
 						reportFbConfirmed(valFb);
 					}
+				} else {
+					float valFb = feedback.getValue()?1.0f:0.0f;
+					reportFbConfirmed(valFb, false);
 				}
 			}
 		};

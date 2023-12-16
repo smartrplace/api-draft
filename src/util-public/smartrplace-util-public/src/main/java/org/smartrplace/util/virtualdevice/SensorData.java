@@ -62,8 +62,12 @@ public abstract class SensorData {
 		addKnownValue(value);
 	}
 	protected void reportFbConfirmed(float feedbackValue) {
+		reportFbConfirmed(feedbackValue, true);
+	}
+	protected void reportFbConfirmed(float feedbackValue, boolean addToKnownValues) {
 		lastSetpointFeedbackConfirmTime = ctrl.appMan.getFrameworkTime();
-		addKnownValue(feedbackValue);
+		if(addToKnownValues)
+			addKnownValue(feedbackValue);
 	}
 	
 	public static String getStatus(SensorData sd) {

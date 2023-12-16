@@ -45,6 +45,9 @@ public abstract class SensorDataTemperature extends SensorData {
 						valueFeedbackPending = null;
 						reportFbConfirmed(valFb);
 					}
+				} else {
+					float valFb = feedback.getValue();
+					reportFbConfirmed(valFb, false);
 				}
 			}
 		};
