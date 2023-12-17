@@ -15,7 +15,6 @@ import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.TimeResource;
-import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
@@ -50,6 +49,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	public static final String resendMissingFbPerHour = "resendMissingFbPerHour";
 	public static final String relativeLoadEff = "relativeLoadEff";
 	private static final double RESEND_INCREASE_FACTOR = 1.1;
+	private static final Long DEFAULT_MIN_INTERVAL_BETWEEN_WRITES = 5000l;
 	
 	public static enum SetpointControlType {
 		/** Default types use the gateway as CCU/router*/
@@ -253,7 +253,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
 			boolean requestConfirmationOnly) {
 		return requestSetpointWrite(setp, setpoint, setpointData, prioLevel, resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint,
-				requestConfirmationOnly, 5000l);
+				requestConfirmationOnly, DEFAULT_MIN_INTERVAL_BETWEEN_WRITES);
 	}
 	/**
 	 * 
@@ -321,16 +321,19 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				}
 			}
 		}
+		boolean isOverload;
 		if(minRewriteTime != null) {
 			long now = appMan.getFrameworkTime();
 			long sentAgo = now - sens.lastSent;
 			if(sentAgo < minRewriteTime) {
 				if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
-					log.debug("In MIN_REWRITE_TIME For "+sens.setpoint().getLocation()+" minRewriteTime:"+minRewriteTime+" valueFeedback:"+sens.valueFeedbackPending);
-				return true;
+					log.debug("Retarding write due to MIN_REWRITE_TIME for "+sens.setpoint().getLocation()+" minRewriteTime:"+minRewriteTime+" valueFeedback:"+sens.valueFeedbackPending);
+				sens.pendingTimeForMissingFeedback = Math.max(10000l,  DEFAULT_MIN_INTERVAL_BETWEEN_WRITES);
+				isOverload = true;
 			}
-		}
-		boolean isOverload = isSensorInOverload(sens, maxDC);
+			isOverload = isSensorInOverload(sens, maxDC);
+		} else
+			isOverload = isSensorInOverload(sens, maxDC);
 		if((!isOverload) || requestConfirmationOnly) {
 			//We do not actively reset overload, but it just expires
 			//sens.valuePendingDueToOverloadSince = -1;
@@ -597,7 +600,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					boolean success;
 					if(resenddata.valueFeedbackPendingObject != null)
 						success = requestSetpointWrite((T) resenddata.setpoint(), Float.NaN, resenddata.valuePendingObject,
-								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, 5000l);
+								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, DEFAULT_MIN_INTERVAL_BETWEEN_WRITES);
 					else
 						success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valuePending, null,
 								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, 5000l);
