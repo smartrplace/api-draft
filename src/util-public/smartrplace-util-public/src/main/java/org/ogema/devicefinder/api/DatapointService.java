@@ -8,6 +8,7 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ValueResource;
 import org.ogema.devicefinder.api.DatapointInfo.UtilityType;
 import org.ogema.messaging.api.MessageTransport;
+import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.app.useradmin.api.UserDataAccess;
 import org.smartrplace.alarming.escalation.util.EscalationManagerI;
@@ -158,6 +159,14 @@ public interface DatapointService {
 	 * @return
 	 */
 	Collection<InstallAppDevice> managedDeviceResoures(Class<? extends Resource> resourceType);
+	
+	/** Get InstallAppDevice resources for a room, without trash devices.
+	 * Note: This may include cashing for up to 60 seconds
+	 * 
+	 * @param room
+	 * @return
+	 */
+	Collection<InstallAppDevice> managedDeviceResouresForRoom(Room room);
 	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId);
 	
 	/** Get resources managed by deviceHandler
