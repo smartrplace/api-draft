@@ -2,7 +2,9 @@ package org.smartrplace.util.virtualdevice;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
@@ -36,6 +38,7 @@ import org.ogema.model.sensors.CO2Sensor;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.model.sensors.HumiditySensor;
 import org.ogema.model.sensors.TemperatureSensor;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resource.util.LoggingUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.gateway.device.GatewayDevice;
@@ -333,6 +336,19 @@ public class ChartsUtil {
 		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv, datalogs, datapointsToUse,
 				vh.getParent());
 	}
+
+	public static GetPlotButtonResult getPlotButton(String id, final InstallAppDevice object,
+			final DatapointService dpService, final ApplicationManager appMan,//final HardwareInstallController controller2,
+			boolean addDataPointInfoLabel,
+			ObjectResourceGUIHelper<?, ?> vh, Row row, OgemaHttpRequest req,
+			DeviceHandlerProviderDP<?> devHand,
+			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
+			ResourceList<DataLogTransferInfo> datalogs,
+			Collection<Datapoint> datapointsToUse, OgemaWidget parent) {
+		IntervalConfiguration itv = IntervalConfiguration.getDefaultDuration(IntervalConfiguration.ONE_DAY, appMan);
+		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv,
+				datalogs, datapointsToUse, itv, parent);
+	}
 	/**
 	 * 
 	 * @param id
@@ -357,7 +373,7 @@ public class ChartsUtil {
 			DeviceHandlerProviderDP<?> devHand,
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
 			ResourceList<DataLogTransferInfo> datalogs,
-			Collection<Datapoint> datapointsToUse, OgemaWidget parent) {
+			Collection<Datapoint> datapointsToUse, IntervalConfiguration itv, OgemaWidget parent) {
 		final GetPlotButtonResult resultMain = new GetPlotButtonResult();
 		
 		resultMain.devHand = devHand;
@@ -399,7 +415,7 @@ public class ChartsUtil {
 				
 				@Override
 				public IntervalConfiguration getITVConfiguration() {
-					return IntervalConfiguration.getDefaultDuration(IntervalConfiguration.ONE_DAY, appMan);
+					return itv; //IntervalConfiguration.getDefaultDuration(itv, appMan);
 				}
 				
 				@Override
@@ -472,5 +488,104 @@ public class ChartsUtil {
 		return result;
 	}
 	
-
+	public static class DeviceInRoomHistoryResult {
+		public InstallAppDevice iad;
+		public long start;
+		public long end;
+	}
+	private static Map<String, List<DeviceInRoomHistoryResult>> devicesByRoomHistory = new HashMap<>();
+	private static long lastDevByRoomHistoryUpdate = -1;
+	
+	/** Get only devices listed by Location#roomHistory. No trash devices are returned.
+	 * 
+	 * @param start if null then no filtering of time is performed
+	 * @param end
+	 * @param room
+	 * @param now
+	 * @return may be null if start = null if no devices are found for the room
+	 */
+	public static List<DeviceInRoomHistoryResult> getDeviceswithHistoryInRoom(Long start, long end, Room room,
+			DatapointService dpService) {
+		String roomLoc = room.getLocation();
+		long now = dpService.getFrameworkTime();
+		synchronized (devicesByRoomHistory) {
+			List<DeviceInRoomHistoryResult> result = devicesByRoomHistory.get(roomLoc);
+			if(result == null || (now - lastDevByRoomHistoryUpdate) > TimeProcUtil.MINUTE_MILLIS) {
+				Map<String, List<DeviceInRoomHistoryResult>> newMap = new HashMap<>();
+				Collection<InstallAppDevice> allIad = dpService.managedDeviceResoures(null);
+				for(InstallAppDevice iad: allIad) {
+					if(iad.isTrash().getValue())
+						continue;
+					PhysicalElement device = iad.device();
+					StringArrayResource history = device.location().roomHistory();
+					if(!history.isActive() || history.size() == 0)
+						continue;
+					TimeArrayResource historyStart = device.location().roomStart();
+					int len = Math.min(history.size(), historyStart.size());
+					if(len == 0)
+						continue;
+					
+					String[] rooms = history.getValues();
+					long[] startTimes = historyStart.getValues();
+					for(int idx=0; idx<len; idx++) {
+						String roomLocLoop = rooms[idx];
+						List<DeviceInRoomHistoryResult> resultLoop = newMap.get(roomLocLoop);
+						if(resultLoop == null) {
+							resultLoop = new ArrayList<>();
+							newMap.put(roomLocLoop, resultLoop);
+						}
+						DeviceInRoomHistoryResult newEntry = new DeviceInRoomHistoryResult();
+						newEntry.iad = iad;
+						newEntry.start = startTimes[idx];
+						if(idx < (len-1))
+							newEntry.end = startTimes[idx+1];
+						else
+							newEntry.end = Long.MAX_VALUE;
+						resultLoop.add(newEntry);
+					}
+				}
+				devicesByRoomHistory = newMap;
+				lastDevByRoomHistoryUpdate = now;
+				result = devicesByRoomHistory.get(roomLoc);
+			}
+			if(result != null && start != null) {
+				List<DeviceInRoomHistoryResult> resultFinal = new ArrayList<>();
+				for(DeviceInRoomHistoryResult iad: result) {
+					if(isDeviceInRoomHistory(iad.iad.device(), start, end, roomLoc))
+						resultFinal.add(iad);
+				}
+				return resultFinal;
+			}
+			return result;
+		}
+	}
+	
+	public static boolean isDeviceInRoomHistory(PhysicalElement device, long start, long end, String roomLocation) {
+		StringArrayResource history = device.location().roomHistory();
+		if(!history.isActive() || history.size() == 0)
+			return false;
+		TimeArrayResource historyStart = device.location().roomStart();
+		int len = Math.min(history.size(), historyStart.size());
+		if(len == 0)
+			return false;
+		long[] startTimes = historyStart.getValues();
+		String[] rooms = history.getValues();
+		for(int idx=0; idx<len; idx++) {
+			String roomLocLoop = rooms[idx];
+			if(roomLocLoop.equals(roomLocation))
+				continue;
+			long roomStart = startTimes[idx];
+			long roomEnd;
+			if(idx < (len-1))
+				roomEnd = startTimes[idx+1];
+			else
+				roomEnd = Long.MAX_VALUE;
+			if(((roomStart < start && roomEnd > end)
+					|| (roomStart >= start && roomStart <= end)
+					|| (roomEnd >= start && roomEnd <= end))
+					&& rooms[idx] != null && (!rooms[idx].isBlank()))
+				return true;
+		}
+		return false;
+	}
 }
