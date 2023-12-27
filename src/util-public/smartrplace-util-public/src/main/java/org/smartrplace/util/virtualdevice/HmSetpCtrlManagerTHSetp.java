@@ -31,7 +31,8 @@ public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResour
 		}
 		
 		public boolean isFeedbackFullySet(float value) {
-			return ValueResourceHelper.isAlmostEqual(feedback.getValue(), value);
+			return ValueResourceHelper.isAlmostEqual(feedback.getValue(), value) &&
+					(feedback.getLastUpdateTime() > setpoint.getLastUpdateTime());
 			//	return false;
 			//return true;
 		}
