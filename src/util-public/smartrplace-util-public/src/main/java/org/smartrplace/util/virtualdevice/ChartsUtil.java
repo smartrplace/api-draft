@@ -347,7 +347,7 @@ public class ChartsUtil {
 			Collection<Datapoint> datapointsToUse, OgemaWidget parent) {
 		IntervalConfiguration itv = IntervalConfiguration.getDefaultDuration(IntervalConfiguration.ONE_DAY, appMan);
 		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv,
-				datalogs, datapointsToUse, itv, parent);
+				datalogs, datapointsToUse, itv, parent, "Plot");
 	}
 	/**
 	 * 
@@ -373,7 +373,8 @@ public class ChartsUtil {
 			DeviceHandlerProviderDP<?> devHand,
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
 			ResourceList<DataLogTransferInfo> datalogs,
-			Collection<Datapoint> datapointsToUse, IntervalConfiguration itv, OgemaWidget parent) {
+			Collection<Datapoint> datapointsToUse, IntervalConfiguration itv, OgemaWidget parent,
+			String buttonText) {
 		final GetPlotButtonResult resultMain = new GetPlotButtonResult();
 		
 		resultMain.devHand = devHand;
@@ -440,7 +441,7 @@ public class ChartsUtil {
 				}
 			};
 			resultMain.plotButton = ScheduleViwerOpenUtil.getScheduleViewerOpenButton(parent, "plotButton"+id,
-					"Plot", provider, schedViewProv, req);
+					buttonText!=null?buttonText:"Plot", provider, schedViewProv, req);
 		}
 		return resultMain;
 	}
