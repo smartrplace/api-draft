@@ -7,12 +7,14 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.model.sensors.Sensor;
 import org.ogema.model.sensors.TemperatureSensor;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResource> {
 	public static class SensorDataHmTemperature extends SensorDataTemperature {
+		public static final long SETPOINT_CONSIDERED_DONE_TIME = Long.getLong("org.smartrplace.util.virtualdevice.setpointConsideredAgoMillis", 2*TimeProcUtil.HOUR_MILLIS);
 		CCUInstance ccu = null;
 		
 		public SensorDataHmTemperature(TemperatureSensor sensor, HmSetpCtrlManagerTHSetp ctrl) {
@@ -31,8 +33,13 @@ public class HmSetpCtrlManagerTHSetp extends HmSetpCtrlManager<TemperatureResour
 		}
 		
 		public boolean isFeedbackFullySet(float value) {
-			return ValueResourceHelper.isAlmostEqual(feedback.getValue(), value) &&
-					(feedback.getLastUpdateTime() > setpoint.getLastUpdateTime());
+			if(!ValueResourceHelper.isAlmostEqual(feedback.getValue(), value))
+				return false;
+			if(ValueResourceHelper.isAlmostEqual(setpoint.getValue(), value))
+				return true;
+			long now = ctrl.dpService.getFrameworkTime();
+			return (feedback.getLastUpdateTime() > setpoint.getLastUpdateTime())
+					&& (now - setpoint.getLastUpdateTime() > SETPOINT_CONSIDERED_DONE_TIME);
 			//	return false;
 			//return true;
 		}
