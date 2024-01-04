@@ -3,6 +3,7 @@ package org.smartrplace.util.virtualdevice;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
+import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
 /** Generic setpoint-feedback data e.g. used for switch on/off setpoint*/
@@ -10,8 +11,8 @@ public class SensorDataBool2Bool extends SensorData {
 	RouterInstance ccu = null;
 
 	Resource parentAsSensor;
-	BooleanResource setpoint;
-	BooleanResource feedback;
+	final BooleanResource setpoint;
+	final BooleanResource feedback;
 	//CCUInstance ccu;
 	ResourceValueListener<BooleanResource> setpointListener;
 	ResourceValueListener<BooleanResource> feedbackListener;
@@ -27,6 +28,10 @@ public class SensorDataBool2Bool extends SensorData {
 		this.parentAsSensor = parentAsSensor;
 		this.setpoint = setpoint;
 		this.feedback = feedback;
+		if(setpoint == null)
+			UserServlet.logGeneralReport("Init SensorDataBool2Bool with setpoint null, parent:"+parentAsSensor.getLocation(), -34, ctrl.appMan);
+		if(feedback == null)
+			UserServlet.logGeneralReport("Init SensorDataBool2Bool with feedback null, parent:"+parentAsSensor.getLocation(), -35, ctrl.appMan);
 		this.setpointListener = new ResourceValueListener<BooleanResource>() {
 			@Override
 			public void resourceChanged(BooleanResource resource) {

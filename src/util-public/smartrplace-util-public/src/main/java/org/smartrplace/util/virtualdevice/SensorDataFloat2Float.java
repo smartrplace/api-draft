@@ -3,6 +3,7 @@ package org.smartrplace.util.virtualdevice;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
+import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
 /** Generic setpoint-feedback data*/
@@ -10,8 +11,8 @@ public class SensorDataFloat2Float extends SensorData {
 	RouterInstance ccu = null;
 
 	Resource parentAsSensor;
-	FloatResource setpoint;
-	FloatResource feedback;
+	final FloatResource setpoint;
+	final FloatResource feedback;
 	//CCUInstance ccu;
 	ResourceValueListener<FloatResource> setpointListener;
 	ResourceValueListener<FloatResource> feedbackListener;
@@ -27,6 +28,10 @@ public class SensorDataFloat2Float extends SensorData {
 		this.parentAsSensor = parentAsSensor;
 		this.setpoint = setpoint;
 		this.feedback = feedback;
+		if(setpoint == null)
+			UserServlet.logGeneralReport("Init SensorDataFloat2Float with setpoint null, parent:"+parentAsSensor.getLocation(), -30, ctrl.appMan);
+		if(feedback == null)
+			UserServlet.logGeneralReport("Init SensorDataFloat2Float with feedback null, parent:"+parentAsSensor.getLocation(), -31, ctrl.appMan);
 		this.setpointListener = new ResourceValueListener<FloatResource>() {
 			@Override
 			public void resourceChanged(FloatResource resource) {

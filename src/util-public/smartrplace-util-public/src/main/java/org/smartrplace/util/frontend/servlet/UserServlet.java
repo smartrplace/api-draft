@@ -1204,12 +1204,13 @@ System.out.println("SUFIBSD");
 
 	public static void logGeneralReport(String message, int exceptionCode,
 			ApplicationManager appMan) {
+		IllegalStateException etest = new IllegalStateException("exceptionCode:"+exceptionCode);
 		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			System.out.println(message);
-			UserServlet.logger.info("General report with exception code: "+exceptionCode+" ::"+message);
+			UserServlet.logger.info("General report with exception code: "+exceptionCode+" ::"+message, etest);
 		} else {
-			UserServlet.logger.info("General report with exception code: "+exceptionCode+" ::"+message);
-		}		
+			UserServlet.logger.info("General report with exception code: "+exceptionCode+" ::"+message, etest);
+		}
 		
 		if(appMan != null)
 			ValueResourceHelper.setCreate(

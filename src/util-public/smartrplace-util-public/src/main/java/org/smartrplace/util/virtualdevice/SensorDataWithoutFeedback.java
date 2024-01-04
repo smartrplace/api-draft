@@ -6,14 +6,18 @@ import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.smartrplace.util.frontend.servlet.UserServlet;
 
 /** SensorData that just supports check if writing needs to be blocked due to overload*/
 public abstract class SensorDataWithoutFeedback extends SensorData {
-	ValueResource setpoint;
+	final ValueResource setpoint;
 	
 	public SensorDataWithoutFeedback(ValueResource setpoint, SetpointControlManager<IntegerResource> ctrl) {
 		super(ctrl);
 		this.setpoint = setpoint;
+		if(setpoint == null)
+			UserServlet.logGeneralReport("Init SensorDataWithoutFeedback with setpoint null", -38, ctrl.appMan);
+
 		//No feedback check
 		valueFeedbackPending = null;
 		ccu();

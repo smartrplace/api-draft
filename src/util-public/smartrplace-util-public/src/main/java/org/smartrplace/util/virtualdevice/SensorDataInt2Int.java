@@ -3,12 +3,13 @@ package org.smartrplace.util.virtualdevice;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
+import org.smartrplace.util.frontend.servlet.UserServlet;
 
 /** Generic setpoint-feedback data e.g. used for thermostat controlMode*/
 public abstract class SensorDataInt2Int extends SensorData {
 	Resource parentAsSensor;
-	IntegerResource setpoint;
-	IntegerResource feedback;
+	final IntegerResource setpoint;
+	final IntegerResource feedback;
 	//CCUInstance ccu;
 	ResourceValueListener<IntegerResource> setpointListener;
 	ResourceValueListener<IntegerResource> feedbackListener;
@@ -20,6 +21,10 @@ public abstract class SensorDataInt2Int extends SensorData {
 		this.parentAsSensor = parentAsSensor;
 		this.setpoint = setpoint;
 		this.feedback = feedback;
+		if(setpoint == null)
+			UserServlet.logGeneralReport("Init SensorDataInt2Int with setpoint null, parent:"+parentAsSensor.getLocation(), -32, ctrl.appMan);
+		if(feedback == null)
+			UserServlet.logGeneralReport("Init SensorDataInt2Int with feedback null, parent:"+parentAsSensor.getLocation(), -33, ctrl.appMan);
 		this.setpointListener = new ResourceValueListener<IntegerResource>() {
 			@Override
 			public void resourceChanged(IntegerResource resource) {
