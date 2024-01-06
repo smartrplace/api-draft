@@ -882,7 +882,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static String setDecalcTimeForwardMax(Thermostat device, long now, GatewaySyncResourceService gwSync) {
 		//long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
 		long startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
-		long destTime = startOfDay + 2*TimeProcUtil.HOUR_MILLIS;
+		long destTime = startOfDay + 6*TimeProcUtil.HOUR_MILLIS;
 		if(destTime > now)
 			destTime += 6*TimeProcUtil.DAY_MILLIS;
 		return setDecalcTime(device, destTime, gwSync);												

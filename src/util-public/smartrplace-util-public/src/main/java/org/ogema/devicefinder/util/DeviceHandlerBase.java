@@ -15,6 +15,7 @@ import org.ogema.core.model.schedule.AbsoluteSchedule;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.ResourceAccess;
@@ -40,6 +41,7 @@ import org.ogema.model.devices.buildingtechnology.ThermostatProgram;
 import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericBinarySensor;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
@@ -285,10 +287,25 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 				return true;
 			return false;
 		}
+		if(val == 5) {
+			TimeResource lastDecalc = dev.valve().getSubResource("lastDecalc", TimeResource.class);
+			if(lastDecalc == null)
+				return true;
+			if(now - lastDecalc.getValue() > 30*TimeProcUtil.DAY_MILLIS) {
+				//request recalc
+				TimeResource requestCalc = dev.valve().getSubResource("requestLastDecalcCalculation", TimeResource.class);
+				if(requestCalc.getValue() > now)
+					return false;
+				long nextScheduled = DeviceTableRaw.getNextDecalcTime(dev, now);
+				ValueResourceHelper.setCreate(requestCalc, nextScheduled + 2*TimeProcUtil.HOUR_MILLIS);
+				return false;
+			}
+			return true;
+		}
 		return Boolean.getBoolean("org.smartrplace.homematic.devicetable.autostart.shiftdecalc");		
 	}
 	
-	public static boolean performDailyPostpone(Thermostat dev,HardwareInstallConfig hwConfig, long now) {
+	public static boolean performDailyDecalc(Thermostat dev,HardwareInstallConfig hwConfig, long now) {
 		if(hwConfig == null)
 			return false;		
 		int val = hwConfig.weeklyPostponeMode().getValue();
@@ -300,6 +317,9 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			if(now >= hwConfig.noPostponeEnd().getValue())
 				return false;
 			return true;
+		}
+		if(val == 5) {
+			return false;
 		}
 		return false;		
 	}
