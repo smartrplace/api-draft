@@ -69,7 +69,7 @@ public class TimeSeriesServlet implements ServletPageProvider<TimeSeriesDataImpl
 	private static final float DAILY_METERMIN_DEFAULT = -1000;
 	private static final float DAILY_METERMAX_DEFAULT = 1.0e8f;
 
-	private static final float MAX_DIF_FOR_EQUAL_SETP = 0.3f;
+	private static final float MAX_DIF_FOR_EQUAL_SETP = Boolean.getBoolean("org.ogema.timeseries.eval.simple.mon3.std.setpreact.basedonroom.allowed")?0.6f:0.3f;
 	public TimeSeriesServlet(ApplicationManager appMan) {
 		this.appMan = appMan;
 	}
