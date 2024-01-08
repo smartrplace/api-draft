@@ -798,7 +798,7 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 	}	
 	
 	/** Return setpoint reaction gap durations in minutes as FloatValues*/
-	public static List<SampledValue> getSensReact(ReadOnlyTimeSeries setpReq, ReadOnlyTimeSeries setpFb, long start, long end, long maxReactTime) {
+	/*public static List<SampledValue> getSensReact(ReadOnlyTimeSeries setpReq, ReadOnlyTimeSeries setpFb, long start, long end, long maxReactTime) {
 		//List<SampledValue> req = setpReq.getValues(start, end+1);
 		//List<SampledValue> fb = setpFb.getValues(start, end+1);
 		List<SampledValue> result = new ArrayList<>();
@@ -861,7 +861,7 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 				idxNext++;
 		}
 		return result;
-	}
+	}*/
 
 	/** Get next setpoint request with a different value requested. From this point on we accept any feedback as we cannot 
 	 * expect to receive the original value anymore
@@ -870,7 +870,7 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 	 * @param idx
 	 * @return
 	 */
-	protected static SampledValue getNextReqDiffVal(SampledValue sv, ReadOnlyTimeSeries req, int idx) {
+	/*protected static SampledValue getNextReqDiffVal(SampledValue sv, ReadOnlyTimeSeries req, int idx) {
 		SampledValue result = req.getNextValue(sv.getTimestamp()+1);
 		if(result == null)
 			return null;
@@ -887,7 +887,7 @@ if(Boolean.getBoolean("evaldebug2")) System.out.println("Processing "+timeSeries
 			}
 		}
 		return result;
-	}
+	}*/
 	/*
 	protected static class NextReqValResult {
 		SampledValue svNext;
