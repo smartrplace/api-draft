@@ -105,7 +105,7 @@ public abstract class SensorData {
 			if(!receivedFirstFBValue) {
 				addKnownValue(tempSetpointFeedbackValue);
 				receivedFirstFBValue = true;
-				ctrl.appMan.getLogger().debug("Ignored due to receivedFirstFBValue RemoteVal:"+(fbReceived-273.15)+" / "+(tempSetpointFeedbackValue.getValue()-273.15));
+				ctrl.appMan.getLogger().warn("Ignored due to receivedFirstFBValue RemoteVal:"+(fbReceived-273.15)+" / "+(tempSetpointFeedbackValue.getValue()-273.15));
 				return true;
 			}
 			// A setpoint requested should be provided by requestSetpointWrite
