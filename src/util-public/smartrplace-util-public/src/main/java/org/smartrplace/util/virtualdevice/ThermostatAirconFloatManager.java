@@ -31,6 +31,7 @@ public class ThermostatAirconFloatManager extends SetpointControlManager<FloatRe
 	public static ThermostatAirconFloatManager getInstance(ApplicationManagerPlus appManPlus) {
 		if(instance == null)
 			instance = new ThermostatAirconFloatManager(appManPlus);
+		instance.setHeatcontrolLogger(appManPlus.appMan());
 		return instance;
 	}
 	
@@ -56,7 +57,7 @@ public class ThermostatAirconFloatManager extends SetpointControlManager<FloatRe
 		SensorDataFloat2Float result = (SensorDataFloat2Float) knownSensorsInner.get(loc);
 		if(result != null)
 			return result;
-		appMan.getLogger().debug("Create and register SensorDataTemperatureDefault (Aircon) for "+loc);
+		log.debug("Create and register SensorDataTemperatureDefault (Aircon) for "+loc);
 		result = new SensorDataFloat2Float(sensor, setp, this);
 		knownSensorsInner.put(loc, result);
 		return result;

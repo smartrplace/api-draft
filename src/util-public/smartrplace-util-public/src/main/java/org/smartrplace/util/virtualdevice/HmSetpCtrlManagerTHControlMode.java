@@ -55,6 +55,7 @@ public class HmSetpCtrlManagerTHControlMode extends HmSetpCtrlManager<IntegerRes
 			HmSetpCtrlManagerTHSetp mainHmManLoc = HmSetpCtrlManagerTHSetp.getInstance(appManPlus);
 			instance = new HmSetpCtrlManagerTHControlMode(appManPlus, mainHmManLoc);
 		}
+		instance.setHeatcontrolLogger(appManPlus.appMan());
 		return instance;
 	}
 	
@@ -83,7 +84,7 @@ public class HmSetpCtrlManagerTHControlMode extends HmSetpCtrlManager<IntegerRes
 		if(result != null)
 			return result;
 		IntegerResource fb = getFeeedback(setp);
-		appMan.getLogger().debug("Create and register SensorDataHmInt for "+loc);
+		log.debug("Create and register SensorDataHmInt for "+loc);
 		result = new SensorDataHmInt(sensor, setp, fb, this);
 		knownSensorsInner.put(loc, result);
 		return result;

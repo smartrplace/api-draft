@@ -35,6 +35,7 @@ public class ThermostatAirconBooleanManager extends SetpointControlManager<Boole
 	public static ThermostatAirconBooleanManager getInstance(ApplicationManagerPlus appManPlus) {
 		if(instance == null)
 			instance = new ThermostatAirconBooleanManager(appManPlus);
+		instance.setHeatcontrolLogger(appManPlus.appMan());
 		return instance;
 	}
 	
@@ -60,7 +61,7 @@ public class ThermostatAirconBooleanManager extends SetpointControlManager<Boole
 		SensorDataBool2Bool result = (SensorDataBool2Bool) knownSensorsInner.get(loc);
 		if(result != null)
 			return result;
-		appMan.getLogger().debug("Create and register SensorDataTemperatureDefault (Aircon) for "+loc);
+		log.debug("Create and register SensorDataTemperatureDefault (Aircon) for "+loc);
 		result = new SensorDataBool2Bool(sensor, setp, this);
 		knownSensorsInner.put(loc, result);
 		return result;

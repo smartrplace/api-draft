@@ -22,6 +22,7 @@ import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resource.util.ValueResourceUtils;
+import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -647,5 +648,17 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	/** Overwrite if implementation is used*/
 	public boolean isFeedbackFullySet(float t, T setPoint) {
 		return false;
+	}
+	
+	boolean finalLoggerFound = false;
+	protected void setHeatcontrolLogger(ApplicationManager appLoc) {
+		if(finalLoggerFound)
+			return;
+		Bundle bundle = appLoc.getAppID().getBundle();
+		String bundleSymbol = bundle.getSymbolicName();
+		if(bundle != null && bundle.getSymbolicName().contains("-heatcontrol-v")) {
+			log = appLoc.getLogger();
+			finalLoggerFound = true;
+		}
 	}
 }

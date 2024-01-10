@@ -34,6 +34,7 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 	public static ThermostatAirconDefaultManager getInstance(ApplicationManagerPlus appManPlus) {
 		if(instance == null)
 			instance = new ThermostatAirconDefaultManager(appManPlus);
+		instance.setHeatcontrolLogger(appManPlus.appMan());
 		return instance;
 	}
 	
@@ -59,7 +60,7 @@ public class ThermostatAirconDefaultManager extends SetpointControlManager<Tempe
 		SensorDataTemperatureDefault result = (SensorDataTemperatureDefault) knownSensorsInner.get(loc);
 		if(result != null)
 			return result;
-		appMan.getLogger().debug("Create and register SensorDataTemperatureDefault (Aircon) for "+loc);
+		log.debug("Create and register SensorDataTemperatureDefault (Aircon) for "+loc);
 		result = new SensorDataTemperatureDefault((TemperatureSensor) sensor, this);
 		knownSensorsInner.put(loc, result);
 		return result;

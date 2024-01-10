@@ -11,9 +11,9 @@ import org.ogema.core.model.ValueResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
-import org.smartrplace.util.virtualdevice.HmSetpCtrlManager.WritePrioLevel;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.RouterInstance;
 
+import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public abstract class SensorData {
@@ -54,7 +54,7 @@ public abstract class SensorData {
 	public SensorData(SetpointControlManager<?> ctrl2) {
 		this.ctrl = ctrl2;
 		this.pendingTimeForMissingFeedback = ctrl2.pendingTimeForMissingFeedbackDefault;
-		ctrl.appMan.getLogger().debug("  CREATING SensorData for: "+ctrl.getClass().getSimpleName());
+		ctrl.log.debug("  CREATING SensorData for: "+ctrl.getClass().getSimpleName());
 	}
 	
 	/** Notify that setpoint control has changed*/
@@ -105,7 +105,7 @@ public abstract class SensorData {
 			if(!receivedFirstFBValue) {
 				addKnownValue(tempSetpointFeedbackValue);
 				receivedFirstFBValue = true;
-				ctrl.appMan.getLogger().warn("Ignored due to receivedFirstFBValue RemoteVal:"+(fbReceived-273.15)+" / "+(tempSetpointFeedbackValue.getValue()-273.15));
+				ctrl.log.warn("Ignored due to receivedFirstFBValue RemoteVal:"+(fbReceived-273.15)+" / "+(tempSetpointFeedbackValue.getValue()-273.15));
 				return true;
 			}
 			// A setpoint requested should be provided by requestSetpointWrite
@@ -114,6 +114,11 @@ public abstract class SensorData {
 			//	return true;
 			for(Float val: knownValues.keySet()) {
 				if(ValueResourceHelper.isAlmostEqual(val, fbReceived)) {
+					int i = 0;
+					for(Entry<Float, Long> e: knownValues.entrySet()) {
+						ctrl.log.debug("SD:knownValues["+i+"] : "+e.getKey()+ " from: "+StringFormatHelper.getTimeDateInLocalTimeZone(e.getValue()));
+						i++;
+					}				
 					return true;
 				}
 			}			
