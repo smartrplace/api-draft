@@ -655,7 +655,6 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		if(finalLoggerFound)
 			return;
 		Bundle bundle = appLoc.getAppID().getBundle();
-		String bundleSymbol = bundle.getSymbolicName();
 		if(bundle != null && bundle.getSymbolicName().contains("-heatcontrol-v")) {
 			log = appLoc.getLogger();
 			finalLoggerFound = true;
