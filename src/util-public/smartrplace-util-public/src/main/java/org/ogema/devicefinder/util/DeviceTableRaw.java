@@ -888,6 +888,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return setDecalcTime(device, destTime, gwSync);												
 	}
 	
+	public static String setDecalcNow(Thermostat device, long now, GatewaySyncResourceService gwSync) {
+		String result = DeviceTableRaw.setDecalcTime(device, now+5*TimeProcUtil.MINUTE_MILLIS, gwSync);	
+		DeviceHandlerBase.blockShiftingUntil = now + 60*TimeProcUtil.MINUTE_MILLIS;
+		TimeResource requestCalc = device.valve().getSubResource(DeviceHandlerBase.REQUEST_LAST_DECALC_RESNAME, TimeResource.class);
+		ValueResourceHelper.setCreate(requestCalc, DeviceHandlerBase.blockShiftingUntil-1000);
+		return result;
+	}
+	
 	public static String setDecalcTimeForNextDay(Thermostat device, long now, GatewaySyncResourceService gwSync) {
 		//long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
 		long startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);

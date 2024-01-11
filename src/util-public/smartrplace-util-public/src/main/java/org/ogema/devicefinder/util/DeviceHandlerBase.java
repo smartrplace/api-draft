@@ -51,6 +51,9 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public abstract class DeviceHandlerBase<T extends PhysicalElement> implements DeviceHandlerProvider<T> {
 
+	public static final String REQUEST_LAST_DECALC_RESNAME = "requestLastDecalcCalculation";
+	public static final String REQUEST_DECALC_AFTER_RESNAME = "requestDecalcAfter";
+	
 	/** You have to provide a resource pattern to find the devices that shall be processed by the
 	 * {@link DeviceHandlerProvider}. If there are also other DeviceHandlerProviders working on the
 	 * same device ResourceType then you have to make sure that the {@link ResourcePattern#accept()} method
@@ -293,7 +296,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 				return true;
 			if(now - lastDecalc.getValue() > 30*TimeProcUtil.DAY_MILLIS) {
 				//request recalc
-				TimeResource requestCalc = dev.valve().getSubResource("requestLastDecalcCalculation", TimeResource.class);
+				TimeResource requestCalc = dev.valve().getSubResource(REQUEST_LAST_DECALC_RESNAME, TimeResource.class);
 				if(requestCalc.getValue() > now)
 					return false;
 				long nextScheduled = DeviceTableRaw.getNextDecalcTime(dev, now);

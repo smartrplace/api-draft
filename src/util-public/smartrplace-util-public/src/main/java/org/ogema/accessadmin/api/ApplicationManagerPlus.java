@@ -9,6 +9,7 @@ import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.core.security.WebAccessManager;
 import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.recordeddata.DataRecorder;
+import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
 
 import de.iwes.widgets.api.OgemaGuiService;
 import de.iwes.widgets.api.services.MessagingService;
@@ -22,6 +23,7 @@ public class ApplicationManagerPlus {
 	private PermissionManager permMan;
 	private MessagingService messagingService;
 	private DataRecorder dataRecorder;
+	private GatewaySyncResourceService gwSyncService;
 	
 	public ApplicationManagerPlus(ApplicationManager appMan) {
 		this.appMan = appMan;		
@@ -107,4 +109,12 @@ public class ApplicationManagerPlus {
 	public void setDataRecorder(DataRecorder dataRecorder) {
 		this.dataRecorder = dataRecorder;
 	}
+	
+	public GatewaySyncResourceService gwSyncService() {
+		return gwSyncService;
+	}
+	public void setGwSyncService(GatewaySyncResourceService gwSyncService) {
+		this.gwSyncService = gwSyncService;
+	}
+
 }
