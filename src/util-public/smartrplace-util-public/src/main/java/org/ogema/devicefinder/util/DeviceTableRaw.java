@@ -955,7 +955,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static long getNextDecalcTime(String deCalcString, long now) {
 		long timeInWeek = getDecalcTimeInWeek(deCalcString);
-		if(timeInWeek < 0)
+		return getNextDecalcTime(timeInWeek, now);
+		/*if(timeInWeek < 0)
 			return 0;
 		long nowStartOfWeek = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.WEEK);
 		long result = nowStartOfWeek + timeInWeek;
@@ -964,7 +965,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		else
 			return result;
 		
-		/*String[] daySplit = deCalcString.split("\\s+");
+		String[] daySplit = deCalcString.split("\\s+");
 		if(daySplit.length != 2)
 			return 0;
 		int dayOfWeekIdx = 0;
@@ -995,6 +996,17 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		} catch(NumberFormatException e) {
 			return 0;
 		}*/
+	}
+	
+	public static long getNextDecalcTime(long timeInWeek, long now) {
+		if(timeInWeek < 0)
+			return 0;
+		long nowStartOfWeek = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.WEEK);
+		long result = nowStartOfWeek + timeInWeek;
+		if(result <= now)
+			return result + 7*TimeProcUtil.DAY_MILLIS;
+		else
+			return result;
 	}
 	
 	public static long getDecalcTimeInWeek(String deCalcString) {
