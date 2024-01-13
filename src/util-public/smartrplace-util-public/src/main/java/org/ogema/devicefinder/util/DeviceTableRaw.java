@@ -9,6 +9,7 @@ import java.util.Map;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.accessadmin.api.SubcustomerUtil;
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.application.Timer;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
@@ -834,6 +835,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
     public static final int CTRLMODE_ECO = 6;
     public static final int CTRLMODE_COOLING_ORECO = 7; //means FORCED_ORECO
     public static final int CTRLMODE_HEATING_ORECO = 8; //means FORCED_ORECO
+	private static final long BLOCKSHIFTUNTIL_DURATION = Long.getLong("org.ogema.devicefinder.util.blockshiftuntil.duration", 60*TimeProcUtil.MINUTE_MILLIS);
 
     public static boolean isVirtualThermostat(Thermostat model) {
 		return !(model.getSubResources(VirtualThermostatConfig.class, false).isEmpty());
@@ -878,7 +880,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 
 	/** Thermostat location -> next check time*/
-	public static Map<String, Long> nextDecalcShiftCheck = new HashMap<>();
+	@Deprecated
+	public static final Map<String, Long> nextDecalcShiftCheck = new HashMap<>();
+	public static final Map<String, Timer> deCalcTimer = new HashMap<>();
 	public static String setDecalcTimeForwardMax(Thermostat device, long now, GatewaySyncResourceService gwSync) {
 		//long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
 		long startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
@@ -890,7 +894,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static String setDecalcNow(Thermostat device, long now, GatewaySyncResourceService gwSync) {
 		String result = DeviceTableRaw.setDecalcTime(device, now+5*TimeProcUtil.MINUTE_MILLIS, gwSync);	
-		DeviceHandlerBase.blockShiftingUntil = now + 60*TimeProcUtil.MINUTE_MILLIS;
+		DeviceHandlerBase.blockShiftingUntil = now + BLOCKSHIFTUNTIL_DURATION;
 		TimeResource requestCalc = device.valve().getSubResource(DeviceHandlerBase.REQUEST_LAST_DECALC_RESNAME, TimeResource.class);
 		ValueResourceHelper.setCreate(requestCalc, DeviceHandlerBase.blockShiftingUntil-1000);
 		return result;
@@ -950,7 +954,17 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static long getNextDecalcTime(String deCalcString, long now) {
-		String[] daySplit = deCalcString.split("\\s+");
+		long timeInWeek = getDecalcTimeInWeek(deCalcString);
+		if(timeInWeek < 0)
+			return 0;
+		long nowStartOfWeek = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.WEEK);
+		long result = nowStartOfWeek + timeInWeek;
+		if(result <= now)
+			return result + 7*TimeProcUtil.DAY_MILLIS;
+		else
+			return result;
+		
+		/*String[] daySplit = deCalcString.split("\\s+");
 		if(daySplit.length != 2)
 			return 0;
 		int dayOfWeekIdx = 0;
@@ -980,9 +994,36 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				return result;
 		} catch(NumberFormatException e) {
 			return 0;
-		}
-		
+		}*/
 	}
+	
+	public static long getDecalcTimeInWeek(String deCalcString) {
+		String[] daySplit = deCalcString.split("\\s+");
+		if(daySplit.length != 2)
+			return -1;
+		int dayOfWeekIdx = 0;
+		boolean found = false;
+		for(String dayStr: dayOfWeekStr) {
+			if(dayStr.equals(daySplit[0])) {
+				found = true;
+				break;
+			}
+			dayOfWeekIdx++;
+		}
+		if(!found)
+			return -1;
+		String[] hourSplit = daySplit[1].split(":");
+		if(hourSplit.length != 2)
+			return -1;
+		try {
+			int hours = Integer.parseInt(hourSplit[0]);
+			int minutes = Integer.parseInt(hourSplit[1]);
+			return dayOfWeekIdx*TimeProcUtil.DAY_MILLIS + hours*TimeProcUtil.HOUR_MILLIS + minutes*TimeProcUtil.MINUTE_MILLIS;
+		} catch(NumberFormatException e) {
+			return -1;
+		}		
+	}
+
 	/** 
 	 * 
 	 * @param object

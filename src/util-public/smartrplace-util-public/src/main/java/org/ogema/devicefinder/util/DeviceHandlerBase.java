@@ -53,6 +53,9 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 
 	public static final String REQUEST_LAST_DECALC_RESNAME = "requestLastDecalcCalculation";
 	public static final String REQUEST_DECALC_AFTER_RESNAME = "requestDecalcAfter";
+	public static final String LAST_DECALC_CALCULATED_RESNAME = "lastDecalc";
+	public static final String LAST_DECALC_CALCULATED_VESONLY_RESNAME = "lastDecalcVESOnly";
+	public static final String DECALC_FEEDBACK_RESNAME = "DECALC_FEEDBACK_EFFECTIVE";
 	
 	/** You have to provide a resource pattern to find the devices that shall be processed by the
 	 * {@link DeviceHandlerProvider}. If there are also other DeviceHandlerProviders working on the
@@ -291,7 +294,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			return false;
 		}
 		if(val == 5) {
-			TimeResource lastDecalc = dev.valve().getSubResource("lastDecalc", TimeResource.class);
+			TimeResource lastDecalc = dev.valve().getSubResource(LAST_DECALC_CALCULATED_RESNAME, TimeResource.class);
 			if(lastDecalc == null)
 				return true;
 			if(now - lastDecalc.getValue() > 30*TimeProcUtil.DAY_MILLIS) {
