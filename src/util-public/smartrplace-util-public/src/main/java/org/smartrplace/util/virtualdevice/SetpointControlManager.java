@@ -29,6 +29,7 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManager.WritePrioLevel;
 
+import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
@@ -562,9 +563,13 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 						if(resenddata.valueFeedbackPendingObject != null) {
 							success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valueFeedbackPendingObject,
 									WritePrioLevel.CONDITIONAL, false, false);							
+							log.debug("Resending object for "+resenddata.setpoint().getLocation()+
+									" with interval sec:"+(resenddata.pendingTimeForMissingFeedback/1000));
 						} else try {
 							success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valueFeedbackPending,
 								WritePrioLevel.CONDITIONAL, false, false);
+							log.debug("Resending val "+String.format("%.1f", (float)resenddata.valuePending)+" for "+resenddata.setpoint().getLocation()+
+									" with interval sec:"+(resenddata.pendingTimeForMissingFeedback/1000));
 						} catch(NullPointerException e) {
 							String text = "Resend failed";
 							if(resenddata.setpoint() != null)
@@ -599,12 +604,17 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					//NOTE: valuePending is set already so we do not have to indicate resend, will take place anyways if no success.
 					resenddata.pendingTimeForMissingFeedback = (long) (RESEND_INCREASE_FACTOR * (double)resenddata.pendingTimeForMissingFeedback);
 					boolean success;
-					if(resenddata.valueFeedbackPendingObject != null)
+					if(resenddata.valueFeedbackPendingObject != null) {
 						success = requestSetpointWrite((T) resenddata.setpoint(), Float.NaN, resenddata.valuePendingObject,
 								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, DEFAULT_MIN_INTERVAL_BETWEEN_WRITES);
-					else
+						log.debug("Retry to send of object for "+resenddata.setpoint().getLocation()+
+								" with interval sec:"+(pendingTimeForRetry/1000));
+					} else {
 						success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valuePending, null,
 								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, 5000l);
+						log.debug("Retry to send of val "+String.format("%.1f", (float)resenddata.valuePending)+" for "+resenddata.setpoint().getLocation()+
+								" with interval sec:"+(pendingTimeForRetry/1000));
+					}
 					if(success) {
 						resenddata.valuePending = null;
 						resenddata.lastSent = now;

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.TimeResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceValueListener;
@@ -34,6 +35,9 @@ public interface TemperatureControlDev extends TemperatureControlBase {
     	/** When auto-mode is activated we do not accept manual values for some time*/
     	public long blockedForRemoteManualUntil = -1;
     	public boolean requestedManuMode = false;
+    	public long blockedForOnThermostatManuModeSwitchUntil = -1;
+    	public IntegerResource controlMode = null;
+		public IntegerResource controlModeFeedback = null;
     	
     	public LogicProviderTP logicProvider = null;
 		public ThermostatPatternExtension(ApplicationManager appMan, TimeResource manualRetard) {
