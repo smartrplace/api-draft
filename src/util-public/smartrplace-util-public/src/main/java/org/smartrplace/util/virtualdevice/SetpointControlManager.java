@@ -568,7 +568,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 						} else try {
 							success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valueFeedbackPending,
 								WritePrioLevel.CONDITIONAL, false, false);
-							log.debug("Resending val "+String.format("%.1f", (float)resenddata.valuePending)+" for "+resenddata.setpoint().getLocation()+
+							log.debug("Resending val "+String.format("%.1f", (float)resenddata.valueFeedbackPending)+" for "+resenddata.setpoint().getLocation()+
 									" with interval sec:"+(resenddata.pendingTimeForMissingFeedback/1000));
 						} catch(NullPointerException e) {
 							String text = "Resend failed";
