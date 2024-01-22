@@ -912,6 +912,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		String val = getDecalcString(destTime);
 		if(val != null) {
 			setCreate(res, val, gwSync);
+			System.out.println("Setting Decalc Time with gwSync set:"+(gwSync != null));
 			//ValueResourceHelper.setCreate(res, val);
 		}
 		return val;
@@ -1117,7 +1118,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			if(gwSync != null)
 				gwSync.create(fres);
 			return true;
-		}
+		} else if(gwSync != null)
+			gwSync.create(fres);
 		fres.setValue(value);
 		return false;
 	}
@@ -1128,7 +1130,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			if(gwSync != null)
 				gwSync.create(fres);
 			return true;
-		}
+		} else if(gwSync != null)
+			gwSync.create(fres);
 		fres.setValue(value);
 		return false;
 	}
@@ -1136,10 +1139,12 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static boolean setCreate(StringResource fres, String value, GatewaySyncResourceService gwSync) {
 		if(!fres.exists()) {
 			ValueResourceHelper.setCreate(fres,  value);
-			if(gwSync != null)
+			if(gwSync != null) {
 				gwSync.create(fres);
+			}
 			return true;
-		}
+		} else if(gwSync != null)
+			gwSync.create(fres);
 		fres.setValue(value);
 		return false;
 	}
