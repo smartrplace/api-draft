@@ -1118,8 +1118,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			if(gwSync != null)
 				gwSync.create(fres);
 			return true;
-		} else if(gwSync != null)
-			gwSync.create(fres);
+		} //else if(gwSync != null)
+		//	gwSync.create(fres);
 		fres.setValue(value);
 		return false;
 	}
@@ -1130,8 +1130,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			if(gwSync != null)
 				gwSync.create(fres);
 			return true;
-		} else if(gwSync != null)
-			gwSync.create(fres);
+		} //else if(gwSync != null)
+		//	gwSync.create(fres);
 		fres.setValue(value);
 		return false;
 	}
@@ -1143,8 +1143,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				gwSync.create(fres);
 			}
 			return true;
-		} else if(gwSync != null)
-			gwSync.create(fres);
+		} //else if(gwSync != null)
+		//	gwSync.create(fres);
 		fres.setValue(value);
 		return false;
 	}
