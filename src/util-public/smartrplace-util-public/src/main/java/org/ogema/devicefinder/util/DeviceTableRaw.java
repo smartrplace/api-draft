@@ -941,9 +941,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			dayOfWeekIdx++;
 			if(dayOfWeekIdx > 6)
 				dayOfWeekIdx = 0;
-			result = dayOfWeekStr[(int) dayOfWeekIdx]+" "+hourOfDay+":30";
+			result = dayOfWeekStr[(int) dayOfWeekIdx]+" "+String.format("%02d", hourOfDay)+":30";
 		} else {
-			result += " "+(hourOfDay+1)+":00";
+			result += " "+String.format("%02d", hourOfDay+1)+":00";
 		} return result;
 	}
 	
