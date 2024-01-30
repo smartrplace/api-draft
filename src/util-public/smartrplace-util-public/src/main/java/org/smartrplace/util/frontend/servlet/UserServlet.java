@@ -1216,4 +1216,8 @@ System.out.println("SUFIBSD");
 			ValueResourceHelper.setCreate(
 					ResourceHelper.getLocalDevice(appMan).logFileCheckNotification(), exceptionCode);
 	}
+	
+	public static void resetLogFileCheckNotification(ApplicationManager appMan) {
+		ResourceHelper.getLocalDevice(appMan).logFileCheckNotification().setValue(0);		
+	}
 }
