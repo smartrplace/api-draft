@@ -721,7 +721,13 @@ public class UserServlet extends HttpServlet {
 		List<T> allObj;
 		try {
 			allObj = new ArrayList<>(pageprov.getAllObjects(user));
+			int idxDebug = -1;
 			for(T obj: allObj) {
+				idxDebug++;
+				if(obj == null) {
+					logger.warn("getAllObjects has null entry from pageProv:"+pageprov.getClass().getName()+" user:"+user+" idx:"+idxDebug);
+					continue;
+				}
 				String id = pageprov.getObjectId(obj);
 				//int numIdNew = id.hashCode();
 				num2StringPut(id, pageprov.objectIdPostiveOnly());			
