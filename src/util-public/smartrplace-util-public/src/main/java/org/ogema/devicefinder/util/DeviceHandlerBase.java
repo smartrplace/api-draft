@@ -56,6 +56,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	public static final String LAST_DECALC_CALCULATED_RESNAME = "lastDecalc";
 	public static final String LAST_DECALC_CALCULATED_VESONLY_RESNAME = "lastDecalcVESOnly";
 	public static final String DECALC_FEEDBACK_RESNAME = "DECALC_FEEDBACK_EFFECTIVE";
+	public static final String MAX_NORMAL_TEMPERATURE_RESNAME = "maxNormalTemperature";
 	
 	/** You have to provide a resource pattern to find the devices that shall be processed by the
 	 * {@link DeviceHandlerProvider}. If there are also other DeviceHandlerProviders working on the
