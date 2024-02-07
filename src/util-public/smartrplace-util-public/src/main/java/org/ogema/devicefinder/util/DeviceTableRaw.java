@@ -578,6 +578,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return false;
 		if(isFALorFALMOT(resourceLocation))
 			return false;
+		if(isPeoplePassingDetector(resourceLocation))
+			return false;
 		if(resourceLocation.contains("maintenanceChannelReadings"))
 			return false;
 		if(resourceLocation.toLowerCase().startsWith("homematic"))
@@ -654,6 +656,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.toLowerCase().startsWith("homematic") && (
 				resourceLocation.contains("FAL230_") || resourceLocation.contains("FAL24_") ||resourceLocation.contains("FALMOT_")))
+			return true;
+		return false;
+	}
+
+	public static boolean isPeoplePassingDetector(String resourceLocation) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
+		if(resourceLocation.toLowerCase().startsWith("homematic") && (
+				resourceLocation.contains("/PASSAGE_DETECTOR_DIRECTION_TRANSMITTER_")))
 			return true;
 		return false;
 	}
