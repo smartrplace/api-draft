@@ -1185,6 +1185,10 @@ System.out.println("SUFIBSD");
 	}*/
 	public static void logException(Exception e, String fullUrl, int exceptionCode,
 			ApplicationManagerPlus appManPlus) {
+		logException(e, fullUrl, exceptionCode, appManPlus.appMan());
+	}
+	public static void logException(Exception e, String fullUrl, int exceptionCode,
+			ApplicationManager appMan) {
 		if(e == null) {
 			if(fullUrl != null)
 				UserServlet.logger.info("Servlet provider incident for: "+fullUrl);
@@ -1203,9 +1207,9 @@ System.out.println("SUFIBSD");
 				UserServlet.logger.info("Servlet provider exception "+exceptionCode+": ", e);
 		}		
 		
-		if(appManPlus != null)
+		if(appMan != null)
 			ValueResourceHelper.setCreate(
-					ResourceHelper.getLocalDevice(appManPlus.appMan()).logFileCheckNotification(), exceptionCode);
+					ResourceHelper.getLocalDevice(appMan).logFileCheckNotification(), exceptionCode);
 	}
 
 	public static void logGeneralReport(String message, int exceptionCode,
