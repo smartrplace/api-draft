@@ -23,6 +23,18 @@ public class TimeProcUtil {
 	public static final long DAY_MILLIS = 24*HOUR_MILLIS;
 	public static final long YEAR_MILLIS = (long)(365.25*DAY_MILLIS);
 
+	/** Standard delay for operations to perform when startup is finished. Usually a shorter time may be set
+	 * for testing. The short delay is foreseen for gateways in intial setup phase when startup should be fast
+	 * and gateway may be disconnected after short time.
+	 */
+	public static final long INIT_DELAY_SHORT = Long.getLong("org.ogema.timeseries.eval.simple.api.initdelay", 8*MINUTE_MILLIS);
+
+	/** Standard delay for operations to perform when startup is finished. Usually a shorter time may be set
+	 * for testing. The long delay is foreseen for gateways in normal operation when at least several hours can
+	 * be expected between startups.
+	 */
+	public static final long INIT_DELAY_LONG = Long.getLong("org.ogema.timeseries.eval.simple.api.initdelay", 20*MINUTE_MILLIS);
+	
 	public static final String PER_DAY_AV_EVAL = "AV_DAY";
 	public static final String PER_DAY_AV_SUFFIX = "_avPerDay";
 	//public static final String PER_WEEK_AV_EVAL = "AV_WEEK";
@@ -106,8 +118,8 @@ public class TimeProcUtil {
 	
 	public static final DPRoom unknownRoom = new DPRoomImpl(Datapoint.UNKNOWN_ROOM_ID,
 			Datapoint.UNKNOWN_ROOM_NAME);
-	
 
+	
 	/** Reference for meter building from power and Consumption2Meter values*/
 	public static class MeterReference {
 		public long referenceTime;
