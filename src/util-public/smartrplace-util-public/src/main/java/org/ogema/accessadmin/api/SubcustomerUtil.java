@@ -572,25 +572,30 @@ public class SubcustomerUtil {
 		/** get general heating start time in */
 		public long startTimeFromRoomData;
 		public long endTimeFromRoomData;
-		//public List<Long> startTimes;
-		//public List<Long> endTimes;
+		
+		/** Alternative evaluation of full startEndTimes of curve in
+		 * if RoomcontrolSetUtil.getSettingsBase is used with determineFullStartEndTimes=true
+		 */
+		public List<Long> startEndTimesFromRoomData;
+		
 		public float usageTemperature;
 		public float nonUsageTemperature;
-		
-		/*public List<Long> getStartTimes() {
-			return startTimes;
-		}
-		public List<Long> getEndTimes() {
-			return endTimes;
-		}*/
-		public float getUsageTemperature() {
-			return usageTemperature;
-		}
-		public float getNonUsageTemperature() {
-			return nonUsageTemperature;
-		}		
 	}
 
+	public static long getStartTimeStatic(Map<Integer, List<Long>> startEndTimes) {
+		List<Long> workingdayTime = startEndTimes.get(HeatCoolData.STARTEND_WORKINGDAY_IDX);
+		if(workingdayTime == null || workingdayTime.isEmpty())
+			return 1440*TimeProcUtil.MINUTE_MILLIS;
+		return workingdayTime.get(0);
+	}
+
+	public static long getEndTimeStatic(Map<Integer, List<Long>> startEndTimes) {
+		List<Long> workingdayTime = startEndTimes.get(HeatCoolData.STARTEND_WORKINGDAY_IDX);
+		if(workingdayTime == null || (workingdayTime.size() < 2))
+			return 1440*TimeProcUtil.MINUTE_MILLIS;
+		return workingdayTime.get(1);
+	}
+	
 	public static void addRoomToGroup(Room object, BuildingPropertyUnit bu) {
 		ResourceListHelper.addReferenceUnique(bu.rooms(), object);
 	}
