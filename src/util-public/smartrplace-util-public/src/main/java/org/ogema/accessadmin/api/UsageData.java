@@ -13,6 +13,7 @@ public class UsageData extends SettingsBaseData {
 	
 	/** Day type -> even-idx: startTime, odd-idx: endTime*/
 	public Map<Integer, List<Long>> startEndTimes = new HashMap<>();
+	public boolean isCurveSimple = true;
 	
 	public List<Long> getStartEndTimesMonday() {
 		return startEndTimes.get(0);

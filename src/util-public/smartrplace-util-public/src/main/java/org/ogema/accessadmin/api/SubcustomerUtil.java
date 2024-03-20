@@ -580,6 +580,8 @@ public class SubcustomerUtil {
 		
 		public float usageTemperature;
 		public float nonUsageTemperature;
+		
+		public boolean isSimpleCurve = true;
 	}
 
 	public static long getStartTimeStatic(Map<Integer, List<Long>> startEndTimes) {
