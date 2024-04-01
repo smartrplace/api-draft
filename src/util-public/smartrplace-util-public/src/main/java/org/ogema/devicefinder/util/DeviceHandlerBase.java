@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
+import org.ogema.accessadmin.api.SubcustomerUtil;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
@@ -44,6 +45,8 @@ import org.ogema.model.sensors.GenericBinarySensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.external.accessadmin.config.OnsiteVisitData;
+import org.smartrplace.external.accessadmin.config.SubCustomerSuperiorData;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
@@ -278,8 +281,27 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		return isAutoModeAllowed(dev, configPending, hwConfig.autoThermostatMode());
 	}
 	
+	public static Long isAutoDecalcBlockedUntil(long now, ApplicationManager appMan) {
+		final SubCustomerSuperiorData database = SubcustomerUtil.getEntireBuildingSubcustomerDatabase(appMan);
+		if (database == null) {
+			return null;
+		}
+		for(OnsiteVisitData visit : database.onSiteVisits().getAllElements()) {
+			if(!visit.blockAutoDecalcForDays().isActive())
+				continue;
+			if(now < visit.date().getValue())
+				continue;
+			long endVal = visit.date().getValue() +
+					(long)(TimeProcUtil.DAY_MILLIS * visit.blockAutoDecalcForDays().getValue());
+			if(now < endVal)
+				return endVal;
+		}
+		return null;
+	}
+
 	public static long blockShiftingUntil = -1;
-	public static boolean performWeeklyPostpone(Thermostat dev,HardwareInstallConfig hwConfig, long now) {
+	public static boolean performWeeklyPostpone(Thermostat dev,HardwareInstallConfig hwConfig, long now,
+			ApplicationManager appMan) {
 		if(hwConfig == null)
 			return Boolean.getBoolean("org.smartrplace.homematic.devicetable.autostart.shiftdecalc");		
 		int val = hwConfig.weeklyPostponeMode().getValue();
@@ -301,6 +323,9 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			if(now - lastDecalc.getValue() > 30*TimeProcUtil.DAY_MILLIS) {
 				//request recalc
 				TimeResource requestCalc = dev.valve().getSubResource(REQUEST_LAST_DECALC_RESNAME, TimeResource.class);
+				Long blockedByOnsite = (appMan != null)?isAutoDecalcBlockedUntil(now, appMan):null;
+				if(blockedByOnsite != null)
+					return true;
 				if(requestCalc.getValue() > now)
 					return false;
 				long nextScheduled = DeviceTableRaw.getNextDecalcTime(dev, now);

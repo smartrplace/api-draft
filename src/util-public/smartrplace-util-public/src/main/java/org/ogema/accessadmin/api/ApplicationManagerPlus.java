@@ -110,11 +110,39 @@ public class ApplicationManagerPlus {
 		this.dataRecorder = dataRecorder;
 	}
 	
+	private static GatewaySyncResourceService gwSyncServicePublic = null;
+	public static void setGwSyncServicePublic(GatewaySyncResourceService gwSyncService) {
+		gwSyncServicePublic = gwSyncService;
+	}
 	public GatewaySyncResourceService gwSyncService() {
-		return gwSyncService;
+		if(gwSyncService != null)
+			return gwSyncService;
+		return gwSyncServicePublic;
 	}
 	public void setGwSyncService(GatewaySyncResourceService gwSyncService) {
 		this.gwSyncService = gwSyncService;
 	}
+	
+	public static interface AlarmingUpdater {
+		void updateAlarming();
+		
+		/** Update alarming with some delay leaving time for further changes to take place*/
+		void updateAlarmingWithRetard();
+		
+		/** Trigger an update of alarming, but allow some retard for more configuration changes to be applied
+		 * 
+		 * @param maximumRetard
+		 * @param restartWithNewCall if true and not another call with this flag set false is pending then the
+		 * 		maximumRetard is reset
+		 */
+		//void updateAlarming(long maximumRetard, boolean restartWithNewCall);
+	}
 
+	private static AlarmingUpdater alarmingUpdater;
+	public void setAlarmingUpdater(AlarmingUpdater alarmingUpdater) {
+		ApplicationManagerPlus.alarmingUpdater = alarmingUpdater;
+	}
+	public AlarmingUpdater alarmingUpdater() {
+		return alarmingUpdater;
+	}
 }

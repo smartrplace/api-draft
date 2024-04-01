@@ -305,8 +305,8 @@ public class ObjectGUIHelperBase<T> {
 					return display;
 				}
 				@Override
-				protected void setResourceValue(S resource, String value, List<String> displayedValues) {
-					if(valuesToSet == null) super.setResourceValue(resource, value, displayedValues);
+				protected void setResourceValue(S resource, String value, List<String> displayedValues, OgemaHttpRequest req) {
+					if(valuesToSet == null) super.setResourceValue(resource, value, displayedValues, req);
 					for(Entry<String, String> e: valuesToSet.entrySet()) {
 						if(e.getValue().equals(value)) {
 							ValueResourceUtils.setValue(resource, e.getKey());
@@ -339,8 +339,8 @@ public class ObjectGUIHelperBase<T> {
 					return display;
 				}
 				@Override
-				protected void setResourceValue(S resource, String value, List<String> displayedValues) {
-					if(valuesToSet == null) super.setResourceValue(resource, value, displayedValues);
+				protected void setResourceValue(S resource, String value, List<String> displayedValues, OgemaHttpRequest req) {
+					if(valuesToSet == null) super.setResourceValue(resource, value, displayedValues, req);
 					for(Entry<String, String> e: valuesToSet.entrySet()) {
 						if(e.getValue().equals(value)) {
 							ValueResourceUtils.setValue(resource, e.getKey());

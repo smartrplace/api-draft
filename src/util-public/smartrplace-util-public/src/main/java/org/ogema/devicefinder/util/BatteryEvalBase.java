@@ -8,10 +8,12 @@ import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.AppID;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.model.devices.storage.ElectricityStorage;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.message.MessageImpl;
@@ -267,6 +269,44 @@ public class BatteryEvalBase {
 		return result;
 	}
 
+	public static BatteryStatusPlus getBatteryStatus(PhysicalElement dev, Long now) {
+		return getBatteryStatus(dev, false, now);
+	}
+	public static BatteryStatusPlus getBatteryStatus(PhysicalElement dev, boolean forceSOCTest,
+			Long now) {
+		VoltageResource bat = DeviceHandlerBase.getBatteryVoltage(dev);
+		if(bat != null && bat.isActive() && (!forceSOCTest)) {
+			return BatteryEvalBase.getBatteryStatusPlus(bat, true, now);
+		} 
+		FloatResource batSOC = dev.getSubResource("battery", ElectricityStorage.class).chargeSensor().reading();
+		if(batSOC != null && batSOC.isActive()) {
+			return BatteryEvalBase.getBatteryStatusSOCPlus(batSOC, true, now);
+		}
+		BatteryStatusPlus result = new BatteryStatusPlus();
+		if(now != null) {
+			BooleanResource batteryStatus = DeviceHandlerBase.getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
+					"batteryLow", BooleanResource.class);
+			if(batteryStatus != null) {
+				//TODO: Take into account main sensor value to check if device 
+				// is online => if last status value is far in the past => OK again, then batteryStatus needs to be set back to false
+				// if recent, then URGENT, if last value is false and far, then OK
+				long lastStatusAgo = now - batteryStatus.getLastUpdateTime(); 
+				if(lastStatusAgo > TimeProcUtil.DAY_MILLIS) {
+					if(batteryStatus.getValue()) {
+						//TODO
+						result.status = BatteryStatus.EMPTY;
+					} else
+						result.status = BatteryStatus.OK;
+				} else if(batteryStatus.getValue()) {
+					result.status = BatteryStatus.URGENT;
+				}
+				return result;
+			}
+		}
+		result.status = BatteryStatus.UNKNOWN;
+		return result;
+	}
+	
 	/**
 	 * 
 	 * @param iad

@@ -13,10 +13,12 @@ import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.StringResource;
 import org.ogema.model.gateway.LocalGatewayInformation;
 import org.ogema.model.locations.BuildingPropertyUnit;
 import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.Configuration;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -26,6 +28,7 @@ import org.smartrplace.external.accessadmin.config.AccessConfigUser;
 import org.smartrplace.external.accessadmin.config.SubCustomerData;
 import org.smartrplace.external.accessadmin.config.SubCustomerSuperiorData;
 import org.smartrplace.gateway.device.GatewaySuperiorData;
+import org.smartrplace.util.virtualdevice.ChartsUtil;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
@@ -810,5 +813,61 @@ public class SubcustomerUtil {
 	@SuppressWarnings("deprecation")
 	public static StringResource getGatewayLinkOverviewUrl(SubCustomerSuperiorData subc, LocalGatewayInformation gwInfo) {
 		return subc != null? subc.gatewayLinkOverviewUrl():gwInfo.gatewayLinkOverviewUrl();
+	}
+
+	public static boolean showIdlemodeSwitch(SubCustomerData subc, ApplicationManager appMan) {
+		if(subc == null)
+			return Boolean.getBoolean("org.smartrplace.apps.heatcontrolservlet.servlet.idlemodeswitch.show");
+		SubCustomerSuperiorData subcDb = SubcustomerUtil.getDatabaseData(subc, appMan);
+		switch(subcDb.frontendMode().getValue()) {
+			case 1:
+			case 4:
+				return true;
+			case -1:
+			case 2:
+			case 3:
+				return false;
+		}
+		
+		return Boolean.getBoolean("org.smartrplace.apps.heatcontrolservlet.servlet.idlemodeswitch.show");
+	}
+	
+	public static boolean showReducedHeatPlan(SubCustomerData subc, ApplicationManager appMan) {
+		if(subc == null)
+			return Boolean.getBoolean("org.smartrplace.apps.heatcontrolservlet.servlet.setUsageData");
+		SubCustomerSuperiorData subcDb = SubcustomerUtil.getDatabaseData(subc, appMan);
+		switch(subcDb.frontendMode().getValue()) {
+			case 2:
+			case 4:
+				return true;
+			case 3:
+				return false;
+		}
+		
+		return Boolean.getBoolean("org.smartrplace.apps.heatcontrolservlet.servlet.setUsageData");
+	}
+
+	public static boolean isAutomatedManagementActive(SubCustomerData subcustUser,
+			ApplicationManager appMan) {
+		boolean isActive = false;
+		List<Room> rooms = getAllRoomsForSubcustomer(subcustUser, appMan);
+		for(Room uroom: rooms) {
+			Configuration rts = ChartsUtil.getRoomTemperatureSetting(uroom, appMan.getResourceAccess());
+			if(rts != null && (rts.getSubResource("roomIdleMode", IntegerResource.class).getValue() == 0))
+				isActive = true;
+		}
+		return isActive;
+	}
+	
+	public static void setAutomatedManagementActive(SubCustomerData subcustUser,
+			ApplicationManager appMan, boolean val) {
+		List<Room> rooms = getAllRoomsForSubcustomer(subcustUser, appMan);
+appMan.getLogger().info("Settings "+rooms.size()+" rooms to idleMode:"+val);
+		for(Room uroom: rooms) {
+			Configuration rts = ChartsUtil.getRoomTemperatureSetting(uroom, appMan.getResourceAccess());
+			if(rts != null)
+				ValueResourceHelper.setCreate(rts.getSubResource("roomIdleMode", IntegerResource.class), val?0
+						:Boolean.getBoolean("org.smartrplace.apps.heatcontrol.logic.globalIdleModeFull")?2:1);
+		}
 	}
 }
