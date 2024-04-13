@@ -167,6 +167,7 @@ public interface DatapointService {
 	 * @return
 	 */
 	Collection<InstallAppDevice> managedDeviceResouresForRoom(Room room);
+	Collection<InstallAppDevice> managedDeviceResouresForRoom(Room room, Class<? extends Resource> resourceType);
 	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId);
 	
 	/** Get resources managed by deviceHandler
