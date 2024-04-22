@@ -32,6 +32,8 @@ import org.ogema.core.channelmanager.measurements.ObjectValue;
 import org.ogema.core.channelmanager.measurements.StringValue;
 import org.ogema.core.channelmanager.measurements.Value;
 import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.IntegerResource;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.slf4j.Logger;
@@ -128,6 +130,7 @@ public class UserServlet extends HttpServlet {
 	}
  	
 	public static final String TimeSeriesServletImplClassName = "org.smartrplace.app.monbase.servlet.TimeseriesBaseServlet";
+	public static final String DEVICE_LOGFILECHECK_RESNAME = "deviceLogFileCheckNotification";
 	
 	public enum ReturnStructure {
 		/**In this case a list is returned with each element having an element named "key". Additional
@@ -1225,6 +1228,20 @@ System.out.println("SUFIBSD");
 		if(appMan != null)
 			ValueResourceHelper.setCreate(
 					ResourceHelper.getLocalDevice(appMan).logFileCheckNotification(), exceptionCode);
+	}
+	
+	public static void logDeviceReport(PhysicalElement device, String message, int exceptionCode) {
+		IllegalStateException etest = new IllegalStateException("exceptionCode:"+exceptionCode);
+		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
+			System.out.println(message);
+			UserServlet.logger.info("Device "+device.getLocation()+" report with exception code: "+exceptionCode+" ::"+message, etest);
+		} else {
+			UserServlet.logger.info("Device "+device.getLocation()+" report with exception code: "+exceptionCode+" ::"+message, etest);
+		}
+		
+		IntegerResource logFileCheckNot = device.getSubResource(DEVICE_LOGFILECHECK_RESNAME, IntegerResource.class);
+		ValueResourceHelper.setCreate(
+				logFileCheckNot, exceptionCode);		
 	}
 	
 	public static void resetLogFileCheckNotification(ApplicationManager appMan) {
