@@ -3,14 +3,12 @@ package org.smartrplace.apps.heatcontrol.extensionapi;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
-import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.core.resourcemanager.ResourceValueListener;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.transaction.ResourceTransaction;
-import org.ogema.model.actors.MultiSwitch;
 import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.TemperatureSensor;
@@ -20,9 +18,6 @@ import org.smartrplace.util.virtualdevice.HmSetpCtrlManagerTHIntTrigger;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManagerTHSetp;
 import org.smartrplace.util.virtualdevice.SetpointControlManager;
 import org.smartrplace.util.virtualdevice.SetpointControlManager.SetpointControlType;
-
-import de.iwes.util.resource.ValueResourceHelper;
-
 import org.smartrplace.util.virtualdevice.ThermostatAirconDefaultManager;
 
 public class ThermostatPattern extends ResourcePattern<Thermostat> { 
@@ -78,7 +73,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	public boolean receivedFirstFBValue = false;
 	public Boolean lastBangBangState = null;
 	
-    private ResourceValueListener<FloatResource> controlModeListener = null;
+    private ResourceValueListener<IntegerResource> controlModeListener = null;
     
     /**
 	 * Constructor for the access pattern. This constructor is invoked by the framework. Must be public
@@ -99,9 +94,9 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 			final IntegerResource controlModeCt = model.getSubResource("controlMode", IntegerResource.class);
 			final IntegerResource controlModeFb = model.getSubResource("controlModeFeedback", IntegerResource.class);
         	if(controlModeCt != null && controlModeFb != null && controlModeCt.isActive() && controlModeFb.isActive()) {
-            	controlModeListener = new ResourceValueListener<FloatResource>() {
+            	controlModeListener = new ResourceValueListener<IntegerResource>() {
             		@Override
-            		public void resourceChanged(FloatResource resource) {
+            		public void resourceChanged(IntegerResource resource) {
             			if(controlModeFb.getValue() != controlModeCt.getValue())
             				controlModeCt.setValue(controlModeCt.getValue());
             		}
