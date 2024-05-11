@@ -8,8 +8,12 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
+import org.ogema.model.extended.alarming.AlarmGroupData;
+import org.smartrplace.alarming.check.AlarmCheckConfigBase;
+import org.smartrplace.alarming.check.IssueAnalysisResultBase;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
 import de.iwes.widgets.html.form.label.Label;
@@ -151,6 +155,24 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default void initAlarmingForDevice(InstallAppDevice appDevice,
 			HardwareInstallConfig appConfigData) {}
 
+	/** This method is called each time an update of alarming settings is required by an application.
+	 * This method shall set all all alarming settings that are dynmic over time (e.g. seasonal settings)
+	 * or that depend on special settings outside the device.<br>
+	 * The method or its implementation usually shall be called within {@link #initAlarmingForDevice(InstallAppDevice, HardwareInstallConfig)}
+	 * to make sure dynamic settings are initated automatically. As this method may be required to be called before
+	 * activating the alarming resource this is not done by the framework.
+	 * @param knownDevice
+	 * @param appConfigData
+	 * @param multiDeviceData if settings for more than one device need to be updated it may help
+	 * 		efficiency to transfer common information. The first device will always be called
+	 * 		with the paramater being null, but may return an object, which will be given to any
+	 * 		subsequent call for another device. If a new object is returned by a subsequent call this
+	 * 		is used for the followings
+	 * @return new common-data object (see multiDeviceData)
+	 */
+	default Object updateAlarmingSettings(InstallAppDevice knownDevice, HardwareInstallConfig appConfigData,
+			Object multiDeviceData) {return null;}	
+	
 	/** If true then the devices attached to this DeviceHandler will be synched from a subgateway to 
 	 * superior if applicable
 	 */
@@ -187,4 +209,32 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default InstallAppDevice getNetworkParent(InstallAppDevice knownDevice) {
 		return null;
 	}
+	
+	/** This method shall be called as frequently as new actions can be taken on an issue. A typical frequency is once daily
+	 * and additional calls by manual request. More frequent calls may be made for special applications etc. Them method shall
+	 * also be called when actions taken are expected to be finished to check if the action is now in actionsDone or more
+	 * actions need to be taken.<br>
+	 * The service shall automatically determine previous analysis results and take them into account. If issues are not assigned
+	 * then typically an automated assignment and comment setting may be performed. If possible also actions and release
+	 * recommended is given directly. Execution and releases are not done by the service itself, though. This allows for
+	 * introducing another step of manual checking before such actions. The service may make changes to device and alarming
+	 * settings, but does not restart the alarming service or call
+	 * {@link DeviceHandlerProviderDP#updateAlarmingSettings(InstallAppDevice, org.smartrplace.apps.hw.install.config.HardwareInstallConfig, Object)}.<br>
+	 * 
+	 * @param device may be null if device is not available anymore. Implementations shall be able to reject this analysis returning
+	 * 		{@link IssueStatus#REQUIRES_DEVICE}
+	 * @param issue issue to be analyzed
+	 * @param iad InstallAppDevice for device
+	 * @param mes original message when alarm was sent
+	 * @param releaseDirectly if true the issue may be released directly if possible
+	 * @param blockedByOnsiteVisitUntil notification on blocking period of critical actions
+	 * @param config application-specific configuration
+	 * @param gwSync service for synchronization
+	 * @param now current time
+	 */
+	default IssueAnalysisResultBase analyzeIssueStatus(T device, AlarmGroupData issue, InstallAppDevice iad, String mes,
+			boolean releaseDirectly, Long blockedByOnsiteVisitUntil, AlarmCheckConfigBase config,
+			GatewaySyncResourceService gwSync, long now)
+		{return null;}
+
 }

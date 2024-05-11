@@ -11,6 +11,7 @@ import org.ogema.messaging.api.MessageTransport;
 import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.tools.app.useradmin.api.UserDataAccess;
+import org.smartrplace.alarming.check.StandardActionForType;
 import org.smartrplace.alarming.escalation.util.EscalationManagerI;
 import org.smartrplace.alarming.escalation.util.EscalationProvider;
 import org.smartrplace.apps.hw.install.config.DeviceTypeData;
@@ -237,4 +238,8 @@ public interface DatapointService {
 	/** Use this method to pre-register even if EscalationManager is not yet available*/
 	void registerEscalationProvider(EscalationProvider prov);
 	EscalationProvider unregisterEscalationProvider(EscalationProvider prov);
+	
+	void registerAction(String id, StandardActionForType<?> action);
+	StandardActionForType<?> unregisterStandardAction(String id);
+	StandardActionForType<?> getAction(String id);
 }
