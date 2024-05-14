@@ -9,7 +9,6 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
 import org.ogema.model.extended.alarming.AlarmGroupData;
-import org.smartrplace.alarming.check.AlarmCheckConfigBase;
 import org.smartrplace.alarming.check.IssueAnalysisResultBase;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -233,7 +232,7 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * @param now current time
 	 */
 	default IssueAnalysisResultBase analyzeIssueStatus(T device, AlarmGroupData issue, InstallAppDevice iad, String mes,
-			boolean releaseDirectly, Long blockedByOnsiteVisitUntil, AlarmCheckConfigBase config,
+			boolean releaseDirectly, Long blockedByOnsiteVisitUntil, int autoAction,
 			GatewaySyncResourceService gwSync, long now)
 		{return null;}
 
