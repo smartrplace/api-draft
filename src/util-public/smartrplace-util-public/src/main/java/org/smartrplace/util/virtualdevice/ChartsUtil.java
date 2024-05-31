@@ -288,6 +288,10 @@ public class ChartsUtil {
 		public ScheduleViewerOpenButton plotButton;
 	}
 	
+	public static interface PlotButtonActionProvider {
+		void openPlot(OgemaHttpRequest req);
+	}
+	
 	public static final String DATAPOINT_INFO_HEADER = "DP/Log/Transfer/Tmpl";
 	/** Create widgets for a plotButton. The dataPointInfoLabel is directly added to the row if requested,
 	 * the plotButton needs to be added to the row by separate operation
@@ -313,8 +317,19 @@ public class ChartsUtil {
 			DeviceHandlerProviderDP<?> devHand,
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
 			ResourceList<DataLogTransferInfo> datalogs) {
+		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv,
+				datalogs, (PlotButtonActionProvider)null);
+	}
+	public static GetPlotButtonResult getPlotButton(String id, final InstallAppDevice object,
+			final DatapointService dpService, final ApplicationManager appMan,//final HardwareInstallController controller2,
+			boolean addDataPointInfoLabel,
+			ObjectResourceGUIHelper<?, ?> vh, Row row, OgemaHttpRequest req,
+			DeviceHandlerProviderDP<?> devHand,
+			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
+			ResourceList<DataLogTransferInfo> datalogs,
+			PlotButtonActionProvider prov) {
 		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv, datalogs, null,
-				vh.getParent());
+				vh.getParent(), prov);
 	}
 	
 	public static GetPlotButtonResult getPlotButtonBase(String id, final InstallAppDevice object,
@@ -322,7 +337,7 @@ public class ChartsUtil {
 			OgemaWidget parent, Row row, OgemaHttpRequest req,
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv) {
 		DeviceHandlerProviderDP<Resource> devHand = dpService.getDeviceHandlerProvider(object);
-		return getPlotButton(id, object, dpService, appMan, false, null, row, req, devHand, schedViewProv, null, null, parent);
+		return getPlotButton(id, object, dpService, appMan, false, null, row, req, devHand, schedViewProv, null, null, parent, null);
 	}
 
 	public static GetPlotButtonResult getPlotButton(String id, final InstallAppDevice object,
@@ -334,7 +349,7 @@ public class ChartsUtil {
 			ResourceList<DataLogTransferInfo> datalogs,
 			Collection<Datapoint> datapointsToUse) {
 		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv, datalogs, datapointsToUse,
-				vh.getParent());
+				vh.getParent(), null);
 	}
 
 	public static GetPlotButtonResult getPlotButton(String id, final InstallAppDevice object,
@@ -344,10 +359,11 @@ public class ChartsUtil {
 			DeviceHandlerProviderDP<?> devHand,
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
 			ResourceList<DataLogTransferInfo> datalogs,
-			Collection<Datapoint> datapointsToUse, OgemaWidget parent) {
+			Collection<Datapoint> datapointsToUse, OgemaWidget parent,
+			PlotButtonActionProvider prov) {
 		IntervalConfiguration itv = IntervalConfiguration.getDefaultDuration(IntervalConfiguration.ONE_DAY, appMan);
 		return getPlotButton(id, object, dpService, appMan, addDataPointInfoLabel, vh, row, req, devHand, schedViewProv,
-				datalogs, datapointsToUse, itv, parent, "Plot");
+				datalogs, datapointsToUse, itv, parent, "Plot", prov);
 	}
 	/**
 	 * 
@@ -374,7 +390,7 @@ public class ChartsUtil {
 			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
 			ResourceList<DataLogTransferInfo> datalogs,
 			Collection<Datapoint> datapointsToUse, IntervalConfiguration itv, OgemaWidget parent,
-			String buttonText) {
+			String buttonText, PlotButtonActionProvider prov) {
 		final GetPlotButtonResult resultMain = new GetPlotButtonResult();
 		
 		resultMain.devHand = devHand;
@@ -421,6 +437,8 @@ public class ChartsUtil {
 				
 				@Override
 				public List<TimeSeriesData> getData(OgemaHttpRequest req) {
+					if(prov != null)
+						prov.openPlot(req);
 					List<TimeSeriesData> result = new ArrayList<>();
 					OgemaLocale locale = req!=null?req.getLocale():null;
 					if(resultMain.datapoints2 == null) {
@@ -437,6 +455,7 @@ public class ChartsUtil {
 						tsdExt.type = dp.getGaroDataType();
 						result.add(tsdExt);
 					}
+					
 					return result;
 				}
 			};

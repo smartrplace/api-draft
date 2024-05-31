@@ -188,7 +188,7 @@ public interface DatapointService {
 	/** This handler also provides access to Driver Properties*/
 	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(InstallAppDevice installAppDeviceRes);
 	<T extends Resource> DeviceHandlerProviderDP<T> getDeviceHandlerProvider(String devHandId);
-	DeviceTypeData getDeviceHandlerProviderResourceData(String devHandId, boolean createIfMissing);
+	//DeviceTypeData getDeviceHandlerProviderResourceData(String devHandId, boolean createIfMissing);
 	
 	List<DeviceHandlerProviderDP<?>> getDeviceHandlerProviders();
 	
