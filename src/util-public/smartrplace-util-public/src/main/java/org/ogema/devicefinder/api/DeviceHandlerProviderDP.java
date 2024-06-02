@@ -12,6 +12,7 @@ import org.ogema.model.extended.alarming.AlarmGroupData;
 import org.smartrplace.alarming.check.IssueAnalysisResultBase;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.external.accessadmin.config.SubCustomerSuperiorData;
 import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
@@ -209,6 +210,21 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 		return null;
 	}
 	
+	public static class AnalyzeIssueStatusInput {
+		public Resource device;
+		public AlarmGroupData issue;
+		public InstallAppDevice iad;
+		public DeviceHandlerProviderDP<?> devHand;
+		public String mes;
+		public boolean releaseDirectly;
+		public Long blockedByOnsiteVisitUntil;
+		public int autoAction;
+		public GatewaySyncResourceService gwSync;
+		public long now;
+		
+		public SubCustomerSuperiorData tenantData;
+	}
+	
 	/** This method shall be called as frequently as new actions can be taken on an issue. A typical frequency is once daily
 	 * and additional calls by manual request. More frequent calls may be made for special applications etc. Them method shall
 	 * also be called when actions taken are expected to be finished to check if the action is now in actionsDone or more
@@ -227,13 +243,24 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * @param mes original message when alarm was sent
 	 * @param releaseDirectly if true the issue may be released directly if possible
 	 * @param blockedByOnsiteVisitUntil notification on blocking period of critical actions
+	 * @param autoAction :  Auto Action and Release mode <br>
+	 *        0: Auto analysis only<br>
+	 *        1: Block Auto analysis<br>
+	 *        2: Auto Action, no release<br>
+	 *        3: Auto Action and release if decalc possible<br>
+	 *        4: Auto Action, release or set email reminder daily/weekly<br>		
+	 *        5: Auto Action, release or set email reminder weekly<br>		
+	 *        6: Auto Action, release or set blocking for check onsite<br> 
 	 * @param config application-specific configuration
 	 * @param gwSync service for synchronization
 	 * @param now current time
 	 */
-	default IssueAnalysisResultBase analyzeIssueStatus(T device, AlarmGroupData issue, InstallAppDevice iad, String mes,
+	default IssueAnalysisResultBase analyzeIssueStatus(AnalyzeIssueStatusInput in)
+		{return null;}
+
+	/*default IssueAnalysisResultBase analyzeIssueStatus(T device, AlarmGroupData issue, InstallAppDevice iad, String mes,
 			boolean releaseDirectly, Long blockedByOnsiteVisitUntil, int autoAction,
 			GatewaySyncResourceService gwSync, long now)
-		{return null;}
+		{return null;}*/
 
 }

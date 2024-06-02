@@ -373,7 +373,7 @@ public class ChartsUtil {
 	 * @param appMan
 	 * @param addDataPointInfoLabel
 	 * @param vh
-	 * @param row
+	 * @param row may be null if addDataPointInfoLabel=false
 	 * @param req
 	 * @param devHand
 	 * @param schedViewProv
