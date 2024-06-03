@@ -72,6 +72,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 
 	public static enum DownSamplingMode {
 		AVERAGE,
+		AVERAGE_COUNTBASED,
 		/** If more than one value is used to calculate a downsampled value the minimum and the maximum are both included*/
 		MINMAX,
 	}
@@ -160,6 +161,14 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	public JSONVarrRes getJSON(String user, String key) {
 		JSONObject json = new JSONObject();
 		Integer valueDist = UserServlet.getInteger("valueDist", paramMap);
+		String sampleMode = UserServlet.getParameter("samplingMode", paramMap);
+		final DownSamplingMode mode;
+		if("averaging".equals(sampleMode))
+			mode = DownSamplingMode.AVERAGE;
+		else if("avergingCountBased".equals(sampleMode))
+			mode = DownSamplingMode.AVERAGE_COUNTBASED;
+		else
+			mode = DownSamplingMode.MINMAX;
 		//json.put("name", name); //res.name().getValue());
 		long[] startEnd;
 		//if(startTime != null) {
@@ -222,7 +231,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			if(structureStr != null && structureStr.equals("tslist"))
 				structList = true;
 		}
-		SampledToJSonResult mainRes = smapledValuesToJson(vals, valueDist, valueDist==null?null:DownSamplingMode.MINMAX,
+		SampledToJSonResult mainRes = smapledValuesToJson(vals, valueDist, mode, //valueDist==null?null:DownSamplingMode.MINMAX,
 				structList, shortXY, pData.suppressNan, factor, offset, startEnd[1]+30*TimeProcUtil.DAY_MILLIS);
 		json.put("values", mainRes.arr);
 		if(mainRes.errorTs != null) {
@@ -438,13 +447,28 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		sched.deleteValues(start, end);
 	}
 
-	/** Structure for passing on downsampling information from one input sample to the next one*/
-	static class DownSamplingData {
+	static class TSReductionData{
 		long lastTs = -1; //time stamp of last SampledValue written
 		Long lastTsCollected = null; //time stamp of last input SampledValue processed IF it is not part of an output value yet
+		boolean suppressNaN;		
+	}
+	
+	/** Structure for passing on downsampling information from one input sample to the next one*/
+	static class DownSamplingData extends TSReductionData {
 		float maxVal = -Float.MAX_VALUE;
-		float minVal = -Float.MAX_VALUE;
-		boolean suppressNaN;
+		float minVal = Float.MAX_VALUE;
+	}
+
+	static class AveragingDataCountBased extends TSReductionData {
+		float sum = 0;
+		int count = 0;
+		//float result = Float.NaN;
+	}
+
+	static class AveragingDataTimeBased extends TSReductionData {
+		double sum = 0;
+		long count = 0;
+		//float result = Float.NaN;
 	}
 
 	public static class SampledToJSonResult {
@@ -467,13 +491,19 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 */
 	public static SampledToJSonResult smapledValuesToJson(List<SampledValue> vals, Integer valueDist, DownSamplingMode mode,
 			boolean structureList, boolean shortXY, boolean suppressNaN, Float factor, Float offset, long maxTsAllowed) {
-		if(valueDist != null && mode != DownSamplingMode.MINMAX)
-			throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
+		//if(valueDist != null && mode != DownSamplingMode.MINMAX)
+		//	throw new UnsupportedOperationException("Downsampling mode AVERAGE not implemented yet!");
 		SampledToJSonResult mainRes = new SampledToJSonResult();
 		JSONArray result = new JSONArray();
 		mainRes.arr = result;
 		
-		DownSamplingData data = new DownSamplingData();
+		TSReductionData data;
+		if(mode == DownSamplingMode.AVERAGE)
+			data = new AveragingDataTimeBased();
+		else if(mode == DownSamplingMode.AVERAGE_COUNTBASED)
+			data = new AveragingDataCountBased();
+		else
+			data = new DownSamplingData();
 		data.suppressNaN = suppressNaN;
 		
 		long lastBaseTs = -1;
@@ -501,7 +531,12 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 					fval = fval+offset;
 				if(valueDist != null) {
 					long tsNow = sv.getTimestamp();
-					processMinMaxDownSampling(data , tsNow, valueDist, fval, svMap, idx == maxIdx);
+					if(mode == DownSamplingMode.AVERAGE)
+						processAveragingTimeBased((AveragingDataTimeBased) data, tsNow, valueDist, fval, svMap, idx == maxIdx);
+					else if(mode == DownSamplingMode.AVERAGE_COUNTBASED)
+						processAveragingCountBased((AveragingDataCountBased) data, tsNow, valueDist, fval, svMap, idx == maxIdx);
+					else
+						processMinMaxDownSampling((DownSamplingData) data , tsNow, valueDist, fval, svMap, idx == maxIdx);
 				} else //if valueDist != null
 					svMap.put(sv.getTimestamp(), fval);
 			}
@@ -552,12 +587,12 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				data.lastTs = putDownSampledTs(tsNow, fval, svMap, data.suppressNaN, data);
 			}
 		} else {
+			if(fval > data.maxVal)
+				data.maxVal = fval;
+			else if(fval < data.minVal)
+				data.minVal = fval;
+			data.lastTsCollected = tsNow;
 			if(((tsNow - data.lastTs) < valueDist) && (!lastVal)) {
-				if(fval > data.maxVal)
-					data.maxVal = fval;
-				else if(fval < data.minVal)
-					data.minVal = fval;
-				data.lastTsCollected = tsNow;
 			} else {
 				data.lastTs = putDownSampledTs(data.lastTsCollected,data.minVal, svMap, data.suppressNaN, data);
 				if(data.maxVal != data.minVal)
@@ -569,6 +604,72 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		}		
 	}
 	
+	protected static void processAveragingCountBased(AveragingDataCountBased data, long tsNow, int valueDist, float fval,
+			LinkedHashMap<Long, Float> svMap, boolean lastVal) {
+		if(data.lastTsCollected == null) {
+			if(((tsNow - data.lastTs) < valueDist) && (!lastVal)) {
+				data.sum = fval;
+				data.count = 1;
+				//data.minVal = fval;
+				data.lastTsCollected = tsNow;
+			} else {
+				//we just write out the input value
+				data.lastTs = putDownSampledTs(tsNow, fval, svMap, data.suppressNaN, data);
+			}
+		} else {
+			data.sum += fval;
+			data.count++;
+			data.lastTsCollected = tsNow;
+			if(((tsNow - data.lastTs) < valueDist) && (!lastVal)) {
+			} else {
+				if(data.count == 0)
+					//Should never occur
+					System.out.println("      !!!  !!  ERROR data.count=0!!");
+				else {
+					final float val = data.sum / data.count;
+					data.lastTs = putDownSampledTs(data.lastTsCollected, val, svMap, data.suppressNaN, data);
+					data.lastTsCollected = null;
+					//The new input value has not been processed. We process it with condition lastTsCollected=null
+					processAveragingCountBased(data, tsNow, valueDist, fval, svMap, lastVal);
+				}
+			}
+		}		
+	}
+
+	protected static void processAveragingTimeBased(AveragingDataTimeBased data, long tsNow, int valueDist, float fval,
+			LinkedHashMap<Long, Float> svMap, boolean lastVal) {
+		long stepAgg = tsNow - data.lastTs;
+		if(data.lastTsCollected == null) {
+			if((stepAgg < valueDist) && (!lastVal)) {
+				data.sum = fval * stepAgg;
+				data.count = stepAgg;
+				//data.minVal = fval;
+				data.lastTsCollected = tsNow;
+			} else {
+				//we just write out the input value
+				data.lastTs = putDownSampledTs(tsNow, fval, svMap, data.suppressNaN, data);
+			}
+		} else {
+			long stepLoc = tsNow - data.lastTsCollected;
+			data.sum += fval * stepLoc;
+			data.count += stepLoc;
+			data.lastTsCollected = tsNow;
+			if((stepAgg < valueDist) && (!lastVal)) {
+			} else {
+				if(data.count == 0)
+					//Should never occur
+					System.out.println("      !!!  !!  ERROR data.count=0!!");
+				else {
+					final float val = (float) (data.sum / data.count);
+					data.lastTs = putDownSampledTs(data.lastTsCollected, val, svMap, data.suppressNaN, data);
+					data.lastTsCollected = null;
+					//The new input value has not been processed. We process it with condition lastTsCollected=null
+					processAveragingTimeBased(data, tsNow, valueDist, fval, svMap, lastVal);
+				}
+			}
+		}		
+	}
+
 	/** Add new SampledValue to map if value fulfills NaN reuqirements
 	 * 
 	 * @param timeStamp time stamp of SampledValue
@@ -579,7 +680,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	 */
 	protected static long putDownSampledTs(long timeStamp, float fval,
 			LinkedHashMap<Long, Float> svMap, boolean suppressNaN,
-			DownSamplingData data) {
+			TSReductionData data) {
 		if(timeStamp < data.lastTs) {
 			System.out.println("Timestamp in wrong order:"+StringFormatHelper.getFullTimeDateInLocalTimeZone(timeStamp));
 			return data.lastTs;
