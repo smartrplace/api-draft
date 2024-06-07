@@ -16,13 +16,13 @@ public class HeatCoolData extends UsageData {
 	
 	public ValueVariance[] valueEval;
 	
-	public float comfortTemperature;
-	public float ecoTemperatureV2;
-	public float windowOpenTemperatureV2;
+	public Float comfortTemperature;
+	public Float ecoTemperatureV2;
+	public Float windowOpenTemperatureV2;
 
 	/**Both minSetpoint and minSetpointAuto*/
-	public float minSetpointAuto;
-	public float maxSetpointAuto;
+	public Float minSetpointAuto;
+	public Float maxSetpointAuto;
 	
 	public float getComfortTemperature() {
 		return comfortTemperature;

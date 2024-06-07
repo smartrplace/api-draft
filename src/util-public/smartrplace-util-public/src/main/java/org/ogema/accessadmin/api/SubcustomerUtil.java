@@ -581,8 +581,8 @@ public class SubcustomerUtil {
 		 */
 		public List<Long> startEndTimesFromRoomData;
 		
-		public float usageTemperature;
-		public float nonUsageTemperature;
+		public Float usageTemperature;
+		public Float nonUsageTemperature;
 		
 		public boolean isSimpleCurve = true;
 	}
