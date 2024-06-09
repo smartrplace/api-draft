@@ -216,9 +216,12 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 		public InstallAppDevice iad;
 		public DeviceHandlerProviderDP<?> devHand;
 		public String mes;
+		public int autoAction;
+		/** If autoAction >=3 then we release automatically, releaseDirectly is not relevant
+		 * otherwise releaseDirectly can be forced if even autoAction is below
+		 */
 		public boolean releaseDirectly;
 		public Long blockedByOnsiteVisitUntil;
-		public int autoAction;
 		public GatewaySyncResourceService gwSync;
 		public long now;
 		
