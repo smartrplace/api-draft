@@ -46,6 +46,7 @@ import org.smartrplace.widget.extensions.GUIUtilHelper;
 import de.iwes.timeseries.eval.base.provider.utils.TimeSeriesDataImpl;
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.logconfig.LogHelper;
+import de.iwes.util.logconfig.LogHelper.StartupDetection;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -1013,7 +1014,7 @@ public class UserServlet extends HttpServlet {
 					keyForSetValue = key;
 				prov.setValue(user, keyForSetValue, value);
 			} catch(Exception e) {
-				if(appManPlus != null && (!LogHelper.isStartupComplete(appManPlus.appMan(), true))) // we do not care then
+				if(appManPlus != null && (!LogHelper.isStartupComplete(appManPlus.appMan(), StartupDetection.TIME_AFTER_FIRST_BUNDLE_20MIN))) // we do not care then
 					return;
 				if(odata.objectId != null)
 					throw new IllegalStateException(key+" cannot be processed for "+pageprov.toString()+", object:"+odata.objectId+", "+e.getMessage(), e);
