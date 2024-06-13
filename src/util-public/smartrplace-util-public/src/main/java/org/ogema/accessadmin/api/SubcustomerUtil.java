@@ -342,7 +342,7 @@ public class SubcustomerUtil {
 				accessAdminConfigRes.userPermissions());
 		if(userEntry == null)
 			return null;
-		if(userEntry.superGroups().size() == 0)
+		if(userEntry.superGroups().size() == 0 && acceptAggregated)
 			return getEntireBuildingSubcustomer(appMan);
 		
 		for(SubCustomerData subc: subcs) {
@@ -361,8 +361,12 @@ public class SubcustomerUtil {
 				}
 			}
 		}
-		if(preferAggregated && (agg != null))
-			return agg;
+		if(preferAggregated && (agg != null)) {
+			if(acceptAggregated)
+				return agg;
+			else
+				return null;
+		}
 		if(selected == null && (!acceptAggregated))
 			return null;
 		if(selected == null && agg != null)
