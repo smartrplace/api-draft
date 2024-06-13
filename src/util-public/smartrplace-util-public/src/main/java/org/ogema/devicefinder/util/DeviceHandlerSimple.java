@@ -232,11 +232,23 @@ if(Boolean.getBoolean("jobdebug")) {
 		return appMan.getResourcePatternAccess();
 	}
 	
-	Map<String, Collection<Datapoint>> knownDpsMap = new HashMap<>();
+	private Map<String, Collection<Datapoint>> knownDpsMap = new HashMap<>();
+	private long lastReset = -1;
+	private static volatile long resetKnownDpsMapUntil = -1;
+	public static final long RESET_DURATION = 20000;
+	public static void resetDatapoints(long now) {
+		resetKnownDpsMapUntil = now + RESET_DURATION;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Datapoint> getDatapoints(InstallAppDevice installDeviceRes, DatapointService dpService) {
 		T device = (T)installDeviceRes.device().getLocationResource();
+		long now = dpService.getFrameworkTime();
+		if(now < resetKnownDpsMapUntil && (lastReset < resetKnownDpsMapUntil)) {
+			knownDpsMap.clear();
+			lastReset = resetKnownDpsMapUntil+1;
+		}
 		if(Boolean.getBoolean("org.ogema.devicefinder.util.updateDatapoints")) {
 			Collection<Datapoint> result = getDatapoints(device, installDeviceRes);
 			
