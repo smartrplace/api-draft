@@ -9,7 +9,7 @@ import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 public class HeatCoolData extends UsageData {
 
 	@Deprecated //should not be used anymore, writing to old-style interval-based window temperature
-	public float setSingleSetpoint_Window_open;
+	public Float setSingleSetpoint_Window_open;
 	
 	public Boolean ecoEqualsOff;
 	public Integer dayTypeSettingMode;
