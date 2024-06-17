@@ -29,7 +29,7 @@ public class SensorDataFloat2Float extends SensorData {
 		this.setpoint = setpoint;
 		this.feedback = feedback;
 		if(setpoint == null)
-			UserServlet.logGeneralReport("Init SensorDataFloat2Float with setpoint null, parent:"+parentAsSensor.getLocation(), -30, ctrl.appMan);
+			UserServlet.logGeneralReport("Init SensorDataFloat2Float with setpoint null, parent:"+parentAsSensor.getLocation(), -29, ctrl.appMan);
 		if(feedback == null)
 			UserServlet.logGeneralReport("Init SensorDataFloat2Float with feedback null, parent:"+parentAsSensor.getLocation(), -31, ctrl.appMan);
 		this.setpointListener = new ResourceValueListener<FloatResource>() {
