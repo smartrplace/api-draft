@@ -720,8 +720,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	public static boolean isWaterMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
-		if(resourceLocation.startsWith("MBusReadings/WATER_METER_") ||
-				resourceLocation.startsWith("MBusReadings/WARM_WATER_METER_"))
+		if(resourceLocation.startsWith("MBusReadings")
+				&& (resourceLocation.contains("/WATER_METER_") ||
+						resourceLocation.startsWith("/WARM_WATER_METER_")))
 			return true;
 		if(subResources == null)
 			return false;
@@ -761,19 +762,19 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	public static boolean isHeatCostAllocatorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
-		if(resourceLocation.startsWith("MBusReadings/HEAT_COST_ALLOCATOR_"))
+		if(resourceLocation.startsWith("MBusReadings") && resourceLocation.contains("/HEAT_COST_ALLOCATOR_"))
 			return true;
 		return false;
 	}
 	public static boolean isSmokeDetectorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
-		if(resourceLocation.startsWith("MBusReadings/SMOKE_DETECTOR_"))
+		if(resourceLocation.startsWith("MBusReadings") && resourceLocation.contains("/SMOKE_DETECTOR_"))
 			return true;
 		return false;
 	}
 	public static boolean isWiredMBusMasterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
-		if(resourceLocation.startsWith("MBusReadings/BUS_SYSTEM_COMPONENT_"))
+		if(resourceLocation.startsWith("MBusReadings") && resourceLocation.contains("/BUS_SYSTEM_COMPONENT_"))
 			return true;
 		return false;
 	}
