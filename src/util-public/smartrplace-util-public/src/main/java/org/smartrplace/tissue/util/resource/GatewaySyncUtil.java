@@ -22,6 +22,7 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
 import org.smartrplace.gateway.device.CascadingData;
 import org.smartrplace.model.sync.mqtt.GatewaySyncData;
+import org.smartrplace.system.guiappstore.config.GatewayData;
 
 import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
@@ -382,5 +383,14 @@ public class GatewaySyncUtil {
 		ValueResourceHelper.setCreate(deviceNames, newVals.toArray(new String[0]));
 		
 		return result;
+	}
+	public static InstallAppDevice getSubGateway(String gwId, DatapointService dpService) {
+		Collection<InstallAppDevice> gws = dpService.managedDeviceResoures(GatewayData.class);
+		for(InstallAppDevice sub: gws) {
+			String subGwId = GatewaySyncUtil.getGatewayBaseIdStartingGw(sub.device().getLocationResource());
+			if(gwId.equals(subGwId))
+				return sub;
+		}
+		return null;
 	}
 }
