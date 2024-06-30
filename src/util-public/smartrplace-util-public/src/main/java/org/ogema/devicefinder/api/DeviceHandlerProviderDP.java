@@ -261,6 +261,16 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default IssueAnalysisResultBase analyzeIssueStatus(AnalyzeIssueStatusInput in)
 		{return null;}
 
+	/** Provide information if the device can be assumed to be fully installed, e.g.
+	 * based on room being set
+	 * @param in
+	 * @return true if the conditions for the device to be fully installed are met.
+	 * 		Return null if no such information is available. Return false if the device
+	 *      is probably not fully installed anymore (usually false is not used as this is
+	 *      hard to detect automatically)
+	 */
+	default Boolean isDeviceAssumedFullyInstalled(AnalyzeIssueStatusInput in) { return null;}
+	
 	/*default IssueAnalysisResultBase analyzeIssueStatus(T device, AlarmGroupData issue, InstallAppDevice iad, String mes,
 			boolean releaseDirectly, Long blockedByOnsiteVisitUntil, int autoAction,
 			GatewaySyncResourceService gwSync, long now)
