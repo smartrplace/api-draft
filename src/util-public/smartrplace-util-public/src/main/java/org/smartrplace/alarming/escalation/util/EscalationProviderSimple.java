@@ -126,7 +126,7 @@ public abstract class EscalationProviderSimple<T extends EscalationKnownIssue> i
 		synchronized (ongoingIssues) {
 			List<String> toRemove = new ArrayList<>();
 			for(Entry<String, T> issue: ongoingIssues.entrySet()) {
-				if(!issue.getValue().knownIssue.isActive())
+				if(!issue.getValue().knownIssue.exists())
 					toRemove.add(issue.getKey());
 			}
 			for(String key: toRemove)
