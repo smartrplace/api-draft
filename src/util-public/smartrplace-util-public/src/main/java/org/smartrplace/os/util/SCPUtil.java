@@ -160,7 +160,7 @@ public class SCPUtil {
 			return 0;
 		}
 		catch(Exception e){
-			System.out.println(e);
+			e.printStackTrace();
 			try{if(fos!=null)fos.close();}catch(Exception ee){}
 			return -1;
 		}		
@@ -304,7 +304,7 @@ public class SCPUtil {
 			return 0;
 		}
 		catch(Exception e){
-			System.out.println(e);
+			e.printStackTrace();
 			try{if(fis!=null)fis.close();}catch(Exception ee){}
 			return -1;
 		}
