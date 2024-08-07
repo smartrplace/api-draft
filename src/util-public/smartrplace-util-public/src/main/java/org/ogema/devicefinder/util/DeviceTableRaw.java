@@ -32,6 +32,7 @@ import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.connectiondevices.ElectricityConnectionBox;
 import org.ogema.model.devices.generators.PVPlant;
 import org.ogema.model.devices.sensoractordevices.SensorDevice;
+import org.ogema.model.devices.sensoractordevices.SensorDeviceLabelled;
 import org.ogema.model.devices.sensoractordevices.SingleSwitchBox;
 import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.locations.Room;
@@ -721,20 +722,26 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static boolean isWaterMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.startsWith("MBusReadings")
-				&& (resourceLocation.contains("/WATER_METER_") ||
-						resourceLocation.startsWith("/WARM_WATER_METER_")))
+				&& (resourceLocation.contains("/WATER_METER_")
+						|| resourceLocation.contains("/WARM_WATER_METER_")))
 			return true;
 		if(subResources == null)
 			return false;
 		//do not accept if subResource size fits GasEnergyCam
-		if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.toLowerCase().startsWith("JMBUS_BASE")
+		boolean isOther = false;
+		if(resourceLocation.startsWith("MBusReadings")
+				&& (resourceLocation.contains("/OTHER_"))) {
+			isOther = true;
+		} else if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.toLowerCase().startsWith("JMBUS_BASE")
 				|| resourceLocation.startsWith("serverMirror")))
 			return false;
 		if(isHeatMeterDevice(resourceLocation, subResources))
 			return false;
+		if(isOther) {
 		int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
-		if(unsup == 1)
-			return false;
+			if(unsup == 1)
+				return false;
+		}
 		boolean foundVolume = false;
 		for(SubResourceInfo srinfo: subResources) {
 			if(VolumeAccumulatedSensor.class.getName().equals(srinfo.resType)) {
@@ -748,7 +755,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(subResources == null)
 			return false;
-		if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.toLowerCase().startsWith("JMBUS_BASE")
+		if(!(resourceLocation.toLowerCase().startsWith("jmbus")
+				|| resourceLocation.startsWith("MBusReadings")
 				||resourceLocation.startsWith("serverMirror")))
 			return false;
 		boolean foundEnergy = false;
@@ -836,7 +844,29 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 	
-    //public enum ControlMode { COOLING, HEATING, NONE; }
+	public static boolean isElectricityMeterESI(SensorDeviceLabelled model) {
+		if(model.getLocation().contains("HM_HmIP_ESI_") && model.mainSensorTitle().getValue().equals("Energie")
+				&& model.getLocation().endsWith("_2"))
+			return true;
+		return false;
+	}
+	public static boolean isGasMeterESI(SensorDeviceLabelled model) {
+		/* We only accept the volume sensor here. The sensor "Gas Flow" is added in the DeviceHandler*/
+		if(model.getLocation().contains("HM_HmIP_ESI_") && model.mainSensorTitle().getValue().equals("Gas Volume"))
+			return true;
+		return false;
+	}
+	public static boolean isSubMeterESINonOwnDevice(SensorDeviceLabelled model) {
+		if(model.getLocation().contains("HM_HmIP_ESI_")
+				&& model.mainSensorTitle().getValue().equals("Gas Flow"))
+			return true;
+		if(model.getLocation().contains("HM_HmIP_ESI_") && model.mainSensorTitle().getValue().equals("Energie")
+				&& !model.getLocation().endsWith("_2"))
+			return true;
+		return false;
+	}	
+
+	//public enum ControlMode { COOLING, HEATING, NONE; }
     public static final int CTRLMODE_NONE = 0;
     public static final int CTRLMODE_COOLING = 1;
     public static final int CTRLMODE_HEATING = 2;
