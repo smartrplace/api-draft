@@ -737,10 +737,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return false;
 		if(isHeatMeterDevice(resourceLocation, subResources))
 			return false;
-		if(isOther) {
-		int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
-			if(unsup == 1)
-				return false;
+		if(!isOther) {
+			int unsup = getUnsupportedOfType(subResources, TimeResource.class.getName());
+				if(unsup == 1)
+					return false;
 		}
 		boolean foundVolume = false;
 		for(SubResourceInfo srinfo: subResources) {
