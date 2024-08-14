@@ -845,7 +845,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static boolean isElectricityMeterESI(SensorDeviceLabelled model) {
-		if(model.getLocation().contains("HM_HmIP_ESI_") && model.mainSensorTitle().getValue().equals("Energie")
+		if(model.getLocation().contains("HM_HmIP_ESI_") && model.mainSensorTitle().getValue().equals("Energy")
 				&& model.getLocation().endsWith("_2"))
 			return true;
 		return false;
@@ -860,7 +860,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(model.getLocation().contains("HM_HmIP_ESI_")
 				&& model.mainSensorTitle().getValue().equals("Gas Flow"))
 			return true;
-		if(model.getLocation().contains("HM_HmIP_ESI_") && model.mainSensorTitle().getValue().equals("Energie")
+		if(model.getLocation().contains("HM_HmIP_ESI_") && model.mainSensorTitle().getValue().equals("Energy")
 				&& !model.getLocation().endsWith("_2"))
 			return true;
 		return false;
