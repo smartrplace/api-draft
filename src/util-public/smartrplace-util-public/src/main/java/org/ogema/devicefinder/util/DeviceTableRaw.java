@@ -865,6 +865,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return true;
 		return false;
 	}	
+	public static boolean isLoraGw(SensorDeviceLabelled model) {
+		if(model.getLocation().contains("chirpstack") && model.mainSensorTitle().getValue().equals("Last event"))
+			return true;
+		return false;
+	}
 
 	//public enum ControlMode { COOLING, HEATING, NONE; }
     public static final int CTRLMODE_NONE = 0;
