@@ -8,16 +8,17 @@ import org.ogema.serialization.jaxb.Resource;
 import org.ogema.serialization.jaxb.ResourceLink;
 
 public class JAXBResourceUtil {
+	@Deprecated //Cannot set SubResourceInfo#res
 	public static List<SubResourceInfo> getSubResourceInfo(Resource model) {
 		List<Object> ress = model.getSubresources();
 		List<SubResourceInfo> result = new ArrayList<>();
 		for(Object res: ress) {
 			if (res instanceof ResourceLink) { 
 				ResourceLink r = (ResourceLink) res;
-				result.add(new SubResourceInfo(r.getName(), r.getType()));
+				result.add(new SubResourceInfo(r.getName(), r.getType(), null));
 			} else if(res instanceof Resource) {
 				Resource r = (Resource) res;
-				result.add(new SubResourceInfo(r.getName(), r.getType()));				
+				result.add(new SubResourceInfo(r.getName(), r.getType(), null));				
 			}
 		}
 		return result ;

@@ -437,9 +437,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static class SubResourceInfo {
 		String resourceName;
 		String resType;
-		public SubResourceInfo(String resourceName, String resType) {
+		Resource res;
+		public SubResourceInfo(String resourceName, String resType, Resource res) {
 			this.resourceName = resourceName;
 			this.resType = resType;
+			this.res = res;
 		}
 	}
 	public static List<SubResourceInfo> getSubResInfo(Resource parent) {
@@ -448,7 +450,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static List<SubResourceInfo> getSubResInfo(Collection<Resource> ress) {
 		List<SubResourceInfo> result = new ArrayList<>();
 		for(Resource res: ress) {
-			result.add(new SubResourceInfo(res.getName(), res.getResourceType().getName()));
+			result.add(new SubResourceInfo(res.getName(), res.getResourceType().getName(), res));
 		}
 		return result ;
 	}
@@ -721,7 +723,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	public static boolean isWaterMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
-		if(resourceLocation.startsWith("MBusReadings")
+		if((resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.startsWith("MBusReadings"))
 				&& (resourceLocation.contains("/WATER_METER_")
 						|| resourceLocation.contains("/WARM_WATER_METER_")))
 			return true;
@@ -735,6 +737,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		} else if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.toLowerCase().startsWith("JMBUS_BASE")
 				|| resourceLocation.startsWith("serverMirror")))
 			return false;
+		for(SubResourceInfo srinfo: subResources) {
+			if(srinfo.resourceName.equals("mBusType") && StringResource.class.getName().equals(srinfo.resType)) {
+				if(srinfo.res != null && ((StringResource)srinfo.res).getValue().equals("WATER_METER"))
+					return true;
+				else
+					break;
+			}
+		}
 		if(isHeatMeterDevice(resourceLocation, subResources))
 			return false;
 		if(!isOther) {
@@ -759,6 +769,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				|| resourceLocation.startsWith("MBusReadings")
 				||resourceLocation.startsWith("serverMirror")))
 			return false;
+		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
+			return false;
 		boolean foundEnergy = false;
 		for(SubResourceInfo srinfo: subResources) {
 			if(EnergyAccumulatedSensor.class.getName().equals(srinfo.resType)) {
@@ -770,8 +782,15 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	public static boolean isHeatCostAllocatorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
-		if(resourceLocation.startsWith("MBusReadings") && resourceLocation.contains("/HEAT_COST_ALLOCATOR_"))
+		if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.startsWith("MBusReadings")))
+			return false;
+		if(resourceLocation.contains("/HEAT_COST_ALLOCATOR_"))
 			return true;
+		for(SubResourceInfo srinfo: subResources) {
+			if(srinfo.resourceName.equals("hcaEnergy")) {
+				return true;
+			}
+		}
 		return false;
 	}
 	public static boolean isSmokeDetectorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
