@@ -38,6 +38,7 @@ import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.DoorWindowSensor;
+import org.ogema.model.sensors.ElectricVoltageSensor;
 import org.ogema.model.sensors.EnergyAccumulatedSensor;
 import org.ogema.model.sensors.VolumeAccumulatedSensor;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
@@ -761,6 +762,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		}
 		return foundVolume;
 	}
+
 	public static boolean isHeatMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(subResources == null)
@@ -780,6 +782,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		}
 		return foundEnergy;
 	}
+	
 	public static boolean isHeatCostAllocatorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.startsWith("MBusReadings")))
@@ -793,18 +796,57 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		}
 		return false;
 	}
+	
 	public static boolean isSmokeDetectorDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.startsWith("MBusReadings") && resourceLocation.contains("/SMOKE_DETECTOR_"))
 			return true;
 		return false;
 	}
+	
 	public static boolean isWiredMBusMasterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.startsWith("MBusReadings") && resourceLocation.contains("/BUS_SYSTEM_COMPONENT_"))
 			return true;
 		return false;
 	}
+	
+	public static boolean isJMbusRepeater(String resourceLocation, Collection<SubResourceInfo> subResources) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
+		if(!(resourceLocation.toLowerCase().startsWith("jmbus") || resourceLocation.startsWith("MBusReadings")))
+			return false;
+		if(subResources == null)
+			return false;
+		for(SubResourceInfo srinfo: subResources) {
+			if(srinfo.resourceName.equals("mBusType") && StringResource.class.getName().equals(srinfo.resType)) {
+				if(srinfo.res != null && ((StringResource)srinfo.res).getValue().equals("UNIDIRECTION_REPEATER"))
+					return true;
+				else
+					break;
+			}
+		}
+		if(isHeatMeterDevice(resourceLocation, subResources))
+			return false;
+		if(isWaterMeterDevice(resourceLocation, subResources))
+			return false;
+		if(isCO2wMBUSDevice(resourceLocation, subResources))
+			return false;
+		if(isWiredMBusMasterDevice(resourceLocation, subResources))
+			return false;
+		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
+			return false;
+		if(isGasEnergyCamDevice(resourceLocation, subResources))
+			return false;
+		boolean foundVoltage = false;
+		for(SubResourceInfo srinfo: subResources) {
+			if(ElectricVoltageSensor.class.getName().equals(srinfo.resType)) {
+				foundVoltage = true;
+				break;
+			}
+		}
+		return foundVoltage;
+	}
+
 	public static boolean isFaultMessageDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		if((resourceLocation.toLowerCase().contains("/errors_")||resourceLocation.contains("/faults_")))
 			return true;
