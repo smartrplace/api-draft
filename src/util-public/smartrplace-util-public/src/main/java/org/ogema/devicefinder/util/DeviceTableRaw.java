@@ -860,7 +860,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(model.getLocation().contains("HM_HmIP_ESI_")
 				&& model.mainSensorTitle().getValue().equals("Gas Flow"))
 			return true;
-		if(model.getLocation().contains("HM_HmIP_ESI_") && model.mainSensorTitle().getValue().equals("Energy")
+		if(model.getLocation().contains("HM_HmIP_ESI_") && (!model.mainSensorTitle().getValue().contains("Gas"))
 				&& !model.getLocation().endsWith("_2"))
 			return true;
 		return false;
