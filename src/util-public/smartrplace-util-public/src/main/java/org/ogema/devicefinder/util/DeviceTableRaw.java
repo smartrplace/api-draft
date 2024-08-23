@@ -1,5 +1,6 @@
 package org.ogema.devicefinder.util;
 
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -931,6 +932,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return true;
 		return false;
 	}
+	public static boolean isLoraDevice(PhysicalElement device) {
+		return device.getLocation().contains("chirpstack");
+	}
 
 	//public enum ControlMode { COOLING, HEATING, NONE; }
     public static final int CTRLMODE_NONE = 0;
@@ -1016,7 +1020,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static String setDecalcTime(Thermostat device, long destTime, GatewaySyncResourceService gwSync) {
 		StringResource res = device.valve().getSubResource("DECALCIFICATION", StringResource.class);
-		String val = getDecalcString(destTime);
+		boolean isMonthly = isLoraDevice(device);
+		String val = getDecalcString(destTime, isMonthly);
 		if(val != null) {
 			setCreate(res, val, gwSync);
 			System.out.println("Setting Decalc Time with gwSync set:"+(gwSync != null));
@@ -1026,6 +1031,19 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	
 	public static String[] dayOfWeekStr = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
+	public static String[] weekOfMonthStr = {"FIRST_WEEK", "SECOND_WEEK", "THIRD_WEEK", "FOURTH_WEEK", "LAST_WEEK"};
+	public static String getDecalcString(long destTime, boolean isMonthly) {
+		String base = getDecalcString(destTime);
+		if(!isMonthly)
+			return base;
+		long curMonthStart = AbsoluteTimeHelper.getIntervalStart(destTime, AbsoluteTiming.MONTH);
+		long timeInMonth = destTime - curMonthStart;
+		long weekOfMonthIdx = timeInMonth / (7*TimeProcUtil.DAY_MILLIS);
+		if(weekOfMonthIdx > 4)
+			weekOfMonthIdx = 4;
+		String result = weekOfMonthStr[(int) weekOfMonthIdx];
+		return base + " "+result;
+	}
 	public static String getDecalcString(long destTime) {
 		long curWeekStart = AbsoluteTimeHelper.getIntervalStart(destTime, AbsoluteTiming.WEEK);
 		long timeInWeek = destTime - curWeekStart;
