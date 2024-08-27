@@ -123,7 +123,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				row.addCell("GUI", guiButton);
 			}*/
 		}
-		vh.stringEdit("Customer", id, object.customer(), row, alert);
+		vh.stringEdit("Subdomain", id, object.customer(), row, alert);
 		if(req == null) {
 			vh.registerHeaderEntry("Comment");
 			if(pageType == GwPageType.BASE_VERSION) {
