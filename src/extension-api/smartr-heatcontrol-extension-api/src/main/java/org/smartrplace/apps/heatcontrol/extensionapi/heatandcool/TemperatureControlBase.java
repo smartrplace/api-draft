@@ -65,8 +65,8 @@ public interface TemperatureControlBase extends RoomDeviceProvider {
     //public ResourcePattern getPattern();
     
     /** Get number off speed states the device supports. According to
-     * resource {@link AirConditioner#fan()} and {@link MechanicalFan#setting()} this can usually be null, 2 or 3.<br>
-     * 4 states may be given if auto shall be supported (currently not implemented)
+     * resource {@link AirConditioner#fan()} and {@link MechanicalFan#setting()} this can usually be null, 2 or 4.<br>
+     * 4 states represents Auto/off, Low, Medium, High
      *  
      * @return null if no fan speed is supported
      */
