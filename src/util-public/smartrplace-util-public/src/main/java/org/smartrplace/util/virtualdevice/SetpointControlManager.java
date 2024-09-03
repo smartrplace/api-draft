@@ -29,7 +29,6 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.util.frontend.servlet.UserServlet;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManager.WritePrioLevel;
 
-import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
@@ -550,14 +549,16 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				continue;
 			List<SensorData> allresend = new ArrayList<>(subMap.values());
 			for(SensorData resenddata: allresend) {
-				if(resenddata.valueFeedbackPending != null) {
+				//TODO: Obviously valueFeedbackPending can be changed by another thread
+				Float valueFeedbackPending = resenddata.valueFeedbackPending;
+				if(valueFeedbackPending != null) {
 					long timePendingFb = now - resenddata.valuePendingSince;
 					//long sentAgoFb = now - resenddata.lastSent;
 					if((timePendingFb > resenddata.pendingTimeForMissingFeedback)) { // && (sentAgoFb > lastSentAgoForRetry)) {
-						if(resenddata.valueFeedbackPending != null)
-							log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending, value:"+(float)resenddata.valueFeedbackPending+".");
-						else
-							log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
+						if(valueFeedbackPending != null)
+							log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending, value:"+(float)valueFeedbackPending+".");
+						//else
+						//	log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
 						cd.resendMissingFbCount++;
 						boolean success;
 						if(resenddata.valueFeedbackPendingObject != null) {
@@ -566,11 +567,11 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 							log.debug("Resending object for "+resenddata.setpoint().getLocation()+
 									" with interval sec:"+(resenddata.pendingTimeForMissingFeedback/1000));
 						} else try {
-							success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valueFeedbackPending,
+							success = requestSetpointWrite((T) resenddata.setpoint(), (float)valueFeedbackPending,
 								WritePrioLevel.CONDITIONAL, false, false);
-							log.debug("Resending val "+String.format("%.1f", (float)resenddata.valueFeedbackPending)+" for "+resenddata.setpoint().getLocation()+
+							log.debug("Resending val "+String.format("%.1f", (float)valueFeedbackPending)+" for "+resenddata.setpoint().getLocation()+
 									" with interval sec:"+(resenddata.pendingTimeForMissingFeedback/1000));
-						} catch(NullPointerException e) {
+						} catch(NullPointerException e) { //Should not occur anymore
 							String text = "Resend failed";
 							if(resenddata.setpoint() != null)
 								text += "  Setpoint:"+resenddata.setpoint().getLocation();
@@ -580,7 +581,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 								text += "  Feedback:"+resenddata.feedback().getLocation();
 							else
 								text += "  Feedback null!  ";
-							text += "  Value:"+resenddata.valueFeedbackPending;
+							text += "  Value:"+valueFeedbackPending;
 							UserServlet.logException(e, null, -11, appManPlus);
 							throw new IllegalStateException(text, e);
 						}
