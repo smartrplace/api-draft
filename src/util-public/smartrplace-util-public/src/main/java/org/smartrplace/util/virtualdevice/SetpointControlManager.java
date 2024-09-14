@@ -597,7 +597,9 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					continue;
 				}
 				//valuePending is for processing requests postponed due to overload
-				if(resenddata.valuePending == null)
+				//obviously resenddata.valuePending can be changed by another thread
+				Float valuePending = resenddata.valuePending;
+				if(valuePending == null)
 					continue;
 				long timePending = now - resenddata.valuePendingSince;
 				long sentAgo = now - resenddata.lastSent;
@@ -611,9 +613,9 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 						log.debug("Retry to send of object for "+resenddata.setpoint().getLocation()+
 								" with interval sec:"+(pendingTimeForRetry/1000));
 					} else {
-						success = requestSetpointWrite((T) resenddata.setpoint(), (float)resenddata.valuePending, null,
+						success = requestSetpointWrite((T) resenddata.setpoint(), (float)valuePending, null,
 								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, 5000l);
-						log.debug("Retry to send of val "+String.format("%.1f", (float)resenddata.valuePending)+" for "+resenddata.setpoint().getLocation()+
+						log.debug("Retry to send of val "+String.format("%.1f", (float)valuePending)+" for "+resenddata.setpoint().getLocation()+
 								" with interval sec:"+(pendingTimeForRetry/1000));
 					}
 					if(success) {
