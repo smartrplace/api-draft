@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.Resource;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.devicefinder.util.DeviceTableRaw;
 import org.ogema.devicefinder.util.DpGroupUtil;
 import org.ogema.tools.resource.util.ResourceUtils;
@@ -105,7 +107,13 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				if(pageType != GwPageType.BASE_VERSION) {
 					vh.linkingButton("Op Link", id, object, row, "CCU-Page", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/ccutDetails.hmtl.html");
 					//vh.linkingButton("Controller", id, object, row, "Controller", gwUrl+"/org/sp/app/drivermonapp/index.html");
-					vh.linkingButton("Season Mode", id, object, row, "Mode", gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
+					IntegerResource seasonMode = getSeasonMode(appMan);
+					String modeText;
+					if(seasonMode != null && seasonMode.exists())
+						modeText = "Mode: "+seasonMode.getValue();
+					else
+						modeText = "Mode";
+					vh.linkingButton("Season Mode", id, object, row, modeText, gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
 					vh.linkingButton("Roomcontrol Main", id, object, row, "Room Control", gwUrl+"/org/smartrplace/apps/smartrplaceheatcontrolv2/index.html");
 					vh.linkingButton("Update Rate", id, object, row, "Upd.Rate", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/thermostatUpdateRate.hmtl.html");
 					vh.linkingButton("Configuration Page", id, object, row, "Config", gwUrl+"/org/smartrplace/alarmingexpert/masterdatabase.html");
@@ -187,5 +195,15 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 	public String getLineId(GatewayData object) {
 		String baseId = ViaHeartbeatUtil.getBaseGwId(ResourceUtils.getHumanReadableShortName(object));
 		return baseId+super.getLineId(object);
+	}
+	
+	public static IntegerResource getSeasonMode(ApplicationManager appMan) {
+		Resource roomControl = appMan.getResourceAccess().getResource("smartrplaceHeatcontrolConfig");
+		if(roomControl != null && roomControl.exists()) {
+			IntegerResource seasonMode = roomControl.getSubResource("seasonMode", IntegerResource.class);
+			if(seasonMode.exists())
+				return seasonMode;
+		}
+		return null;		
 	}
 }

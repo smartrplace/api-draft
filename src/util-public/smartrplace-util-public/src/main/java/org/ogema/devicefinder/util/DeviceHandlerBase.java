@@ -54,7 +54,18 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 public abstract class DeviceHandlerBase<T extends PhysicalElement> implements DeviceHandlerProvider<T> {
 
+	/** Request re-calculation of last decalc time after time given in this resource. As a default in 
+	 * The time is requested at blockShiftingUntil, which by default is 60 minutes after The request.
+	 * The default interval for the decalc timer is 120 minutes +/- random 10 minutes, so as a worst case calculation may take place
+	 * almost 190 minutes after a "Decalc now" request. 
+	 */
 	public static final String REQUEST_LAST_DECALC_RESNAME = "requestLastDecalcCalculation";
+	
+	/** When clicking on "Decalc Now" or decalc via auto-issue action then also this resource is set so
+	 * that decalc will be repeated with the decalc timer (approx. 120 minutes, see above) until decalc is
+	 * confirmed. This is NOT VESonly, so it is sufficient the decalc time request is confirmed. Actions check
+	 * for VESonly in addition.
+	 */
 	public static final String REQUEST_DECALC_AFTER_RESNAME = "requestDecalcAfter";
 	public static final String LAST_DECALC_CALCULATED_RESNAME = "lastDecalc";
 	public static final String LAST_DECALC_CALCULATED_VESONLY_RESNAME = "lastDecalcVESOnly";

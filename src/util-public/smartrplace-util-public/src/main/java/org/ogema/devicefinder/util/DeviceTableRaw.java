@@ -946,7 +946,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
     public static final int CTRLMODE_ECO = 6;
     public static final int CTRLMODE_COOLING_ORECO = 7; //means FORCED_ORECO
     public static final int CTRLMODE_HEATING_ORECO = 8; //means FORCED_ORECO
-	private static final long BLOCKSHIFTUNTIL_DURATION = Long.getLong("org.ogema.devicefinder.util.blockshiftuntil.duration", 60*TimeProcUtil.MINUTE_MILLIS);
+	public static final long BLOCKSHIFTUNTIL_DURATION = Long.getLong("org.ogema.devicefinder.util.blockshiftuntil.duration", 60*TimeProcUtil.MINUTE_MILLIS);
 
     public static boolean isVirtualThermostat(Thermostat model) {
 		return !(model.getSubResources(VirtualThermostatConfig.class, false).isEmpty());
