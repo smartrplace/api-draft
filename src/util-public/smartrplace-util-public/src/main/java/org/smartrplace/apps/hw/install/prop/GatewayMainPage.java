@@ -13,6 +13,7 @@ import org.ogema.devicefinder.util.DeviceTableRaw;
 import org.ogema.devicefinder.util.DpGroupUtil;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.gateway.device.GatewaySuperiorData;
 import org.smartrplace.gui.tablepages.ObjectGUITablePageNamed;
 import org.smartrplace.system.guiappstore.config.AppstoreConfig;
 import org.smartrplace.system.guiappstore.config.GatewayData;
@@ -107,12 +108,17 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				if(pageType != GwPageType.BASE_VERSION) {
 					vh.linkingButton("Op Link", id, object, row, "CCU-Page", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/ccutDetails.hmtl.html");
 					//vh.linkingButton("Controller", id, object, row, "Controller", gwUrl+"/org/sp/app/drivermonapp/index.html");
-					IntegerResource seasonMode = getSeasonMode(appMan);
+					GatewaySuperiorData gsd = ServerGatewayUtil.getSuperiorDataForGwOnSuperior(object, appMan);
 					String modeText;
-					if(seasonMode != null && seasonMode.exists())
-						modeText = "Mode: "+seasonMode.getValue();
-					else
-						modeText = "Mode";
+					if(gsd == null)
+						modeText = "Mode: GW-null";
+					else {
+						IntegerResource seasonMode = gsd.knownIssueStatistics().seasonMode();
+						if(seasonMode != null && seasonMode.exists())
+							modeText = "Mode: "+seasonMode.getValue();
+						else
+							modeText = "Mode";
+					}
 					vh.linkingButton("Season Mode", id, object, row, modeText, gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
 					vh.linkingButton("Roomcontrol Main", id, object, row, "Room Control", gwUrl+"/org/smartrplace/apps/smartrplaceheatcontrolv2/index.html");
 					vh.linkingButton("Update Rate", id, object, row, "Upd.Rate", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/thermostatUpdateRate.hmtl.html");

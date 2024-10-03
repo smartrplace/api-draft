@@ -3,7 +3,11 @@ package org.smartrplace.apps.hw.install.prop;
 import java.util.List;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
+import org.ogema.core.resourcemanager.ResourceAccess;
+import org.ogema.tools.resource.util.ResourceUtils;
+import org.smartrplace.gateway.device.GatewaySuperiorData;
 import org.smartrplace.system.guiappstore.config.AppstoreConfig;
 import org.smartrplace.system.guiappstore.config.AppstoreSystemUpdates;
 import org.smartrplace.system.guiappstore.config.GatewayData;
@@ -84,4 +88,27 @@ public class ServerGatewayUtil {
     		return "https://"+customer+".smartrplace.de";
     	return null;
     }
+    
+	public static GatewaySuperiorData getSuperiorDataForGwOnSuperior(GatewayData gw, ApplicationManager appMan) {
+		if(gw.gwSuperiorData().isReference(false))
+			return gw.gwSuperiorData().getLocationResource();
+		
+		String baseId = ViaHeartbeatUtil.getBaseGwId(ResourceUtils.getHumanReadableShortName(gw));
+		if(baseId == null)
+			return null;
+		GatewaySuperiorData result = getSuperiorData(baseId, appMan.getResourceAccess());
+		if(result != null)
+			gw.gwSuperiorData().setAsReference(result);
+		return result;
+	}
+	
+	public static GatewaySuperiorData getSuperiorData(String gwBaseId, ResourceAccess resAcc) {
+		Resource gwRes = resAcc.getResource("gw"+gwBaseId);
+		if(gwRes == null)
+			return null;
+		Resource result = gwRes.getSubResource("gatewaySuperiorDataRes");
+		if(result instanceof GatewaySuperiorData)
+			return (GatewaySuperiorData) result;
+		return null;
+	}	
 }
