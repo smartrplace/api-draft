@@ -40,7 +40,7 @@ public class BatteryEvalBase {
 		return in+StringUtils.repeat(' ', len-in.length());
 	}
 	
-	protected static void reallySendMessage(String title, String message, MessagePriority prio,
+	public static void reallySendMessage(String title, String message, MessagePriority prio,
 			ApplicationManagerPlus appManPlus) {
 		AppID appId = appManPlus.appMan().getAppID();
 		reallySendMessage(title, message, prio, appManPlus, appId);
@@ -70,6 +70,49 @@ public class BatteryEvalBase {
 	public static BatteryStatus getBatteryStatus(float val, boolean changeInfoRelevant) {
 		return getBatteryStatus(val, changeInfoRelevant, 2);
 	}
+
+	public static String getGermanStatus(BatteryStatus status) {
+		switch(status) {
+		case OK:
+			return "OK";
+		case CHANGE_RECOMMENDED:
+			return "Wechsel empfohlen";
+		case WARNING:
+			return "Warnung";
+		case URGENT:
+			return "Dringend";
+		case EMPTY:
+			return "Keine Versorgung mehr";
+		case UNKNOWN:
+			return "Unbekannt";
+		case NO_BATTERY:
+			return "keine Batterie";
+		default:
+			return status.toString();
+		}
+	}
+
+	public static String getGermanLiftetimeEstimation(BatteryStatus status) {
+		switch(status) {
+		case OK:
+			return "OK";
+		case CHANGE_RECOMMENDED:
+			return "Wenige Monate";
+		case WARNING:
+			return "Einige Wochen";
+		case URGENT:
+			return "Wenige Tage/Wochen";
+		case EMPTY:
+			return "Keine Versorgung mehr";
+		case UNKNOWN:
+			return "Unbekannt";
+		case NO_BATTERY:
+			return "keine Batterie";
+		default:
+			return status.toString();
+		}
+	}
+
 	/**
 	 * 
 	 * @param val

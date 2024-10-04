@@ -8,6 +8,7 @@ import org.ogema.core.resourcemanager.ResourceManagement;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
 import org.ogema.core.security.WebAccessManager;
 import org.ogema.devicefinder.api.DatapointService;
+import org.ogema.messaging.api.MailSessionServiceI;
 import org.ogema.recordeddata.DataRecorder;
 import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
 
@@ -24,6 +25,7 @@ public class ApplicationManagerPlus {
 	private MessagingService messagingService;
 	private DataRecorder dataRecorder;
 	private GatewaySyncResourceService gwSyncService;
+	private MailSessionServiceI mailSessionService;
 	
 	public ApplicationManagerPlus(ApplicationManager appMan) {
 		this.appMan = appMan;		
@@ -121,6 +123,13 @@ public class ApplicationManagerPlus {
 	}
 	public void setGwSyncService(GatewaySyncResourceService gwSyncService) {
 		this.gwSyncService = gwSyncService;
+	}
+	
+	public MailSessionServiceI mailSessionService() {
+		return mailSessionService;
+	}
+	public void setMailSessionService(MailSessionServiceI mailSessionService) {
+		this.mailSessionService = mailSessionService;
 	}
 	
 	public static interface AlarmingUpdater {
