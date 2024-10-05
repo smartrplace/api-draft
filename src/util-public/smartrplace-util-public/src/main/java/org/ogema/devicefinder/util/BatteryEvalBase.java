@@ -103,7 +103,7 @@ public class BatteryEvalBase {
 		case URGENT:
 			return "Wenige Tage/Wochen";
 		case EMPTY:
-			return "Keine Versorgung mehr";
+			return "--";
 		case UNKNOWN:
 			return "Unbekannt";
 		case NO_BATTERY:
