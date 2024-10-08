@@ -965,6 +965,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return true;
 		if(resourceLocation.contains("HM_HmIP_BWTH_"))
 			return true;
+		if(resourceLocation.contains("HM_HmIP_BWTH24_"))
+			return true;
 		if(resourceLocation.contains("HM_HM_TC_IT_WM_W_EU"))
 			return true;
 		return false;
