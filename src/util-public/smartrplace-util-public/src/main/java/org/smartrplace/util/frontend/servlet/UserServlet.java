@@ -1195,20 +1195,20 @@ System.out.println("SUFIBSD");
 			ApplicationManager appMan) {
 		if(e == null) {
 			if(fullUrl != null)
-				UserServlet.logger.info("Servlet provider incident for: "+fullUrl);
+				UserServlet.logger.warn("Servlet provider incident for: "+fullUrl);
 			else
-				UserServlet.logger.info("Servlet provider incident with code: "+exceptionCode);
+				UserServlet.logger.warn("Servlet provider incident with code: "+exceptionCode);
 		} else if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			e.printStackTrace();
 			if(fullUrl != null)
-				UserServlet.logger.info("Servlet provider exception "+exceptionCode+" for: "+fullUrl, e);
+				UserServlet.logger.warn("Servlet provider exception "+exceptionCode+" for: "+fullUrl, e);
 			else
-				UserServlet.logger.info("Servlet provider exception: ", e);
+				UserServlet.logger.warn("Servlet provider exception: ", e);
 		} else {
 			if(fullUrl != null)
-				UserServlet.logger.info("Servlet provider exception "+exceptionCode+" for: "+fullUrl, e);
+				UserServlet.logger.warn("Servlet provider exception "+exceptionCode+" for: "+fullUrl, e);
 			else
-				UserServlet.logger.info("Servlet provider exception "+exceptionCode+": ", e);
+				UserServlet.logger.warn("Servlet provider exception "+exceptionCode+": ", e);
 		}		
 		
 		if(appMan != null)
@@ -1221,9 +1221,9 @@ System.out.println("SUFIBSD");
 		IllegalStateException etest = new IllegalStateException("exceptionCode:"+exceptionCode);
 		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			System.out.println(message);
-			UserServlet.logger.info("General report with exception code: "+exceptionCode+" ::"+message, etest);
+			UserServlet.logger.warn("General report with exception code: "+exceptionCode+" ::"+message, etest);
 		} else {
-			UserServlet.logger.info("General report with exception code: "+exceptionCode+" ::"+message, etest);
+			UserServlet.logger.warn("General report with exception code: "+exceptionCode+" ::"+message, etest);
 		}
 		
 		if(appMan != null)
@@ -1235,9 +1235,9 @@ System.out.println("SUFIBSD");
 		IllegalStateException etest = new IllegalStateException("exceptionCode:"+exceptionCode);
 		if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole")) {
 			System.out.println(message);
-			UserServlet.logger.info("Device "+device.getLocation()+" report with exception code: "+exceptionCode+" ::"+message, etest);
+			UserServlet.logger.warn("Device "+device.getLocation()+" report with exception code: "+exceptionCode+" ::"+message, etest);
 		} else {
-			UserServlet.logger.info("Device "+device.getLocation()+" report with exception code: "+exceptionCode+" ::"+message, etest);
+			UserServlet.logger.warn("Device "+device.getLocation()+" report with exception code: "+exceptionCode+" ::"+message, etest);
 		}
 		
 		IntegerResource logFileCheckNot = device.getSubResource(DEVICE_LOGFILECHECK_RESNAME, IntegerResource.class);
