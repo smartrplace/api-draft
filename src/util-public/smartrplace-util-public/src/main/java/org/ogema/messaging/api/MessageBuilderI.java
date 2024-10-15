@@ -65,6 +65,8 @@ public interface MessageBuilderI {
 
     public MessageBuilderI addHtml(String txt);
 
+    public MessageBuilderI withReplyTo(String ... address);
+    
     /**
      * Sends this message on the session it was created with.
      * 
