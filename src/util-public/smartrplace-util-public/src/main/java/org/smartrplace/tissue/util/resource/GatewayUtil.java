@@ -43,6 +43,18 @@ public class GatewayUtil {
 		int idx = gwName.indexOf(".smartrplace.");
 		if(idx >= 0)
 			gwName = gwName.substring(0, idx);
+		String[] els = gwName.split("-");
+		gwName = null;
+		boolean init = false;
+		for(String el: els) {
+			if(!init) {
+				init = true;
+				gwName = el.substring(0,1).toUpperCase() + el.substring(1);			
+			} else 
+				gwName += "-"+el.substring(0,1).toUpperCase() + el.substring(1);			
+		}
+		//if(gwName.length() >= 2)
+		//	gwName = gwName.substring(0,1).toUpperCase() + gwName.substring(1);
 		return gwName;
 	}
 
