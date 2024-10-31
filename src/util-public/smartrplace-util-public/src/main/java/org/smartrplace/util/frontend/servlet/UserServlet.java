@@ -876,14 +876,14 @@ public class UserServlet extends HttpServlet {
 		}
 		String request = sb.toString();
 
-		if(logger.isDebugEnabled())  {
+		if(UserServlet.logger.isDebugEnabled())  {
 			String fullURL = req.getRequestURL().toString();
-			logger.debug("POST message to "+fullURL);
-			logger.debug("POST body: "+request);
+			UserServlet.logger.debug("POST message to "+fullURL);
+			UserServlet.logger.debug("POST body: "+request);
 		} else if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.logdetails")) {
 			String fullURL = req.getRequestURL().toString();
-			logger.info("POST message to "+fullURL);
-			logger.info("POST body: "+request);
+			UserServlet.logger.info("POST message to "+fullURL);
+			UserServlet.logger.info("POST body: "+request);
 		}
 		
 		try {
@@ -978,9 +978,9 @@ public class UserServlet extends HttpServlet {
 		if(odata.objects == null) return;
 		if(odata.objects.size() > 1) {
 			if(odata.objectId != null)
-				throw new IllegalStateException("POST can be applied only to a single object, we found:"+odata.objects.size()+"for "+pageprov.toString()+", object:"+odata.objectId);
+				throw new IllegalStateException("POST can be applied only to a single object, we found:"+odata.objects.size()+" for "+pageprov.toString()+", object:"+odata.objectId);
 			else
-				throw new IllegalStateException("POST can be applied only to a single object, we found:"+odata.objects.size()+"for "+pageprov.toString());
+				throw new IllegalStateException("POST can be applied only to a single object, we found:"+odata.objects.size()+" for "+pageprov.toString());
 		}
 		
 		paramMap.put("METHOD", new String[] {"POST"});
