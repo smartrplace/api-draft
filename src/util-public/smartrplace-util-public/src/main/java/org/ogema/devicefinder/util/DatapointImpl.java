@@ -11,6 +11,7 @@ import java.util.Map;
 import org.ogema.core.logging.OgemaLogger;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.timeseries.ReadOnlyTimeSeries;
 import org.ogema.devicefinder.api.DPRoom;
 import org.ogema.devicefinder.api.Datapoint;
@@ -127,7 +128,14 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 
 	public static void addStandardData(Datapoint result) {
 		if(result.getGaroDataType() == null) {
-			result.setGaroDataType(GaRoEvalHelper.getDataType(result.getLocation()));
+			GaRoDataType type = GaRoEvalHelper.getDataType(result.getLocation());
+			if(type.equals(GaRoDataType.Unknown)) {
+				if(result.getResource() instanceof TemperatureResource) {
+					result.setGaroDataType(GaRoDataType.UnknownTemperature);
+					return;
+				}
+			}
+			result.setGaroDataType(type);
 		}
 	}		
 
