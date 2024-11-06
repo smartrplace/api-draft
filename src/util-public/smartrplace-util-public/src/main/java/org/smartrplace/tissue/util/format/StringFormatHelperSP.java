@@ -15,6 +15,8 @@
  */
 package org.smartrplace.tissue.util.format;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
 
@@ -121,5 +123,11 @@ public class StringFormatHelperSP {
 			}
 		}
 		return ret1.toString();
+	}
+	
+	public static String getTimeDateInLocalTimeZoneMinutes(long millisUTCSinceEpoc) {
+		//Date date = new Date(millisUTCSinceEpoc-100);
+		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+		return formatter.format(millisUTCSinceEpoc);
 	}
 }
