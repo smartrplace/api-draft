@@ -95,10 +95,17 @@ public abstract class SensorData {
 	//public List<KnownValue2> knownValues = new ArrayList<>();
 	public Map<Float, Long> knownValues = new HashMap<>();
 	public long lastSetpointFeedbackConfirmTime = -1;
+	public void setFirstValueReceived() {
+		if(!receivedFirstFBValue) {
+			FloatResource tempSetpointFeedbackValue = (FloatResource) feedback();
+			addKnownValue(tempSetpointFeedbackValue);
+			receivedFirstFBValue = true;
+		}
+	}
 	public boolean isSetpointKnown(float fbReceived) {
 		if(!(setpoint() instanceof FloatResource))
 			return false;
-		FloatResource temperatureSetpoint = (FloatResource) setpoint();
+		//FloatResource temperatureSetpoint = (FloatResource) setpoint();
 		FloatResource tempSetpointFeedbackValue = (FloatResource) feedback();
 		synchronized (this) {
 			cleanKnownValues();

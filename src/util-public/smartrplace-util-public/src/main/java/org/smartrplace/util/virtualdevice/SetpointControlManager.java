@@ -582,7 +582,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 							else
 								text += "  Feedback null!  ";
 							text += "  Value:"+valueFeedbackPending;
-							UserServlet.logException(e, null, -11, appManPlus);
+							UserServlet.logException(e, null, -28, appManPlus);
 							throw new IllegalStateException(text, e);
 						}
 						if(!success) {
