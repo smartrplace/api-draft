@@ -741,7 +741,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return false;
 		for(SubResourceInfo srinfo: subResources) {
 			if(srinfo.resourceName.equals("mBusType") && StringResource.class.getName().equals(srinfo.resType)) {
-				if(srinfo.res != null && ((StringResource)srinfo.res).getValue().equals("WATER_METER"))
+				if(srinfo.res != null
+						&& ((StringResource)srinfo.res).getValue().contains("WATER_METER"))
 					return true;
 				else
 					break;
@@ -773,6 +774,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				||resourceLocation.startsWith("serverMirror")))
 			return false;
 		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
+			return false;
+		if(isWaterMeterDevice(resourceLocation, subResources))
 			return false;
 		boolean foundEnergy = false;
 		for(SubResourceInfo srinfo: subResources) {
