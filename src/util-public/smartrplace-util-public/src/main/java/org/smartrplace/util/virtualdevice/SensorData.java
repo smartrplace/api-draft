@@ -100,6 +100,7 @@ public abstract class SensorData {
 			FloatResource tempSetpointFeedbackValue = (FloatResource) feedback();
 			addKnownValue(tempSetpointFeedbackValue);
 			receivedFirstFBValue = true;
+			ctrl.log.warn("Setting value known as first receivedFirstFBValue RemoteVal:"+(tempSetpointFeedbackValue.getValue()-273.15));
 		}
 	}
 	public boolean isSetpointKnown(float fbReceived) {
