@@ -769,6 +769,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(subResources == null)
 			return false;
+		//TODO: double check implemented now, clean up
 		boolean isMbusHeatMeter = subResources.stream()
 				.filter(i -> i.resourceName.equals("mBusType") && StringResource.class.getName().equals(i.resType))
 				.anyMatch(i -> "HEAT_METER".equals(((StringResource)i.res).getValue()));
