@@ -775,8 +775,21 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return false;
 		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
 			return false;
-		if(isWaterMeterDevice(resourceLocation, subResources))
-			return false;
+		//if(isWaterMeterDevice(resourceLocation, subResources))
+		//	return false;
+		for(SubResourceInfo srinfo: subResources) {
+			if(srinfo.resourceName.equals("mBusType") && StringResource.class.getName().equals(srinfo.resType)) {
+				if(srinfo.res != null
+						&& ((StringResource)srinfo.res).getValue().contains("WATER_METER"))
+					return false;
+				else if(srinfo.res != null
+						&& ((StringResource)srinfo.res).getValue().equals("HEAT_METER"))
+					return true;
+				else
+					break;
+			}
+		}
+
 		boolean foundEnergy = false;
 		for(SubResourceInfo srinfo: subResources) {
 			if(EnergyAccumulatedSensor.class.getName().equals(srinfo.resType)) {
