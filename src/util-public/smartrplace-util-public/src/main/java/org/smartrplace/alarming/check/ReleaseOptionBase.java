@@ -1,5 +1,6 @@
 package org.smartrplace.alarming.check;
 
+import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.model.extended.alarming.AlarmGroupData;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
@@ -16,7 +17,7 @@ public class ReleaseOptionBase {
 	public String releaseComment;
 	
 	public static interface ReleaseAction {
-		void onRelease(AlarmGroupData issue, InstallAppDevice iad);
+		String onRelease(AlarmGroupData issue, InstallAppDevice iad, ApplicationManagerPlus appManPlus);
 	}
 	public ReleaseAction action = null;
 	public Object actionParameter = null;
