@@ -374,6 +374,58 @@ public class SubcustomerUtil {
 		return selected;
 	}
 
+	/** Get all (sub-)primary subcustomers for user*/
+	public static Collection<SubCustomerData> getDataForUserMulti(String userName, ApplicationManager appMan,
+			boolean acceptAggregated, boolean preferAggregated) {
+		SubCustomerData selected = null;
+		SubCustomerData agg = null;
+		List<SubCustomerData> subcs = getSubcustomers(appMan);
+
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		int mode = accessAdminConfigRes.subcustomerUserMode().getValue();
+		if(mode == 0)
+			return Arrays.asList(new SubCustomerData[] {getEntireBuildingSubcustomer(appMan)});
+		
+		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
+				accessAdminConfigRes.userPermissions());
+		if(userEntry == null)
+			return null;
+		if(userEntry.superGroups().size() == 0 && acceptAggregated)
+			return Arrays.asList(new SubCustomerData[] {getEntireBuildingSubcustomer(appMan)});
+		
+		Set<SubCustomerData> result = new HashSet<>();
+		for(SubCustomerData subc: subcs) {
+			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
+					accessAdminConfigRes.userPermissions());
+			if(subcustGroup == null)
+				throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
+
+			if(ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
+				if(subc.aggregationType().getValue() > 0) {
+					agg = subc;
+				} else {
+					result.add(subc);
+					selected = subc;
+					//if(!preferAggregated)
+					//	break;
+				}
+			}
+		}
+		if(preferAggregated && (agg != null)) {
+			if(acceptAggregated)
+				result.add(agg);
+			//else
+			//	return null;
+		}
+		if(selected == null && (!acceptAggregated))
+			return result;
+		if(selected == null && agg != null)
+			selected = agg;
+		if(selected != null)
+			result.add(selected);
+		return result;
+	}
+
 	public static Collection<Room> getUserRoomsBySubcustomers(String userName, ApplicationManager appMan) {
 		
 		SubCustomerData activeSubcust = SubcustomerUtil.getDataForUser(userName, appMan, true, true);
