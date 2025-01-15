@@ -834,6 +834,7 @@ public class UserServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//String user = req.getParameter("user");
 		//if(user == null) return;
+		req.setCharacterEncoding("UTF-8");
 		String user = GUIUtilHelper.getUserLoggedInBase(req.getSession());
 		doPost(req, resp, user, false);
 		if(isTestInstance(resp)) {

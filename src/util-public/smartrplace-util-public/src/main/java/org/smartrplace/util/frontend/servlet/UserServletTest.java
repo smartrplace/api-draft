@@ -152,6 +152,7 @@ public abstract class UserServletTest extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		req.setCharacterEncoding("UTF-8");
 		String user = getUser(req, resp);
 		if (user == null) {
 			return;
