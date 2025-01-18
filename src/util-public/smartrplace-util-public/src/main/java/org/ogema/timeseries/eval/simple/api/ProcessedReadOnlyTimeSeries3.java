@@ -429,6 +429,9 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	public void addValuesPublic(List<SampledValue> newVals) {
 		addValues(newVals);
 	}
+	public void addValuesPublic(List<SampledValue> newVals, long removeFirst, long removeLast) {
+		addValues(newVals, removeFirst, removeLast);
+	}
 	
 	@Override
 	public String getSummaryColumn() {
