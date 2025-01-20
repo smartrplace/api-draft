@@ -429,6 +429,11 @@ if(Boolean.getBoolean("evaldebug")) System.out.println("returning "+result.size(
 	public void addValuesPublic(List<SampledValue> newVals) {
 		addValues(newVals);
 	}
+	public void addValuesPublic(List<SampledValue> newVals, boolean clearExisting) {
+		if(clearExisting && super.values != null)
+			super.values.clear();
+		addValues(newVals);
+	}
 	public void addValuesPublic(List<SampledValue> newVals, long removeFirst, long removeLast) {
 		addValues(newVals, removeFirst, removeLast);
 	}
