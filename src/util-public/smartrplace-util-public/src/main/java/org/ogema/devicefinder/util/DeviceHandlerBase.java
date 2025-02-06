@@ -415,8 +415,10 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	public static BooleanResource getShortBatteryLifetimeIndicator(PhysicalElement device) {
 		return device.getSubResource("shorBattery", BooleanResource.class);
 	}
-	public static ThermostatProgram getHmThermProgram(Thermostat th) {
+	public static ThermostatProgram getHmThermProgram(Thermostat th, boolean force) {
 		ThermostatProgram hmThermProgram = th.getSubResource("program", ThermostatProgram.class);
+		if(force)
+			return hmThermProgram;
 		if ((hmThermProgram == null) || (!hmThermProgram.isActive()))
 			return null;
 		return hmThermProgram;
