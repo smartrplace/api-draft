@@ -1,6 +1,5 @@
 package org.ogema.devicefinder.util;
 
-import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,9 +54,11 @@ import org.smartrplace.util.format.WidgetHelper;
 import org.smartrplace.widget.extensions.GUIUtilHelper;
 
 import de.iwes.util.format.StringFormatHelper;
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
+import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -69,7 +70,6 @@ import de.iwes.widgets.html.form.label.Header;
 import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.html.form.label.LabelData;
-import de.iwes.widgets.resource.widget.dropdown.ResourceDropdown;
 
 public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITablePage<T,R>  {
 	public static final long DEFAULT_POLL_RATE = 5000;
@@ -211,6 +211,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	public static Map<SubCustomerData, String> tenantsToSet = new HashMap<>();
 	private static long lastUpdate = -1;
 	private static long lastUpdateTenant = -1;
+	private static IntegerResource deviceProtectedMode;
 	protected void addRoomWidget(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
@@ -233,8 +234,17 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			}
 			roomsToSet = roomsToSetLoc;
 			lastUpdate = now;
+			
+			deviceProtectedMode = ResourceHelper.getHwConfig(appMan.getResourceAccess()).deviceProtectedMode();
 		}
-		final ResourceDropdown<Room> roomSelector = vh.referenceDropdownFixedChoice(columnName, id, deviceRoom, row, roomsToSet, 3);
+		final OgemaWidget roomSelector;
+		if(deviceProtectedMode.getValue() >= 3) {
+			//roomSelector =  vh.referenceDropdownFixedChoice(columnName, id, deviceRoom, row, roomsToSet, 3);
+			roomSelector = vh.stringLabel(columnName, id,
+					ResourceUtils.getHumanReadableShortName(deviceRoom)+
+					" by SIA("+(deviceProtectedMode.getValue()-2)+")", row);
+		} else
+			roomSelector =  vh.referenceDropdownFixedChoice(columnName, id, deviceRoom, row, roomsToSet, 3);
 		if (roomSelector != null)
 			roomSelector.setDefaultMinWidth("7em");
 	}
