@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.ogema.core.application.ApplicationManager;
@@ -644,16 +645,47 @@ public class SubcustomerUtil {
 	}
 
 	public static long getStartTimeStatic(Map<Integer, List<Long>> startEndTimes) {
-		List<Long> workingdayTime = startEndTimes.get(HeatCoolData.STARTEND_WORKINGDAY_IDX);
+		return getStartTimeStatic(startEndTimes, HeatCoolData.STARTEND_WORKINGDAY_IDX);
+	}
+	public static long getStartTimeStatic(Map<Integer, List<Long>> startEndTimes, int dayIdx) {
+		List<Long> workingdayTime = startEndTimes.get(dayIdx);
 		if(workingdayTime == null || workingdayTime.isEmpty())
-			return 1440*TimeProcUtil.MINUTE_MILLIS;
+			return 1500*TimeProcUtil.MINUTE_MILLIS;
 		return workingdayTime.get(0);
+	}
+	public static String getStartOrEndTimeStaticUD(Map<Integer, List<Long>> startEndTimes, boolean startTime) {
+		Map<Long, String> startSum = new HashMap<>();
+		for(int idx=0; idx<7; idx++) {
+			long startMin = startTime?getStartTimeStatic(startEndTimes, idx):getEndTimeStatic(startEndTimes, idx);
+			String days = startSum.get(startMin);
+			if(days == null)
+				days = ""+idx;
+			else
+				days = days+","+idx;
+			startSum.put(startMin, days);
+		}
+		if(startSum.isEmpty())
+			return "time empty"; // should never occur
+		else if(startSum.size() == 1)
+			return ""+(startSum.keySet().iterator().next()/TimeProcUtil.MINUTE_MILLIS);
+		String result = null;
+		for(Entry<Long, String> el: startSum.entrySet()) {
+			String elStr = ""+(el.getKey()/TimeProcUtil.MINUTE_MILLIS)+"("+el.getValue()+")";
+			if(result == null)
+				result = elStr;
+			else
+				result += ", "+elStr;
+		}
+		return result;
 	}
 
 	public static long getEndTimeStatic(Map<Integer, List<Long>> startEndTimes) {
-		List<Long> workingdayTime = startEndTimes.get(HeatCoolData.STARTEND_WORKINGDAY_IDX);
+		return getEndTimeStatic(startEndTimes, HeatCoolData.STARTEND_WORKINGDAY_IDX);
+	}
+	public static long getEndTimeStatic(Map<Integer, List<Long>> startEndTimes, int dayIdx) {
+		List<Long> workingdayTime = startEndTimes.get(dayIdx);
 		if(workingdayTime == null || (workingdayTime.size() < 2))
-			return 1440*TimeProcUtil.MINUTE_MILLIS;
+			return 1510*TimeProcUtil.MINUTE_MILLIS;
 		return workingdayTime.get(1);
 	}
 	

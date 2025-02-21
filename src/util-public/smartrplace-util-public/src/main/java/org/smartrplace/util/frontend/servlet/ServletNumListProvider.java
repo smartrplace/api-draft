@@ -42,6 +42,8 @@ public class ServletNumListProvider<T> implements ServletValueProvider {
 					arr.put(val);
 			} else if(obj instanceof Integer)
 				arr.put((Integer)obj);
+			else if(obj instanceof Long)
+				arr.put((Long)obj);
 			else if(obj instanceof Boolean)
 				arr.put((Boolean)obj);
 			else
