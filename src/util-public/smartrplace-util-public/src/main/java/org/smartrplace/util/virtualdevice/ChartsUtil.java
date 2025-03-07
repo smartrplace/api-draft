@@ -340,6 +340,16 @@ public class ChartsUtil {
 		return getPlotButton(id, object, dpService, appMan, false, null, row, req, devHand, schedViewProv, null, null, parent, null);
 	}
 
+	public static GetPlotButtonResult getPlotButtonBase(String id, final InstallAppDevice object,
+			final DatapointService dpService, final ApplicationManager appMan,
+			OgemaWidget parent, Row row, OgemaHttpRequest req,
+			DefaultScheduleViewerConfigurationProviderExtended schedViewProv,
+			IntervalConfiguration itv) {
+		DeviceHandlerProviderDP<Resource> devHand = dpService.getDeviceHandlerProvider(object);
+		return getPlotButton(id, object, dpService, appMan, false, null, row, req, devHand, schedViewProv,
+				null, null, itv, parent, "Plot", null);
+	}
+
 	public static GetPlotButtonResult getPlotButton(String id, final InstallAppDevice object,
 			final DatapointService dpService, final ApplicationManager appMan,//final HardwareInstallController controller2,
 			boolean addDataPointInfoLabel,

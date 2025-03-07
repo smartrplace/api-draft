@@ -63,6 +63,7 @@ import de.iwes.widgets.api.widgets.WidgetPage;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
+import de.iwes.widgets.html.complextable.DynamicTable;
 import de.iwes.widgets.html.complextable.RowTemplate.Row;
 import de.iwes.widgets.html.form.button.Button;
 import de.iwes.widgets.html.form.button.RedirectButton;
@@ -299,6 +300,12 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	protected Label addLastContact(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, 
 			SingleValueResource reading) {
+		return addLastContactStatic(columnLabel, vh, id, req, row, reading, appMan, mainTable);
+	}
+	public static Label addLastContactStatic(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, 
+			SingleValueResource reading,
+			ApplicationManager appMan, DynamicTable<?> mainTable) {
 		if(columnLabel == null)
 			columnLabel = "Last Contact";
 		Label lastContact = null;
