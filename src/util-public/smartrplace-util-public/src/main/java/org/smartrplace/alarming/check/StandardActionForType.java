@@ -12,6 +12,6 @@ public interface StandardActionForType<R extends Resource> {
 	 * @param issue
 	 * @return String result. If null nothing is appended.
 	 */
-	String performAction(InstallAppDevice iad, R device);
+	String performAction(InstallAppDevice iad, R device, Object parameters);
 	
 }
