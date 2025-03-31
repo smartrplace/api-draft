@@ -1040,8 +1040,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		//long destTime = now+6*TimeProcUtil.DAY_MILLIS+6*TimeProcUtil.HOUR_MILLIS;
 		long startOfDay = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.DAY);
 		int decalcMinOfDay = Integer.getInteger("org.ogema.devicefinder.util.decalcMinutesOfDay", 360);
+		int newTimeMinAgo = Integer.getInteger("org.ogema.devicefinder.util.decalcMinutesMinimumDistanceToNow", 120);
 		long destTime = startOfDay + decalcMinOfDay*TimeProcUtil.MINUTE_MILLIS;
-		if(destTime > now)
+		if(destTime > (now- newTimeMinAgo*TimeProcUtil.MINUTE_MILLIS))
 			destTime += 6*TimeProcUtil.DAY_MILLIS;
 		return setDecalcTime(device, destTime, gwSync);												
 	}
