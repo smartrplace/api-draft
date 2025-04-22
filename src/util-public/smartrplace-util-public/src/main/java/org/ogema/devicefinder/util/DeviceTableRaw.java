@@ -45,6 +45,8 @@ import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resource.util.ResourceUtils;
 import org.ogema.virtual.device.config.VirtualThermostatConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.external.accessadmin.config.SubCustomerData;
 import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
@@ -75,6 +77,8 @@ import de.iwes.widgets.html.form.label.LabelData;
 public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITablePage<T,R>  {
 	public static final long DEFAULT_POLL_RATE = 5000;
 	public static final String BATTERY_VOLTAGE_HEADER = "Battery Voltage (V)";
+	
+	private static Logger logger = LoggerFactory.getLogger(DeviceTableRaw.class);
 	
 	/** Unique ID for the table e.g. name of providing class*/
 	protected abstract String id();
@@ -1042,7 +1046,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		int decalcMinOfDay = Integer.getInteger("org.ogema.devicefinder.util.decalcMinutesOfDay", 360);
 		int newTimeMinAgo = Integer.getInteger("org.ogema.devicefinder.util.decalcMinutesMinimumDistanceToNow", 120);
 		long destTime = startOfDay + decalcMinOfDay*TimeProcUtil.MINUTE_MILLIS;
-		if(destTime > (now- newTimeMinAgo*TimeProcUtil.MINUTE_MILLIS))
+		if(destTime < (now + newTimeMinAgo*TimeProcUtil.MINUTE_MILLIS))
 			destTime += 6*TimeProcUtil.DAY_MILLIS;
 		return setDecalcTime(device, destTime, gwSync);												
 	}
@@ -1068,7 +1072,11 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		String val = getDecalcString(destTime, isMonthly);
 		if(val != null) {
 			setCreate(res, val, gwSync);
-			System.out.println("Setting Decalc Time with gwSync set:"+(gwSync != null));
+			logger.info("Setting Decalc Time with gwSync set:"+(gwSync != null));
+			if(Boolean.getBoolean("org.ogema.devicefinder.util.decalc.log.stacktrace")) {
+				Exception e = new IllegalStateException("Setting Decalc Time to "+val+" for "+res.getLocation());
+				logger.info("Log Stacktrace", e);
+			}
 			//ValueResourceHelper.setCreate(res, val);
 		}
 		return val;
