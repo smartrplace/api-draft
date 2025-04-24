@@ -17,6 +17,7 @@ import org.smartrplace.alarming.escalation.util.EscalationProvider;
 import org.smartrplace.apps.hw.install.config.DeviceTypeData;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.autoconfig.api.OSGiConfigAccessService;
+import org.smartrplace.widgets.api.DatapointServiceBase;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
@@ -34,7 +35,7 @@ import de.iwes.widgets.template.LabelledItem;
  * offered in the first place.
  * TODO: We need a listener concept for this service, but we do not implement this in the first step
  */
-public interface DatapointService {
+public interface DatapointService extends DatapointServiceBase {
 	/** Get Datapoint information for a resource location. The information is filled with all
 	 * standard information. If you make a lot of calls and you know that all information you need
 	 * is already stored for the resource location then you can speed up the function using
@@ -181,6 +182,7 @@ public interface DatapointService {
 	 */
 	Collection<InstallAppDevice> managedDeviceResoures(String deviceHandlerId, boolean shortId, boolean returnAlsoTrash);
 	
+	@Override
 	InstallAppDevice getMangedDeviceResource(PhysicalElement device);
 	InstallAppDevice getMangedDeviceResourceForSubresource(Resource subRes);
 	InstallAppDevice getMangedDeviceResource(String deviceId);
