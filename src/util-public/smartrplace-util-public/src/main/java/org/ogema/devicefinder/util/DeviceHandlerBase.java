@@ -300,6 +300,8 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		for(OnsiteVisitData visit : database.onSiteVisits().getAllElements()) {
 			if(!visit.blockAutoDecalcForDays().isActive())
 				continue;
+			if(visit.status().getValue() < 3)
+				continue;
 			if(now < visit.date().getValue())
 				continue;
 			long endVal = visit.date().getValue() +
