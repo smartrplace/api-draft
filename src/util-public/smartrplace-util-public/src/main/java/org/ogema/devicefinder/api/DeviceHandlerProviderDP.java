@@ -9,6 +9,7 @@ import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
 import org.ogema.model.extended.alarming.AlarmGroupData;
+import org.smartrplace.alarming.check.FinalAnalysisHolderBase;
 import org.smartrplace.alarming.check.IssueAnalysisResultBase;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
@@ -261,6 +262,9 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default IssueAnalysisResultBase analyzeIssueStatus(AnalyzeIssueStatusInput in)
 		{return null;}
 
+	default FinalAnalysisHolderBase getFinalAnalysis(AnalyzeIssueStatusInput in, boolean useIssueMessage)
+		{return null;}
+	
 	/** Provide information if the device can be assumed to be fully installed, e.g.
 	 * based on room being set
 	 * @param iad
