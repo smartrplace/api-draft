@@ -6,7 +6,12 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
 public class ReleaseOptionBase {
 	public boolean blockIssue;
-	public boolean setToTrash = false;
+	public enum DeleteMethod {
+		NONE,
+		DELETE,
+		TO_TRASH
+	}
+	public DeleteMethod setToTrash = DeleteMethod.NONE;
 	public int blockingVal = 4; //default: waiting for onsite support, 8:customer
 	
 	//public FinalAnalysis finalAnalysis;
