@@ -786,6 +786,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return foundVolume;
 	}
 
+	public static boolean isHeatMeterDevice(PhysicalElement device) {
+		return isHeatMeterDevice(device.getLocation(), getSubResInfo(device));
+	}
 	public static boolean isHeatMeterDevice(String resourceLocation, Collection<SubResourceInfo> subResources) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(subResources == null)
