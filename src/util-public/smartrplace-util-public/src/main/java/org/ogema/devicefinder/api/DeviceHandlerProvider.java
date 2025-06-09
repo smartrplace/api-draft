@@ -7,7 +7,6 @@ import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.resourcemanager.pattern.ResourcePattern;
 import org.ogema.core.resourcemanager.pattern.ResourcePatternAccess;
-import org.ogema.devicefinder.util.DeviceHandlerSimple;
 import org.ogema.devicefinder.util.DeviceTableBase;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.simulation.shared.api.RoomInsideSimulationBase;
@@ -25,7 +24,7 @@ import de.iwes.widgets.html.complextable.RowTemplate.Row;
 /** Implement this service to add another device table to the hardware installation app and to provide
  * everything to provide device information for device and application configuration.<br>
  *
- * For implementation of simple standard device handlers implement the class {@link DeviceHandlerSimple}.<br>
+ * For implementation of simple standard device handlers implement the class DeviceHandlerSimple.<br>
  *
  * Note that the package and class name of a {@link DeviceHandlerProvider} should not be refactored after productive usage
  * started as the {@link #id()} method by default uses the class and package name and this id is stored persistently in the
