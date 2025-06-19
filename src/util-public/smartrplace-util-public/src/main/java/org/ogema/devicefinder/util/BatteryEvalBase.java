@@ -205,23 +205,25 @@ public class BatteryEvalBase {
 		return result;
 	}
 
+	
+	public static float expected270days = 1.33f*ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.expectedYears", 1.0f);
 	public static Map<Integer, Long> batteryDurationsFromLast = new HashMap<>();
 	static {
 		//batteryDurationsFromLast.put(33, 300*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(33, 290*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(32, 270*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(31, 240*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(30, 210*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(29, 180*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(28, 150*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(27, 120*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(26, 90*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(25, 60*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(24, 30*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(23, 5*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(22, 3*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(21, 2*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(20, 1*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(33, ((long) (expected270days*290))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(32, ((long) (expected270days*270))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(31, ((long) (expected270days*240))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(30, ((long) (expected270days*210))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(29, ((long) (expected270days*180))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(28, ((long) (expected270days*150))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(27, ((long) (expected270days*120))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(26, ((long) (expected270days*90))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(25, ((long) (expected270days*60))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(24, ((long) (expected270days*30))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(23, ((long) (expected270days*5))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(22, ((long) (expected270days*3))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(21, ((long) (expected270days*2))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(20, ((long) (expected270days*1))*TimeProcUtil.DAY_MILLIS);
 	}
 	
 	public static long getRemainingLifeTimeEstimation(float voltageFromWhichDroppedPermanently) {
