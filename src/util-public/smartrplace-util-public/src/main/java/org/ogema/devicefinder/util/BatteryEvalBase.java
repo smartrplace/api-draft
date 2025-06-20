@@ -31,6 +31,8 @@ public class BatteryEvalBase {
 	public static final float DEFAULT_BATTERY_URGENT_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.urgentvolt", 2.3f);
 	public static final long TIME_TO_ASSUME_EMPTY = 1*TimeProcUtil.DAY_MILLIS;
 	
+	public static FloatResource batteryLifetimeExpectedYears = null;
+	
 	public static String getRightAlignedString(String in, int len) {
 		if(in.length() >= len) return in.substring(0, len);
 		return StringUtils.repeat(' ', len-in.length())+in;
@@ -227,15 +229,29 @@ public class BatteryEvalBase {
 	}
 	
 	public static long getRemainingLifeTimeEstimation(float voltageFromWhichDroppedPermanently) {
+		if(batteryLifetimeExpectedYears != null && batteryLifetimeExpectedYears.isActive())
+			return getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, batteryLifetimeExpectedYears.getValue());
+		return getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, null);
+	}
+	public static long getRemainingLifeTimeEstimation(float voltageFromWhichDroppedPermanently,
+			Float batteryLifetimeExpectedYears) {
 		float curVal = voltageFromWhichDroppedPermanently;
+		
+		double factor;
+		if(batteryLifetimeExpectedYears != null) {
+			float factorByProperty = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.expectedYears", 1.0f);
+			factor = batteryLifetimeExpectedYears / factorByProperty;
+		} else
+			factor = 1.0f;
+		
 		if(Float.isNaN(curVal))
 			return -1;
 		if(curVal >= 3.3f)
-			return batteryDurationsFromLast.get(33);
+			return (long) (factor*batteryDurationsFromLast.get(33));
 		else if(curVal <= 2.0f)
-			return batteryDurationsFromLast.get(20);
+			return (long) (factor*batteryDurationsFromLast.get(20));
 		else
-			return batteryDurationsFromLast.get(Math.round(curVal*10));
+			return (long) (factor*batteryDurationsFromLast.get(Math.round(curVal*10)));
 		
 	}
 	
