@@ -86,7 +86,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 				vh.registerHeaderEntry("Season Mode");
 				vh.registerHeaderEntry("Roomcontrol Main");
 				vh.registerHeaderEntry("Update Rate");
-				vh.registerHeaderEntry("Configuration Page");
+				vh.registerHeaderEntry("Contact Page");
 				vh.registerHeaderEntry("User App Mapping");
 				vh.registerHeaderEntry("Charts");
 				vh.registerHeaderEntry("Alarm");
@@ -119,10 +119,10 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 						else
 							modeText = "Mode";
 					}
-					vh.linkingButton("Season Mode", id, object, row, modeText, gwUrl+"/reactroomcontrolWE/index.html#/reactroomcontrolWE/settings");
+					vh.linkingButton("Battery Page", id, object, row, modeText, gwUrl+"//org/smartrplace/hardwareinstall/superadmin/batteryStates.hmtl.html");
 					vh.linkingButton("Roomcontrol Main", id, object, row, "Room Control", gwUrl+"/org/smartrplace/apps/smartrplaceheatcontrolv2/index.html");
 					vh.linkingButton("Update Rate", id, object, row, "Upd.Rate", gwUrl+"/org/smartrplace/hardwareinstall/superadmin/thermostatUpdateRate.hmtl.html");
-					vh.linkingButton("Configuration Page", id, object, row, "Config", gwUrl+"/org/smartrplace/alarmingexpert/masterdatabase.html");
+					vh.linkingButton("Contact Page", id, object, row, "Config", gwUrl+"/org/smartrplace/alarmingexpert/masterdatabase.html");
 					vh.linkingButton("User App Mapping", id, object, row, "App Perms", gwUrl+"/org/smartrplace/external/accessadmin/userstatus.html");
 					vh.linkingButton("Charts", id, object, row, "Charts", gwUrl+"/org/sp/app/srcmonexpert/roomcontrolcharts.html");
 					vh.linkingButton("Alarm", id, object, row, "Alarm", gwUrl+"/org/smartrplace/alarmingsuper/index.html");
