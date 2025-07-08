@@ -992,7 +992,10 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					else
 						throw new IllegalStateException("Could not find "+sva.altIdUsed);
 				}
-				myField.setValue(source.getValue()+"",req);
+				if(source.getValue() == null)
+					myField.setValue("",req);
+				else
+					myField.setValue(source.getValue()+"",req);
 				if (tooltip != null)
 					myField.setToolTip(tooltip.getValue(), req);
 			}

@@ -306,15 +306,31 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			SingleValueResource reading) {
 		return addLastContactStatic(columnLabel, vh, id, req, row, reading, appMan, mainTable);
 	}
+	protected Label addLastContact(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, 
+			SingleValueResource reading, Long maxAgeBeforeWarn) {
+		return addLastContactStatic(columnLabel, vh, id, req, row, reading, appMan, mainTable, maxAgeBeforeWarn);
+	}
 	public static Label addLastContactStatic(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, 
 			SingleValueResource reading,
 			ApplicationManager appMan, DynamicTable<?> mainTable) {
+		return addLastContactStatic(columnLabel, vh, id, req, row, reading, appMan, mainTable,
+				24*TimeProcUtil.HOUR_MILLIS);
+	}
+	public static Label addLastContactStatic(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, 
+			SingleValueResource reading,
+			ApplicationManager appMan, DynamicTable<?> mainTable,
+			Long maxAgeBeforeWarn) {
 		if(columnLabel == null)
 			columnLabel = "Last Contact";
 		Label lastContact = null;
 		if(req != null) {
-			lastContact = new LastContactLabel(reading, appMan, mainTable, WidgetHelper.getValidWidgetId(columnLabel)+id, req);
+			if(maxAgeBeforeWarn == null)
+				lastContact = new LastContactLabel(reading, appMan, mainTable, WidgetHelper.getValidWidgetId(columnLabel)+id, req);
+			else
+				lastContact = new LastContactLabel(maxAgeBeforeWarn, reading, appMan, mainTable, WidgetHelper.getValidWidgetId(columnLabel)+id, req);
 			row.addCell(WidgetHelper.getValidWidgetId(columnLabel), lastContact);
 			return lastContact;
 		} else

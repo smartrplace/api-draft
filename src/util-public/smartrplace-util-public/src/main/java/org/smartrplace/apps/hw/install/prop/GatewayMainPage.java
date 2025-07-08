@@ -83,7 +83,7 @@ public class GatewayMainPage extends ObjectGUITablePageNamed<GatewayData, Gatewa
 			if(pageType != GwPageType.BASE_VERSION) {
 				vh.registerHeaderEntry("Op Link");
 				//vh.registerHeaderEntry("Controller");
-				vh.registerHeaderEntry("Season Mode");
+				vh.registerHeaderEntry("Battery Page");
 				vh.registerHeaderEntry("Roomcontrol Main");
 				vh.registerHeaderEntry("Update Rate");
 				vh.registerHeaderEntry("Contact Page");
