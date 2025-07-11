@@ -390,8 +390,7 @@ public class UserServlet extends HttpServlet {
 			
 		} catch (Exception e) {
 			out = "An error occurred: " + e.toString();
-			if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.alarm.block.APIException"))
-				logException(e, "POST", 3, appManPlus);
+			logExceptionForAPI(e, "POST", 3, appManPlus);
 			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 			//	e.printStackTrace();
 			if(result == null)
@@ -497,8 +496,8 @@ public class UserServlet extends HttpServlet {
 				logger.info("Servlet provider exception: {}", res.message);
 			//writeMessage(res, "exception", message);
 			//result.put("exception", message);
-			if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.alarm.block.APIException"))
-				logException(null, res.message, 5, appManPlus);
+			//if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.alarm.block.APIException"))
+			logExceptionForAPI(null, res.message, 5, appManPlus);
 			return res;
 		}
 
@@ -545,8 +544,7 @@ public class UserServlet extends HttpServlet {
 					continue;
 				objStr = pageprov.getObjectId(obj);
 			} catch(Exception e) {
-				if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.alarm.block.APIException"))
-					logException(e, fullUrl, 4, appManPlus);
+				logExceptionForAPI(e, fullUrl, 4, appManPlus);
 				res.message = e.toString();
 				return res;
 			}
@@ -637,8 +635,7 @@ public class UserServlet extends HttpServlet {
 				}
 				} catch(Exception e) {
 					subJson.put(jsonkey, e.toString());
-					if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.alarm.block.APIException"))
-						logException(e, fullUrl, 3, appManPlus);
+					logExceptionForAPI(e, fullUrl, 3, appManPlus);
 					/*if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 						e.printStackTrace();
 					else
@@ -930,8 +927,7 @@ public class UserServlet extends HttpServlet {
 			status = odata.status; //HttpServletResponse.SC_OK;
 		} catch (Exception e) {
 			response = response + "An error occurred: " + e.toString();
-			if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.alarm.block.APIException"))
-				logException(e, "POST from "+user, 2, appManPlus);
+			logExceptionForAPI(e, "POST from "+user, 2, appManPlus);
 			//if(Boolean.getBoolean("org.smartrplace.util.frontend.servlet.servererrorstoconsole"))
 			//	e.printStackTrace();
 			status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -1193,6 +1189,13 @@ System.out.println("SUFIBSD");
 			ApplicationManagerPlus appManPlus) {
 		logException(e, fullUrl, exceptionCode, appManPlus);
 	}*/
+	public static void logExceptionForAPI(Exception e, String fullUrl, int exceptionCode,
+			ApplicationManagerPlus appManPlus) {
+		if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.alarm.block.APIException"))
+			logException(e, fullUrl, exceptionCode, appManPlus.appMan());
+		else
+			logException(e, fullUrl, exceptionCode, (ApplicationManager)null);
+	}
 	public static void logException(Exception e, String fullUrl, int exceptionCode,
 			ApplicationManagerPlus appManPlus) {
 		logException(e, fullUrl, exceptionCode, appManPlus.appMan());
