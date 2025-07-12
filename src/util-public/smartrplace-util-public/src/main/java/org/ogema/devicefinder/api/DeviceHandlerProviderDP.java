@@ -262,6 +262,12 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default IssueAnalysisResultBase analyzeIssueStatus(AnalyzeIssueStatusInput in)
 		{return null;}
 
+	/**
+	 * 
+	 * @param in
+	 * @param useIssueMessage usually this is true
+	 * @return
+	 */
 	default FinalAnalysisHolderBase getFinalAnalysis(AnalyzeIssueStatusInput in, boolean useIssueMessage)
 		{return null;}
 	
@@ -274,6 +280,18 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 *      hard to detect automatically)
 	 */
 	default Boolean isDeviceAssumedFullyInstalled(InstallAppDevice iad) { return null;}
+
+	public static class DeviceInstallationStatus {
+		public DeviceInstallationStatus(int status, String message) {
+			this.status = status;
+			this.message = message;
+		}
+		public int status;
+		public String message;
+	}
+	default DeviceInstallationStatus getDeviceInstallationStatus(InstallAppDevice object) {
+		return null;
+	}
 	
 	/*default IssueAnalysisResultBase analyzeIssueStatus(T device, AlarmGroupData issue, InstallAppDevice iad, String mes,
 			boolean releaseDirectly, Long blockedByOnsiteVisitUntil, int autoAction,
