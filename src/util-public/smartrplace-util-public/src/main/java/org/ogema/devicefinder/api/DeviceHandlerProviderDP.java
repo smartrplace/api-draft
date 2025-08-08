@@ -282,12 +282,23 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	default Boolean isDeviceAssumedFullyInstalled(InstallAppDevice iad) { return null;}
 
 	public static class DeviceInstallationStatus {
-		public DeviceInstallationStatus(int status, String message) {
+		public DeviceInstallationStatus(int status, String message, long lastUpdateTime) {
 			this.status = status;
 			this.message = message;
+			this.lastUpdateTime = lastUpdateTime;
+		}
+		public DeviceInstallationStatus(int status, String message,
+				SingleValueResource res) {
+			this.status = status;
+			this.message = message;
+			if(res == null)
+				this.lastUpdateTime = -1;
+			else
+				this.lastUpdateTime = res.getLastUpdateTime();
 		}
 		public int status;
 		public String message;
+		public long lastUpdateTime;
 	}
 	default DeviceInstallationStatus getDeviceInstallationStatus(InstallAppDevice object) {
 		return null;
