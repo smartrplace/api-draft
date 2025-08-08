@@ -534,6 +534,7 @@ public class UserServlet extends HttpServlet {
 		int orgSize = odata.objects.size();
 		int count = 0;
 		try { for(T obj: odata.objects) {
+System.out.println("Super234: count:"+count+"  Obj:"+obj.toString());
 			count++;
 			//if(obj == null) continue;
 			Map<String, ServletValueProvider> data = null;
@@ -562,6 +563,7 @@ public class UserServlet extends HttpServlet {
 			//else
 			//	objStr = obj.toString();
 			for(Entry<String, ServletValueProvider> prov: data.entrySet()) {
+System.out.println("DSHASJKS: Obj:"+objStr+"   Key:"+prov.getKey());
 				ServletValueProvider valprov = prov.getValue();
 				final String jsonkey;
 				if(retStruct == ReturnStructure.LIST) {
