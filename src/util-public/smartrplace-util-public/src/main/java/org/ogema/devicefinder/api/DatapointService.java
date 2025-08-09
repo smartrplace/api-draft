@@ -14,7 +14,6 @@ import org.ogema.tools.app.useradmin.api.UserDataAccess;
 import org.smartrplace.alarming.check.StandardActionForType;
 import org.smartrplace.alarming.escalation.util.EscalationManagerI;
 import org.smartrplace.alarming.escalation.util.EscalationProvider;
-import org.smartrplace.apps.hw.install.config.DeviceTypeData;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.autoconfig.api.OSGiConfigAccessService;
 import org.smartrplace.widgets.api.DatapointServiceBase;
@@ -24,7 +23,6 @@ import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.RecIdVal;
 import de.iwes.timeseries.eval.garo.api.helper.base.GaRoEvalHelper.TypeChecker;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
-import de.iwes.widgets.template.LabelledItem;
 
 /** Service for interchanging extended Datapoint information between applications
  * TODO: Shall be moved to ogema-widgets repository when more stable
