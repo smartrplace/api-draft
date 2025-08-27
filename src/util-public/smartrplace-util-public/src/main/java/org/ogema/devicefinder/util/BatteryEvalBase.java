@@ -189,7 +189,8 @@ public class BatteryEvalBase {
 	public static boolean isSingleBattery(String deviceLocation) {
 		if(deviceLocation == null)
 			return true;
-		if(!deviceLocation.toUpperCase().contains("HMIP_SWDO"))
+		if(!(deviceLocation.toUpperCase().contains("HMIP_SWDO")
+				|| deviceLocation.toUpperCase().contains("HMIP_SRH")))
 			return false;
 		return !(deviceLocation.contains("SWDO_PL_2_") || deviceLocation.contains("SWDO_I_"));
 	}
