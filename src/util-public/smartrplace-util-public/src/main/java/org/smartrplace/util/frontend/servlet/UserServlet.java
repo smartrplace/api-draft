@@ -51,7 +51,7 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
-/** Core class to provide servlets based on widgets pages
+/** Core class for API based on OTP / browser session authentication
  */
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;

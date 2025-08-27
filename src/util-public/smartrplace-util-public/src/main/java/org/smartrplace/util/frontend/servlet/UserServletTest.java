@@ -16,12 +16,7 @@ import org.smartrplace.widget.extensions.GUIUtilHelper;
 import de.iwes.util.resourcelist.ResourceListHelper;
 
 /**
- * Core class to provide testing variants for servlets based on widgets pages.
- * This servlet does only provide relevant information in the HTTP response when
- * the property org.smartrplace.apps.heatcontrol.servlet.istestinstance is set
- * true. This shall NOT be the case in any productive instance as this would be
- * a major security leak. This servlet is accessible without any
- * authentification.
+ * Core class to provide API-mobile version of API.
  */
 public abstract class UserServletTest extends HttpServlet {
 
@@ -53,9 +48,9 @@ public abstract class UserServletTest extends HttpServlet {
 
 	@Override
 	protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		if (!checkAccessAllowedAndSendError(req, resp)) {
-			return;
-		}
+		//if (!checkAccessAllowedAndSendError(req, resp)) {
+		//	return;
+		//}
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("application/json");
 		resp.addHeader("Access-Control-Allow-Origin", "*"); //CORS header
