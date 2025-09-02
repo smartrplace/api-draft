@@ -331,6 +331,13 @@ public class BatteryEvalBase {
 		return result;
 	}
 
+	public static boolean hasBattery(PhysicalElement dev, Long now) {
+		BatteryStatusPlus status = getBatteryStatus(dev, now);
+		if(status == null || status.status == BatteryStatus.NO_BATTERY)
+			return false;
+		return true;
+	}
+	
 	public static BatteryStatusPlus getBatteryStatus(PhysicalElement dev, Long now) {
 		return getBatteryStatus(dev, false, now);
 	}
