@@ -256,6 +256,24 @@ public class BatteryEvalBase {
 		
 	}
 	
+	public static long getRemainingLifeTimeEstimation(float voltageFromWhichDroppedPermanently,
+			long durationSinceLastChange) {
+		long basedOn365days = getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, 1.0f);
+		long durationSinceLast365 = TimeProcUtil.YEAR_MILLIS - basedOn365days;
+		double factor = ((double)durationSinceLastChange) / durationSinceLast365;
+		long result = (long) (factor * basedOn365days);
+		return result;
+	}
+	
+	public static long getFullLifeTimeEstimation(float voltageFromWhichDroppedPermanently,
+			long durationSinceLastChange) {
+		long basedOn365days = getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, 1.0f);
+		long durationSinceLast365 = TimeProcUtil.YEAR_MILLIS - basedOn365days;
+		double factor = ((double)durationSinceLastChange) / durationSinceLast365;
+		long result = (long) (factor * TimeProcUtil.YEAR_MILLIS);
+		return result;
+	}
+
 	public static Long getExpectedEmptyDateSimple(VoltageResource batRes, long now) {
 		RecordedData ts = batRes.getHistoricalData();
 		if(ts == null)
