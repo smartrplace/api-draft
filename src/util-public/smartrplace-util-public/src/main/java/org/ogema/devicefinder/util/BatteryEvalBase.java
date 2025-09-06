@@ -351,11 +351,22 @@ public class BatteryEvalBase {
 
 	public static boolean hasBattery(PhysicalElement dev, Long now) {
 		BatteryStatusPlus status = getBatteryStatus(dev, now);
-		if(status == null || status.status == BatteryStatus.NO_BATTERY)
+		if(status == null || status.status == BatteryStatus.NO_BATTERY
+				|| status.status == BatteryStatus.UNKNOWN)
 			return false;
 		return true;
 	}
 	
+	public static boolean hasBatteryVoltage(PhysicalElement dev, Long now) {
+		BatteryStatusPlus status = getBatteryStatus(dev, now);
+		if(status == null || status.status == BatteryStatus.NO_BATTERY
+				|| status.status == BatteryStatus.UNKNOWN)
+			return false;
+		if(status.batRes == null)
+			return false;
+		return true;
+	}
+
 	public static BatteryStatusPlus getBatteryStatus(PhysicalElement dev, Long now) {
 		return getBatteryStatus(dev, false, now);
 	}
@@ -390,7 +401,7 @@ public class BatteryEvalBase {
 				return result;
 			}
 		}
-		result.status = BatteryStatus.UNKNOWN;
+		result.status = BatteryStatus.NO_BATTERY;
 		return result;
 	}
 	
