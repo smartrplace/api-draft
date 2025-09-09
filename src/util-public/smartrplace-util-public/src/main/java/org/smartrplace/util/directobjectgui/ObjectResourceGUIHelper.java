@@ -160,15 +160,15 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				if(formatter != null) {
 					OnGETData data = formatter.getData(req);
 					if(data.state == 0) {
-						myLabel.addStyle(LabelData.BOOTSTRAP_ORANGE, req);
+						myLabel.setStyle(LabelData.BOOTSTRAP_ORANGE, req);
 						hasStyle = true;
 					} else if(data.state == 2) {
-						myLabel.addStyle(LabelData.BOOTSTRAP_RED, req);
+						myLabel.setStyle(LabelData.BOOTSTRAP_RED, req);
 						hasStyle = true;
 					} else if(hasStyle && data.state == 1) {
 						myLabel.removeStyle(LabelData.BOOTSTRAP_ORANGE, req);
 						myLabel.removeStyle(LabelData.BOOTSTRAP_RED, req);
-						myLabel.addStyle(LabelData.BOOTSTRAP_GREEN, req);
+						myLabel.setStyle(LabelData.BOOTSTRAP_GREEN, req);
 					}
 					myLabel.setText(data.text, req);
 				} else if(text != null) {
