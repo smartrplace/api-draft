@@ -904,7 +904,9 @@ public class UserServlet extends HttpServlet {
 							addParameter(el.getKey(), subel.toString(), paramMap);
 							//paramvals.add(subel.toString());
 						}
-					} else
+					} else if(el.getValue() == null)
+						logger.debug("Value is null for key:"+el.getKey());
+					else
 						addParameter(el.getKey(), el.getValue().toString(), paramMap);
 					if(el.getKey().equals("getData") && (el.getValue()!=null && "false".equals(el.getValue().toString())))
 						isGET = false;
