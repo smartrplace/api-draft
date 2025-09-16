@@ -26,6 +26,7 @@ import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.html.form.label.LabelData;
 
 public class BatteryEvalBase {
+	public static final float DEFAULT_BATTERY_NOTNEW_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.notNewvolt", 2.7f);
 	public static final float DEFAULT_BATTERY_CHANGE_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.changevolt", 2.7f);
 	public static final float DEFAULT_BATTERY_WARN_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.warnvolt", 2.5f);
 	public static final float DEFAULT_BATTERY_URGENT_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.urgentvolt", 2.3f);
@@ -54,6 +55,7 @@ public class BatteryEvalBase {
 	}
 	
 	public static enum BatteryStatus {
+		NEW,
 		OK,
 		CHANGE_RECOMMENDED,
 		WARNING,
@@ -75,6 +77,7 @@ public class BatteryEvalBase {
 
 	public static String getGermanStatus(BatteryStatus status) {
 		switch(status) {
+		case NEW:
 		case OK:
 			return "OK";
 		case CHANGE_RECOMMENDED:
@@ -96,6 +99,7 @@ public class BatteryEvalBase {
 
 	public static String getGermanLiftetimeEstimation(BatteryStatus status) {
 		switch(status) {
+		case NEW:
 		case OK:
 			return "OK";
 		case CHANGE_RECOMMENDED:
@@ -132,6 +136,8 @@ public class BatteryEvalBase {
 				return BatteryStatus.WARNING;
 			else if(changeInfoRelevant && (val <= 0.4f))
 				return BatteryStatus.CHANGE_RECOMMENDED;
+			else
+				return BatteryStatus.OK;
 		} else if(batteryNum == 2) {
 			if(val <= DEFAULT_BATTERY_URGENT_VOLTAGE)
 				return BatteryStatus.URGENT;
@@ -139,15 +145,19 @@ public class BatteryEvalBase {
 				return BatteryStatus.WARNING;
 			else if(changeInfoRelevant && (val <= DEFAULT_BATTERY_CHANGE_VOLTAGE))
 				return BatteryStatus.CHANGE_RECOMMENDED;
+			else if(changeInfoRelevant && (val <= DEFAULT_BATTERY_NOTNEW_VOLTAGE))
+				return BatteryStatus.OK;
 		} else {
 			if(val <= batteryNum*(DEFAULT_BATTERY_URGENT_VOLTAGE/2))
 				return BatteryStatus.URGENT;
 			else if(val <= batteryNum*(DEFAULT_BATTERY_WARN_VOLTAGE/2))
 				return BatteryStatus.WARNING;
 			else if(changeInfoRelevant && (val <= batteryNum*(DEFAULT_BATTERY_CHANGE_VOLTAGE/2)))
-				return BatteryStatus.CHANGE_RECOMMENDED;			
-		}
-		return BatteryStatus.OK;
+				return BatteryStatus.CHANGE_RECOMMENDED;
+			else if(changeInfoRelevant && (val <= batteryNum*(DEFAULT_BATTERY_NOTNEW_VOLTAGE/2)))
+				return BatteryStatus.OK;
+		} 
+		return BatteryStatus.NEW;
 	}
 	
 	public static class BatteryStatusPlus {
