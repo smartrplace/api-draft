@@ -74,6 +74,7 @@ import de.iwes.widgets.html.form.label.HeaderData;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.html.form.label.LabelData;
 
+@SuppressWarnings("serial")
 public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITablePage<T,R>  {
 	public static final long DEFAULT_POLL_RATE = 5000;
 	public static final String BATTERY_VOLTAGE_HEADER = "Battery Voltage (V)";
@@ -360,19 +361,48 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			OgemaHttpRequest req, Row row,
 			PhysicalElement device2, String colHeader) {
 		VoltageResource batteryVoltage = DeviceHandlerBase.getBatteryVoltage(device2);
+		Label batValLabel = null;
 		if(batteryVoltage != null) {
-			AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(colHeader, id, batteryVoltage, row, "%.1f#min:0.1"),
-					batteryVoltage);
-			float val = batteryVoltage.getValue();
-			BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req, false);
+			batValLabel = new Label(vh.getParent(), "batValLabel"+id, req) {
+				boolean styleWasSet = false;
+
+				@Override
+				public void onGET(OgemaHttpRequest req) {
+					float val = batteryVoltage.getValue();
+					if(val >= 0.1f)
+						setText(String.format("%.1f", val), req);
+					else
+						setText("n/a", req);
+					if(BatteryEvalBase.addBatteryStyle(this, val, true, device2.getLocation(), req, false, styleWasSet) != null)
+						styleWasSet = true;					
+				}
+			};
+			//AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(colHeader, id, batteryVoltage, row, "%.1f#min:0.1"),
+			AddBatteryVoltageResult result = new AddBatteryVoltageResult(batValLabel, batteryVoltage);
+			row.addCell(WidgetHelper.getValidWidgetId(colHeader), batValLabel);
+			batValLabel.setDefaultPollingInterval(DEFAULT_POLL_RATE);
 			return result;
 		} else if(!device2.getLocation().contains("_cc")){
 			FloatResource batSOC = device2.getSubResource("battery", ElectricityStorage.class).chargeSensor().reading();
 			if(batSOC != null && batSOC.isActive()) {
-				AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(colHeader, id, batSOC, row, "%.0f%%#fac:100"),
-						batSOC, true);
-				float val = batSOC.getValue();
-				BatteryEvalBase.addBatteryStyle(result.label, val, true, device2.getLocation(), req, true);
+				batValLabel = new Label(vh.getParent(), "batValLabel"+id, req) {
+					boolean styleWasSet = false;
+					
+					@Override
+					public void onGET(OgemaHttpRequest req) {
+						float val = batSOC.getValue();
+						if(val >= 0.1f)
+							setText(String.format("%.0f%%", val*100), req);
+						else
+							setText("n/a", req);
+						if(BatteryEvalBase.addBatteryStyle(this, val, true, device2.getLocation(), req, true, styleWasSet) != null)
+							styleWasSet = true;
+					}
+				};
+				//AddBatteryVoltageResult result = new AddBatteryVoltageResult(vh.floatLabel(colHeader, id, batSOC, row, "%.0f%%#fac:100"),
+				AddBatteryVoltageResult result = new AddBatteryVoltageResult(batValLabel, batSOC, true);
+				row.addCell(WidgetHelper.getValidWidgetId(colHeader), batValLabel);
+				batValLabel.setDefaultPollingInterval(DEFAULT_POLL_RATE);
 				return result;
 			}
 		}

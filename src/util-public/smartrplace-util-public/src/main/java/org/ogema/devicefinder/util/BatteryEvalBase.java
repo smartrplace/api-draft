@@ -174,7 +174,7 @@ public class BatteryEvalBase {
 	
 	public static WidgetStyle<Label> addBatteryStyle(Label label, float val, boolean changeInfoRelevant,
 			String deviceLocation, OgemaHttpRequest req,
-			boolean isSOCValue) {
+			boolean isSOCValue, boolean styleWasSet) {
 		WidgetStyle<Label> result = null;
 		final BatteryStatus stat;
 		if(isSOCValue) {
@@ -192,7 +192,9 @@ public class BatteryEvalBase {
 		else if(stat == BatteryStatus.UNKNOWN || stat == BatteryStatus.NO_BATTERY)
 			result = LabelData.BOOTSTRAP_GREY;
 		if(result != null)
-			label.addStyle(result, req);
+			label.setStyle(result, req);
+		else if(styleWasSet)
+			label.setStyle(LabelData.BOOTSTRAP_GREEN, req);
 		return result;
 	}
 	
