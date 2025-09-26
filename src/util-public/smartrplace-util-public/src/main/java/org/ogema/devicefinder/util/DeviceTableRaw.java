@@ -1053,6 +1053,13 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return resultPlus.get(0);
 	}
 	
+	public static boolean isRoomSensorDevice(String resourceLocation) {
+		if(isWallThermostat(resourceLocation))
+			return true;
+		if(resourceLocation.contains("HM_HmIP_STH_"))
+			return true;
+		return false;
+	}
 	public static boolean isWallThermostat(String resourceLocation) {
 		if(resourceLocation.contains("HM_HmIP_WTH_"))
 			return true;
