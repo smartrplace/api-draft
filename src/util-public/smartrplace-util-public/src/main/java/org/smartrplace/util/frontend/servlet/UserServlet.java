@@ -331,12 +331,12 @@ public class UserServlet extends HttpServlet {
 	
 				long start = -2;
 				long end = -1;
-				try {
-					start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
-					end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
-				} catch(NumberFormatException | NullPointerException e) {
-					start = -1;
-				}
+				//try {
+					start = (long)Double.parseDouble(UserServlet.getParameter("startTime", paramMap));
+					end = (long)Double.parseDouble(UserServlet.getParameter("endTime", paramMap));
+				//} catch(NumberFormatException | NullPointerException e) {
+				//	start = -1;
+				//}
 				lastAcc.lastStartTimeRequested = start;
 				lastAcc.lastEndTimeRequested = end;
 				lastAcc.user = user;

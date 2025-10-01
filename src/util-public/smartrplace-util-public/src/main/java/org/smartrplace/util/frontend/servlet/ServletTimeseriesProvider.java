@@ -123,24 +123,6 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		this.pData = new UserServletParamData(paramMap);
 		this.deleteValue = deleteValue;
 		this.minValue = minValue;
-		/*Long start;
-		long end = -1;
-		Long startValueMaxBeforeStart;
-		try {
-			start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
-			end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
-		} catch(NumberFormatException | NullPointerException e) {
-			start = null;
-		}
-		try {
-			String startValParam = UserServlet.getParameter("startValueMaxBeforeStart", paramMap);
-			startValueMaxBeforeStart = Long.parseLong(startValParam);
-		} catch(NumberFormatException | NullPointerException e) {
-			startValueMaxBeforeStart = null;
-		}
-		this.startTime = start;
-		this.endTime = end;
-		this.startValueMaxBeforeStart = startValueMaxBeforeStart;*/
 	}
 	
 	protected String name;
@@ -282,9 +264,9 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	public static long[] getDayStartEnd(Map<String, String[]> paramMap, ApplicationManager appMan, String key) {
 		String align = UserServlet.getParameter("align", paramMap);
 		long start = -1;
-		try {
-			start = Long.parseLong(UserServlet.getParameter("startTime", paramMap));
-			long end = Long.parseLong(UserServlet.getParameter("endTime", paramMap));
+		//try {
+			start = (long)Double.parseDouble(UserServlet.getParameter("startTime", paramMap));
+			long end = (long)Double.parseDouble(UserServlet.getParameter("endTime", paramMap));
 			if(align != null) {
 				int alignInt;
 				if(align.equals("day"))
@@ -302,14 +284,14 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 				}
 			}
 			return new long[] {start, end};
-		} catch(NumberFormatException | NullPointerException e) {
+		/*} catch(NumberFormatException | NullPointerException e) {
 			if(align != null && align.equals("day") && start > 0) {
 				long startDay = AbsoluteTimeHelper.getIntervalStart(start, AbsoluteTiming.DAY);
 				long endDay = AbsoluteTimeHelper.addIntervalsFromAlignedTime(startDay, 1, AbsoluteTiming.DAY)-1;
 				return new long[] {startDay, endDay};
 			}
 			return getDayStartEnd(key, appMan);
-		}		
+		}*/		
 	}
 	
 	protected long lastTimestamp = -1;

@@ -27,7 +27,6 @@ public interface TemperatureControlDev extends TemperatureControlBase {
     	public float currentSetpointBeforeOffset;
     	public ResourceValueListener<TemperatureResource> feedbackListener = null;
     	public boolean receivedFirstFBValue = false;
-    	public Boolean lastBangBangState = null;
     	
     	public final CountdownTimerMulti2Single manualRetardTimer;
     	//public CountDownDelayedExecutionTimer manualRetardTimer;
