@@ -308,6 +308,13 @@ public class UserServlet extends HttpServlet {
 		
 	}
 	
+	public static long parseTime(String name, Map<String, String[]> paramMap) {
+		String param = UserServlet.getParameter(name, paramMap);
+		if(param == null)
+			return -1;
+		return (long)Double.parseDouble(param);		
+	}
+	
 	/** Processed for any READING request if coming via GET or POST*/
 	void doGet(HttpServletRequest req, HttpServletResponse resp, String user, Map<String, String[]> paramMap, boolean isMobile)
 			throws ServletException, IOException {
@@ -332,8 +339,8 @@ public class UserServlet extends HttpServlet {
 				long start = -2;
 				long end = -1;
 				//try {
-					start = (long)Double.parseDouble(UserServlet.getParameter("startTime", paramMap));
-					end = (long)Double.parseDouble(UserServlet.getParameter("endTime", paramMap));
+					start = parseTime("startTime", paramMap);
+					end = parseTime("endTime", paramMap);
 				//} catch(NumberFormatException | NullPointerException e) {
 				//	start = -1;
 				//}
