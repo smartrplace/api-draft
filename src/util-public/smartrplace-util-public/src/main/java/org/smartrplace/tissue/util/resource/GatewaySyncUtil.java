@@ -29,6 +29,8 @@ import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
 
 public class GatewaySyncUtil {
+	public static final String LINKED_TEMPSENS_RESNAME = "linkedTempSens";
+
 	public static String registerToplevelDeviceForSyncAsClient(Resource device, ApplicationManager appMan) {
 		return registerToplevelDeviceForSyncAsClient(device, appMan, false);
 	}

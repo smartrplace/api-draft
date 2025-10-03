@@ -13,6 +13,7 @@ import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.locations.Room;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.tools.resource.util.ResourceUtils;
+import org.smartrplace.tissue.util.resource.GatewaySyncUtil;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManagerTHControlMode;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManagerTHIntTrigger;
 import org.smartrplace.util.virtualdevice.HmSetpCtrlManagerTHSetp;
@@ -21,7 +22,7 @@ import org.smartrplace.util.virtualdevice.SetpointControlManager.SetpointControl
 import org.smartrplace.util.virtualdevice.ThermostatAirconDefaultManager;
 
 public class ThermostatPattern extends ResourcePattern<Thermostat> { 
-	
+
 	public final TemperatureResource setPoint = model.temperatureSensor().settings().setpoint();
 
 	public final Room room = model.location().room();
@@ -56,7 +57,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	 * If the thermostat is a Homematic device, an association will be created at Homematic level
 	 */
 	@Existence(required = CreateMode.OPTIONAL)
-	public final TemperatureSensor associatedTempSensor = model.getSubResource("linkedTempSens", TemperatureSensor.class);
+	public final TemperatureSensor associatedTempSensor = model.getSubResource(GatewaySyncUtil.LINKED_TEMPSENS_RESNAME, TemperatureSensor.class);
 	
 	// FIXME avoid non-resource fields in pattern
 	// FIXME this is a room property, not a thermostat property -> the thermostat location may change indeed
