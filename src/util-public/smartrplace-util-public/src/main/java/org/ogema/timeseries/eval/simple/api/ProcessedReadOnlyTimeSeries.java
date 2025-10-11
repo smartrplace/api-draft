@@ -456,7 +456,7 @@ if(Boolean.getBoolean("evaldebug")) {
 
 	@Override
 	public boolean isEmpty() {
-		return false;
+		return values != null && !values.isEmpty();
 	}
 
 	@Override
