@@ -60,6 +60,13 @@ public interface DatapointService extends DatapointServiceBase {
 	Datapoint getDataPointStandard(ValueResource valRes);
 	Datapoint getDataPointAsIs(ValueResource valRes);
 	
+	/** Remove datapoint
+	 * 
+	 * @param dp
+	 * @return true if datapoint existed
+	 */
+	boolean removeDatapoint(Datapoint dp);
+	
 	/** We need some kind of filtering, but initially this is up to the application*/
 	List<Datapoint> getAllDatapoints();
 	Collection<Datapoint> getAllDatapoints(String gwId);
