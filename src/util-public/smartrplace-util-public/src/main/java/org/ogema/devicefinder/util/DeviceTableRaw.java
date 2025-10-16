@@ -411,6 +411,27 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return null;
 	}
 		
+	public static String getBatteryVoltageOrSOC(PhysicalElement device2) {
+		VoltageResource batteryVoltage = DeviceHandlerBase.getBatteryVoltage(device2);
+		if(batteryVoltage != null) {
+			float val = batteryVoltage.getValue();
+			if(val >= 0.1f)
+				return String.format("%.1fV", val);
+			else
+				return "n/a";
+		} else if(!device2.getLocation().contains("_cc")) {
+			FloatResource batSOC = device2.getSubResource("battery", ElectricityStorage.class).chargeSensor().reading();
+			if(batSOC != null && batSOC.isActive()) {
+				float val = batSOC.getValue();
+				if(val >= 0.1f)
+					return String.format("%.0f%%", val*100);
+				else
+					return "n/a";
+			}
+		}
+		return "";
+	}
+
 	protected AddBatteryVoltageResult addBatteryStatus(ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row,
 			PhysicalElement device2) {
