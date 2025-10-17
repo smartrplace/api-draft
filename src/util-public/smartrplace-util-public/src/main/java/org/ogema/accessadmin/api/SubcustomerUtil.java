@@ -946,16 +946,4 @@ public class SubcustomerUtil {
 		}
 		return isActive;
 	}
-	
-	public static void setAutomatedManagementActive(SubCustomerData subcustUser,
-			ApplicationManager appMan, boolean val) {
-		List<Room> rooms = getAllRoomsForSubcustomer(subcustUser, appMan);
-appMan.getLogger().info("Settings "+rooms.size()+" rooms to idleMode:"+val);
-		for(Room uroom: rooms) {
-			Configuration rts = ChartsUtil.getRoomTemperatureSetting(uroom, appMan.getResourceAccess());
-			if(rts != null)
-				ValueResourceHelper.setCreate(rts.getSubResource("roomIdleMode", IntegerResource.class), val?0
-						:Boolean.getBoolean("org.smartrplace.apps.heatcontrol.logic.globalIdleModeFull")?2:1);
-		}
-	}
 }
