@@ -60,6 +60,22 @@ public class PropType implements LabelledItem {
 	public static final PropType THERMOSTAT_WINDOWOPEN_TEMPERATURE = new PropType("ThermostatWindowOpenTemperature", Arrays.asList(
 			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
 			Float.class);
+	
+	/** In Delta-Celsius/Kelvin*/
+	public static final PropType THERMOSTAT_OFFSET = new PropType("ThermostatOffset", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Float.class);
+
+	/** In Celsius*/
+	public static final PropType THERMOSTAT_TEMPERATURE_MAX = new PropType("ThermostatTemperatureMax", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Float.class);
+
+	
+	/** In Celsius*/
+	public static final PropType THERMOSTAT_TEMPERATURE_MIN = new PropType("ThermostatTemperatureMin", Arrays.asList(
+			new PropUsage[] {PropUsage.THERMOSTAT}), AccessAvailability.WRITE,
+			Float.class);
 
 	/** integer in minutes*/
 	public static final PropType THERMOSTAT_WINDOWOPEN_MINUTES = new PropType("ThermostatWindowOpenMode", Arrays.asList(
@@ -272,6 +288,12 @@ public class PropType implements LabelledItem {
 			return getSubFloat(master, "TEMPERATURE_WINDOW_OPEN", feedback);
 		else if(type == PropType.THERMOSTAT_VALVE_MAXPOSITION)
 			return getSubFloat(master, "VALVE_MAXIMUM_POSITION", feedback);
+		else if(type == PropType.THERMOSTAT_OFFSET)
+			return getSubFloat(master, "TEMPERATURE_OFFSET", feedback);
+		else if(type == PropType.THERMOSTAT_TEMPERATURE_MAX)
+			return getSubFloat(master, "TEMPERATURE_MAXIMUM", feedback);
+		else if(type == PropType.THERMOSTAT_TEMPERATURE_MIN)
+			return getSubFloat(master, "TEMPERATURE_MINIMUM", feedback);
 		else
 			throw new IllegalStateException("PropType not supported as resource:"+type.id);
 	}
