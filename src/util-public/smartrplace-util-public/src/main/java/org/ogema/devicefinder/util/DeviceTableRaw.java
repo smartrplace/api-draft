@@ -761,6 +761,14 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 
+	public static boolean isMotionOrPresenceDetector(String resourceLocation) {
+		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
+		if(resourceLocation.toLowerCase().startsWith("homematic") && (
+				(resourceLocation.contains("HmIP_SPI_") || resourceLocation.contains("HmIP_SMI_"))))
+			return true;
+		return false;
+	}
+	
 	public static boolean isDimmerSensorDevice(String resourceLocation) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(resourceLocation.toLowerCase().startsWith("vekin"))
