@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
@@ -416,7 +417,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(batteryVoltage != null) {
 			float val = batteryVoltage.getValue();
 			if(val >= 0.1f)
-				return String.format("%.1fV", val);
+				return String.format(Locale.GERMAN, "%.1fV", val);
 			else
 				return "n/a";
 		} else if(!device2.getLocation().contains("_cc")) {

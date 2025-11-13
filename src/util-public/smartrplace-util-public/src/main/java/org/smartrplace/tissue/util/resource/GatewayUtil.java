@@ -35,6 +35,17 @@ public class GatewayUtil {
 		return ViaHeartbeatUtil.getBaseGwId(pre);
 	}
 
+	public static int getGatewayBaseIdInt(ResourceAccess resAcc) {
+		String str = getGatewayBaseId(resAcc);
+		if(str == null)
+			return 0;
+		try {
+			return Integer.parseInt(str);
+		} catch(NumberFormatException e) {
+			return 1;
+		}
+	}
+	
 	public static String getGatewayNameFromURL(ApplicationManager appMan) {
 		String baseUrl = ResourceHelper.getLocalGwInfo(appMan).gatewayBaseUrl().getValue();
 		String gwName = baseUrl;
