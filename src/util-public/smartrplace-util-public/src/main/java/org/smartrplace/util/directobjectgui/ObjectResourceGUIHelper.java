@@ -784,7 +784,7 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 				if(mode == -1) {
 					flexMode = getLastMode(val);
 					if(flexMode <= 0) flexMode = lastMode.lastMode;
-					val = val.replaceAll("[^\\d.]", "");
+					val = val.replaceAll("[^\\d.-]", "");
 				}
 				try {
 					value  = Integer.parseInt(val);

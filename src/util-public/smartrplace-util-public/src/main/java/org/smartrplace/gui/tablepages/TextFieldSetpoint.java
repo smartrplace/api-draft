@@ -30,7 +30,7 @@ public abstract class TextFieldSetpoint extends TextField {
 	@Override
 	public void onPOSTComplete(String data, OgemaHttpRequest req) {
 		String val = getValue(req);
-		val = val.replaceAll("[^\\d.]", "");
+		val = val.replaceAll("[^\\d.-]", "");
 		try {
 			float value  = Float.parseFloat(val);
 			if(min != null && value < min || value> max) {
