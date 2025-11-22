@@ -17,6 +17,7 @@ import org.smartrplace.external.accessadmin.config.SubCustomerSuperiorData;
 import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.html.form.label.Label;
 import de.iwes.widgets.template.LabelledItem;
 
@@ -121,6 +122,10 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 	 * 
 	 */
 	String getDeviceTypeShortId(DatapointService dpService);
+	
+	default String[] getLocaleDeviceTypeShortIds(OgemaLocale locale, DatapointService dpService) {
+		return new String[] {getDeviceTypeShortId(dpService)};
+	}
 	
 	public enum ComType {
 		IP,
@@ -299,11 +304,19 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 		public int status;
 		public String message;
 		public long lastUpdateTime;
+		
+		public Float batteryVoltage;
+		public Float valveStatus;
+		public Float temperatureMeasured;
+		public Integer deviceMeasurementStatus;
 	}
 	default DeviceInstallationStatus getDeviceInstallationStatus(InstallAppDevice object) {
 		return null;
 	}
 	
+	default String getSerialNumber(InstallAppDevice object) {
+		return null;
+	}
 	/*default IssueAnalysisResultBase analyzeIssueStatus(T device, AlarmGroupData issue, InstallAppDevice iad, String mes,
 			boolean releaseDirectly, Long blockedByOnsiteVisitUntil, int autoAction,
 			GatewaySyncResourceService gwSync, long now)

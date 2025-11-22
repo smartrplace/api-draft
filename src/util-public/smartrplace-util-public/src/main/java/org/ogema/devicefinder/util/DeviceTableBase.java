@@ -1,11 +1,13 @@
 package org.ogema.devicefinder.util;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.devicefinder.api.DatapointService;
 import org.ogema.devicefinder.api.DeviceHandlerProvider;
 import org.ogema.devicefinder.api.InstalledAppsSelector;
 import org.ogema.model.locations.Room;
@@ -14,8 +16,10 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.tissue.util.resource.GatewayUtil;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 
+import de.iwes.util.format.StringFormatHelper;
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
 import de.iwes.widgets.html.complextable.DynamicTable;
@@ -32,6 +36,8 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 	protected final TimeResource deviceIdManipulationUntil;
 	protected volatile boolean isEmpty = true;
 	
+	private final DatapointService dpService;
+	
 	public DeviceTableBase(WidgetPage<?> page, ApplicationManagerPlus appMan, Alert alert,
 			InstalledAppsSelector appSelector,
 			DeviceHandlerProvider<?> devHand) {
@@ -42,6 +48,7 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 			InstalledAppsSelector appSelector,
 			DeviceHandlerProvider<?> devHand, boolean emptyStateControlledExternally) {
 		super(page, appMan, alert, ResourceHelper.getSampleResource(InstallAppDevice.class), emptyStateControlledExternally);
+		this.dpService = appMan.dpService();
 		this.devHand = devHand;
 		this.deviceIdManipulationUntil = appMan.getResourceAccess().getResource("hardwareInstallConfig/deviceIdManipulationUntil");
 		if(appSelector != null)
@@ -54,6 +61,11 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 
 	@Override
 	protected String getTableTitleRaw() {
+		String[] addShort = devHand.getLocaleDeviceTypeShortIds(OgemaLocale.GERMAN, dpService);
+		if(addShort.length > 1 || (addShort.length == 1 && !addShort[0].equals(devHand.getDeviceTypeShortId(dpService)))) {
+			String result = devHand.getTableTitle()+" ("+StringFormatHelper.getListToPrint(Arrays.asList(addShort))+")";
+			return result;
+		}
 		return devHand.getTableTitle();
 	}
 	
