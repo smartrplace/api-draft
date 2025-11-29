@@ -1,10 +1,19 @@
 package org.smartrplace.tissue.util.resource;
 
+import java.util.List;
+
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.channelmanager.measurements.SampledValue;
+import org.ogema.core.model.RecordableResource;
+import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.resourcemanager.ResourceAccess;
 import org.ogema.model.gateway.LocalGatewayInformation;
+import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.prop.ViaHeartbeatUtil;
+import org.smartrplace.gateway.device.GatewayDevice;
 
+import de.iwes.util.logconfig.LogHelper;
 import de.iwes.util.resource.ResourceHelper;
 
 public class GatewayUtil {
@@ -78,5 +87,25 @@ public class GatewayUtil {
 		//if(Boolean.getBoolean("org.ogema.devicefinder.util.supportcascadedccu"))
 		//	return true;
 		return false;
+	}
+
+	public static long lastGatwayActiveTime(ApplicationManager appMan) {
+		GatewayDevice gw = ResourceHelper.getLocalDevice(appMan.getResourceAccess());
+		if(gw == null)
+			return -1;
+		long now = appMan.getFrameworkTime();
+		return Math.max(lastEventValueBeforeStart(gw.usedSpace_Root().reading(), now),
+				lastEventValueBeforeStart(gw.gitUpdateStatus(), now));
+		
+	}
+	private static long lastEventValueBeforeStart(RecordableResource res, long now) {
+		List<SampledValue> vals = res.getHistoricalData().getValues(now-24*TimeProcUtil.HOUR_MILLIS, now-10*TimeProcUtil.MINUTE_MILLIS);
+		if(vals.isEmpty())
+			return -1;
+		return vals.get(vals.size()-1).getTimestamp();
+	}
+	public static boolean isGatewayJustRestarted(ApplicationManager appMan) {
+		long lastActive = lastGatwayActiveTime(appMan);
+		return appMan.getFrameworkTime() - lastActive < 30*TimeProcUtil.MINUTE_MILLIS;
 	}
 }

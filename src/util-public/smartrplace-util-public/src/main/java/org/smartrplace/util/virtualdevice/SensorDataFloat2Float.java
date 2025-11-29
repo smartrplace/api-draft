@@ -60,7 +60,7 @@ public class SensorDataFloat2Float extends SensorData {
 					}
 				} else {
 					float valFb = feedback.getValue();
-					reportFbConfirmed(valFb, false);
+					reportFbConfirmed(valFb, true);
 				}
 			}
 		};
