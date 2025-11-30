@@ -69,6 +69,15 @@ public abstract class DeviceTableBase extends DeviceTableRaw<InstallAppDevice,In
 		return devHand.getTableTitle();
 	}
 	
+	public static String getLocalDeviceId(String deviceId, OgemaLocale locale,
+			DeviceHandlerProvider<?> devHand, DatapointService dpService) {
+		String[] addShort = devHand.getLocaleDeviceTypeShortIds(locale, dpService);
+		if(addShort.length == 1 && !addShort[0].equals(devHand.getDeviceTypeShortId(dpService))) {
+			return deviceId.replace(devHand.getDeviceTypeShortId(dpService), addShort[0]);
+		}
+		return deviceId;
+	}
+	
 	protected void addHomematicCCUId(InstallAppDevice object, ObjectResourceGUIHelper<InstallAppDevice,InstallAppDevice> vh, String id,
 			OgemaHttpRequest req, Row row, ApplicationManager appMan,
 			Room deviceRoom) {
