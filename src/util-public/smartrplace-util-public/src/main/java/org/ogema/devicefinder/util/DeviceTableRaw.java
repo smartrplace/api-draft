@@ -1139,9 +1139,10 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	
 	public static String setDecalcNow(Thermostat device, long now, GatewaySyncResourceService gwSync) {
 		String result = DeviceTableRaw.setDecalcTime(device, now+5*TimeProcUtil.MINUTE_MILLIS, gwSync);	
-		DeviceHandlerBase.blockShiftingUntil = now + BLOCKSHIFTUNTIL_DURATION;
+		long blockUntil = now + BLOCKSHIFTUNTIL_DURATION;
+		DeviceHandlerBase.blockShiftingUntil.put(device.getLocation(), blockUntil); 
 		TimeResource requestCalc = device.valve().getSubResource(DeviceHandlerBase.REQUEST_LAST_DECALC_RESNAME, TimeResource.class);
-		ValueResourceHelper.setCreate(requestCalc, DeviceHandlerBase.blockShiftingUntil-1000);
+		ValueResourceHelper.setCreate(requestCalc, blockUntil-1000);
 		return result;
 	}
 	

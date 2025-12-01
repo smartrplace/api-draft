@@ -4,7 +4,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.accessadmin.api.SubcustomerUtil;
@@ -312,7 +314,8 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		return null;
 	}
 
-	public static long blockShiftingUntil = -1;
+	/** Thermostat-location -> block shifting until-time*/
+	public static Map<String, Long> blockShiftingUntil = new HashMap<>(); //-1;
 	public static boolean performWeeklyPostpone(Thermostat dev,HardwareInstallConfig hwConfig, long now,
 			ApplicationManager appMan) {
 		if(hwConfig == null)
