@@ -11,7 +11,7 @@ public class UsageData extends SettingsBaseData {
 	public static int STARTEND_WEEKEND_IDX = 8;
 	public static int STARTEND_TIMES_SIZE = 9;
 	
-	/** Day type -> even-idx: startTime, odd-idx: endTime*/
+	/** Day type (0..6 = Monday...Sunday) -> even-idx: startTime, odd-idx: endTime*/
 	public Map<Integer, List<Long>> startEndTimes = new HashMap<>();
 	public boolean isCurveSimple = true;
 	
