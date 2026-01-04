@@ -427,6 +427,39 @@ public class SubcustomerUtil {
 		return result;
 	}
 
+	public static boolean hasUserAccessToAllSubcustomers(String userName, ApplicationManager appMan) {
+		List<SubCustomerData> subcs = getSubcustomers(appMan);
+
+		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
+		int mode = accessAdminConfigRes.subcustomerUserMode().getValue();
+		if(mode == 0)
+			return true;
+		
+		SubCustomerData activeSubcust = SubcustomerUtil.getDataForUser(userName, appMan, true, true);
+		if((activeSubcust != null) && (activeSubcust.aggregationType().getValue() > 0)) {
+			return true;
+		}
+
+		AccessConfigUser userEntry = ResourceListHelper.getNamedElementFlex(userName,
+				accessAdminConfigRes.userPermissions());
+		if(userEntry == null)
+			return false;
+		if(userEntry.superGroups().size() == 0)
+			return true;
+		
+		for(SubCustomerData subc: subcs) {
+			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
+					accessAdminConfigRes.userPermissions());
+			if(subcustGroup == null)
+				throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
+
+			if(!ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public static Collection<Room> getUserRoomsBySubcustomers(String userName, ApplicationManager appMan) {
 		
 		SubCustomerData activeSubcust = SubcustomerUtil.getDataForUser(userName, appMan, true, true);
