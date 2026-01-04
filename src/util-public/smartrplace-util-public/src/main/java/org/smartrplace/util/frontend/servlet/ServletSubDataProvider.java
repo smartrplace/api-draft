@@ -113,6 +113,7 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 		throw new IllegalStateException("Returns JSON");
 	}
 	
+	public static boolean hasHeatingAndCoolingLast;
 	@Override
 	public void setValue(String user, String keyMain, String value) {
 		JSONObject in = new JSONObject(value);
@@ -120,12 +121,15 @@ public class ServletSubDataProvider<T> implements ServletValueProvider {
 		while(keys.hasNext()) {
 		    String key = keys.next();
 		    if (in.get(key) instanceof JSONObject) {
-				String timeString = UserServlet.getParameter("time", parameters);
+		    	String timeString = UserServlet.getParameter("time", parameters);
 				GetObjectResult<T> odata = UserServlet.getObjects(user, provider, key, true);
-				if(avoidProcessingKeyOnPOSTInThisClass)
+				if(avoidProcessingKeyOnPOSTInThisClass) {
+					hasHeatingAndCoolingLast = in.toString().contains("heatingData")&&in.toString().contains("coolingData");
 					UserServlet.postJSON(user, in, provider, timeString, parameters, odata, null);
-				else
+				} else {
+					hasHeatingAndCoolingLast = ((JSONObject)in.get(key)).toString().contains("heatingData")&&((JSONObject)in.get(key)).toString().contains("coolingData");
 					UserServlet.postJSON(user, (JSONObject)in.get(key), provider, timeString, parameters, odata, null);
+				}
 		    }
 		}
 		
