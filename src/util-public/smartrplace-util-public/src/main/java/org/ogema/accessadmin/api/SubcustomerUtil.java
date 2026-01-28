@@ -570,8 +570,11 @@ public class SubcustomerUtil {
 		AccessAdminConfig accessAdminConfigRes = appMan.getResourceAccess().getResource("accessAdminConfig");
 		BuildingPropertyUnit subcustGroup = ResourceListHelper.getNamedElementFlex(data.name().getValue(),
 				accessAdminConfigRes.roomGroups());
-		if(subcustGroup == null)
+		if(subcustGroup == null) {
+			if(Boolean.getBoolean("subcustomerUtil.returnEmptyOnError"))
+				return Collections.emptyList();
 			throw new IllegalStateException("Room Group for Subcustomer "+data.getLocation() + " missing!");
+		}
 		
 		return subcustGroup.rooms().getAllElements();
 	}
