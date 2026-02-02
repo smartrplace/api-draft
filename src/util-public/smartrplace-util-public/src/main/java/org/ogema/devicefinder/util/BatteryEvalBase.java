@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.ogema.accessadmin.api.ApplicationManagerPlus;
 import org.ogema.core.application.AppID;
+import org.ogema.core.application.ApplicationManager;
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
@@ -16,6 +17,7 @@ import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
+import org.smartrplace.util.eval.EvalUtilBase;
 import org.smartrplace.util.message.MessageImpl;
 
 import de.iwes.util.resource.ValueResourceHelper;
@@ -232,9 +234,9 @@ public class BatteryEvalBase {
 		batteryDurationsFromLast.put(29, ((long) (expected270days*180))*TimeProcUtil.DAY_MILLIS);
 		batteryDurationsFromLast.put(28, ((long) (expected270days*150))*TimeProcUtil.DAY_MILLIS);
 		batteryDurationsFromLast.put(27, ((long) (expected270days*120))*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(26, ((long) (expected270days*90))*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(25, ((long) (expected270days*60))*TimeProcUtil.DAY_MILLIS);
-		batteryDurationsFromLast.put(24, ((long) (expected270days*30))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(26, ((long) (expected270days*85))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(25, ((long) (expected270days*50))*TimeProcUtil.DAY_MILLIS);
+		batteryDurationsFromLast.put(24, ((long) (expected270days*20))*TimeProcUtil.DAY_MILLIS);
 		batteryDurationsFromLast.put(23, ((long) (expected270days*5))*TimeProcUtil.DAY_MILLIS);
 		batteryDurationsFromLast.put(22, ((long) (expected270days*3))*TimeProcUtil.DAY_MILLIS);
 		batteryDurationsFromLast.put(21, ((long) (expected270days*2))*TimeProcUtil.DAY_MILLIS);
@@ -246,6 +248,23 @@ public class BatteryEvalBase {
 			return getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, batteryLifetimeExpectedYears.getValue());
 		return getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, null);
 	}
+	public static long getRemainingLifeTimeEstimation(
+			VoltageResource batRes, ApplicationManager appMan) {
+		if(batteryLifetimeExpectedYears != null && batteryLifetimeExpectedYears.isActive())
+			return getRemainingLifeTimeEstimation(batteryLifetimeExpectedYears.getValue(), batRes, appMan);
+		return getRemainingLifeTimeEstimation(null, batRes, appMan);
+	}
+	public static long getRemainingLifeTimeEstimation(
+			VoltageResource batRes, long now) {
+		if(batteryLifetimeExpectedYears != null && batteryLifetimeExpectedYears.isActive())
+			return getRemainingLifeTimeEstimation(batteryLifetimeExpectedYears.getValue(), batRes, now);
+		return getRemainingLifeTimeEstimation(null, batRes, now);
+	}
+	/** This version requires the estimated battery lifetime to be provided by the resource batteryLifetimeExpectedYears.
+	 * If the battery lifetime shall be estimated by providing the time since the last battery change, use {@link #getRemainingLifeTimeEstimation(float, long)}
+	 * TODO: Take into account time since last drop of voltage*/
+	private static Map<String, Long> lastDropTimeMap = new HashMap<>();
+	private static Map<String, Float> lastDropVoltageMap = new HashMap<>();
 	public static long getRemainingLifeTimeEstimation(float voltageFromWhichDroppedPermanently,
 			Float batteryLifetimeExpectedYears) {
 		float curVal = voltageFromWhichDroppedPermanently;
@@ -267,7 +286,51 @@ public class BatteryEvalBase {
 			return (long) (factor*batteryDurationsFromLast.get(Math.round(curVal*10)));
 		
 	}
+	public static long getRemainingLifeTimeEstimation(
+			Float batteryLifetimeExpectedYears, VoltageResource batRes, ApplicationManager appMan) {
+		long now = appMan.getFrameworkTime();
+		return getRemainingLifeTimeEstimation(batteryLifetimeExpectedYears, batRes, now);
+	}
+	public static long getRemainingLifeTimeEstimation(Float batteryLifetimeExpectedYears, VoltageResource batRes, long now) {
+		Long lastDropTime;
+		float voltageFromWhichDroppedPermanently = batRes.getValue() + 0.1f;
+
+		Float lastDropVoltage = lastDropVoltageMap.get(batRes.getLocation());
+		if(lastDropVoltage == null || lastDropVoltage != voltageFromWhichDroppedPermanently) {
+			lastDropTime = EvalUtilBase.firstLargerTimeBackwardsSafe(batRes.getHistoricalData(), batRes.getValue(),
+					180*1440, now);
+			if(lastDropTime < 0)
+				lastDropTime = now - 180*TimeProcUtil.DAY_MILLIS;
+			lastDropTimeMap.put(batRes.getLocation(), lastDropTime);
+			lastDropVoltageMap.put(batRes.getLocation(), voltageFromWhichDroppedPermanently);
+		} else
+			lastDropTime = lastDropTimeMap.get(batRes.getLocation());
+		
+		long dropPreviousRemain = getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently+0.1f, batteryLifetimeExpectedYears);
+		long dropThisRemain = getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, batteryLifetimeExpectedYears);
+		//We expect that estimated duration is at approx 20% of liftime, so we add 20% expired here. We start with 20% expired then.
+		double expiredSinceLastDropFactor = ((double)(now - lastDropTime))/(dropPreviousRemain - dropThisRemain) + 0.2;
+		if(expiredSinceLastDropFactor > 1.2)
+			expiredSinceLastDropFactor = 1.2;
+		return (long) (dropThisRemain + (1-expiredSinceLastDropFactor)*(dropPreviousRemain - dropThisRemain));
+	}
 	
+	//TODO: This requires caching
+	/*public static long getRemainingLifeTimeEstimation(InstallAppDevice iad, long now) {
+		BatteryStatusPlus stat = getBatteryStatusPlus(iad, true, now);
+		if(stat.batRes == null) {
+			if(stat.batSOC != null) {
+				long lastChange = 
+			}
+		}
+	}*/
+	
+	/**
+	 * 
+	 * @param voltageFromWhichDroppedPermanently
+	 * @param durationSinceLastChange time since last battery change
+	 * @return
+	 */
 	public static long getRemainingLifeTimeEstimation(float voltageFromWhichDroppedPermanently,
 			long durationSinceLastChange) {
 		long basedOn365days = getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, 1.0f);
@@ -295,10 +358,11 @@ public class BatteryEvalBase {
 			return null;
 		
 		float curVal = ts.getPreviousValue(now).getValue().getFloatValue();
-		float preVal = curVal+0.1f;
-		long curTime = getRemainingLifeTimeEstimation(curVal);
-		long preTime = getRemainingLifeTimeEstimation(preVal);
-		return now + (curTime+preTime)/2;
+		//float preVal = curVal+0.1f;
+		long curTime = getRemainingLifeTimeEstimation(batRes, now);
+		return curTime;
+		//long preTime = getRemainingLifeTimeEstimation(preVal, batRes, now);
+		//return now + (curTime+preTime)/2;
 	}
 	
 	public static BatteryStatus getBatteryStatus(VoltageResource batRes, boolean changeInfoRelevant, Long now) {
