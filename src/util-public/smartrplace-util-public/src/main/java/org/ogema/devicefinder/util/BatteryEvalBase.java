@@ -1,5 +1,11 @@
 package org.ogema.devicefinder.util;
 
+import java.time.Instant;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +27,8 @@ import org.smartrplace.util.eval.EvalUtilBase;
 import org.smartrplace.util.message.MessageImpl;
 
 import de.iwes.util.resource.ValueResourceHelper;
+import de.iwes.util.timer.AbsoluteTimeHelper;
+import de.iwes.util.timer.AbsoluteTiming;
 import de.iwes.widgets.api.messaging.MessagePriority;
 import de.iwes.widgets.api.widgets.WidgetStyle;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
@@ -73,9 +81,9 @@ public class BatteryEvalBase {
 		public Long expectedEmptyDate;
 	}
 	
-	public static BatteryStatus getBatteryStatus(float val, boolean changeInfoRelevant) {
+	/*public static BatteryStatus getBatteryStatus(float val, boolean changeInfoRelevant) {
 		return getBatteryStatus(val, changeInfoRelevant, 2);
-	}
+	}*/
 
 	public static String getGermanStatus(BatteryStatus status) {
 		switch(status) {
@@ -293,12 +301,17 @@ public class BatteryEvalBase {
 	}
 	public static long getRemainingLifeTimeEstimation(Float batteryLifetimeExpectedYears, VoltageResource batRes, long now) {
 		Long lastDropTime;
-		float voltageFromWhichDroppedPermanently = batRes.getValue() + 0.1f;
+		float curVal = batRes.getValue();
+		boolean singleBattery = isSingleBattery(batRes.getLocation());
+		if(singleBattery)
+			curVal = 2*curVal;
+		float voltageFromWhichDroppedPermanently = curVal + 0.1f;
 
+		
 		Float lastDropVoltage = lastDropVoltageMap.get(batRes.getLocation());
 		if(lastDropVoltage == null || lastDropVoltage != voltageFromWhichDroppedPermanently) {
 			lastDropTime = EvalUtilBase.firstLargerTimeBackwardsSafe(batRes.getHistoricalData(), batRes.getValue(),
-					180*1440, now);
+					180*1440, now);				
 			if(lastDropTime < 0)
 				lastDropTime = now - 180*TimeProcUtil.DAY_MILLIS;
 			lastDropTimeMap.put(batRes.getLocation(), lastDropTime);
@@ -390,12 +403,52 @@ public class BatteryEvalBase {
 			lastTs = batRes.getLastUpdateTime();
 		boolean singleBattery = isSingleBattery(batRes.getLocation());
 		result.status = getBatteryStatus(result.voltage, changeInfoRelevant, singleBattery?1:2);
+		if(now != null) {
+			result.status = getAdaptedStatus(result.status, batRes, now);
+			/*long remain = BatteryEvalBase.getRemainingLifeTimeEstimation(batRes, now);
+			long endOfApril = getEndOfApril(now);
+			long yearStart = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.YEAR);
+			int dayOfYear = (int) ((now - yearStart) / TimeProcUtil.DAY_MILLIS);
+			if(dayOfYear < 120 && (now + remain > endOfApril))
+				result.status = BatteryStatus.OK;
+			else if(dayOfYear < 170)
+				result.status = BatteryStatus.OK;*/
+		}
 		if(result.status != BatteryStatus.URGENT)
 			return result;
 		if(lastTs != null && now != null && (now - lastTs) > TIME_TO_ASSUME_EMPTY)
 			result.status = BatteryStatus.EMPTY;
 		return result;
 	}
+	
+	public static BatteryStatus getAdaptedStatus(BatteryStatus statusStd, VoltageResource batRes, long now) {
+		if(Boolean.getBoolean("org.smartrplace.apps.hw.install.gui.alarm.batteryLow.basedOnRemainingTime")
+				&& (statusStd == BatteryStatus.CHANGE_RECOMMENDED || statusStd == BatteryStatus.WARNING)) {
+			long remain = BatteryEvalBase.getRemainingLifeTimeEstimation(batRes, now);
+			long endOfApril = getEndOfApril(now);
+			long yearStart = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.YEAR);
+			int dayOfYear = (int) ((now - yearStart) / TimeProcUtil.DAY_MILLIS);
+			if(dayOfYear < 120 && (now + remain > endOfApril))
+				return BatteryStatus.OK;
+			else if(dayOfYear < 170)
+				return BatteryStatus.OK;
+		}		
+		return statusStd;
+	}
+	
+	public static long getEndOfApril(long now0) {
+		final ZonedDateTime now = ZonedDateTime.ofInstant(Instant.ofEpochMilli(now0), ZoneId.systemDefault());
+		return getEndOfApril(now);
+	}
+	public static long getEndOfApril(ZonedDateTime now) {
+		final Month month = now.getMonth();
+		ZonedDateTime t0 = now;
+		if (month.compareTo(Month.APRIL) > 0 || (month == Month.APRIL && now.getDayOfMonth() == 31))
+			t0 = t0.plusYears(1);
+		long timestamp = t0.with(Month.APRIL).with(TemporalAdjusters.lastDayOfMonth()).truncatedTo(ChronoUnit.DAYS).toEpochSecond()*1000;
+		return timestamp;
+	}
+
 	
 	public static BatteryStatusPlus getBatteryStatusSOCPlus(FloatResource batSOC, boolean changeInfoRelevant, Long now) {
 		BatteryStatusPlus result = new BatteryStatusPlus();
