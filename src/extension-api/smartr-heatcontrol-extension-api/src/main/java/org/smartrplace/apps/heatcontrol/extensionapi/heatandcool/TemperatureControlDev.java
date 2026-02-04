@@ -34,6 +34,7 @@ public interface TemperatureControlDev extends TemperatureControlBase {
     	/** When auto-mode is activated we do not accept manual values for some time*/
     	public long blockedForRemoteManualUntil = -1;
     	public boolean requestedManuMode = false;
+    	public float prevManualSetpoint = -1;
     	public long blockedForOnThermostatManuModeSwitchUntil = -1;
     	public IntegerResource controlMode = null;
 		public IntegerResource controlModeFeedback = null;
