@@ -317,9 +317,19 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			OgemaHttpRequest req, Row row, 
 			SingleValueResource reading,
 			ApplicationManager appMan, DynamicTable<?> mainTable) {
+		long maxAgeBeforeWarn = getMaxAgeBeforeWarnStd(reading.getLocation());
 		return addLastContactStatic(columnLabel, vh, id, req, row, reading, appMan, mainTable,
-				24*TimeProcUtil.HOUR_MILLIS);
+				maxAgeBeforeWarn);
 	}
+	
+	public static long getMaxAgeBeforeWarnStd(String location) {
+		if(location.contains("JMBUS_BASE"))
+			return 8*TimeProcUtil.DAY_MILLIS;
+		else
+			return 24*TimeProcUtil.HOUR_MILLIS;
+		
+	}
+	
 	public static Label addLastContactStatic(String columnLabel, ObjectResourceGUIHelper<?,?> vh, String id,
 			OgemaHttpRequest req, Row row, 
 			SingleValueResource reading,
