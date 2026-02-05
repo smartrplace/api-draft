@@ -44,11 +44,13 @@ import org.ogema.model.devices.buildingtechnology.ThermostatProgram;
 import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.GenericBinarySensor;
+import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.smartrplace.apps.hw.install.config.HardwareInstallConfig;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.external.accessadmin.config.OnsiteVisitData;
 import org.smartrplace.external.accessadmin.config.SubCustomerSuperiorData;
+import org.smartrplace.tissue.util.resource.GatewaySyncUtil;
 
 import de.iwes.util.resource.ResourceHelper;
 import de.iwes.util.resource.ValueResourceHelper;
@@ -291,7 +293,24 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	public static boolean isAutoModeAllowed(Thermostat dev, HardwareInstallConfig hwConfig) {
 		BooleanResource configPending = getSubResourceOfSibblingOrDirectChildMaintenance(dev,
 				"configPending", BooleanResource.class);
-		return isAutoModeAllowed(dev, configPending, hwConfig.autoThermostatMode());
+		BooleanResource coupledWTconfigPending = getCoupledWTConfigPending(dev);
+		return isAutoModeAllowed(dev, configPending, coupledWTconfigPending, hwConfig.autoThermostatMode());
+	}
+	
+	public static Thermostat getCoupledWallThermostat(Thermostat dev) {
+		TemperatureSensor wtSens = dev.getSubResource(GatewaySyncUtil.LINKED_TEMPSENS_RESNAME, TemperatureSensor.class);
+		if(!(wtSens.isActive() && wtSens.isReference(false)))
+			return null;
+		return ResourceHelper.getFirstParentOfType(wtSens.getLocationResource(), Thermostat.class);
+	}
+	
+	public static BooleanResource getCoupledWTConfigPending(Thermostat dev) {
+		Thermostat wt = getCoupledWallThermostat(dev);
+		if(wt == null)
+			return null;
+		else
+			return getSubResourceOfSibblingOrDirectChildMaintenance(wt,
+					"configPending", BooleanResource.class);
 	}
 	
 	public static Long isAutoDecalcBlockedUntil(long now, ApplicationManager appMan) {
@@ -373,7 +392,8 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	}
 
 	public static boolean isAutoModeAllowed(Thermostat dev,
-			BooleanResource configPending, IntegerResource autoThermostatMode) {
+			BooleanResource configPending, BooleanResource coupledWTconfigPending,
+			IntegerResource autoThermostatMode) {
 		IntegerResource autoThermostatModeSingle = getAutoThermostatModeSingle(dev);
 		int overallState = autoThermostatMode.getValue();
 		if(overallState == 3)
@@ -404,7 +424,10 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			break;
 		}
 		if(configPending != null && configPending.exists() && configPending.getValue()) {
-			return false;			
+			return false;
+		}					
+		if(coupledWTconfigPending != null && coupledWTconfigPending.exists() && coupledWTconfigPending.getValue()) {
+			return false;
 		}					
 		return true;
 	}
