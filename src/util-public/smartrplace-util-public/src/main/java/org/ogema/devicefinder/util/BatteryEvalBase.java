@@ -39,7 +39,7 @@ public class BatteryEvalBase {
 	public static final float DEFAULT_BATTERY_NOTNEW_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.notNewvolt", 2.7f);
 	public static final float DEFAULT_BATTERY_CHANGE_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.changevolt", 2.7f);
 	public static final float DEFAULT_BATTERY_WARN_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.warnvolt", 2.5f);
-	public static final float DEFAULT_BATTERY_URGENT_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.urgentvolt", 2.3f);
+	public static final float DEFAULT_BATTERY_URGENT_VOLTAGE = ValueResourceHelper.getFloatProperty("org.ogema.devicefinder.util.battery.urgentvolt", 2.2f);
 	public static final long TIME_TO_ASSUME_EMPTY = 1*TimeProcUtil.DAY_MILLIS;
 	
 	public static FloatResource batteryLifetimeExpectedYears = null;
@@ -426,11 +426,15 @@ public class BatteryEvalBase {
 				&& (statusStd == BatteryStatus.CHANGE_RECOMMENDED || statusStd == BatteryStatus.WARNING)) {
 			long remain = BatteryEvalBase.getRemainingLifeTimeEstimation(batRes, now);
 			long endOfApril = getEndOfApril(now);
+			long midOfMarch = getMidOfMarch(now);
 			long yearStart = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.YEAR);
 			int dayOfYear = (int) ((now - yearStart) / TimeProcUtil.DAY_MILLIS);
-			if(dayOfYear < 120 && (now + remain > endOfApril))
-				return BatteryStatus.OK;
-			else if(dayOfYear < 170)
+			if(dayOfYear < 120) {
+				if(now + remain > endOfApril)
+					return BatteryStatus.OK;
+				if(now + remain > midOfMarch && statusStd == BatteryStatus.WARNING)
+					return BatteryStatus.CHANGE_RECOMMENDED;
+			} else if(dayOfYear < 170) //between 120 and 170 battery changes are usually not relevant
 				return BatteryStatus.OK;
 		}		
 		return statusStd;
@@ -447,6 +451,10 @@ public class BatteryEvalBase {
 			t0 = t0.plusYears(1);
 		long timestamp = t0.with(Month.APRIL).with(TemporalAdjusters.lastDayOfMonth()).truncatedTo(ChronoUnit.DAYS).toEpochSecond()*1000;
 		return timestamp;
+	}
+	public static long getMidOfMarch(long now) {
+		long yearStart = AbsoluteTimeHelper.getIntervalStart(now, AbsoluteTiming.YEAR);
+		return yearStart + 79*TimeProcUtil.DAY_MILLIS;
 	}
 
 	
@@ -545,16 +553,23 @@ public class BatteryEvalBase {
 		return getBatteryStatusPlus(iad, changeInfoRelevant, now).status;
 	}
 	public static BatteryStatusPlus getBatteryStatusPlus(InstallAppDevice iad, boolean changeInfoRelevant, Long now) {
-		VoltageResource sres = DeviceHandlerBase.getBatteryVoltage(iad.device().getLocationResource());
+		BatteryStatusPlus result = getBatteryStatusPlusInternal(iad, changeInfoRelevant, now);
 		if(iad.knownFault().assigned().exists()) {
 			int kni = iad.knownFault().assigned().getValue();
-			if(kni == AlarmingConfigUtil.ASSIGNMENT_BATTERYLOW) {
+			if(kni == AlarmingConfigUtil.ASSIGNMENT_BATTERYLOW
+					&& (result.status == BatteryStatus.WARNING || result.status == BatteryStatus.CHANGE_RECOMMENDED))
+				result.status = BatteryStatus.URGENT;
+			/*if(kni == AlarmingConfigUtil.ASSIGNMENT_BATTERYLOW) {
 				BatteryStatusPlus result = new BatteryStatusPlus();
 				result.status = BatteryStatus.EMPTY;
 				result.batRes = sres;
 				return result;
-			}
+			}*/
 		}
+		return result;
+	}
+	public static BatteryStatusPlus getBatteryStatusPlusInternal(InstallAppDevice iad, boolean changeInfoRelevant, Long now) {
+		VoltageResource sres = DeviceHandlerBase.getBatteryVoltage(iad.device().getLocationResource());
 		if(sres == null || (!sres.isActive())) {
 			Resource device2 = iad.device().getLocationResource();
 			if(!device2.getLocation().contains("_cc")) {
