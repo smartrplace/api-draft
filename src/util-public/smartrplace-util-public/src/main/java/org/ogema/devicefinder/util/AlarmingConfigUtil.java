@@ -64,6 +64,10 @@ public class AlarmingConfigUtil {
 	public static final int ASSIGNMENT_BACKLOG = 5000;
 	public static final int ASSIGNMENT_DEPDENDENT = 6000;
 	public static final int ASSIGNMENT_SPECIALSETS = 7000;
+	
+	/** Not supported as real assignment */
+	public static final int ASSIGNMENT_DIRECTCOUPLING = 11000;
+	
 	static {
 		ASSIGNEMENT_ROLES.put("0", "None");
 		//ASSIGNEMENT_ROLES.put("1", "requires more analysis");

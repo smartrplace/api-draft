@@ -37,4 +37,14 @@ public class EvalUtilBase {
 		return (start - (long)(minutesBack*TimeProcUtil.MINUTE_MILLIS));
 	}
 	
+	public static Float getCurrentValue(ReadOnlyTimeSeries ts, long timeStamp,
+			long maxValidDuration) {
+		SampledValue sv = ts.getPreviousValue(timeStamp);
+		if(sv == null || sv.getQuality() == Quality.BAD)
+			return null;
+		if(timeStamp - sv.getTimestamp() > maxValidDuration)
+			return null;
+		return sv.getValue().getFloatValue();
+	}
+
 }
