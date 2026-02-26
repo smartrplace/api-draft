@@ -306,6 +306,7 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 		public long lastUpdateTime;
 		
 		public Float batteryVoltage;
+		public Float rssi;
 		public Float valveStatus;
 		public Float temperatureMeasured;
 		public Integer deviceMeasurementStatus;

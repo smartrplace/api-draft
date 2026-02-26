@@ -17,6 +17,7 @@ import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.BooleanResource;
 import org.ogema.core.model.simple.FloatResource;
+import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.recordeddata.RecordedData;
 import org.ogema.model.devices.storage.ElectricityStorage;
@@ -181,6 +182,10 @@ public class BatteryEvalBase {
 		public FloatResource batSOC;
 	}
 
+	public static class RSSIStatusPlus {
+		public float rssi = Float.NaN;
+		public IntegerResource rssiRes;
+	}
 	
 	public static WidgetStyle<Label> addBatteryStyle(Label label, float val, boolean changeInfoRelevant,
 			String deviceLocation, OgemaHttpRequest req,
@@ -580,5 +585,19 @@ public class BatteryEvalBase {
 			}
 		}
 		return getBatteryStatusPlus(sres, changeInfoRelevant, now);
-	}	
+	}
+	
+	public static RSSIStatusPlus getRSSIStatusPlus(InstallAppDevice iad, boolean changeInfoRelevant, Long now) {
+		RSSIStatusPlus result = new RSSIStatusPlus();
+		String devLoc = iad.device().getLocation();
+		PhysicalElement dev = iad.device().getLocationResource();
+		if(DeviceTableBase.isHomematic(devLoc)) {
+			result.rssiRes = DeviceHandlerBase.getRSSIResource(dev);
+		} else {
+			result.rssiRes = dev.getSubResource("rssiDevice", IntegerResource.class);
+		}
+		if(result.rssiRes != null)
+			result.rssi = result.rssiRes.getValue();
+		return result;
+	}
 }
