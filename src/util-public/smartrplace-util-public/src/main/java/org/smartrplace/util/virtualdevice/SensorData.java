@@ -124,12 +124,16 @@ public abstract class SensorData {
 				if(ValueResourceHelper.isAlmostEqual(val, fbReceived)) {
 					int i = 0;
 					for(Entry<Float, Long> e: knownValues.entrySet()) {
-						ctrl.log.debug("SD:knownValues["+i+"] : "+e.getKey()+ " from: "+StringFormatHelper.getTimeDateInLocalTimeZone(e.getValue()));
+						ctrl.log.debug("SD-PostClean:knownValues["+i+"] : "+e.getKey()+ " from: "+StringFormatHelper.getTimeDateInLocalTimeZone(e.getValue()));
 						i++;
 					}				
 					return true;
 				}
-			}			
+			}
+			if(valueFeedbackPending != null && ValueResourceHelper.isAlmostEqual(valueFeedbackPending, fbReceived)) {
+				ctrl.log.debug("known as fBPending : "+valueFeedbackPending);
+				return true;
+			}
 		}
 		return false;
 	}

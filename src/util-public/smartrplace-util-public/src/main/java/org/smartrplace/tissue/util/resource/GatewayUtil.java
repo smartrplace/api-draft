@@ -44,6 +44,11 @@ public class GatewayUtil {
 		return ViaHeartbeatUtil.getBaseGwId(pre);
 	}
 
+	/**
+	 * 
+	 * @param resAcc
+	 * @return gatewayBaseId as int or 1 if numerical id cannot be determined
+	 */
 	public static int getGatewayBaseIdInt(ResourceAccess resAcc) {
 		String str = getGatewayBaseId(resAcc);
 		if(str == null)
