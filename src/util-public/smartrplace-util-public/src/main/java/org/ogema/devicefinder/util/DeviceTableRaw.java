@@ -1109,6 +1109,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return true;
 		if(resourceLocation.contains("HM_HM_TC_IT_WM_W_EU"))
 			return true;
+		if(resourceLocation.contains("HM_HmIP_STH_"))
+			return true;
 		return false;
 	}
 	public static boolean isCLThermostat(String resourceLocation) {
