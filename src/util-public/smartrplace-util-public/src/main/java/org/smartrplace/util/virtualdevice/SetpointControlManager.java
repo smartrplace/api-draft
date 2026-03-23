@@ -199,7 +199,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		SensorData sens = registerSensor(setp, sensor, mapInner);
 		if(sens == null) {
 			sens = registerSensor(setp, sensor, mapInner);
-			throw new IllegalStateException("Registered as null for "+setp.getLocation());		
+			throw new IllegalStateException("Registered as null for SCM::"+setp.getLocation());		
 		}
 		return sens;
 	}
@@ -233,10 +233,10 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	 * @return true if resource is written that triggers sending setpoint to device. False if request is dropped or postponed.
 	 * 		If request is dropped because setpoint and feedback already have the value requested true is returned (success)
 	 */
-	public boolean requestSetpointWrite(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
+	public boolean requestSetpointWrite(T setp, final float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
 		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, false, false);
 	}
-	public boolean requestSetpointWrite(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint) {
+	public boolean requestSetpointWrite(T setp, final float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint) {
 		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional,
 				writeEvenIfNochChangeForFeedbackAndSetpoint, false);
 	}
@@ -246,11 +246,11 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				writeEvenIfNochChangeForFeedbackAndSetpoint, false);
 	}
 	/** Call this if the setpoint should be set by the device itself or via transaction, just request a feedback and resend if feedback is not received*/
-	public boolean requestSetpointFeedback(T setp, float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
+	public boolean requestSetpointFeedback(T setp, final float setpoint, WritePrioLevel prioLevel, boolean resendEvenIfConditional) {
 		return requestSetpointWrite(setp, setpoint, null, prioLevel, resendEvenIfConditional, false, true);
 	}
 	
-	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData, WritePrioLevel prioLevel,
+	protected boolean requestSetpointWrite(T setp, final float setpoint, Object setpointData, WritePrioLevel prioLevel,
 			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
 			boolean requestConfirmationOnly) {
 		return requestSetpointWrite(setp, setpoint, setpointData, prioLevel, resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint,
@@ -268,7 +268,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	 * 		requested value is confirmed by feedback. This can be used is the value setting is expected to be made by auto-settings
 	 * @return false if the request is still pending e.g. as request could not be written due to high router load
 	 */
-	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData, WritePrioLevel prioLevel,
+	protected boolean requestSetpointWrite(T setp, final float setpoint, Object setpointData, WritePrioLevel prioLevel,
 			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
 			boolean requestConfirmationOnly, Long minRewriteTime) {
 		SensorData sens = registerSensor(setp);
@@ -297,19 +297,20 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		return requestSetpointWrite(setp, setpoint, setpointData, sens, maxDC,
 				resendEvenIfConditional, writeEvenIfNochChangeForFeedbackAndSetpoint, requestConfirmationOnly, minRewriteTime);
 	}
-	protected boolean requestSetpointWrite(T setp, float setpoint, Object setpointData,
+	protected boolean requestSetpointWrite(T setp, final float setpoint, Object setpointData,
 			SensorData sens, float maxDC,
-			boolean resendEvenIfConditional, boolean writeEvenIfNochChangeForFeedbackAndSetpoint,
+			boolean resendEvenIfConditional, boolean writeEvenIfNoChangeForFeedbackAndSetpoint,
 			boolean requestConfirmationOnly, Long minRewriteTime) {
-		if((!writeEvenIfNochChangeForFeedbackAndSetpoint) && (setpointData == null)) {
+		if((!writeEvenIfNoChangeForFeedbackAndSetpoint) && (setpointData == null)) {
 			//we do not support this for array resources etc. yet
 			boolean done = true;
 			if(sens.setpoint() instanceof SingleValueResource) {
 				float curSetp = ValueResourceUtils.getFloatValue((SingleValueResource) sens.setpoint());
 				if(!ValueResourceHelper.isAlmostEqual(curSetp, setpoint))
 					done = false;
+				float curFb = -1;
 				if(done && (sens.feedback() instanceof SingleValueResource)) {
-					float curFb = ValueResourceUtils.getFloatValue((SingleValueResource) sens.feedback());
+					curFb = ValueResourceUtils.getFloatValue((SingleValueResource) sens.feedback());
 					if(!ValueResourceHelper.isAlmostEqual(curFb, setpoint))
 						done = false;					
 				}
@@ -317,7 +318,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					sens.valuePending = null;
 					sens.valueFeedbackPending = null;
 					if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
-						log.debug("In DONE1 For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
+						log.debug("In DONE1 Ct:"+curSetp+" Fb:"+curFb+" Req:"+setpoint+" for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 					return true;
 				}
 			}
@@ -328,7 +329,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			long sentAgo = now - sens.lastSent;
 			if(sentAgo < minRewriteTime) {
 				if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
-					log.debug("Retarding write due to MIN_REWRITE_TIME for "+sens.setpoint().getLocation()+" minRewriteTime:"+minRewriteTime+" valueFeedback:"+sens.valueFeedbackPending);
+					log.debug("Retarding write due to MIN_REWRITE_TIME for SCM::"+sens.setpoint().getLocation()+" minRewriteTime:"+minRewriteTime+" valueFeedback:"+sens.valueFeedbackPending);
 				sens.pendingTimeForMissingFeedback = Math.max(10000l,  DEFAULT_MIN_INTERVAL_BETWEEN_WRITES);
 				isOverload = true;
 			}
@@ -360,11 +361,11 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				sens.valuePending = null;
 				sens.valueFeedbackPending = null;
 				if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
-					log.debug("In RESEND_IF_NO_FB For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
+					log.debug("In RESEND_IF_NO_FB for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 				return true;
 			}
 
-			if((!writeEvenIfNochChangeForFeedbackAndSetpoint) && (setpointData == null)) {
+			if((!writeEvenIfNoChangeForFeedbackAndSetpoint) && (setpointData == null)) {
 				//we do not support this for array resources etc. yet
 				boolean done = true;
 				if(sens.feedback() instanceof SingleValueResource) {
@@ -376,7 +377,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					sens.valuePending = null;
 					sens.valueFeedbackPending = null;
 					if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
-						log.debug("In DONE2 For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
+						log.debug("In DONE2 for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 					return true;
 				}
 			}
@@ -391,10 +392,13 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 				sens.valueFeedbackPendingObject = setpointData;
 			sens.valueFeedbackPending = setpoint;
 			if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
-				log.debug("For "+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
+				log.debug("for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);
 			sens.valuePending = null;
 			return true;
-		} //if((!isOverload) || requestConfirmationOnly) {
+		} else {
+			if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
+				log.debug("  Skip rewrite due to OVERLOAD for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);			
+		} ////if((!isOverload) || requestConfirmationOnly) {
 		if(sens.ccu() != null) {
 			if(maxDC <= sens.ccu().dutyCycleWarningYellow()) {
 				sens.ccu().conditionalDropCount++;
@@ -551,25 +555,27 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			for(SensorData resenddata: allresend) {
 				//TODO: Obviously valueFeedbackPending can be changed by another thread
 				Float valueFeedbackPending = resenddata.valueFeedbackPending;
+				long sentAgo = now - resenddata.lastSent;
 				if(valueFeedbackPending != null) {
 					long timePendingFb = now - resenddata.valuePendingSince;
 					//long sentAgoFb = now - resenddata.lastSent;
 					if((timePendingFb > resenddata.pendingTimeForMissingFeedback)) { // && (sentAgoFb > lastSentAgoForRetry)) {
 						if(valueFeedbackPending != null)
-							log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending, value:"+(float)valueFeedbackPending+".");
+							log.warn("Feedback missing for SCM::"+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending, value:"+(float)valueFeedbackPending+".");
 						//else
 						//	log.warn("Feedback missing for "+resenddata.setpoint().getLocation()+" for "+timePendingFb+" msec. Resending.");
 						cd.resendMissingFbCount++;
 						boolean success;
+						boolean reWriteMust = (sentAgo > lastSentAgoForRetry);
 						if(resenddata.valueFeedbackPendingObject != null) {
 							success = requestSetpointWrite((T) resenddata.setpoint(), resenddata.valueFeedbackPendingObject,
-									WritePrioLevel.CONDITIONAL, false, false);							
-							log.debug("Resending object for "+resenddata.setpoint().getLocation()+
+									reWriteMust?WritePrioLevel.MUST_WRITE:WritePrioLevel.CONDITIONAL, false, false);							
+							log.debug("Resending object for SCM::"+resenddata.setpoint().getLocation()+
 									" with interval sec:"+(resenddata.pendingTimeForMissingFeedback/1000));
 						} else try {
 							success = requestSetpointWrite((T) resenddata.setpoint(), (float)valueFeedbackPending,
-								WritePrioLevel.CONDITIONAL, false, false);
-							log.debug("Resending val "+String.format("%.1f", (float)valueFeedbackPending)+" for "+resenddata.setpoint().getLocation()+
+									reWriteMust?WritePrioLevel.MUST_WRITE:WritePrioLevel.CONDITIONAL, false, false);
+							log.debug("Resending val "+String.format("%.1f", (float)valueFeedbackPending)+" for SCM::"+resenddata.setpoint().getLocation()+
 									" with interval sec:"+(resenddata.pendingTimeForMissingFeedback/1000));
 						} catch(NullPointerException e) { //Should not occur anymore
 							String text = "Resend failed";
@@ -585,7 +591,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 							UserServlet.logException(e, null, -28, appManPlus);
 							throw new IllegalStateException(text, e);
 						}
-						if(!success) {
+						if(success) {
 							//CHANGED (not anymore): we stop the chain due to overload
 							//resenddata.valueFeedbackPending = null;
 							resenddata.lastSent = now;
@@ -593,16 +599,15 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 							resenddata.valuePendingSince = now;
 							//	break;
 						}
-					}
+					} // if((timePendingFb > resenddata.pendingTimeForMissingFeedback))
 					continue;
-				}
+				} //if(valueFeedbackPending != null)
 				//valuePending is for processing requests postponed due to overload
 				//obviously resenddata.valuePending can be changed by another thread
 				Float valuePending = resenddata.valuePending;
 				if(valuePending == null)
 					continue;
 				long timePending = now - resenddata.valuePendingSince;
-				long sentAgo = now - resenddata.lastSent;
 				if((timePending > pendingTimeForRetry) && (sentAgo > lastSentAgoForRetry)) {
 					//NOTE: valuePending is set already so we do not have to indicate resend, will take place anyways if no success.
 					resenddata.pendingTimeForMissingFeedback = (long) (RESEND_INCREASE_FACTOR * (double)resenddata.pendingTimeForMissingFeedback);
@@ -610,12 +615,12 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					if(resenddata.valueFeedbackPendingObject != null) {
 						success = requestSetpointWrite((T) resenddata.setpoint(), Float.NaN, resenddata.valuePendingObject,
 								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, DEFAULT_MIN_INTERVAL_BETWEEN_WRITES);
-						log.debug("Retry to send of object for "+resenddata.setpoint().getLocation()+
+						log.debug("Retry to send of object for SCM::"+resenddata.setpoint().getLocation()+
 								" with interval sec:"+(pendingTimeForRetry/1000));
 					} else {
 						success = requestSetpointWrite((T) resenddata.setpoint(), (float)valuePending, null,
 								resenddata, Math.min(retryAfterOverloadLimit, resenddata.maxDC), false, false, false, 5000l);
-						log.debug("Retry to send of val "+String.format("%.1f", (float)valuePending)+" for "+resenddata.setpoint().getLocation()+
+						log.debug("Retry to send of val "+String.format("%.1f", (float)valuePending)+" for SCM::"+resenddata.setpoint().getLocation()+
 								" with interval sec:"+(pendingTimeForRetry/1000));
 					}
 					if(success) {
@@ -623,9 +628,13 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 						resenddata.lastSent = now;
 					} /*else
 					break;*/
-				}
-			}
-		}
+				} else {
+					if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
+						log.debug("  TimeForRetry:"+timePending+"/"+pendingTimeForRetry+" sentAgo:"+sentAgo+"/"+lastSentAgoForRetry+" for SCM::"+
+								resenddata.setpoint().getLocation());
+				} //if((timePending > pendingTimeForRetry)
+			} //for(SensorData resenddata: allresend)
+		} //for(RouterInstance cd: routers)
 	}
 
 	/** Base implementation that usually has to be overwritten by copying and extension*/
