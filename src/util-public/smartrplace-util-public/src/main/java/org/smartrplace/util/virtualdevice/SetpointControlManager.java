@@ -397,7 +397,7 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			return true;
 		} else {
 			if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
-				log.debug("  Skip rewrite due to OVERLOAD for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending);			
+				log.debug("  Skip rewrite due to OVERLOAD for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending+" maxDC:"+maxDC);			
 		} ////if((!isOverload) || requestConfirmationOnly) {
 		if(sens.ccu() != null) {
 			if(maxDC <= sens.ccu().dutyCycleWarningYellow()) {
