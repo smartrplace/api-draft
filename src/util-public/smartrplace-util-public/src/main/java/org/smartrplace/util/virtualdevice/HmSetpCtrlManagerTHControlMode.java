@@ -45,7 +45,7 @@ public class HmSetpCtrlManagerTHControlMode extends HmSetpCtrlManager<IntegerRes
 	}
 	
 	private HmSetpCtrlManagerTHControlMode(ApplicationManagerPlus appManPlus, HmSetpCtrlManagerTHSetp mainHmMan) {
-		super(appManPlus, 15*TimeProcUtil.MINUTE_MILLIS);
+		super(appManPlus, 8*TimeProcUtil.MINUTE_MILLIS);
 		this.mainHmMan = mainHmMan;
 	}
 	

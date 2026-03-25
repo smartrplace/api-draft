@@ -332,8 +332,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 					log.debug("Retarding write due to MIN_REWRITE_TIME for SCM::"+sens.setpoint().getLocation()+" minRewriteTime:"+minRewriteTime+" valueFeedback:"+sens.valueFeedbackPending);
 				sens.pendingTimeForMissingFeedback = Math.max(10000l,  DEFAULT_MIN_INTERVAL_BETWEEN_WRITES);
 				isOverload = true;
-			}
-			isOverload = isSensorInOverload(sens, maxDC);
+			} else 
+				isOverload = isSensorInOverload(sens, maxDC);
 		} else
 			isOverload = isSensorInOverload(sens, maxDC);
 		if((!isOverload) || requestConfirmationOnly) {
@@ -397,7 +397,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 			return true;
 		} else {
 			if(Boolean.getBoolean("setpointcontrolmanager.logdetails"))
-				log.debug("  Skip rewrite due to OVERLOAD for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending+" maxDC:"+maxDC);			
+				log.debug("  Skip rewrite due to OVERLOAD for SCM::"+sens.setpoint().getLocation()+" valueFeedback:"+sens.valueFeedbackPending+" maxDC:"+maxDC
+						+" minRewriteTime:"+(minRewriteTime!=null?""+minRewriteTime:"null"));
 		} ////if((!isOverload) || requestConfirmationOnly) {
 		if(sens.ccu() != null) {
 			if(maxDC <= sens.ccu().dutyCycleWarningYellow()) {
