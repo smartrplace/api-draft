@@ -166,7 +166,7 @@ public class ChartsUtil {
 		}
 		
 		List<OnOffSwitch> oos = dev.getSubResources(OnOffSwitch.class, false);
-		if(hss.size() == 1)
+		if(oos.size() == 1)
 			result.onOffSwitch = oos.get(0);
 		return result ;
 	}
