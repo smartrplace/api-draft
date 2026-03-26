@@ -37,6 +37,8 @@ import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.CO2Sensor;
 import org.ogema.model.sensors.GenericFloatSensor;
 import org.ogema.model.sensors.HumiditySensor;
+import org.ogema.model.sensors.LightSensor;
+import org.ogema.model.sensors.OccupancySensor;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resource.util.LoggingUtils;
@@ -136,6 +138,8 @@ public class ChartsUtil {
 		public TemperatureSensor tempSens;
 		public HumiditySensor humSens;
 		public OnOffSwitch onOffSwitch;
+		public LightSensor lightSens;
+		public OccupancySensor occSens;
 		
 		/** Null if directly acquired via {@link ChartsUtil#getElements(CO2Sensor)}*/
 		public InstallAppDevice iad;
@@ -164,6 +168,12 @@ public class ChartsUtil {
 					result.humSens = hss.get(0);				
 			}
 		}
+		List<LightSensor> lss = dev.getSubResources(LightSensor.class, false);
+		if(lss.size() == 1)
+			result.lightSens = lss.get(0);
+		List<OccupancySensor> ocss = dev.getSubResources(OccupancySensor.class, false);
+		if(ocss.size() == 1)
+			result.occSens = ocss.get(0);
 		
 		List<OnOffSwitch> oos = dev.getSubResources(OnOffSwitch.class, false);
 		if(oos.size() == 1)
