@@ -1125,6 +1125,12 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 
+	public static boolean isCO2SensorSensorDevice(String resourceLocation) {
+		if(resourceLocation.contains("elsys_co2"))
+			return true;
+		return false;
+	}
+
 	public static boolean isKnownOnOffWithEventPushButtonDevice(Resource parent) {
 		if(parent != null && (parent.getName().contains("HM_HmIP_BS2_") ||
 				parent.getName().contains("HmIP_PSM_2_") ||
