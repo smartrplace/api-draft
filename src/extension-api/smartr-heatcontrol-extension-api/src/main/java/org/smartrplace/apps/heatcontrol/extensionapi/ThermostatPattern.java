@@ -153,7 +153,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	public SetpointControlManager<TemperatureResource> getSetpMan(ApplicationManagerPlus appManPlus) {
 		if(setpMan == null) {
 			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
-			if(type == SetpointControlType.HmThermostat)
+			if(type == SetpointControlType.HmThermostat || type == SetpointControlType.ThermostatDefault)
 				setpMan = HmSetpCtrlManagerTHSetp.getInstance(appManPlus);
 			else
 				setpMan = ThermostatAirconDefaultManager.getInstance(appManPlus);
@@ -163,7 +163,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	public SetpointControlManager<IntegerResource> getSetpManControlMode(ApplicationManagerPlus appManPlus) {
 		if(controlModeMan == null) {
 			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
-			if(type == SetpointControlType.HmThermostat)
+			if(type == SetpointControlType.HmThermostat || type == SetpointControlType.ThermostatDefault)
 				controlModeMan = HmSetpCtrlManagerTHControlMode.getInstance(appManPlus);
 		}
 		return controlModeMan;
@@ -171,7 +171,7 @@ public class ThermostatPattern extends ResourcePattern<Thermostat> {
 	public SetpointControlManager<IntegerResource> getSetpManAutoUpdate(ApplicationManagerPlus appManPlus) {
 		if(autoUpdateMan == null) {
 			SetpointControlType type = SetpointControlManager.getControlType(setPoint);
-			if(type == SetpointControlType.HmThermostat)
+			if(type == SetpointControlType.HmThermostat || type == SetpointControlType.ThermostatDefault)
 				autoUpdateMan = HmSetpCtrlManagerTHIntTrigger.getInstance(appManPlus);
 		}
 		return autoUpdateMan;

@@ -56,7 +56,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 		/** Default types use the gateway as CCU/router*/
 		ThermostatDefault,
 		AirconditionerDefault,
-		HmThermostat
+		HmThermostat,
+		VIRTUAL
 	}
 	
 	public abstract boolean isSensorInOverload(SensorData data, float maxDC);
@@ -658,6 +659,8 @@ public abstract class SetpointControlManager<T extends ValueResource> {
 	public static SetpointControlType getControlType(SingleValueResource setpoint) {
 		if(DeviceTableBase.isHomematic(setpoint.getLocation()))
 			return SetpointControlType.HmThermostat;
+		if(setpoint.getLocation().contains("virtual"))
+			return SetpointControlType.VIRTUAL;
 		PhysicalElement device = ResourceHelper.getFirstParentOfType(setpoint, Thermostat.class); //LogHelper.getDeviceResource(setpoint, false, true);
 		if(device != null)
 			return SetpointControlType.ThermostatDefault;
