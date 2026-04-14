@@ -892,6 +892,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 			return false;
 		if(isHeatCostAllocatorDevice(resourceLocation, subResources))
 			return false;
+		if(resourceLocation.contains("JMBUS_BASE/ELECTRICITY_"))
+			return false;
 		//if(isWaterMeterDevice(resourceLocation, subResources))
 		//	return false;
 		for(SubResourceInfo srinfo: subResources) {
