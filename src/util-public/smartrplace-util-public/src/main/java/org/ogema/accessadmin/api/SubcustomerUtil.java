@@ -447,6 +447,11 @@ public class SubcustomerUtil {
 		if(userEntry.superGroups().size() == 0)
 			return true;
 		
+		//Check if single subcustomer contains all rooms
+		int roomNum = KPIResourceAccess.getRealRooms(appMan.getResourceAccess()).size();
+		if((activeSubcust != null) && activeSubcust.roomGroup().rooms().size() >= roomNum)
+			return true;
+		
 		for(SubCustomerData subc: subcs) {
 			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
 					accessAdminConfigRes.userPermissions());
