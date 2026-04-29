@@ -452,16 +452,20 @@ public class SubcustomerUtil {
 		if((activeSubcust != null) && activeSubcust.roomGroup().rooms().size() >= roomNum)
 			return true;
 		
+		int roomCount = 0;
+		boolean subcNotForUser = false;
 		for(SubCustomerData subc: subcs) {
 			AccessConfigUser subcustGroup = ResourceListHelper.getNamedElementFlex(subc.name().getValue(),
 					accessAdminConfigRes.userPermissions());
 			if(subcustGroup == null)
 				throw new IllegalStateException("User Group for Subcustomer "+subc.getLocation() + " missing!");
-
+			roomCount += subc.roomGroup().rooms().size();
 			if(!ResourceHelper.containsLocation(userEntry.superGroups().getAllElements(), subcustGroup)) {
-				return false;
+				subcNotForUser = true;
 			}
 		}
+		if(subcNotForUser && (roomCount < roomNum))
+			return false;
 		return true;
 	}
 	
