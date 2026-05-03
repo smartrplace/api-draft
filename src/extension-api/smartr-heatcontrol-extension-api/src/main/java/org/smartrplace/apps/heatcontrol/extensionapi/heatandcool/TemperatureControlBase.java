@@ -4,10 +4,13 @@ import java.util.Collection;
 
 import org.ogema.core.channelmanager.measurements.SampledValue;
 import org.ogema.core.model.schedule.AbsoluteSchedule;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.units.TemperatureResource;
+import org.ogema.devicefinder.api.PropType;
 import org.ogema.model.devices.buildingtechnology.AirConditioner;
 import org.ogema.model.devices.buildingtechnology.MechanicalFan;
 import org.ogema.model.locations.Room;
+import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.TemperatureSensor;
 
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
@@ -16,7 +19,10 @@ import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
  * cooling units within a room
  */
 public interface TemperatureControlBase extends RoomDeviceProvider {
-
+	default public PhysicalElement getDevice() {
+		return null;
+	};
+	
     /** Get temperature control setpoint resource ("setpoint set")
      * 
      * @return null if no suitable device is available in the room
@@ -175,5 +181,30 @@ public interface TemperatureControlBase extends RoomDeviceProvider {
 		
 		/** Override this if Controller shall use this*/
 		public void setState(int newState) {};
+	}
+	
+	default public FloatResource getTemperatureSetpointMaxCt() {
+		PhysicalElement dev = getDevice();
+		if(dev == null)
+			return null;
+		return (FloatResource) PropType.getHmParam(dev, PropType.THERMOSTAT_TEMPERATURE_MAX, false);
+	}
+	default public FloatResource getTemperatureSetpointMaxFb() {
+		PhysicalElement dev = getDevice();
+		if(dev == null)
+			return null;
+		return (FloatResource) PropType.getHmParam(dev, PropType.THERMOSTAT_TEMPERATURE_MAX, true);
+	}
+	default public FloatResource getTemperatureSetpointMinCt() {
+		PhysicalElement dev = getDevice();
+		if(dev == null)
+			return null;
+		return (FloatResource) PropType.getHmParam(dev, PropType.THERMOSTAT_TEMPERATURE_MIN, false);
+	}
+	default public FloatResource getTemperatureSetpointMinFb() {
+		PhysicalElement dev = getDevice();
+		if(dev == null)
+			return null;
+		return (FloatResource) PropType.getHmParam(dev, PropType.THERMOSTAT_TEMPERATURE_MIN, true);
 	}
 }
