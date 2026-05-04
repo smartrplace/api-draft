@@ -439,7 +439,7 @@ public class BatteryEvalBase {
 					return BatteryStatus.OK;
 				if(now + remain > midOfMarch && statusStd == BatteryStatus.WARNING)
 					return BatteryStatus.CHANGE_RECOMMENDED;
-			} else if(dayOfYear < 170) //between 120 and 170 battery changes are usually not relevant
+			} else if(dayOfYear < 210) //between 120 and 170 battery changes are usually not relevant
 				return BatteryStatus.OK;
 		}		
 		return statusStd;
