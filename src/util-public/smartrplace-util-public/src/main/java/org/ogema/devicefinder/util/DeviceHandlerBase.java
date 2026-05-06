@@ -199,12 +199,23 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	}
 	
 	public static IntegerResource getRSSIResource(PhysicalElement dev) {
+		if(DeviceTableBase.isHomematic(dev.getLocation())) {
+			return DeviceHandlerBase.getRSSIResourceHm(dev);
+		} else {
+			IntegerResource result = ResourceHelper.getSubResourceIfExisting(dev, "rssiDevice", IntegerResource.class);
+			if(result != null)
+				return result;
+			return ResourceHelper.getSubResourceIfExisting(dev, "rssiGateway", IntegerResource.class);
+		}
+	}
+	public static IntegerResource getRSSIResourceHm(PhysicalElement dev) {
 		IntegerResource rssiDevice = getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
 				"rssiDevice", IntegerResource.class);
 		if(rssiDevice != null && rssiDevice.exists())
 			return rssiDevice;
 		return null;
 	}
+	
 	public static IntegerResource getRSSIPeerResource(PhysicalElement dev) {
 		IntegerResource rssiPeer = getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
 				"rssiPeer", IntegerResource.class);

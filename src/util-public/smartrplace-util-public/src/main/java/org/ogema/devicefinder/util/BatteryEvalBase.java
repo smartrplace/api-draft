@@ -587,15 +587,16 @@ public class BatteryEvalBase {
 		return getBatteryStatusPlus(sres, changeInfoRelevant, now);
 	}
 	
-	public static RSSIStatusPlus getRSSIStatusPlus(InstallAppDevice iad, boolean changeInfoRelevant, Long now) {
+	public static RSSIStatusPlus getRSSIStatusPlus(InstallAppDevice iad, Long now) {
 		RSSIStatusPlus result = new RSSIStatusPlus();
-		String devLoc = iad.device().getLocation();
+		//String devLoc = iad.device().getLocation();
 		PhysicalElement dev = iad.device().getLocationResource();
-		if(DeviceTableBase.isHomematic(devLoc)) {
+		result.rssiRes = DeviceHandlerBase.getRSSIResource(dev);
+		/*if(DeviceTableBase.isHomematic(devLoc)) {
 			result.rssiRes = DeviceHandlerBase.getRSSIResource(dev);
 		} else {
 			result.rssiRes = dev.getSubResource("rssiDevice", IntegerResource.class);
-		}
+		}*/
 		if(result.rssiRes != null)
 			result.rssi = result.rssiRes.getValue();
 		return result;
