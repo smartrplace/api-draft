@@ -805,7 +805,8 @@ public class UserServlet extends HttpServlet {
 				if(paramMap != null && !paramMap.isEmpty()) {
 					String paramMapAsString = "";
 					for(Entry<String, String[]> e: paramMap.entrySet()) {
-						String str = e.getKey()+":"+e.getValue();
+						String val = e.getValue().toString().length()>0?e.getValue()[0]:"EMPTY";
+						String str = e.getKey()+":"+val;
 						if(paramMap.isEmpty())
 							paramMapAsString = str;
 						else
