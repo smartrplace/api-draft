@@ -57,7 +57,7 @@ public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = -462293886580458217L;
 	public static final String TIMEPREFIX = "&time=";
 
-	final static Logger logger = LoggerFactory.getLogger(UserServlet.class);
+	public final static Logger logger = LoggerFactory.getLogger(UserServlet.class);
 
 	public final String servletSubUrl;
 	/** Entries may be generated on first call if the pageId is part of the property
@@ -774,25 +774,7 @@ public class UserServlet extends HttpServlet {
 	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap,
 			String servletSubUrl, boolean isGET) {
 		String fullURL = req.getRequestURL().toString();
-		if(logger.isDebugEnabled())  {
-			String paramStr = req.getQueryString();
-			if(paramStr != null)
-				logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL+"?"+paramStr);
-			else {
-				if(paramMap != null && !paramMap.isEmpty()) {
-					String paramMapAsString = "";
-					for(Entry<String, String[]> e: paramMap.entrySet()) {
-						String str = e.getKey()+":"+e.getValue();
-						if(paramMap.isEmpty())
-							paramMapAsString = str;
-						else
-							paramMapAsString = paramMapAsString +", "+str;
-					}
-					logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL+" Params:"+paramMapAsString);					
-				} else
-					logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL);
-			}
-		}
+
 		int idx = fullURL.indexOf(servletSubUrl);
 		String[] subURL;
 		if(idx >= 0)
@@ -814,6 +796,26 @@ public class UserServlet extends HttpServlet {
 				addParameter(paramName, param, paramMap);
 			}
 		}		
+		
+		if(logger.isDebugEnabled())  {
+			String paramStr = req.getQueryString();
+			if(paramStr != null)
+				logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL+"?"+paramStr);
+			else {
+				if(paramMap != null && !paramMap.isEmpty()) {
+					String paramMapAsString = "";
+					for(Entry<String, String[]> e: paramMap.entrySet()) {
+						String str = e.getKey()+":"+e.getValue();
+						if(paramMap.isEmpty())
+							paramMapAsString = str;
+						else
+							paramMapAsString = paramMapAsString +", "+str;
+					}
+					logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL+" Params:"+paramMapAsString);					
+				} else
+					logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL+ "Paramsize:"+paramMap.size());
+			}
+		}
 	}
 
 	protected void addParametersFromUrl(HttpServletRequest req, Map<String, String[]> paramMap,
