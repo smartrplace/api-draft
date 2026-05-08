@@ -778,8 +778,20 @@ public class UserServlet extends HttpServlet {
 			String paramStr = req.getQueryString();
 			if(paramStr != null)
 				logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL+"?"+paramStr);
-			else
-				logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL);
+			else {
+				if(paramMap != null && !paramMap.isEmpty()) {
+					String paramMapAsString = "";
+					for(Entry<String, String[]> e: paramMap.entrySet()) {
+						String str = e.getKey()+":"+e.getValue();
+						if(paramMap.isEmpty())
+							paramMapAsString = str;
+						else
+							paramMapAsString = paramMapAsString +", "+str;
+					}
+					logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL+" Params:"+paramMapAsString);					
+				} else
+					logger.debug("Starting "+(isGET?"GET":"POST")+" for(A):"+fullURL);
+			}
 		}
 		int idx = fullURL.indexOf(servletSubUrl);
 		String[] subURL;
