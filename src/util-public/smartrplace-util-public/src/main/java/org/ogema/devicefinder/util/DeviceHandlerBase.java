@@ -43,6 +43,7 @@ import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.devices.buildingtechnology.ThermostatProgram;
 import org.ogema.model.devices.storage.ElectricityStorage;
 import org.ogema.model.prototypes.PhysicalElement;
+import org.ogema.model.sensors.ElectricVoltageSensor;
 import org.ogema.model.sensors.GenericBinarySensor;
 import org.ogema.model.sensors.TemperatureSensor;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
@@ -194,8 +195,13 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		else {
 			VoltageResource batteryVoltage = getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
 					"battery/internalVoltage/reading", VoltageResource.class);
-			return batteryVoltage;
-		}		
+			if(batteryVoltage != null)
+				return batteryVoltage;
+		}
+		ElectricVoltageSensor voltSens = ResourceHelper.getSubResourceIfExisting(dev, "VOLTAGE_0_0", ElectricVoltageSensor.class);
+		if(voltSens != null)
+			return voltSens.reading();
+		return null;
 	}
 	
 	public static IntegerResource getRSSIResource(PhysicalElement dev) {
