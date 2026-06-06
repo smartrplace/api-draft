@@ -203,7 +203,20 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			return voltSens.reading();
 		return null;
 	}
-	
+
+	/** Get batteryLow status resource for devices that do not provide a battery voltage,
+	 * e.g. WMBus metering devices that only report a batteryLow flag*/
+	public static BooleanResource getBatteryLowStatus(PhysicalElement dev) {
+		BooleanResource batteryLow = dev.getSubResource("batteryLow", BooleanResource.class);
+		if(batteryLow != null && batteryLow.isActive())
+			return batteryLow;
+		batteryLow = getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
+				"batteryLow", BooleanResource.class);
+		if(batteryLow != null && batteryLow.isActive())
+			return batteryLow;
+		return null;
+	}
+
 	public static IntegerResource getRSSIResource(PhysicalElement dev) {
 		if(DeviceTableBase.isHomematic(dev.getLocation())) {
 			return DeviceHandlerBase.getRSSIResourceHm(dev);

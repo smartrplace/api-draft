@@ -524,8 +524,7 @@ public class BatteryEvalBase {
 		}
 		BatteryStatusPlus result = new BatteryStatusPlus();
 		if(now != null) {
-			BooleanResource batteryStatus = DeviceHandlerBase.getSubResourceOfSibblingOrDirectChildMaintenance(dev.getLocationResource(),
-					"batteryLow", BooleanResource.class);
+			BooleanResource batteryStatus = DeviceHandlerBase.getBatteryLowStatus(dev);
 			if(batteryStatus != null) {
 				//TODO: Take into account main sensor value to check if device 
 				// is online => if last status value is far in the past => OK again, then batteryStatus needs to be set back to false

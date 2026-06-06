@@ -417,6 +417,25 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 				return result;
 			}
 		}
+		BooleanResource batteryLow = DeviceHandlerBase.getBatteryLowStatus(device2);
+		if(batteryLow != null) {
+			batValLabel = new Label(vh.getParent(), "batValLabel"+id, req) {
+				@Override
+				public void onGET(OgemaHttpRequest req) {
+					if(batteryLow.getValue()) {
+						setText("Low", req);
+						setStyle(LabelData.BOOTSTRAP_RED, req);
+					} else {
+						setText("OK", req);
+						setStyle(LabelData.BOOTSTRAP_GREEN, req);
+					}
+				}
+			};
+			AddBatteryVoltageResult result = new AddBatteryVoltageResult(batValLabel, batteryLow);
+			row.addCell(WidgetHelper.getValidWidgetId(colHeader), batValLabel);
+			batValLabel.setDefaultPollingInterval(DEFAULT_POLL_RATE);
+			return result;
+		}
 		if(req == null)
 			vh.registerHeaderEntry(colHeader);
 		return null;
