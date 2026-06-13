@@ -881,7 +881,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 	 * @param minimumAllowed
 	 * @param maximumAllowed
 	 * @param notAllowedMessage
-	 * @param mode 0: default, 1:no value transformation, 2: show "0" as default, 3: show 0.0 as default
+	 * @param mode 0: default, 1:no value transformation, 2: show "0" as default, 3: show 0.0 as default,
+	 * 		4: show 1.0 as default (e.g. a conversion factor that defaults to "no conversion")
 	 * @return
 	 */
 	private TextField floatEdit(String widgetId, final FloatResource optSource, String altId, final Alert alert,
@@ -900,6 +901,8 @@ public abstract class ObjectResourceGUIHelper<T, R extends Resource> extends Obj
 					myField.setValue("0",req);
 				else if(mode == 3 && (!source.exists()))
 					myField.setValue("0.0",req);
+				else if(mode == 4 && (!source.exists()))
+					myField.setValue("1.0",req);
 				else if((source instanceof PercentageResource)&&(mode == 0))
 					myField.setValue(((PercentageResource)source).getValue()*100+"",req);
 				else if((source instanceof TemperatureResource)&&(mode == 0))
