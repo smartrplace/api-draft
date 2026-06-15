@@ -168,7 +168,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 		final List<SampledValue> vals;
 		if(evaluationMode != null) {
 			//TODO
-			vals = timeSeries.getValues(startEnd[0], startEnd[1]);
+			vals = cutTimeseries(timeSeries.getValues(startEnd[0], startEnd[1]));
 			json.put("value", vals);
 			
 			JSONVarrRes realResult = new JSONVarrRes();
@@ -213,7 +213,7 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 			if(structureStr != null && structureStr.equals("tslist"))
 				structList = true;
 		}
-		SampledToJSonResult mainRes = smapledValuesToJson(vals, valueDist, mode, //valueDist==null?null:DownSamplingMode.MINMAX,
+		SampledToJSonResult mainRes = smapledValuesToJson(cutTimeseries(vals), valueDist, mode, //valueDist==null?null:DownSamplingMode.MINMAX,
 				structList, shortXY, pData.suppressNan, factor, offset, startEnd[1]+30*TimeProcUtil.DAY_MILLIS);
 		json.put("values", mainRes.arr);
 		if(mainRes.errorTs != null) {
@@ -428,6 +428,32 @@ public class ServletTimeseriesProvider implements ServletValueProvider {
 	public void deleteValues(long start, long end) {
 		Schedule sched = (Schedule) timeSeries;
 		sched.deleteValues(start, end);
+	}
+
+	/** System property holding the start (in milliseconds since epoch) of a time span to be removed
+	 * from the result time series. Only applied if both this and {@link #CUT_TIMESERIES_END_PROP} are set.*/
+	public static final String CUT_TIMESERIES_START_PROP = "org.smartrplace.util.frontend.servlet.cutTimeseries.start";
+	/** System property holding the end (in milliseconds since epoch) of a time span to be removed
+	 * from the result time series. Only applied if both this and {@link #CUT_TIMESERIES_START_PROP} are set.*/
+	public static final String CUT_TIMESERIES_END_PROP = "org.smartrplace.util.frontend.servlet.cutTimeseries.end";
+
+	/** Remove a time span from the result time series if both system properties
+	 * {@link #CUT_TIMESERIES_START_PROP} and {@link #CUT_TIMESERIES_END_PROP} are set (i.e.
+	 * {@link Long#getLong(String)} returns a value for both). All values within the closed interval
+	 * [start, end] are removed. Otherwise the input list is returned unchanged.*/
+	protected static List<SampledValue> cutTimeseries(List<SampledValue> vals) {
+		Long cutStart = Long.getLong(CUT_TIMESERIES_START_PROP);
+		Long cutEnd = Long.getLong(CUT_TIMESERIES_END_PROP);
+		if(cutStart == null || cutEnd == null)
+			return vals;
+		List<SampledValue> result = new ArrayList<>(vals.size());
+		for(SampledValue sv: vals) {
+			long ts = sv.getTimestamp();
+			if(ts >= cutStart && ts <= cutEnd)
+				continue;
+			result.add(sv);
+		}
+		return result;
 	}
 
 	static class TSReductionData{
