@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,10 +20,15 @@ import org.smartrplace.apps.hw.install.config.InstallAppDevice;
  *
  * <p>The MAC address of a remote host is only visible on the same layer-2 network segment. On the
  * gateway (Ubuntu/Linux) it is obtained from the kernel ARP/neighbour cache: the host is pinged once
- * to make sure it has an entry in the cache, then {@code ip neigh show <host>} (fallback
- * {@code arp -n <host>}) is read and the MAC parsed out. If the device is behind a router/bridge the
- * MAC reported is the one of that controller (see the network-identifier documentation on
- * {@link InstallAppDevice#networkIdentifier()}).</p>
+ * to make sure it has an entry in the cache, then the kernel ARP table ({@code /proc/net/arp}, with
+ * {@code ip neigh show <host>} / {@code arp -n <host>} as fallbacks) is read and the MAC parsed out. If
+ * the device is behind a router/bridge the MAC reported is the one of that controller (see the
+ * network-identifier documentation on {@link InstallAppDevice#networkIdentifier()}).</p>
+ *
+ * <p>{@link #updateMacAddressIfChanged} stores the resolved MAC only when it differs from the stored one
+ * (keeping the last-write timestamp otherwise). If the MAC cannot be determined and no value is stored yet
+ * it stores {@link #MAC_NOT_FOUND_MESSAGE} as a placeholder; an already stored (real or manual) value is
+ * never overwritten by that placeholder.</p>
  *
  * <p>This is a Linux/Ubuntu-only feature; on Windows (dev machine) {@link #resolveMacForIp} returns
  * {@code null}. All external commands are executed via {@link ProcessBuilder} argument arrays (no
@@ -32,6 +40,11 @@ public class MacAddressResolver {
 	private static final Pattern MAC_PATTERN = Pattern.compile("([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}");
 	private static final Pattern HOST_PATTERN = Pattern.compile("[0-9a-zA-Z.\\-]+");
 	private static final String ZERO_MAC = "00:00:00:00:00:00";
+
+	/** Placeholder stored in the MAC resource when the MAC could not be determined and none was stored before.
+	 * Kept as a stable string so that a later successful resolution replaces it (and an unchanged failure does
+	 * not rewrite it). */
+	public static final String MAC_NOT_FOUND_MESSAGE = "MAC not found";
 
 	/** Extract the bare host/IP from values like {@code "http://192.168.1.5:2001"}, {@code "/192.168.1.5"}
 	 * or {@code "192.168.1.5"}. Returns {@code null} if nothing usable is contained. */
@@ -68,15 +81,45 @@ public class MacAddressResolver {
 		if(os != null && os.toLowerCase().contains("windows"))
 			return null; // ARP-cache lookup is a Linux/Ubuntu-only feature
 
-		// make sure the host has an entry in the ARP/neighbour cache
-		runQuietly(new String[] {"ping", "-c", "1", "-W", "1", host}, 3);
+		// make sure the host has an entry in the ARP/neighbour cache (ARP is answered on layer 2 even if
+		// the host does not reply to ICMP, so a "failed" ping can still populate the cache)
+		runQuietly(new String[] {"ping", "-c", "1", "-W", "2", host}, 4);
 
-		String mac = parseMac(runCapturing(new String[] {"ip", "neigh", "show", host}, 3));
+		// primary: the kernel ARP table, always readable as a file (no external command needed)
+		String mac = readMacFromProcArp(host);
+		// fallbacks: neighbour cache / arp command (also cover hosts learned without an arp file entry)
+		if(mac == null)
+			mac = parseMac(runCapturing(new String[] {"ip", "neigh", "show", host}, 3));
 		if(mac == null)
 			mac = parseMac(runCapturing(new String[] {"arp", "-n", host}, 3));
-		if(mac != null && appMan != null)
-			appMan.getLogger().info("Resolved MAC {} for host {}", mac, host);
+		if(appMan != null) {
+			if(mac != null)
+				appMan.getLogger().info("Resolved MAC {} for host {}", mac, host);
+			else
+				appMan.getLogger().info("Could not determine MAC for host {} - device offline, not "
+						+ "answering ARP or not on the local network segment", host);
+		}
 		return mac;
+	}
+
+	/** Look up the MAC of a host in the kernel ARP table (/proc/net/arp). Only complete entries (flag 0x2) with
+	 * a non-zero MAC are accepted. Returns {@code null} if the host is not (yet) in the table. */
+	static String readMacFromProcArp(String host) {
+		try {
+			List<String> lines = Files.readAllLines(Paths.get("/proc/net/arp"), StandardCharsets.UTF_8);
+			for(String line : lines) {
+				// columns: IPaddress HWtype Flags HWaddress Mask Device
+				String[] cols = line.trim().split("\\s+");
+				if(cols.length >= 4 && cols[0].equals(host)) {
+					String mac = cols[3];
+					if(MAC_PATTERN.matcher(mac).matches() && !mac.equalsIgnoreCase(ZERO_MAC))
+						return mac.toLowerCase();
+				}
+			}
+		} catch(IOException | RuntimeException e) {
+			// not on Linux or /proc/net/arp unreadable -> caller falls back to the ip/arp commands
+		}
+		return null;
 	}
 
 	/** Resolve the MAC address for the given IP/URL in a background thread and store it in
@@ -99,14 +142,28 @@ public class MacAddressResolver {
 			public void run() {
 				try {
 					String mac = resolveMacForIp(host, appMan);
-					if(mac == null)
-						return; // could not determine - keep whatever is stored
 					String current = macRes.isActive() ? macRes.getValue() : null;
-					if(current != null && mac.equalsIgnoreCase(current.trim()))
+					String currentTrim = (current == null) ? "" : current.trim();
+
+					if(mac == null) {
+						// could not determine the MAC.
+						// If a real MAC (or any manually entered value) is already stored, keep it untouched.
+						if(!currentTrim.isEmpty() && !currentTrim.equalsIgnoreCase(MAC_NOT_FOUND_MESSAGE))
+							return;
+						// no MAC set yet -> store the error message (unless already set, to keep the timestamp)
+						if(currentTrim.equals(MAC_NOT_FOUND_MESSAGE))
+							return;
+						writeMac(macRes, MAC_NOT_FOUND_MESSAGE);
+						if(appMan != null)
+							appMan.getLogger().info("No MAC found for device {}, stored placeholder '{}'",
+									object.getLocation(), MAC_NOT_FOUND_MESSAGE);
+						return;
+					}
+
+					// a MAC was obtained
+					if(mac.equalsIgnoreCase(currentTrim))
 						return; // unchanged - do not write to keep the last-write timestamp
-					macRes.create();
-					macRes.setValue(mac);
-					macRes.activate(true);
+					writeMac(macRes, mac);
 					if(appMan != null)
 						appMan.getLogger().info("Set MAC {} for device {} (was {})", mac,
 								object.getLocation(), current);
@@ -119,6 +176,12 @@ public class MacAddressResolver {
 		}, "mac-resolve-" + host);
 		t.setDaemon(true);
 		t.start();
+	}
+
+	private static void writeMac(StringResource macRes, String value) {
+		macRes.create();
+		macRes.setValue(value);
+		macRes.activate(true);
 	}
 
 	static String parseMac(String text) {
