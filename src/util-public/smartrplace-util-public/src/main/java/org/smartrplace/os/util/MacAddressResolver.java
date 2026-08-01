@@ -125,15 +125,19 @@ public class MacAddressResolver {
 	/** Resolve the MAC address of the device (from the given IP-address resource) in a background thread and
 	 * store it in {@link InstallAppDevice#macAddress()}. Meant to be called once on device startup.
 	 * <ul>
-	 * <li>The IP resource is read <b>inside</b> the background thread and the method waits (up to
-	 *   {@code org.smartrplace.os.util.MacAddressResolver.maxIpWaitSeconds}, default 120s) for it to become
-	 *   available, because the driver often populates the IP a little after the device is detected.</li>
+	 * <li>The IP resource ({@code ipSource}) is a live handle to a fixed path; it is polled <b>inside</b> the
+	 *   background thread because the driver typically populates the device IP only some time (sometimes several
+	 *   minutes) after the device itself is detected.</li>
+	 * <li>If the IP is not available after a short grace period
+	 *   ({@code org.smartrplace.os.util.MacAddressResolver.macGraceSeconds}, default 120s) the placeholder
+	 *   {@link #MAC_NOT_FOUND_MESSAGE} is stored for quick feedback, but the thread <b>keeps polling</b> up to
+	 *   {@code ...maxIpWaitSeconds} (default 1800s) so a late IP still leads to the real MAC replacing the
+	 *   placeholder.</li>
 	 * <li>A resolved MAC is stored only when it <b>differs</b> from the stored value, so an unchanged MAC does
 	 *   not rewrite the resource (its last-write timestamp is kept). A changed MAC (e.g. after a hardware
 	 *   exchange) is updated.</li>
 	 * <li>If the MAC cannot be determined (IP never appeared, host down, not on the local segment, running on
-	 *   Windows): if a real/manual MAC is already stored it is kept; otherwise {@link #MAC_NOT_FOUND_MESSAGE}
-	 *   is stored as a placeholder.</li>
+	 *   Windows): a real/manual MAC already stored is kept; otherwise the placeholder is stored.</li>
 	 * </ul>
 	 * The lookup runs off the calling (OGEMA startup) thread because waiting for the IP and pinging block. */
 	public static void updateMacAddressIfChanged(final InstallAppDevice object, final StringResource ipSource,
@@ -149,37 +153,44 @@ public class MacAddressResolver {
 			@Override
 			public void run() {
 				try {
-					String host = waitForHost(ipSource);
-					String mac = (host == null) ? null : resolveMacForIp(host, appMan);
-					String current = macRes.isActive() ? macRes.getValue() : null;
-					String currentTrim = (current == null) ? "" : current.trim();
+					final long graceMs = 1000L * Integer.getInteger(
+							"org.smartrplace.os.util.MacAddressResolver.macGraceSeconds", 120);
+					final long maxWaitMs = 1000L * Integer.getInteger(
+							"org.smartrplace.os.util.MacAddressResolver.maxIpWaitSeconds", 1800);
+					final long intervalMs = 15000;
+					final long start = System.currentTimeMillis();
+					boolean placeholderWritten = false;
 
-					if(mac == null) {
-						// could not determine the MAC.
-						// If a real MAC (or any manually entered value) is already stored, keep it untouched.
-						if(!currentTrim.isEmpty() && !currentTrim.equalsIgnoreCase(MAC_NOT_FOUND_MESSAGE))
-							return;
-						// no MAC set yet -> store the error message (unless already set, to keep the timestamp)
-						if(currentTrim.equals(MAC_NOT_FOUND_MESSAGE)) {
-							if(appMan != null)
-								appMan.getLogger().warn("MAC still not found for device {} (ip '{}'), keeping "
-										+ "placeholder '{}'", object.getLocation(), host, MAC_NOT_FOUND_MESSAGE);
-							return;
+					// poll the live IP handle until it becomes available (or we give up)
+					String host = null;
+					while(true) {
+						host = extractHost(ipSource.isActive() ? ipSource.getValue() : null);
+						if(host != null)
+							break;
+						long elapsed = System.currentTimeMillis() - start;
+						if(!placeholderWritten && elapsed >= graceMs) {
+							// still no IP after the grace period: show the error placeholder now, but keep
+							// polling so the real MAC can still replace it once the IP appears.
+							storePlaceholderIfNone(macRes, object, appMan, null);
+							placeholderWritten = true;
 						}
-						writeMac(macRes, MAC_NOT_FOUND_MESSAGE);
-						if(appMan != null)
-							appMan.getLogger().warn("No MAC found for device {} (ip '{}'), stored placeholder '{}'",
-									object.getLocation(), host, MAC_NOT_FOUND_MESSAGE);
+						if(elapsed >= maxWaitMs)
+							break;
+						Thread.sleep(intervalMs);
+					}
+
+					if(host == null) {
+						// IP never became available within the wait window
+						if(!placeholderWritten)
+							storePlaceholderIfNone(macRes, object, appMan, null);
 						return;
 					}
 
-					// a MAC was obtained
-					if(mac.equalsIgnoreCase(currentTrim))
-						return; // unchanged - do not write to keep the last-write timestamp
-					writeMac(macRes, mac);
-					if(appMan != null)
-						appMan.getLogger().info("Set MAC {} for device {} (was {})", mac,
-								object.getLocation(), current);
+					String mac = resolveMacForIp(host, appMan);
+					if(mac == null)
+						storePlaceholderIfNone(macRes, object, appMan, host);
+					else
+						storeResolvedMac(macRes, object, appMan, mac);
 				} catch(Exception e) {
 					if(appMan != null)
 						appMan.getLogger().warn("Could not resolve/set MAC for device "
@@ -191,18 +202,38 @@ public class MacAddressResolver {
 		t.start();
 	}
 
-	/** Wait until the IP resource has a usable host value, up to the configured maximum. Returns the extracted
-	 * host or {@code null} if it did not appear in time. */
-	private static String waitForHost(StringResource ipSource) throws InterruptedException {
-		int maxWaitSec = Integer.getInteger("org.smartrplace.os.util.MacAddressResolver.maxIpWaitSeconds", 120);
-		final long intervalMs = 5000;
-		final long attempts = Math.max(1, (maxWaitSec * 1000L) / intervalMs);
-		for(long i = 0;; i++) {
-			String host = extractHost(ipSource.isActive() ? ipSource.getValue() : null);
-			if(host != null || i >= attempts)
-				return host;
-			Thread.sleep(intervalMs);
+	/** Store a successfully resolved MAC, but only if it differs from the currently stored value (keeps the
+	 * last-write timestamp for an unchanged MAC; replaces a placeholder or an outdated MAC). */
+	private static void storeResolvedMac(StringResource macRes, InstallAppDevice object, ApplicationManager appMan,
+			String mac) {
+		String current = macRes.isActive() ? macRes.getValue() : null;
+		String currentTrim = (current == null) ? "" : current.trim();
+		if(mac.equalsIgnoreCase(currentTrim))
+			return; // unchanged - do not write to keep the last-write timestamp
+		writeMac(macRes, mac);
+		if(appMan != null)
+			appMan.getLogger().info("Set MAC {} for device {} (was {})", mac, object.getLocation(), current);
+	}
+
+	/** Store the {@link #MAC_NOT_FOUND_MESSAGE} placeholder if no real/manual MAC is stored yet. A placeholder
+	 * already present is not rewritten (keeps its timestamp). {@code host} is only used for logging. */
+	private static void storePlaceholderIfNone(StringResource macRes, InstallAppDevice object,
+			ApplicationManager appMan, String host) {
+		String current = macRes.isActive() ? macRes.getValue() : null;
+		String currentTrim = (current == null) ? "" : current.trim();
+		// keep an already stored real MAC or manually entered value untouched
+		if(!currentTrim.isEmpty() && !currentTrim.equalsIgnoreCase(MAC_NOT_FOUND_MESSAGE))
+			return;
+		if(currentTrim.equals(MAC_NOT_FOUND_MESSAGE)) {
+			if(appMan != null)
+				appMan.getLogger().warn("MAC still not found for device {} (ip '{}'), keeping placeholder '{}'",
+						object.getLocation(), host, MAC_NOT_FOUND_MESSAGE);
+			return;
 		}
+		writeMac(macRes, MAC_NOT_FOUND_MESSAGE);
+		if(appMan != null)
+			appMan.getLogger().warn("No MAC found (yet) for device {} (ip '{}'), stored placeholder '{}'",
+					object.getLocation(), host, MAC_NOT_FOUND_MESSAGE);
 	}
 
 	private static void writeMac(StringResource macRes, String value) {
