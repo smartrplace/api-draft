@@ -141,6 +141,10 @@ public class MacAddressResolver {
 		if(object == null || ipSource == null)
 			return;
 		final StringResource macRes = object.macAddress();
+		// synchronous log on the calling (startup) thread so we can see the hook actually fired for this device
+		if(appMan != null)
+			appMan.getLogger().info("MAC check scheduled for device {} (ip resource {}, active={})",
+					object.getLocation(), ipSource.getPath(), ipSource.isActive());
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -156,8 +160,12 @@ public class MacAddressResolver {
 						if(!currentTrim.isEmpty() && !currentTrim.equalsIgnoreCase(MAC_NOT_FOUND_MESSAGE))
 							return;
 						// no MAC set yet -> store the error message (unless already set, to keep the timestamp)
-						if(currentTrim.equals(MAC_NOT_FOUND_MESSAGE))
+						if(currentTrim.equals(MAC_NOT_FOUND_MESSAGE)) {
+							if(appMan != null)
+								appMan.getLogger().warn("MAC still not found for device {} (ip '{}'), keeping "
+										+ "placeholder '{}'", object.getLocation(), host, MAC_NOT_FOUND_MESSAGE);
 							return;
+						}
 						writeMac(macRes, MAC_NOT_FOUND_MESSAGE);
 						if(appMan != null)
 							appMan.getLogger().warn("No MAC found for device {} (ip '{}'), stored placeholder '{}'",
