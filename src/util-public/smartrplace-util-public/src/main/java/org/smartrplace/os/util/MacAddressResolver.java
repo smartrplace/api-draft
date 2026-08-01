@@ -122,26 +122,31 @@ public class MacAddressResolver {
 		return null;
 	}
 
-	/** Resolve the MAC address for the given IP/URL in a background thread and store it in
-	 * {@link InstallAppDevice#macAddress()} <b>only if it differs</b> from the currently stored value. If the
-	 * resolved value equals the stored one nothing is written, so the last-write timestamp of the resource is
-	 * kept unchanged. This is meant to be called on every system startup: a MAC that changed because the
-	 * hardware was exchanged is updated, an unchanged one is left untouched, and if the MAC cannot be resolved
-	 * (host down / not on the local segment) the existing value is kept. The lookup is done off the calling
-	 * (OGEMA startup) thread because pinging can block for up to a second per device. */
-	public static void updateMacAddressIfChanged(final InstallAppDevice object, final String ipOrUrl,
+	/** Resolve the MAC address of the device (from the given IP-address resource) in a background thread and
+	 * store it in {@link InstallAppDevice#macAddress()}. Meant to be called once on device startup.
+	 * <ul>
+	 * <li>The IP resource is read <b>inside</b> the background thread and the method waits (up to
+	 *   {@code org.smartrplace.os.util.MacAddressResolver.maxIpWaitSeconds}, default 120s) for it to become
+	 *   available, because the driver often populates the IP a little after the device is detected.</li>
+	 * <li>A resolved MAC is stored only when it <b>differs</b> from the stored value, so an unchanged MAC does
+	 *   not rewrite the resource (its last-write timestamp is kept). A changed MAC (e.g. after a hardware
+	 *   exchange) is updated.</li>
+	 * <li>If the MAC cannot be determined (IP never appeared, host down, not on the local segment, running on
+	 *   Windows): if a real/manual MAC is already stored it is kept; otherwise {@link #MAC_NOT_FOUND_MESSAGE}
+	 *   is stored as a placeholder.</li>
+	 * </ul>
+	 * The lookup runs off the calling (OGEMA startup) thread because waiting for the IP and pinging block. */
+	public static void updateMacAddressIfChanged(final InstallAppDevice object, final StringResource ipSource,
 			final ApplicationManager appMan) {
-		if(object == null)
+		if(object == null || ipSource == null)
 			return;
 		final StringResource macRes = object.macAddress();
-		final String host = extractHost(ipOrUrl);
-		if(host == null)
-			return;
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					String mac = resolveMacForIp(host, appMan);
+					String host = waitForHost(ipSource);
+					String mac = (host == null) ? null : resolveMacForIp(host, appMan);
 					String current = macRes.isActive() ? macRes.getValue() : null;
 					String currentTrim = (current == null) ? "" : current.trim();
 
@@ -155,8 +160,8 @@ public class MacAddressResolver {
 							return;
 						writeMac(macRes, MAC_NOT_FOUND_MESSAGE);
 						if(appMan != null)
-							appMan.getLogger().info("No MAC found for device {}, stored placeholder '{}'",
-									object.getLocation(), MAC_NOT_FOUND_MESSAGE);
+							appMan.getLogger().info("No MAC found for device {} (ip '{}'), stored placeholder '{}'",
+									object.getLocation(), host, MAC_NOT_FOUND_MESSAGE);
 						return;
 					}
 
@@ -173,9 +178,23 @@ public class MacAddressResolver {
 								+ object.getLocation(), e);
 				}
 			}
-		}, "mac-resolve-" + host);
+		}, "mac-resolve-" + object.getName());
 		t.setDaemon(true);
 		t.start();
+	}
+
+	/** Wait until the IP resource has a usable host value, up to the configured maximum. Returns the extracted
+	 * host or {@code null} if it did not appear in time. */
+	private static String waitForHost(StringResource ipSource) throws InterruptedException {
+		int maxWaitSec = Integer.getInteger("org.smartrplace.os.util.MacAddressResolver.maxIpWaitSeconds", 120);
+		final long intervalMs = 5000;
+		final long attempts = Math.max(1, (maxWaitSec * 1000L) / intervalMs);
+		for(long i = 0;; i++) {
+			String host = extractHost(ipSource.isActive() ? ipSource.getValue() : null);
+			if(host != null || i >= attempts)
+				return host;
+			Thread.sleep(intervalMs);
+		}
 	}
 
 	private static void writeMac(StringResource macRes, String value) {
