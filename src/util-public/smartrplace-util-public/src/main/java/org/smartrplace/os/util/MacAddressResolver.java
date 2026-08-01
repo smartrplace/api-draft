@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.ogema.core.application.ApplicationManager;
+import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.StringResource;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 
@@ -171,6 +172,7 @@ public class MacAddressResolver {
 						if(!placeholderWritten && elapsed >= graceMs) {
 							// still no IP after the grace period: show the error placeholder now, but keep
 							// polling so the real MAC can still replace it once the IP appears.
+							logDeviceIpDiagnostics(object, ipSource, appMan);
 							storePlaceholderIfNone(macRes, object, appMan, null);
 							placeholderWritten = true;
 						}
@@ -234,6 +236,27 @@ public class MacAddressResolver {
 		if(appMan != null)
 			appMan.getLogger().warn("No MAC found (yet) for device {} (ip '{}'), stored placeholder '{}'",
 					object.getLocation(), host, MAC_NOT_FOUND_MESSAGE);
+	}
+
+	/** One-time diagnostic: log the device path, the IP resource handle state, and the direct subresources of
+	 * the device (name/type/active) so we can see under which name/type/path the IP is actually stored when the
+	 * expected {@code ipAddress} lookup returns nothing. */
+	private static void logDeviceIpDiagnostics(InstallAppDevice object, StringResource ipSource,
+			ApplicationManager appMan) {
+		if(appMan == null)
+			return;
+		try {
+			Resource dev = object.device().getLocationResource();
+			StringBuilder sb = new StringBuilder();
+			for(Resource sub : dev.getSubResources(false))
+				sb.append(sub.getName()).append('(').append(sub.getResourceType().getSimpleName())
+						.append(",active=").append(sub.isActive()).append(") ");
+			appMan.getLogger().warn("MAC diag for {}: ipSource path={} active={} value='{}'; device={} "
+					+ "subresources: {}", object.getLocation(), ipSource.getPath(), ipSource.isActive(),
+					ipSource.isActive() ? ipSource.getValue() : null, dev.getPath(), sb.toString());
+		} catch(Exception e) {
+			appMan.getLogger().warn("MAC diag failed for " + object.getLocation(), e);
+		}
 	}
 
 	private static void writeMac(StringResource macRes, String value) {
