@@ -96,7 +96,7 @@ public class MacAddressResolver {
 			if(mac != null)
 				appMan.getLogger().info("Resolved MAC {} for host {}", mac, host);
 			else
-				appMan.getLogger().info("Could not determine MAC for host {} - device offline, not "
+				appMan.getLogger().warn("Could not determine MAC for host {} - device offline, not "
 						+ "answering ARP or not on the local network segment", host);
 		}
 		return mac;
@@ -160,7 +160,7 @@ public class MacAddressResolver {
 							return;
 						writeMac(macRes, MAC_NOT_FOUND_MESSAGE);
 						if(appMan != null)
-							appMan.getLogger().info("No MAC found for device {} (ip '{}'), stored placeholder '{}'",
+							appMan.getLogger().warn("No MAC found for device {} (ip '{}'), stored placeholder '{}'",
 									object.getLocation(), host, MAC_NOT_FOUND_MESSAGE);
 						return;
 					}
