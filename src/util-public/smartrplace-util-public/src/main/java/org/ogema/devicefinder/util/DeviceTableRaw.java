@@ -1,5 +1,7 @@
 package org.ogema.devicefinder.util;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,12 +47,14 @@ import org.ogema.model.sensors.VolumeAccumulatedSensor;
 import org.ogema.timeseries.eval.simple.api.KPIResourceAccess;
 import org.ogema.timeseries.eval.simple.api.TimeProcUtil;
 import org.ogema.tools.resource.util.ResourceUtils;
+import org.ogema.tools.resource.util.ValueResourceUtils;
 import org.ogema.virtual.device.config.VirtualThermostatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartrplace.apps.hw.install.config.InstallAppDevice;
 import org.smartrplace.external.accessadmin.config.SubCustomerData;
 import org.smartrplace.tissue.util.resource.GatewaySyncResourceService;
+import org.smartrplace.util.directobjectgui.LabelFormatter;
 import org.smartrplace.util.directobjectgui.ObjectGUITablePage;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
@@ -63,6 +67,7 @@ import de.iwes.util.timer.AbsoluteTimeHelper;
 import de.iwes.util.timer.AbsoluteTiming;
 import de.iwes.widgets.api.widgets.OgemaWidget;
 import de.iwes.widgets.api.widgets.WidgetPage;
+import de.iwes.widgets.api.widgets.WidgetStyle;
 import de.iwes.widgets.api.widgets.html.StaticTable;
 import de.iwes.widgets.api.widgets.sessionmanagement.OgemaHttpRequest;
 import de.iwes.widgets.html.alert.Alert;
@@ -1087,7 +1092,127 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 	public static boolean isLoraDevice(PhysicalElement device) {
-		return device.getLocation().contains("chirpstack");
+		return device.getLocation().contains("chirpstack") || device.getLocation().contains("lorawan");
+	}
+
+	/////////////////////////////////////////////
+	// Radio quality (RSSI / SNR / SF)
+	/////////////////////////////////////////////
+
+	/** RSSI values above this limit (dBm) are considered good and are shown in green.
+	 * Lower values are shown without color.*/
+	public static final int RSSI_GOOD_LIMIT_DBM = -105;
+
+	/** Minimum SNR (dB) required for a LoRaWAN transmission with the given spreading factor.
+	 * Below this limit the transmission is close to the demodulation limit of the receiver.
+	 * @param spreadingFactor LoRaWAN spreading factor (SF7 .. SF12)
+	 * @return the minimum SNR in dB or NaN if no limit is known for the spreading factor given
+	 */
+	public static float getMinSNRForSpreadingFactor(float spreadingFactor) {
+		switch(Math.round(spreadingFactor)) {
+		case 7: return -7.5f;
+		case 8: return -10.0f;
+		case 9: return -12.5f;
+		case 10: return -15.0f;
+		case 11: return -17.5f;
+		case 12: return -20.0f;
+		default: return Float.NaN;
+		}
+	}
+
+	/** Check if an SNR value is below the minimum required for the spreading factor used
+	 * @param snr SNR in dB
+	 * @param spreadingFactor may be null or a value outside SF7..SF12. In this case no limit is
+	 * 		known and false is returned.
+	 */
+	public static boolean isSNRCritical(float snr, Float spreadingFactor) {
+		if(spreadingFactor == null)
+			return false;
+		float minSNR = getMinSNRForSpreadingFactor(spreadingFactor);
+		if(Float.isNaN(minSNR))
+			return false;
+		return snr < minSNR;
+	}
+
+	/** @return value of the resource given or null if the resource is null or inactive*/
+	public static Float getFloatValueOrNull(SingleValueResource res) {
+		if(res == null || (!res.isActive()))
+			return null;
+		return ValueResourceUtils.getFloatValue(res);
+	}
+
+	/** Add an RSSI column showing the value in green if it is above {@link #RSSI_GOOD_LIMIT_DBM},
+	 * without color otherwise.
+	 * @param columnName column title, usually "RSSI"
+	 * @param rssi may be null
+	 * @return the label created or null in the header pass (req == null) / if rssi is null
+	 */
+	public static Label addRSSILabelStatic(String columnName, ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, final IntegerResource rssi) {
+		if(req == null) {
+			vh.registerHeaderEntry(columnName);
+			return null;
+		}
+		if(rssi == null)
+			return null;
+		return vh.stringLabel(columnName, id, new LabelFormatter() {
+
+			@Override
+			public OnGETData getData(OgemaHttpRequest req) {
+				if(!rssi.isActive())
+					return new OnGETData("n.a.");
+				return new OnGETData(""+rssi.getValue());
+			}
+
+			@Override
+			public void onGETAdditional(Label myLabel, OgemaHttpRequest req) {
+				setStyleIf(myLabel, LabelData.BOOTSTRAP_GREEN,
+						rssi.isActive() && rssi.getValue() > RSSI_GOOD_LIMIT_DBM, req);
+			}
+		}, row);
+	}
+
+	/** Add the style given if the condition is true, remove it otherwise (no color in this case)*/
+	public static void setStyleIf(Label label, WidgetStyle<Label> style, boolean condition, OgemaHttpRequest req) {
+		if(condition)
+			label.addStyle(style, req);
+		else
+			label.removeStyle(style, req);
+	}
+
+	/** Add an SNR column showing the value in orange if it is below the minimum SNR for the
+	 * spreading factor currently used (see {@link #getMinSNRForSpreadingFactor(float)}).
+	 * @param columnName column title, usually "SNR"
+	 * @param snr may be null
+	 * @param spreadingFactor may be null. If unknown no color is applied.
+	 * @return the label created or null in the header pass (req == null) / if snr is null
+	 */
+	public static Label addSNRLabelStatic(String columnName, ObjectResourceGUIHelper<?,?> vh, String id,
+			OgemaHttpRequest req, Row row, final SingleValueResource snr,
+			final SingleValueResource spreadingFactor) {
+		if(req == null) {
+			vh.registerHeaderEntry(columnName);
+			return null;
+		}
+		if(snr == null)
+			return null;
+		final NumberFormat nf = DecimalFormat.getNumberInstance(req.getLocale().getLocale());
+		return vh.stringLabel(columnName, id, new LabelFormatter() {
+
+			@Override
+			public OnGETData getData(OgemaHttpRequest req) {
+				if(!snr.isActive())
+					return new OnGETData("n.a.");
+				return new OnGETData(nf.format(ValueResourceUtils.getFloatValue(snr)));
+			}
+
+			@Override
+			public void onGETAdditional(Label myLabel, OgemaHttpRequest req) {
+				boolean critical = snr.isActive() && isSNRCritical(ValueResourceUtils.getFloatValue(snr),
+						getFloatValueOrNull(spreadingFactor));
+				setStyleIf(myLabel, LabelData.BOOTSTRAP_ORANGE, critical, req);
+			}
+		}, row);
 	}
 
 	//public enum ControlMode { COOLING, HEATING, NONE; }
