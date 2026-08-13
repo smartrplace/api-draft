@@ -69,27 +69,4 @@ public class InitialConfig {
 			res.setValue(newExist+initID+",");
 		}
 	}
-
-	public static InstallAppDevice getDeviceByNumericalIdString(String preDevId, String typeIdIn,
-			HardwareInstallConfig cfg, int offset, boolean requireExactNumber) {
-		try {
-			int devIdInt = Integer.parseInt(preDevId);
-	        preDevId = String.format("%04d", devIdInt+offset); // String.format("%s-%04d", typeId, devIdInt + offset);
-		} catch(NumberFormatException e) {}
-		//Set<String> usedSuffixes = new HashSet<>();
-        String typeId = typeIdIn+"-";
-		for(InstallAppDevice d : cfg.knownDevices().getAllElements()) {
-        	if(!d.deviceId().getValue().startsWith(typeId))
-            	continue;
-            if(d.deviceId().getValue().length() <= typeId.length())
-            	continue;
-            String numPart = d.deviceId().getValue().substring(typeId.length());
-            if(preDevId.equals(numPart))
-            	return d;
-            else if((!requireExactNumber) && numPart.startsWith(preDevId)) {
-            	return d; //If _A entries exist the numerical search may not have unique result
-            }
-        }
-		return null;
-	}
 }

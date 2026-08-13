@@ -323,4 +323,8 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 			GatewaySyncResourceService gwSync, long now)
 		{return null;}*/
 
+	default boolean deviceIdBySerialDisabled() {
+		return false;
+	}
+
 }

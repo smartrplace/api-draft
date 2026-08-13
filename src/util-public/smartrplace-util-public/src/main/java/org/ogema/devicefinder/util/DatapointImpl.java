@@ -289,22 +289,29 @@ public class DatapointImpl extends DatapointDescAccessImpl implements Datapoint 
 		if(result.devTypeShort == null)
 			result.devTypeShort = DeviceTableRaw.getDeviceStdName(devRes);
 		
-		String subName;
-		if(appDev != null) {
+		if((Boolean.getBoolean("org.smartrplace.apps.hw.install.deviceId.forceHex")
+					|| Boolean.getBoolean("org.smartrplace.homematic.devicetable.fullLoRaRSSI"))
+				&& (appDev != null)) {
 			String devName = appDev.deviceId().getValue();
-			int devnr = ScheduleViewerOpenButtonEval.getNumberById(devName);
-			subName = ""+devnr;
-			if(appDev.installationLocation().isActive())
-				subName += "-"+appDev.installationLocation().getValue();
-		} else
-			subName = ScheduleViewerOpenButtonEval.getDeviceShortIdPlus(devRes.getLocation()); //DeviceTableRaw.getSubNameForDevice(devRes, dpService);
-		if(result.devTypeShort != null) {
-			if(subName != null && (!subName.isEmpty()))
-				result.subLoc = result.devTypeShort + subName;
-			else
-				result.subLoc = result.devTypeShort;
-		} else
-			result.subLoc = subName;
+			result.subLoc = devName;
+		} else {
+			String subName;
+			if(appDev != null) {
+				String devName = appDev.deviceId().getValue();
+				int devnr = ScheduleViewerOpenButtonEval.getNumberById(devName);
+				subName = ""+devnr;
+				if(appDev.installationLocation().isActive())
+					subName += "-"+appDev.installationLocation().getValue();
+			} else
+				subName = ScheduleViewerOpenButtonEval.getDeviceShortIdPlus(devRes.getLocation()); //DeviceTableRaw.getSubNameForDevice(devRes, dpService);
+			if(result.devTypeShort != null) {
+				if(subName != null && (!subName.isEmpty()))
+					result.subLoc = result.devTypeShort + subName;
+				else
+					result.subLoc = result.devTypeShort;
+			} else
+				result.subLoc = subName;
+		}
 		/*if((appDev != null) && appDev.installationLocation().isActive()) {
 			if(result.devTypeShort != null)
 				result.subLoc = result.devTypeShort+"-"+appDev.installationLocation().getValue();
