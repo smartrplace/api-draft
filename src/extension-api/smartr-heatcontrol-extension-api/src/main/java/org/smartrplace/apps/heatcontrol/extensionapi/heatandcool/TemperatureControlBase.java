@@ -13,6 +13,7 @@ import org.ogema.model.locations.Room;
 import org.ogema.model.prototypes.PhysicalElement;
 import org.ogema.model.sensors.TemperatureSensor;
 
+import de.iwes.util.resource.ResourceHelper;
 import de.iwes.widgets.api.widgets.localisation.OgemaLocale;
 
 /** This interface can be implemented by single devices and by room control units that control all heating and
@@ -187,24 +188,36 @@ public interface TemperatureControlBase extends RoomDeviceProvider {
 		PhysicalElement dev = getDevice();
 		if(dev == null)
 			return null;
+		TemperatureSensor tempSens = ResourceHelper.getSubResource(dev, "temperatureSensor", TemperatureSensor.class);
+		if(tempSens != null && tempSens.settings().controlLimits().upperLimit().isActive())
+			return tempSens.settings().controlLimits().upperLimit();
 		return (FloatResource) PropType.getHmParam(dev, PropType.THERMOSTAT_TEMPERATURE_MAX, false);
 	}
 	default public FloatResource getTemperatureSetpointMaxFb() {
 		PhysicalElement dev = getDevice();
 		if(dev == null)
 			return null;
+		TemperatureSensor tempSens = ResourceHelper.getSubResource(dev, "temperatureSensor", TemperatureSensor.class);
+		if(tempSens != null && tempSens.deviceFeedback().controlLimits().upperLimit().isActive())
+			return tempSens.deviceFeedback().controlLimits().upperLimit();
 		return (FloatResource) PropType.getHmParam(dev, PropType.THERMOSTAT_TEMPERATURE_MAX, true);
 	}
 	default public FloatResource getTemperatureSetpointMinCt() {
 		PhysicalElement dev = getDevice();
 		if(dev == null)
 			return null;
+		TemperatureSensor tempSens = ResourceHelper.getSubResource(dev, "temperatureSensor", TemperatureSensor.class);
+		if(tempSens != null && tempSens.settings().controlLimits().lowerLimit().isActive())
+			return tempSens.settings().controlLimits().lowerLimit();
 		return (FloatResource) PropType.getHmParam(dev, PropType.THERMOSTAT_TEMPERATURE_MIN, false);
 	}
 	default public FloatResource getTemperatureSetpointMinFb() {
 		PhysicalElement dev = getDevice();
 		if(dev == null)
 			return null;
+		TemperatureSensor tempSens = ResourceHelper.getSubResource(dev, "temperatureSensor", TemperatureSensor.class);
+		if(tempSens != null && tempSens.deviceFeedback().controlLimits().lowerLimit().isActive())
+			return tempSens.deviceFeedback().controlLimits().lowerLimit();
 		return (FloatResource) PropType.getHmParam(dev, PropType.THERMOSTAT_TEMPERATURE_MIN, true);
 	}
 }
