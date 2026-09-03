@@ -16,9 +16,11 @@ import org.ogema.core.model.Resource;
 import org.ogema.core.model.ResourceList;
 import org.ogema.core.model.schedule.AbsoluteSchedule;
 import org.ogema.core.model.simple.BooleanResource;
+import org.ogema.core.model.simple.FloatResource;
 import org.ogema.core.model.simple.IntegerResource;
 import org.ogema.core.model.simple.SingleValueResource;
 import org.ogema.core.model.simple.TimeResource;
+import org.ogema.core.model.units.TemperatureResource;
 import org.ogema.core.model.units.VoltageResource;
 import org.ogema.core.resourcemanager.AccessPriority;
 import org.ogema.core.resourcemanager.ResourceAccess;
@@ -188,6 +190,11 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		return addtStatusDatapointsHomematic(dev, dpService, result, true);
 	}
 	
+	public Collection<Datapoint> addStatusDatapointsLoRaWAN(PhysicalElement dev, DatapointService dpService,
+			List<Datapoint> result) {
+		return addStatusDatapointsLoRaWAN(dev, dpService, result, true);
+	}
+
 	public static VoltageResource getBatteryVoltage(PhysicalElement dev) {
 		VoltageResource batVolt = dev.getSubResource("battery", ElectricityStorage.class).internalVoltage().reading();
 		if(batVolt != null && batVolt.isActive())
@@ -299,6 +306,20 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 		IntegerResource cyclicMsgUnchangedFb = (IntegerResource) PropType.getHmParam(dev, PropType.CYCLIC_MSG_UNCHANGED, true);
 		if(cyclicMsgChangedFb != null && cyclicMsgChangedFb.exists())
 			addDatapoint(cyclicMsgUnchangedFb, result, "cyclicMsgUnchangedFb", dpService);
+		return result;
+	}
+	
+	protected Collection<Datapoint> addStatusDatapointsLoRaWAN(PhysicalElement dev, DatapointService dpService,
+			List<Datapoint> result, boolean hasBattery) {
+		dev = dev.getLocationResource();
+		addDatapoint(dev.getSubResource("rssiGateway", IntegerResource.class), result, "RSSI", dpService);
+		addDatapoint(dev.getSubResource("signalToNoiseRatio", SingleValueResource.class), result, "SNR", dpService);
+		addDatapoint(dev.getSubResource("spreadingFactor", FloatResource.class), result, "spreadingFactor", dpService);
+		addDatapoint(dev.getSubResource("statusIntervalControl", IntegerResource.class), result, "statusIntervalCt", dpService);
+		addDatapoint(dev.getSubResource("statusIntervalFeedback", IntegerResource.class), result, "statusIntervalFb", dpService);
+		addDatapoint(dev.getSubResource("dntActiveMode", IntegerResource.class), result, "dntActiveMode", dpService);
+		addDatapoint(dev.getSubResource("controllerInputTemperature", TemperatureResource.class), result, "controllerInputTemperature", dpService);
+		addDatapoint(dev.getSubResource("lastStatusUpdate", TimeResource.class), result, "lastStatusUpdate", dpService);
 		return result;
 	}
 	
