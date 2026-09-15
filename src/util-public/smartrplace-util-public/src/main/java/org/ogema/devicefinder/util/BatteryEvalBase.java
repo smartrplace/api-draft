@@ -314,15 +314,16 @@ public class BatteryEvalBase {
 
 		
 		Float lastDropVoltage = lastDropVoltageMap.get(batRes.getLocation());
-		if(lastDropVoltage == null || lastDropVoltage != voltageFromWhichDroppedPermanently) {
+		lastDropTime = lastDropTimeMap.get(batRes.getLocation());
+		if((lastDropVoltage == null || lastDropVoltage != voltageFromWhichDroppedPermanently)
+				|| lastDropTime == null) {
 			lastDropTime = EvalUtilBase.firstLargerTimeBackwardsSafe(batRes.getHistoricalData(), batRes.getValue(),
 					180*1440, now);				
 			if(lastDropTime < 0)
 				lastDropTime = now - 180*TimeProcUtil.DAY_MILLIS;
 			lastDropTimeMap.put(batRes.getLocation(), lastDropTime);
 			lastDropVoltageMap.put(batRes.getLocation(), voltageFromWhichDroppedPermanently);
-		} else
-			lastDropTime = lastDropTimeMap.get(batRes.getLocation());
+		}
 		
 		long dropPreviousRemain = getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently+0.1f, batteryLifetimeExpectedYears);
 		long dropThisRemain = getRemainingLifeTimeEstimation(voltageFromWhichDroppedPermanently, batteryLifetimeExpectedYears);
