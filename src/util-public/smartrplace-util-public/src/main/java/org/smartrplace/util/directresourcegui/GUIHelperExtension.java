@@ -22,6 +22,8 @@ import org.ogema.core.model.simple.StringResource;
 import org.smartrplace.util.directobjectgui.ObjectResourceGUIHelper;
 import org.smartrplace.util.format.WidgetHelper;
 
+import de.iwes.widgets.api.widgets.dynamics.TriggeredAction;
+import de.iwes.widgets.api.widgets.dynamics.TriggeringAction;
 import de.iwes.util.resource.OGEMAResourceCopyHelper;
 import de.iwes.util.resourcelist.ResourceListHelper;
 import de.iwes.widgets.api.widgets.OgemaWidget;
@@ -56,16 +58,36 @@ public class GUIHelperExtension {
 			ResourceList<T> objectList, T object, OgemaWidget mainTable,
 			String id, Alert alert, String columnName,
 			Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req) {
+		return addDeleteButton(objectList, object, mainTable, id, alert, columnName, row, vh, req, true);
+	}
+	/** @param reloadTable if false the table is not updated after deletion (recommended for large tables).
+	 *   Instead the button is disabled and shows "deleted", the row disappears on the next page reload.*/
+	public static <T extends Resource> ButtonConfirm addDeleteButton(
+			ResourceList<T> objectList, T object, OgemaWidget mainTable,
+			String id, Alert alert, String columnName,
+			Row row, ObjectResourceGUIHelper<?, ?> vh, OgemaHttpRequest req, boolean reloadTable) {
 		if(req != null) {
 			ButtonConfirm deleteButton = new ButtonConfirm(mainTable, "deleteButton_"+id, req) {
 				private static final long serialVersionUID = 1L;
 				@Override
 				public void onPOSTComplete(String data, OgemaHttpRequest req) {
-					if(objectList == null || (objectList.size() > 1))
+					if(objectList == null || (objectList.size() > 1)) {
+						if(!reloadTable && !object.exists()) {
+							if(alert != null)
+								alert.showAlert("Already deleted: "+object.getLocation(), false, req);
+							return;
+						}
+						String location = object.getLocation();
 						object.delete();
-					else if(alert != null)
+						if(!reloadTable) {
+							setText("deleted", req);
+							disable(req);
+							if(alert != null)
+								alert.showAlert("Deleted "+location+" (reload page to update table)", true, req);
+						}
+					} else if(alert != null)
 						alert.showAlert("Last element cannot be deleted", false, req);
-						
+
 				}
 			};
 			deleteButton.setText("delete", req);
@@ -75,7 +97,10 @@ public class GUIHelperExtension {
 			deleteButton.setConfirmMsg("Really delete item "+object.getLocation()+" ?", req);
 			if(row != null) row.addCell(WidgetHelper.getValidWidgetId(columnName), deleteButton);
 			else vh.popTableData.add(new WidgetEntryData("delete", deleteButton));
-			deleteButton.registerDependentWidget(mainTable);
+			if(reloadTable)
+				deleteButton.registerDependentWidget(mainTable);
+			else
+				deleteButton.triggerAction(deleteButton, TriggeringAction.POST_REQUEST, TriggeredAction.GET_REQUEST);
 			if(alert != null) deleteButton.registerDependentWidget(alert);
 			return deleteButton;
 		} else {
