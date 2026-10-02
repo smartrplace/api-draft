@@ -73,4 +73,15 @@ public interface DeviceTypeProvider<T extends Resource>  extends LabelledItem {
 	boolean deleteConfig(DeviceTypeConfigData<T> configData);
 	
 	DeviceTypeConfigDataBase getPlaceHolderData();
+
+	/** Address value indicating that the configuration shall be applied to all tenants. Only supported
+	 * by providers for which {@link #isTenantBased()} returns true.*/
+	public static final String ALL_TENANTS_ADDRESS = "All";
+
+	/** If true the provider supports the address {@link #ALL_TENANTS_ADDRESS}, which is processed by the provider
+	 * (e.g. generating devices based on the number of tenants). Otherwise the GUI rejects this address.
+	 */
+	default boolean isTenantBased() {
+		return false;
+	}
 }

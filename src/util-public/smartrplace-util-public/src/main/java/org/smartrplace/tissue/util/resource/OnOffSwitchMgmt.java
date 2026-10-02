@@ -21,6 +21,8 @@ import de.iwes.util.format.StringFormatHelper;
 
 public class OnOffSwitchMgmt {
 	public static final long CACHING_TIME = 60000;
+
+	private static final String ALWAYSEXCLUDED_LIST = System.getProperty("org.smartrplace.tissue.util.resource.excludeOnOff.always", "globalButtonLock");
 	
 	public static class OnOffSwitchData {
 		public OnOffSwitch swtch;
@@ -56,6 +58,7 @@ public class OnOffSwitchMgmt {
 	protected final ApplicationManager appMan;
 	protected final List<String> normallyExcluded;
 	protected final List<String> normallyExcludedButInclusionForced;
+	protected final List<String> alwaysExcluded;
 	
 	/** By default all OnOffSwitches that are somehow assigned to the room are included, but 
 	 * this is determined via {@link #toBeUsed(OnOffSwitch)}. Additional exclusions and inclusions
@@ -72,6 +75,7 @@ public class OnOffSwitchMgmt {
 		this.appMan = appMan;
 		normallyExcluded = StringFormatHelper.getListFromString(normallyExcludedFromListAsString);
 		normallyExcludedButInclusionForced = StringFormatHelper.getListFromString(normallyExcludedButInclusionForcedFromListAsString);
+		alwaysExcluded = StringFormatHelper.getListFromString(ALWAYSEXCLUDED_LIST);
 		this.maintainListIfNumberOfSwitchesUnchanged = maintainListIfNumberOfSwitchesUnchanged;
 	}
 
@@ -108,7 +112,9 @@ public class OnOffSwitchMgmt {
 				//List<OnOffSwitch> toUse = new ArrayList<>();
 				final boolean toUse;
 				//for(OnOffSwitch onOff: onOffs) {
-					if(isMatchedByList(onOff.getLocation(), normallyExcludedButInclusionForced))
+					if(isMatchedByList(onOff.getLocation(), alwaysExcluded))
+						toUse = false; //continue;
+					else if(isMatchedByList(onOff.getLocation(), normallyExcludedButInclusionForced))
 						toUse = true; //toUse.add(onOff);
 					else if(isMatchedByList(onOff.getLocation(), normallyExcluded))
 						toUse = false; //continue;
