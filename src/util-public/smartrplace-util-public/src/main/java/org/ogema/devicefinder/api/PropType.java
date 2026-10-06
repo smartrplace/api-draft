@@ -14,6 +14,8 @@ import org.ogema.core.model.simple.TimeResource;
 import org.ogema.devicefinder.api.OGEMADriverPropertyService.AccessAvailability;
 import org.ogema.devicefinder.util.DeviceHandlerBase;
 import org.ogema.internationalization.util.LocaleHelper;
+import org.ogema.model.actors.OnOffSwitch;
+import org.ogema.model.devices.buildingtechnology.Thermostat;
 import org.ogema.model.prototypes.PhysicalElement;
 
 import de.iwes.timeseries.eval.garo.api.base.GaRoDataType;
@@ -275,10 +277,13 @@ public class PropType implements LabelledItem {
 			else
 				return getSubInt(mainTenanceMaster, "CYCLIC_INFO_MSG_DIS_UNCHANGED", feedback);
 		}
-		if(type == PropType.BUTTON_LOCK)
+		if(type == PropType.BUTTON_LOCK) {
+			OnOffSwitch lockNew = hmDevice.getSubResource("globalButtonLock", OnOffSwitch.class);
+			if(lockNew != null && lockNew.exists())
+				return feedback?lockNew.stateFeedback():lockNew.stateControl();
 			return DeviceHandlerBase.getSubResourceOfSibblingOrDirectChildMaintenance(hmDevice,
 					"globalButtonLock", BooleanResource.class);
-		
+		}
 		ResourceList<SingleValueResource> master = getHmParamMaster(hmDevice);
 		if(type == PropType.THERMOSTAT_WINDOWOPEN_MINUTES)
 			return getSubInt(master, "TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD", feedback);
@@ -286,15 +291,42 @@ public class PropType implements LabelledItem {
 			return getSubInt(master, "TEMPERATUREFALL_MODUS", feedback);
 		else if(type == PropType.THERMOSTAT_WINDOWOPEN_TEMPERATURE)
 			return getSubFloat(master, "TEMPERATURE_WINDOW_OPEN", feedback);
-		else if(type == PropType.THERMOSTAT_VALVE_MAXPOSITION)
+		else if(type == PropType.THERMOSTAT_VALVE_MAXPOSITION) {
+			FloatResource test1 = null;
+			if(!(hmDevice instanceof Thermostat))
+				return null;
+			if(feedback)
+				test1 = ((Thermostat)hmDevice).valve().setting().deviceFeedback().controlLimits().upperLimit();
+			else
+				test1 = ((Thermostat)hmDevice).valve().setting().settings().controlLimits().upperLimit();
+			if(test1 != null && test1.isActive())
+				return test1;
 			return getSubFloat(master, "VALVE_MAXIMUM_POSITION", feedback);
-		else if(type == PropType.THERMOSTAT_OFFSET)
+		} else if(type == PropType.THERMOSTAT_OFFSET)
 			return getSubFloat(master, "TEMPERATURE_OFFSET", feedback);
-		else if(type == PropType.THERMOSTAT_TEMPERATURE_MAX)
+		else if(type == PropType.THERMOSTAT_TEMPERATURE_MAX) {
+			FloatResource test1 = null;
+			if(!(hmDevice instanceof Thermostat))
+				return null;
+			if(feedback)
+				test1 = ((Thermostat)hmDevice).temperatureSensor().deviceFeedback().controlLimits().upperLimit();
+			else
+				test1 = ((Thermostat)hmDevice).temperatureSensor().settings().controlLimits().upperLimit();
+			if(test1 != null && test1.isActive())
+				return test1;
 			return getSubFloat(master, "TEMPERATURE_MAXIMUM", feedback);
-		else if(type == PropType.THERMOSTAT_TEMPERATURE_MIN)
+		} else if(type == PropType.THERMOSTAT_TEMPERATURE_MIN) {
+			FloatResource test1 = null;
+			if(!(hmDevice instanceof Thermostat))
+				return null;
+			if(feedback)
+				test1 = ((Thermostat)hmDevice).temperatureSensor().deviceFeedback().controlLimits().lowerLimit();
+			else
+				test1 = ((Thermostat)hmDevice).temperatureSensor().settings().controlLimits().lowerLimit();
+			if(test1 != null && test1.isActive())
+				return test1;
 			return getSubFloat(master, "TEMPERATURE_MINIMUM", feedback);
-		else
+		}else
 			throw new IllegalStateException("PropType not supported as resource:"+type.id);
 	}
 
