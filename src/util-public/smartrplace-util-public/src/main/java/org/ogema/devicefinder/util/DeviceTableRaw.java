@@ -700,6 +700,7 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return "SensorDevice";
 	}
 	
+	/** Call this only for SensorDevice*/
 	public static boolean isTempHumSens(String resourceLocation) {
 		resourceLocation = DeviceTableBase.makeDeviceToplevel(resourceLocation);
 		if(isWeatherStation(resourceLocation))
@@ -711,6 +712,8 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		if(resourceLocation.contains("maintenanceChannelReadings"))
 			return false;
 		if(resourceLocation.toLowerCase().startsWith("homematic"))
+			return true;
+		if(resourceLocation.toLowerCase().startsWith("lorawan/dragino_tempsens_"))
 			return true;
 		return false;
 	}
@@ -1093,6 +1096,27 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 	}
 	public static boolean isLoraDevice(PhysicalElement device) {
 		return device.getLocation().contains("chirpstack") || device.getLocation().contains("lorawan");
+	}
+
+	/** Get the resource holding the LoRaWAN status values (rssiGateway, signalToNoiseRatio, spreadingFactor,
+	 * lastStatusUpdate, statusInterval...). Usually this is the device itself. For devices that are sensors
+	 * inside of a LoRaWAN device (e.g. the TemperatureSensors of a Dragino D22 at
+	 * lorawan/dragino_d22_&lt;EUI&gt;/sensors/red) the values are stored in the first PhysicalElement parent.
+	 * @param device LoRaWAN device, see {@link #isLoraDevice(PhysicalElement)}
+	 * @return location resource holding the LoRaWAN status values, location resource of device if no
+	 * 		such parent applies
+	 */
+	public static PhysicalElement getLoraStatusDevice(PhysicalElement device) {
+		PhysicalElement dev = device.getLocationResource();
+		if(dev.getSubResource("rssiGateway") != null || dev.getSubResource("lastStatusUpdate") != null)
+			return dev;
+		Resource parent = dev.getParent();
+		while(parent != null) {
+			if(parent instanceof PhysicalElement)
+				return ((PhysicalElement) parent).getLocationResource();
+			parent = parent.getParent();
+		}
+		return dev;
 	}
 
 	/////////////////////////////////////////////

@@ -231,7 +231,13 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 			IntegerResource result = ResourceHelper.getSubResourceIfExisting(dev, "rssiDevice", IntegerResource.class);
 			if(result != null)
 				return result;
-			return ResourceHelper.getSubResourceIfExisting(dev, "rssiGateway", IntegerResource.class);
+			result = ResourceHelper.getSubResourceIfExisting(dev, "rssiGateway", IntegerResource.class);
+			if(result != null || !DeviceTableRaw.isLoraDevice(dev))
+				return result;
+			PhysicalElement statusDev = DeviceTableRaw.getLoraStatusDevice(dev);
+			if(statusDev.equalsLocation(dev))
+				return null;
+			return ResourceHelper.getSubResourceIfExisting(statusDev, "rssiGateway", IntegerResource.class);
 		}
 	}
 	public static IntegerResource getRSSIResourceHm(PhysicalElement dev) {
@@ -311,7 +317,7 @@ public abstract class DeviceHandlerBase<T extends PhysicalElement> implements De
 	
 	protected Collection<Datapoint> addStatusDatapointsLoRaWAN(PhysicalElement dev, DatapointService dpService,
 			List<Datapoint> result, boolean hasBattery) {
-		dev = dev.getLocationResource();
+		dev = DeviceTableRaw.getLoraStatusDevice(dev);
 		addDatapoint(dev.getSubResource("rssiGateway", IntegerResource.class), result, "RSSI", dpService);
 		addDatapoint(dev.getSubResource("signalToNoiseRatio", SingleValueResource.class), result, "SNR", dpService);
 		addDatapoint(dev.getSubResource("spreadingFactor", FloatResource.class), result, "spreadingFactor", dpService);
