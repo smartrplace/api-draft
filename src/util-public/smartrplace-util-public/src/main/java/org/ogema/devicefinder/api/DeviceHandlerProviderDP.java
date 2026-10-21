@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.ogema.core.model.Resource;
 import org.ogema.core.model.simple.SingleValueResource;
+import org.ogema.core.model.units.PowerResource;
+import org.ogema.core.model.units.VoltageResource;
 import org.ogema.devicefinder.util.DatapointImpl;
 import org.ogema.model.extended.alarming.AlarmConfiguration;
 import org.ogema.model.extended.alarming.AlarmGroupData;
@@ -67,7 +69,36 @@ public interface DeviceHandlerProviderDP<T extends Resource> extends LabelledIte
 		@SuppressWarnings("unchecked")
 		T device = (T) deviceConfiguration.device().getLocationResource();
 		return getMainSensorValue(device, deviceConfiguration);
-		
+
+	}
+
+	/** Name of the value provided by {@link #getMainSensorValue(InstallAppDevice)} for display in external
+	 * front-ends, e.g. "Temperatur" or "Zählerstand"
+	 * @param deviceConfiguration device for which the name is requested. The name may depend on the
+	 * 		resource returned as main sensor value
+	 * @param locale German shall be supported, for other locales an English name may be returned
+	 * @return null if no name is defined
+	 */
+	default String getMainSensorValueName(InstallAppDevice deviceConfiguration, OgemaLocale locale) {
+		return null;
+	}
+
+	/** Standard implementation of {@link #getMainSensorValueName(InstallAppDevice, OgemaLocale)} for temperature sensors*/
+	public static String getMainSensorValueNameTemperature(OgemaLocale locale) {
+		return (locale == OgemaLocale.GERMAN)?"Temperatur":"Temperature";
+	}
+
+	/** Standard implementation of {@link #getMainSensorValueName(InstallAppDevice, OgemaLocale)} for meters. Some meters
+	 * provide power or voltage as main sensor value if available, which is named accordingly. Otherwise the main sensor
+	 * value is assumed to be the meter reading.
+	 */
+	public static String getMainSensorValueNameMeter(SingleValueResource mainSensor, OgemaLocale locale) {
+		final boolean german = (locale == OgemaLocale.GERMAN);
+		if(mainSensor instanceof PowerResource)
+			return german?"Leistung":"Power";
+		if(mainSensor instanceof VoltageResource)
+			return german?"Spannung":"Voltage";
+		return german?"Z\u00e4hlerstand":"Meter reading";
 	}
 	
 	public static class SetpointData {
