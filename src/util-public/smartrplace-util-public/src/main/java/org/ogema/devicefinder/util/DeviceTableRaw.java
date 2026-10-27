@@ -1095,7 +1095,9 @@ public abstract class DeviceTableRaw<T, R extends Resource> extends ObjectGUITab
 		return false;
 	}
 	public static boolean isLoraDevice(PhysicalElement device) {
-		return device.getLocation().contains("chirpstack") || device.getLocation().contains("lorawan");
+		if(device.getLocation().contains("chirpstack") || device.getLocation().contains("lorawan"))
+			return true;
+		return ResourceHelper.getSubResource(device, "loraNwkSKey", StringResource.class) != null;
 	}
 
 	/** Get the resource holding the LoRaWAN status values (rssiGateway, signalToNoiseRatio, spreadingFactor,
